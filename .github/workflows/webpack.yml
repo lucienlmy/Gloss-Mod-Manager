@@ -26,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gloss-mod-manager
-          path: ./app/release/1.0.0/
+          path: ./release/1.0.0/
