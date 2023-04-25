@@ -18,15 +18,12 @@ jobs:
         run: |
           npm install
       - name: Build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm run build
-      - name: Zip files
-        run: |
-          mkdir dist
-          cd dist
-          zip -r ../electron-app.zip .
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
-          name: electron-app
-          path: electron-app.zip
+          name: gloss-mod-manager
+          path: ./app/release/1.0.0/
