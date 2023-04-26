@@ -5,9 +5,10 @@ import { useRouter } from 'vue-router';
 const router = useRouter()
 
 let list = [
-    { title: '添加游戏', icon: 'mdi-controller', path: '/AddGame' },
-    { title: '游览模组', icon: 'mdi-gamepad-circle', path: '/Explore' },
-    { title: '管理模组', icon: 'mdi-select-group', path: '/Manager' },
+    { title: '管理模组', icon: 'mdi-select-group', to: '/Manager' },
+    { title: '游览模组', icon: 'mdi-gamepad-circle', to: '/Explore' },
+    { title: '配置GMM', icon: 'mdi-cog', to: '/Settings' },
+
 ]
 
 function to(path: string) {
@@ -21,7 +22,7 @@ function to(path: string) {
             <v-card title="欢迎使用GMM,在这里你可以">
                 <v-row>
                     <v-col cols="12" sm="4" v-for="item in list" :key="item.title">
-                        <div class="list" @click="to(item.path)"> <v-icon :icon="item.icon"></v-icon> {{ item.title }}</div>
+                        <div class="list" @click="to(item.to)"> <v-icon :icon="item.icon"></v-icon> {{ item.title }}</div>
                     </v-col>
                 </v-row>
             </v-card>

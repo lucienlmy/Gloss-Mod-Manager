@@ -1,16 +1,10 @@
 <script lang='ts' setup>
-import {
-    Operation,
-    InfoFilled,
-    House
-} from '@element-plus/icons-vue'
-import { userMain } from '@src/stores/userMain';
-
+import { useMain } from '@src/stores/useMain';
 
 let lists = [
     {
         title: '首页',
-        icon: House,
+        icon: "mdi-home",
         path: '/'
     },
     {
@@ -19,28 +13,23 @@ let lists = [
         path: '/Manager'
     },
     {
-        title: '添加游戏',
-        icon: "mdi-controller",
-        path: '/AddGame'
-    },
-    {
         title: "游览模组",
         icon: "mdi-gamepad-circle",
         path: "/Explore"
     },
     {
-        title: '设置',
-        icon: Operation,
+        title: '工具设置',
+        icon: "mdi-cog",
         path: '/Settings'
     },
     {
         title: '关于',
-        icon: InfoFilled,
+        icon: "mdi-information-slab-circle-outline",
         path: '/about'
     },
 ]
 
-const main = userMain()
+const main = useMain()
 
 </script>
 <template>

@@ -12,9 +12,12 @@ import LeftMenu from '@src/components/base/LeftMenu.vue'
         <v-layout>
             <AppHeader></AppHeader>
             <LeftMenu></LeftMenu>
-
             <v-main style="min-height: 100vh;">
-                <router-view></router-view>
+                <router-view v-slot="{ Component }">
+                    <keep-alive>
+                        <component :is="Component" />
+                    </keep-alive>
+                </router-view>
             </v-main>
         </v-layout>
     </v-card>

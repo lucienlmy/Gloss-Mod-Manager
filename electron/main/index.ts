@@ -1,6 +1,8 @@
 import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
+import { GetData } from '../model/GetData'
+import { dialog } from 'electron'
 
 // The built directory structure
 //
@@ -152,4 +154,45 @@ ipcMain.on('window-close', function () {
     if (win) {
         win.close();
     }
+})
+
+// 获取Mod列表数据
+ipcMain.on('get-mod-list', async (event, arg) => {
+
+    let page = arg.page;
+    let pageSize = arg.pageSize;
+    let title = arg.title;
+    let original = arg.original;
+    let time = arg.time;
+    let order = arg.order;
+    let key = arg.key;
+    GetData.getModList(page, pageSize, title, original, time, order, key).then((res) => {
+        event.reply('get-mod-list-reply', res)
+    }).catch((err) => {
+        console.log(`err: ${err}`);
+    })
+})
+
+// 获取Mod数据
+ipcMain.on('get-mod-data', async (event, arg) => {
+
+    let id = arg.id;
+    GetData.getMod(id).then((res) => {
+        event.reply('get-mod-data-reply', res)
+    }).catch((err) => {
+        console.log(`err: ${err}`);
+    })
+})
+
+// 选择文件
+ipcMain.on('select-file', async (event, arg) => {
+    let properties = arg.properties
+    let filters = arg.filters
+    dialog.showOpenDialog({
+        properties, filters
+    }).then(result => {
+        event.reply('select-file-reply', result.filePaths)
+    }).catch(err => {
+        console.log(err)
+    })
 })

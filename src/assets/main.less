@@ -47,3 +47,22 @@ body {
     margin: 0;
     padding: 0;
 }
+
+.empty {
+    display: flex;
+    padding: 2rem;
+
+    .empty-hint {
+        flex: 1 1 auto;
+        min-height: 300px;
+        border: 1px dashed #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #2c2c2c;
+        }
+    }
+}

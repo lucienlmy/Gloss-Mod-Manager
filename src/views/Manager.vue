@@ -1,7 +1,15 @@
 <script lang='ts' setup>
 
+import ManagerHeader from '@src/components/Manager/Header.vue'
+import ManagerContent from '@src/components/Manager/Content.vue'
+
 </script>
-<template></template>
+<template>
+    <v-container fluid>
+        <ManagerHeader></ManagerHeader>
+        <ManagerContent></ManagerContent>
+    </v-container>
+</template>
 <script lang='ts'>
 
 export default {

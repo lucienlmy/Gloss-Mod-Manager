@@ -1,0 +1,59 @@
+<script lang='ts' setup>
+import { useExplore } from '@src/stores/useExplore';
+
+
+const explore = useExplore()
+
+</script>
+<template>
+    <div class="search">
+        <div class="search-title">搜索作品</div>
+        <div class="search-wrap">
+            <v-text-field v-model="explore.searchText" class="search-input " placeholder="在这里可以搜索到你想要的东西哦"
+                variant="underlined" @keydown.enter="explore.search" append-inner-icon="mdi-magnify"
+                @click:append-inner="explore.search">
+            </v-text-field>
+        </div>
+    </div>
+</template>
+<script lang='ts'>
+
+export default {
+    name: 'ExploreSearch',
+}
+</script>
+<style lang='less' scoped>
+.search {
+    // height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    .search-title,
+    .search-wrap {
+        z-index: 3;
+    }
+
+    .search-title {
+        padding: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-shadow: 0 0 1px #000;
+    }
+
+    .search-wrap {
+        width: 600px;
+        max-width: 90%;
+        position: relative;
+        // background: rgba(255, 255, 255, 0.3);
+
+        .search-btn {
+            border: none;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    }
+}
+</style>
