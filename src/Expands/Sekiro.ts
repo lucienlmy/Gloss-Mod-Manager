@@ -6,6 +6,7 @@ import { ISupportedGames } from "@src/model/Interfaces";
 
 let supportedGames: ISupportedGames = {
     gameName: "只狼",
+    gameEnName: "Sekiro",
     gameExe: 'sekiro.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/185.png",
     modType: [

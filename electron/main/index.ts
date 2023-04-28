@@ -2,6 +2,7 @@ import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
 import { GetData } from '../model/GetData'
+import { Unzipper } from '../model/Unzipper'
 import { dialog } from 'electron'
 
 // The built directory structure
@@ -185,14 +186,19 @@ ipcMain.on('get-mod-data', async (event, arg) => {
 })
 
 // 选择文件
-ipcMain.on('select-file', async (event, arg) => {
+ipcMain.handle('select-file', async (event, arg) => {
     let properties = arg.properties
     let filters = arg.filters
-    dialog.showOpenDialog({
+    const result = await dialog.showOpenDialog({
         properties, filters
-    }).then(result => {
-        event.reply('select-file-reply', result.filePaths)
-    }).catch(err => {
-        console.log(err)
     })
+    return result.filePaths
+})
+
+// 解压文件
+ipcMain.handle('unzip-file', async (event, arg) => {
+    let source = arg.source
+    let target = arg.target
+    let res = await Unzipper.unzip(source, target)
+    return res
 })

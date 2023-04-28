@@ -38,15 +38,15 @@ let user_avatar = computed(() => {
     return host + mod.value.user_avatar
 })
 
-let to = computed(() => {
-    let query: any = {}
-    if (title.value) query["title"] = title.value
-    return {
-        name: 'ModView',
-        params: { id: props.mod.id },
-        query: query
-    }
-})
+// let to = computed(() => {
+//     let query: any = {}
+//     if (title.value) query["title"] = title.value
+//     return {
+//         name: 'ModView',
+//         params: { id: props.mod.id },
+//         query: query
+//     }
+// })
 
 </script>
 <template>
@@ -74,9 +74,8 @@ let to = computed(() => {
         </v-row>
         <v-row>
             <v-col cols="12" class="mod-title" :title="mod.mods_title">
-                <router-link :to="to">
-                    {{ mod.mods_title }}
-                </router-link>
+                <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a>
+
             </v-col>
         </v-row>
         <v-row>

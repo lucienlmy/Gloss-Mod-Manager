@@ -83,6 +83,7 @@ export interface IModInfo {
     modVersion: string
     modType: number
     isInstalled: boolean
+    weight: number
     modFiles: string[]
     modDesc?: string
     modAuthor?: string
@@ -92,6 +93,7 @@ export interface IModInfo {
 
 export interface IGameInfo {
     gameName: string
+    gameEnName: string
     gameExe: string
     gamePath?: string
     gameVersion?: string
@@ -124,4 +126,5 @@ export interface ISupportedGames extends IGameInfo {
 export interface ISettings {
     managerGame: ISupportedGames
     modStorageLocation: string
+    proxy: string
 }

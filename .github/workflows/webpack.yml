@@ -18,12 +18,12 @@ jobs:
           node-version: "18.x"
       - name: Install dependencies
         run: |
-          npm install
+          yarn
       - name: Build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm run build
+          yarn run build
       - name: Upload artifact 1
         uses: actions/upload-artifact@v2
         with:

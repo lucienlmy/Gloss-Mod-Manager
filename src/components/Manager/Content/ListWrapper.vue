@@ -1,15 +1,15 @@
 <script lang='ts' setup>
+import { ipcRenderer } from "electron";
+import { ElMessage } from "element-plus";
 import path from 'path'
+// import { Unzipper } from '@src/model/Unzipper'
 
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
+import { useSettings } from '@src/stores/useSettings';
 
 const manager = useManager()
-
-function test() {
-    console.log(__dirname);
-}
-
+const settings = useSettings()
 
 // 移入时触发 第一次
 function dragenter(event: DragEvent) {
@@ -17,20 +17,20 @@ function dragenter(event: DragEvent) {
 // 移出时触发
 function dragleave(event: DragEvent) {
 }
-// 在元素内松手时触发
-function drop(event: DragEvent) {
-    let files = event.dataTransfer?.files
-    if (files) {
-        // console.log(files);
-        upFile(files[0])
-    }
-}
-// // 拖入时触发 一直
+
+// 拖入时触发 一直
 function dragover() { }
 
-function upFile(file: File) {
-    console.log(file);
 
+// 拖拽添加文件
+async function drop(event: DragEvent) {
+    let files = event.dataTransfer?.files
+    if (files) {
+        for (let i = 0; i < files.length; i++) {
+            await manager.addModFile(files[i].path)
+        }
+    }
+    console.log(manager.managerModList);
 }
 
 </script>
@@ -38,10 +38,21 @@ function upFile(file: File) {
     <div class="list-wrap" @dragenter.prevent="dragenter($event)" @dragleave.prevent="dragleave"
         @drop.prevent="drop($event)" @dragover.prevent="dragover">
         <div class="mod-list" v-if="manager.managerModList.length > 0">
+            <v-col cols="12">
+                <v-row>
+                    <v-col cols="6">名称</v-col>
+                    <v-col cols="2">版本</v-col>
+                    <v-col cols="2">类型</v-col>
+                    <v-col cols="2">状态</v-col>
+                </v-row>
+            </v-col>
             <ContentModList v-for="item in manager.managerModList" :mod="item"></ContentModList>
         </div>
         <div class="empty" v-else>
-            <div class="empty-hint" @click="test">将Mod压缩包拖拽到这里进行管理</div>
+            <div class="empty-hint" @click="manager.selectMoeFiles">
+                <p>将Mod压缩包拖拽到这里进行管理</p>
+                <p>支持zpi、rar、7z类型文件</p>
+            </div>
         </div>
     </div>
 </template>
@@ -52,19 +63,13 @@ export default {
 }
 </script>
 <style lang='less' scoped>
-.list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+.list-wrap {
+    .mod-list {
+        padding: 1rem;
+    }
 }
 
-.item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #363636;
-    margin-bottom: 10px;
-    padding: 10px;
-    cursor: move;
+.empty-hint {
+    flex-direction: column;
 }
 </style>

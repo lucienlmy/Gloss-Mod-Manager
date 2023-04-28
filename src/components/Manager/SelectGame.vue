@@ -3,42 +3,37 @@ import { ipcRenderer } from "electron";
 import { useManager } from '@src/stores/useManager';
 import { basename, dirname } from 'path'
 import { ElMessage } from "element-plus";
-import { exec } from 'child_process'
-import { ref } from 'vue'
 import { useMain } from "@src/stores/useMain";
+import { useSettings } from "@src/stores/useSettings";
 
 const manager = useManager()
+const settings = useSettings()
 const { lazy_img } = useMain()
-let audoButton = ref(false)
 
-// =========== 选择文件后的回调 ===========
-ipcRenderer.on("select-file-reply", (event, arg: string[]) => {
-    if (arg.length > 0) {
-        const filePath = arg[0]
-        let name = basename(filePath)
-        console.log(name);
-
-        // 判断 supportedGames 中是否有该游戏
-        let supportedGame = manager.supportedGames.find((item) => {
-            return item.gameExe === name
-        })
-        if (supportedGame) {
-            manager.managerGame = supportedGame
-            manager.managerGame.gamePath = dirname(filePath)
-
-            console.log(manager.managerGame);
-            manager.selectGameDialog = false
-
-        } else {
-            ElMessage.error('您选择的游戏我们暂时不支持..')
-        }
-    }
-})
-
+// =========== 让用户选择指定游戏 ===========
 function select() {
-    ipcRenderer.send("select-file", {
+    ipcRenderer.invoke("select-file", {
         properties: ['openFile'],
         filters: [{ name: '游戏主程序', extensions: ['exe'] }]
+    }).then((arg: string[]) => {
+        if (arg.length > 0) {
+            const filePath = arg[0]
+            let name = basename(filePath)
+            console.log(name);
+
+            // 判断 supportedGames 中是否有该游戏
+            let supportedGame = manager.supportedGames.find((item) => {
+                return item.gameExe === name
+            })
+            if (supportedGame) {
+                settings.settings.managerGame = supportedGame
+                settings.settings.managerGame.gamePath = dirname(filePath)
+                console.log(settings.settings);
+                manager.selectGameDialog = false
+            } else {
+                ElMessage.error('您选择的游戏我们暂时不支持..')
+            }
+        }
     })
 }
 

@@ -1,10 +1,18 @@
 <script lang='ts' setup>
-// import { initialization } from '@src/model/config'
-
+import { watch } from "vue";
+import { Config } from '@src/model/Config'
 import AppHeader from '@src/components/base/AppHeader.vue'
 import LeftMenu from '@src/components/base/LeftMenu.vue'
+import { useSettings } from "./stores/useSettings";
 
-// initialization()
+const settings = useSettings()
+
+Config.initialization()
+
+
+watch(() => settings.settings, () => {
+    Config.setConfig(settings.settings)
+}, { deep: true })
 
 </script>
 <template>
