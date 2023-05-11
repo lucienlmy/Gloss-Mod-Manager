@@ -12,7 +12,7 @@ const manager = useManager()
     <div class="header">
         <div class="header-btn">
             <SelectGame></SelectGame>
-            <v-btn variant="text" v-if="manager.managerModList.length > 0" append-icon="mdi-arrow-bottom-left-thick"
+            <v-btn variant="text" v-if="settings.settings.managerGame" append-icon="mdi-arrow-bottom-left-thick"
                 @click="manager.selectMoeFiles">导入Mod</v-btn>
         </div>
         <div class="select-game">当前游戏 『{{ settings.settings.managerGame?.gameName ?? '未选择' }}』</div>

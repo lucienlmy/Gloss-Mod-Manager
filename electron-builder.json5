@@ -2,9 +2,11 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "appId": "YourAppID",
+  "appId": "gmm.aoe.top",
   "asar": true,
   "icon": "public/favicon.ico",
+  "productName":"Gloss Mod Manager",
+  "copyright":"Copyright © 2023 小莫",
   "directories": {
     "output": "release/${version}"
   },
@@ -27,7 +29,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}_${version}.${ext}"
+    "artifactName": "${productName}_${version}.${ext}",
   },
   "nsis": {
     "oneClick": false,

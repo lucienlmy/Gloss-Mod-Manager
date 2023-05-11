@@ -1,5 +1,6 @@
 <script lang='ts' setup>
 import { ipcRenderer } from 'electron'
+
 function handleMinimize() {
     ipcRenderer.send('window-min')
 }
@@ -14,7 +15,10 @@ function handleClose() {
 <template>
     <v-app-bar>
         <div class="title-bar">
-            <div class="title-bar-dragger"> <el-image class="logo" src="/vite.svg" fit="cover"></el-image>
+            <div class="title-bar-dragger">
+                <v-avatar class="logo">
+                    <v-img src="imgs/logo.png"></v-img>
+                </v-avatar>
                 <span>Gloss Mod Manager</span>
             </div>
             <div class="window-actions">

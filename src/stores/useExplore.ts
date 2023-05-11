@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
 import { IGameInfo, IMod } from "@src/model/Interfaces";
+import { useSettings } from "./useSettings";
 
 export const useExplore = defineStore('Explore', {
     state: () => ({
@@ -20,6 +21,9 @@ export const useExplore = defineStore('Explore', {
     },
     actions: {
         GetModList() {
+
+            const settings = useSettings()
+
             ipcRenderer.send("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
@@ -28,6 +32,7 @@ export const useExplore = defineStore('Explore', {
                 time: this.time,
                 order: this.order,
                 key: this.key,
+                gameId: settings.settings.managerGame?.gameID ?? null
             })
         },
         search() {

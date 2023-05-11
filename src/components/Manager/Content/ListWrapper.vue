@@ -1,12 +1,8 @@
 <script lang='ts' setup>
-import { ipcRenderer } from "electron";
-import { ElMessage } from "element-plus";
-import path from 'path'
-// import { Unzipper } from '@src/model/Unzipper'
-
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
+import { watch } from "vue";
 
 const manager = useManager()
 const settings = useSettings()
@@ -33,6 +29,14 @@ async function drop(event: DragEvent) {
     console.log(manager.managerModList);
 }
 
+if (manager.managerModList.length == 0) {
+    manager.getModInfo()
+}
+
+watch(() => manager.managerModList, () => {
+    manager.saveModInfo()
+}, { deep: true })
+
 </script>
 <template>
     <div class="list-wrap" @dragenter.prevent="dragenter($event)" @dragleave.prevent="dragleave"
@@ -41,9 +45,10 @@ async function drop(event: DragEvent) {
             <v-col cols="12">
                 <v-row>
                     <v-col cols="6">名称</v-col>
-                    <v-col cols="2">版本</v-col>
-                    <v-col cols="2">类型</v-col>
-                    <v-col cols="2">状态</v-col>
+                    <v-col cols="1">版本</v-col>
+                    <v-col cols="2" class="text-center">类型</v-col>
+                    <v-col cols="2" class="text-center">状态</v-col>
+                    <v-col cols="1" class="text-center">操作</v-col>
                 </v-row>
             </v-col>
             <ContentModList v-for="item in manager.managerModList" :mod="item"></ContentModList>

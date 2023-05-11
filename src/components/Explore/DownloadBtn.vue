@@ -1,0 +1,84 @@
+<script lang='ts' setup>
+import { Download } from "@src/model/Download"
+import { ref, computed } from "vue";
+import { ipcRenderer } from "electron";
+import { useDownload } from "@src/stores/useDownload";
+import { IDownloadTask } from "@src/model/Interfaces";
+import { useSettings } from "@src/stores/useSettings";
+
+const props = defineProps<{
+    id: number
+}>()
+const download = useDownload()
+const settings = useSettings()
+
+let link = ref("")  // 下载地址
+let isDownloading = computed(() => {
+    if (task.value) return true
+    return false
+})
+let downloaded = computed(() => {
+    if (task.value) {
+        // console.log(task.value);
+        // return task.value.progress
+        return Math.floor(task.value.downloadedSize / task.value.totalSize * 10000) / 100; // 计算下载进度
+    }
+    return 0
+})
+
+// 禁用按钮
+let disabled = computed(() => {
+    if (!settings.settings.managerGame) return true
+    if (isDownloading.value) return true
+    return false
+})
+
+let task = computed<IDownloadTask | undefined>(() => {
+    return download.getTaskById(props.id)
+})
+
+async function toDownload() {
+    try {
+        let data = await ipcRenderer.invoke("get-mod-data", { id: props.id })
+        console.log(data)
+        // 将 link.value 里面的 http://mod.3dmgame.com 换成 https://mod.3dmgame.com
+        data.mods_resource_url = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
+        link.value = data.mods_resource_url
+
+        if (!link.value.includes("https://mod.3dmgame.com")) {
+            window.open(`https://mod.3dmgame.com/mod/${props.id}`)
+            return
+        }
+        download.addDownloadTask(data)
+    } catch (error) {
+    }
+}
+
+let text = computed(() => {
+    if (!settings.settings.managerGame) return "请先管理游戏"
+    if (task.value && task.value.totalSize == task.value.downloadedSize) return "已下载"
+    if (isDownloading.value) return `${downloaded.value} %`
+
+    return "下载"
+})
+
+
+</script>
+<template>
+    <v-btn color="orange-lighten-2" variant="text" @click="toDownload" :disabled="disabled">
+        <template v-slot:append>
+            <v-progress-circular v-if="isDownloading" :model-value="downloaded" color="deep-orange-lighten-2"
+                size="25"></v-progress-circular>
+            <v-icon v-else>mdi-download</v-icon>
+        </template>
+        {{ text }}
+        <!-- {{ isDownloading ? `${downloaded} %` : "下载" }} -->
+    </v-btn>
+</template>
+<script lang='ts'>
+
+export default {
+    name: 'ExploreDownloadBtn',
+}
+</script>
+<style lang='less' scoped></style>

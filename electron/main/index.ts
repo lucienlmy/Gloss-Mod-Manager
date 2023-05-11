@@ -1,9 +1,8 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
-import { GetData } from '../model/GetData'
-import { Unzipper } from '../model/Unzipper'
 import { dialog } from 'electron'
+import { GetData } from '../model/GetData'
 
 // The built directory structure
 //
@@ -31,6 +30,10 @@ if (!app.requestSingleInstanceLock()) {
     app.quit()
     process.exit(0)
 }
+
+// 分配最大内存
+app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
+
 
 // Remove electron security warnings
 // This warning only shows in development mode
@@ -160,14 +163,18 @@ ipcMain.on('window-close', function () {
 // 获取Mod列表数据
 ipcMain.on('get-mod-list', async (event, arg) => {
 
-    let page = arg.page;
-    let pageSize = arg.pageSize;
-    let title = arg.title;
-    let original = arg.original;
-    let time = arg.time;
-    let order = arg.order;
-    let key = arg.key;
-    GetData.getModList(page, pageSize, title, original, time, order, key).then((res) => {
+    let data = {
+        page: arg.page ?? 1,
+        pageSize: arg.pageSize ?? 24,
+        title: arg.title ?? '',
+        original: arg.original ?? 0,
+        time: arg.time ?? 0,
+        order: arg.order ?? 0,
+        key: arg.key ?? '',
+        gameId: arg.gameId ?? null
+    }
+
+    GetData.getModList(data).then((res) => {
         event.reply('get-mod-list-reply', res)
     }).catch((err) => {
         console.log(`err: ${err}`);
@@ -175,14 +182,12 @@ ipcMain.on('get-mod-list', async (event, arg) => {
 })
 
 // 获取Mod数据
-ipcMain.on('get-mod-data', async (event, arg) => {
+ipcMain.handle('get-mod-data', async (event, arg) => {
 
     let id = arg.id;
-    GetData.getMod(id).then((res) => {
-        event.reply('get-mod-data-reply', res)
-    }).catch((err) => {
-        console.log(`err: ${err}`);
-    })
+    let res = await GetData.getMod(id)
+
+    return res.data
 })
 
 // 选择文件
@@ -193,12 +198,4 @@ ipcMain.handle('select-file', async (event, arg) => {
         properties, filters
     })
     return result.filePaths
-})
-
-// 解压文件
-ipcMain.handle('unzip-file', async (event, arg) => {
-    let source = arg.source
-    let target = arg.target
-    let res = await Unzipper.unzip(source, target)
-    return res
 })

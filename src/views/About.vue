@@ -15,9 +15,13 @@ fetch('README.md')
     })
 </script>
 <template>
-    <div class="about">
-        <div class="markdown-body" v-html="readme"></div>
-    </div>
+    <v-container fluid>
+        <v-row>
+            <v-col cols="12" class="about">
+                <div class="markdown-body" v-html="readme"></div>
+            </v-col>
+        </v-row>
+    </v-container>
 </template>
 <script lang='ts'>
 
@@ -27,7 +31,7 @@ export default {
 </script>
 <style lang='less' scoped>
 .about {
-    padding: 10px;
+    padding: 1rem;
     overflow: auto;
     max-height: calc(100vh - 100px);
 

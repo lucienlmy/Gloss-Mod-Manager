@@ -8,12 +8,11 @@ import Search from '@src/components/Explore/Search.vue'
 import ModList from '@src/components/Explore/ModList.vue'
 import Filter from '@src/components/Explore/Filter.vue'
 import TurnPage from "@src/components/Explore/TurnPage.vue";
+import { useSettings } from "@src/stores/useSettings";
 
 const explore = useExplore()
-
-if (explore.mods.length == 0) {
-    explore.GetModList()
-}
+const settings = useSettings()
+explore.GetModList()
 
 ipcRenderer.on("get-mod-list-reply", (event, arg) => {
     // console.log(arg) // 打印获取到的数据
@@ -29,7 +28,7 @@ ipcRenderer.on("get-mod-list-reply", (event, arg) => {
     document.documentElement.scrollTop = 0
 })
 
-watch([() => explore.order, () => explore.original, () => explore.time], () => {
+watch([() => explore.order, () => explore.original, () => explore.time, () => settings.settings.managerGame?.gameID], () => {
     explore.page = 1
     explore.GetModList()
 })

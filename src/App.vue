@@ -1,23 +1,13 @@
 <script lang='ts' setup>
-import { watch } from "vue";
-import { Config } from '@src/model/Config'
 import AppHeader from '@src/components/base/AppHeader.vue'
 import LeftMenu from '@src/components/base/LeftMenu.vue'
-import { useSettings } from "./stores/useSettings";
-
-const settings = useSettings()
-
-Config.initialization()
-
-
-watch(() => settings.settings, () => {
-    Config.setConfig(settings.settings)
-}, { deep: true })
+import Global from '@src/components/base/Global.vue'
 
 </script>
 <template>
     <v-card>
         <v-layout>
+            <Global></Global>
             <AppHeader></AppHeader>
             <LeftMenu></LeftMenu>
             <v-main style="min-height: 100vh;">

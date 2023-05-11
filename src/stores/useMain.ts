@@ -26,5 +26,18 @@ export const useMain = defineStore('Main', {
             }
             return number;
         },
+        // 格式化大小
+        formatSiez(b: number) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let size = b;
+            let unitIndex = 0;
+            if (!size || size == 0) return "0B"
+
+            while (size >= 1024 && unitIndex < units.length - 1) {
+                size /= 1024;
+                unitIndex++;
+            }
+            return `${size.toFixed(2)} ${units[unitIndex]}`;
+        }
     }
 })

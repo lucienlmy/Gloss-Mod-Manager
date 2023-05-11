@@ -30,6 +30,7 @@ function select() {
                 settings.settings.managerGame.gamePath = dirname(filePath)
                 console.log(settings.settings);
                 manager.selectGameDialog = false
+                manager.getModInfo()
             } else {
                 ElMessage.error('您选择的游戏我们暂时不支持..')
             }

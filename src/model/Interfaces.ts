@@ -1,3 +1,5 @@
+import { Download } from "@src/model/Download"
+
 
 export interface IMod {
     id: number
@@ -79,19 +81,21 @@ export interface IUser {
 
 export interface IModInfo {
     id: number
+    webId?: number
     modName: string
+    md5: string
     modVersion: string
-    modType: number
+    modType?: number
     isInstalled: boolean
     weight: number
     modFiles: string[]
     modDesc?: string
     modAuthor?: string
-    modWebsite?: string
     corePlugins?: IPlugins[]
 }
 
 export interface IGameInfo {
+    gameID: number
     gameName: string
     gameEnName: string
     gameExe: string
@@ -107,24 +111,68 @@ export interface IPlugins {
     website: string
     modAuthor?: string
     installPath: string
+    md5?: string[]
+}
+
+
+export interface IState {
+    file: string,
+    state: boolean
 }
 
 export interface IType {
     id: number | "plugin"
     name: string
-    installPath: string
+    installPath?: string
     corePlugins?: IPlugins[]
-    install: (mod: IModInfo) => void
-    uninstall: (mod: IModInfo) => void
+    install: (mod: IModInfo) => Promise<IState[] | boolean>
+    uninstall: (mod: IModInfo) => Promise<IState[] | boolean>
+    checkPlugin?: (plugin: IModInfo) => boolean
 }
 
 export interface ISupportedGames extends IGameInfo {
     modType: IType[]
     corePlugins?: IPlugins[]
+    checkModType: (mod: IModInfo) => number
 }
 
 export interface ISettings {
     managerGame: ISupportedGames
     modStorageLocation: string
     proxy: string
+    UnzipPath: string
+    autoInstall: boolean
+}
+
+
+export enum DownloadStatus {
+    /**
+     * 等待中
+     */
+    WAITING = 0,
+    /**
+     * 下载中
+     */
+    DOWNLOADING = 1,
+    /**
+     * 暂停
+     */
+    PAUSED = 2,
+    /**
+     * 完成
+     */
+    COMPLETED = 3,
+}
+
+
+export interface IDownloadTask {
+    id: number
+    name: string
+    version: string
+    state: DownloadStatus
+    speed: number
+    totalSize: number
+    downloadedSize: number
+    link: string
+    modAuthor: string
 }

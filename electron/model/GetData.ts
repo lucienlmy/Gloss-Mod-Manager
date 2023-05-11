@@ -3,8 +3,8 @@ import callApi from "./CallApi";
 // =========== 从Mod站获取相关数据 ===========
 export class GetData {
     // =========== 获取Mod列表数据 ===========
-    public static async getModList(page: number = 1, pageSize: number = 24, title: string = "", original: number = 0, time: number = 0, order: number = 0, key: string = "") {
-        return await callApi("/render/GetModList", { page, pageSize, title, original, time, order, key });
+    public static async getModList(data: any) {
+        return await callApi("/render/GetModList", data);
     }
 
     // =========== 获取Mod数据 ===========

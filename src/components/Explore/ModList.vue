@@ -1,23 +1,18 @@
 <script lang='ts' setup>
 import { ref, computed } from "vue";
-import { useRoute } from 'vue-router'
 import { IMod } from "@src/model/Interfaces";
 import { useMain } from "@src/stores/useMain";
+import { useExplore } from "@src/stores/useExplore";
+
+import ExploreDownloadBtn from "@src/components/Explore/DownloadBtn.vue"
 
 const props = defineProps<{
     mod: IMod
 }>()
-const route = useRoute()
+const explore = useExplore()
 const { get_number, lazy_img, host } = useMain()
 
 let mod = ref<IMod>(props.mod);
-
-let order = computed(() => {
-    return parseInt(route.query.order as string) || 0
-})
-let title = computed(() => {
-    return route.query.title as string
-})
 
 let mod_img = computed(() => {
     let img = ''
@@ -29,84 +24,47 @@ let mod_img = computed(() => {
     return img
 })
 
-let user_avatar = computed(() => {
-
-    // 判断 mod.value.user_avatar 是否包含 my.3dmgame.com
-    if (mod.value.user_avatar?.includes('my.3dmgame.com')) {
-        return mod.value.user_avatar
-    }
-    return host + mod.value.user_avatar
-})
-
-// let to = computed(() => {
-//     let query: any = {}
-//     if (title.value) query["title"] = title.value
-//     return {
-//         name: 'ModView',
-//         params: { id: props.mod.id },
-//         query: query
-//     }
-// })
-
 </script>
 <template>
-    <div class="mod">
-        <v-row>
-            <v-col cols="12" class="mod-img" :title="mod.mods_desc">
-                <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">
-                    <v-img :lazy-src="lazy_img" width="100%" :aspect-ratio="100 / 56" :src="mod_img" :alt="mod.mods_title"
-                        min-height="150px" :class="{ 'vague': mod.mods_adult_content }">
-                    </v-img>
-                </a>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col cols="12" class="mod-user">
-                <div class="mod-user-avatar" :title="mod.user_nickName">
-                    <a :href="`${host}/u/${mod.mods_publish}`" target="_blank">
-                        <v-avatar>
-                            <v-img :lazy-src="lazy_img" :src="user_avatar" width="40" height="40" :alt="mod.user_nickName">
-                            </v-img>
-                        </v-avatar>
-                    </a>
-                </div>
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col cols="12" class="mod-title" :title="mod.mods_title">
-                <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a>
-
-            </v-col>
-        </v-row>
-        <v-row>
-            <v-col cols="12" class="mod-game">
-                <v-icon icon="mdi-microsoft-xbox-controller"></v-icon>
-                <a :href="`https://mod.3dmgame.com/${mod.game_path}`" class="mod-game-name">
-                    {{ mod.game_name }}
-                </a>
-                <span> > </span>
-                <a :href="`https://mod.3dmgame.com/${mod.game_path}/${mod.mods_type_id}`">
-                    {{ mod.mods_type_name }}
-                </a>
-            </v-col>
-        </v-row>
-        <v-row class="mod-data">
-            <v-col cols="8" class="mod-data-time" :title="mod.mods_updateTime">
-                <v-icon icon="mdi-clock-outline" /> {{ mod.mods_updateTime }}
-            </v-col>
-            <v-col cols="4" class="mod-data-info">
-                <span v-if="order == 2">
-                    <v-icon icon="mdi-download" /> {{ get_number(mod.mods_download_cnt) }}
-                </span>
-                <span v-else-if="order == 3">
-                    <v-icon icon="mdi-thumb-up-outline" /> {{ get_number(mod.mods_mark_cnt) }}
-                </span>
-                <span v-else>
-                    <v-icon icon="mdi-eye-outline" /> {{ get_number(mod.mods_click_cnt) }}
-                </span>
-            </v-col>
-        </v-row>
-    </div>
+    <v-card class="mod">
+        <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">
+            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
+        </a>
+        <v-card-title>
+            <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a>
+        </v-card-title>
+        <v-card-subtitle>
+            <v-icon icon="mdi-microsoft-xbox-controller"></v-icon>
+            <a :href="`https://mod.3dmgame.com/${mod.game_path}`" class="mod-game-name">
+                {{ mod.game_name }}
+            </a>
+            <span> > </span>
+            <a :href="`https://mod.3dmgame.com/${mod.game_path}/${mod.mods_type_id}`">
+                {{ mod.mods_type_name }}
+            </a>
+        </v-card-subtitle>
+        <v-card-subtitle>
+            <v-row class="mod-data">
+                <v-col cols="8" class="mod-data-time" :title="mod.mods_updateTime">
+                    <v-icon icon="mdi-clock-outline" /> {{ mod.mods_updateTime }}
+                </v-col>
+                <v-col cols="4" class="mod-data-info">
+                    <span v-if="explore.order == 2">
+                        <v-icon icon="mdi-download" /> {{ get_number(mod.mods_download_cnt) }}
+                    </span>
+                    <span v-else-if="explore.order == 3">
+                        <v-icon icon="mdi-thumb-up-outline" /> {{ get_number(mod.mods_mark_cnt) }}
+                    </span>
+                    <span v-else>
+                        <v-icon icon="mdi-eye-outline" /> {{ get_number(mod.mods_click_cnt) }}
+                    </span>
+                </v-col>
+            </v-row>
+        </v-card-subtitle>
+        <v-card-actions class="flex-row-reverse">
+            <ExploreDownloadBtn :id="mod.id"></ExploreDownloadBtn>
+        </v-card-actions>
+    </v-card>
 </template>
 <script lang='ts'>
 

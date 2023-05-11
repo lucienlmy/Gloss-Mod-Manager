@@ -27,8 +27,6 @@ export default defineConfig(({ command }) => {
                         } else {
                             options.startup()
                         }
-                        console.log("options1111");
-
                     },
                     vite: {
                         build: {

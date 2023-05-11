@@ -1,6 +1,9 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
 import { useSettings } from '@src/stores/useSettings';
+import { execSync } from 'child_process'
+import { join, dirname } from 'path'
+import { ElMessage } from "element-plus";
 
 const settings = useSettings()
 
@@ -16,23 +19,52 @@ function selectModStorageLocation() {
     })
 }
 
+function selectUnzipPath() {
+    ipcRenderer.invoke("select-file", {
+        properties: ['openFile'],
+        filters: [{ name: '7z', extensions: ['exe'] }]
+    }).then((res: string[]) => {
+        if (res.length > 0) {
+            if (!res[0].endsWith('7z.exe')) {
+                ElMessage.error('请选择7z.exe')
+                return
+            }
+            settings.settings.UnzipPath = res[0]
+        }
+    })
+}
+
+
 </script>
 <template>
     <v-container fluid>
         <v-row>
             <v-col cols="12">
-                <h1 class="title">软件设置</h1>
+                <h1 class="title">设置</h1>
             </v-col>
-            <v-col cols="12">
+        </v-row>
+        <v-row>
+            <v-col cols="12" md="6">
                 <v-text-field label="Mod储存位置" v-model="settings.settings.modStorageLocation">
                     <template v-slot:append-inner>
                         <v-btn variant="text" @click="selectModStorageLocation">选择</v-btn>
                     </template>
                 </v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+                <v-text-field label="7-zip位置" v-model="settings.settings.UnzipPath">
+                    <template v-slot:append-inner>
+                        <v-btn variant="text" @click="selectUnzipPath">手动选择</v-btn>
+                    </template>
+                </v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
                 <v-text-field clearable label="代理地址" v-model="settings.settings.proxy"
                     placeholder="例如:http://127.0.0.1:10809 不使用请留空,乱填将导致无法联网"> </v-text-field>
             </v-col>
-            <v-col cols="12"></v-col>
+            <v-col cols="12">
+                <v-switch label="下载完成后自动安装" color="#039BE5" v-model="settings.settings.autoInstall"></v-switch>
+            </v-col>
         </v-row>
     </v-container>
 </template>
