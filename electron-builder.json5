@@ -5,8 +5,7 @@
   "appId": "gmm.aoe.top",
   "asar": true,
   "icon": "public/favicon.ico",
-  "productName":"Gloss Mod Manager",
-  "copyright":"Copyright © 2023 小莫",
+  "productName": "Gloss Mod Manager",
   "directories": {
     "output": "release/${version}"
   },
@@ -15,7 +14,7 @@
     "dist"
   ],
   "mac": {
-    "artifactName": "${productName}_${version}.${ext}",
+    "artifactName": "${productName}.${ext}",
     "target": [
       "dmg"
     ]
@@ -29,7 +28,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}_${version}.${ext}",
+    "artifactName": "${productName}.${ext}"
   },
   "nsis": {
     "oneClick": false,

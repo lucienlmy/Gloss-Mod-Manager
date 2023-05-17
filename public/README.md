@@ -14,14 +14,31 @@
 ### 如何使用？
 - 下载并安装它,
 - 解压到任意位置.
-- 运行 `gmm.exe`.
+- 运行 `Gloss Mod Manager`.
+- 选择您游玩的游戏
 - 开始享受吧!
+
+### 支持的游戏
+- [x] 艾尔登法环 (完全支持)
+- [x] 只狼 (完全支持)
+- [x] 霍格沃兹之遗 (完全支持)
+- [x] 求生之路 (完全支持)
+- [ ] 赛博朋克2077 (计划中)
+- [ ] 模拟人生4 (计划中)
+- [ ] 怪物猎人:世界 (计划中)
+- [ ] 怪物猎人:崛起 (计划中)
+- [ ] 巫师3 (计划中)
+- [ ] 七日杀 (计划中)
+- [ ] 噬血代码 (计划中)
+- [ ] 突击小队 (计划中)
+- [ ] 地狱之门 (计划中)
+- [ ] 英雄连 (计划中)
 
 ### 反馈问题
 
 - [GitHub](https://github.com/GlossMod)
 - [Discord](https://discord.gg/TF46tu7Upw)
-- QQ群 - 暂无
+- [Patreon](https://www.patreon.com/GlossModManager)
 
 
 ### 开发计划
@@ -29,8 +46,8 @@
 - [x] 完成工具基础架构, 制作游览Mod功能。
 - [x] 添加下载Mod功能。
 - [x] 实现安装和管理Mod功能。
-- [-] 适配一些热门游戏
-- [ ] 自动检查更新
+- [x] 适配一些热门游戏
+- [x] 自动检查更新
 
 - [ ] 实现制作Mod包功能
 - [ ] 添加上传Mod包功能到Mod站。
@@ -44,10 +61,6 @@
 
 ### 协助开发
 在 Discord 里面联系我们.
-
-
-
-
 
 [license]:https://p.aoe.top/shields/github/license/GlossMod/Gloss-Mod-Manager.svg
 [author]: https://p.aoe.top/shields/badge/作者-小莫-blue?logo=Cloudera

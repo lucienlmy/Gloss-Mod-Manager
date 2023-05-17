@@ -97,7 +97,6 @@ export interface IModInfo {
 export interface IGameInfo {
     gameID: number
     gameName: string
-    gameEnName: string
     gameExe: string
     gamePath?: string
     gameVersion?: string
@@ -140,8 +139,11 @@ export interface ISettings {
     managerGame: ISupportedGames
     modStorageLocation: string
     proxy: string
-    UnzipPath: string
+    // UnzipPath: string
     autoInstall: boolean
+    leftMenuRail: boolean
+    autoLaunch: boolean
+    language: string
 }
 
 

@@ -5,12 +5,14 @@ import { ipcRenderer } from "electron";
 import { useDownload } from "@src/stores/useDownload";
 import { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{
     id: number
 }>()
 const download = useDownload()
 const settings = useSettings()
+const { t } = useI18n()
 
 let link = ref("")  // 下载地址
 let isDownloading = computed(() => {
@@ -55,25 +57,24 @@ async function toDownload() {
 }
 
 let text = computed(() => {
-    if (!settings.settings.managerGame) return "请先管理游戏"
-    if (task.value && task.value.totalSize == task.value.downloadedSize) return "已下载"
+    if (!settings.settings.managerGame) return t('Please manage the game first.')
+    if (task.value && task.value.totalSize == task.value.downloadedSize) return t('Downloaded')
     if (isDownloading.value) return `${downloaded.value} %`
 
-    return "下载"
+    return t('Download')
 })
 
 
 </script>
 <template>
-    <v-btn color="orange-lighten-2" variant="text" @click="toDownload" :disabled="disabled">
+    <v-chip label color="orange-lighten-2" variant="text" @click="toDownload" :disabled="disabled">
         <template v-slot:append>
             <v-progress-circular v-if="isDownloading" :model-value="downloaded" color="deep-orange-lighten-2"
                 size="25"></v-progress-circular>
             <v-icon v-else>mdi-download</v-icon>
         </template>
         {{ text }}
-        <!-- {{ isDownloading ? `${downloaded} %` : "下载" }} -->
-    </v-btn>
+    </v-chip>
 </template>
 <script lang='ts'>
 

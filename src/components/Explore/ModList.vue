@@ -10,7 +10,7 @@ const props = defineProps<{
     mod: IMod
 }>()
 const explore = useExplore()
-const { get_number, lazy_img, host } = useMain()
+const { getNumber, lazy_img, host } = useMain()
 
 let mod = ref<IMod>(props.mod);
 
@@ -50,13 +50,13 @@ let mod_img = computed(() => {
                 </v-col>
                 <v-col cols="4" class="mod-data-info">
                     <span v-if="explore.order == 2">
-                        <v-icon icon="mdi-download" /> {{ get_number(mod.mods_download_cnt) }}
+                        <v-icon icon="mdi-download" /> {{ getNumber(mod.mods_download_cnt) }}
                     </span>
                     <span v-else-if="explore.order == 3">
-                        <v-icon icon="mdi-thumb-up-outline" /> {{ get_number(mod.mods_mark_cnt) }}
+                        <v-icon icon="mdi-thumb-up-outline" /> {{ getNumber(mod.mods_mark_cnt) }}
                     </span>
                     <span v-else>
-                        <v-icon icon="mdi-eye-outline" /> {{ get_number(mod.mods_click_cnt) }}
+                        <v-icon icon="mdi-eye-outline" /> {{ getNumber(mod.mods_click_cnt) }}
                     </span>
                 </v-col>
             </v-row>

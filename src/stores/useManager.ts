@@ -11,31 +11,30 @@ import { Unzipper } from '@src/model/Unzipper'
 
 export const useManager = defineStore('Manager', {
     state: () => ({
-        selectGameDialog: false,
         supportedGames: getAllExpands() as ISupportedGames[],
         managerModList: [] as IModInfo[],
+        selectGameDialog: false,
+        maxID: 0,
+        filterType: 0 as number
     }),
     getters: {
-        maxModID: (state) => {
-            let maxID = 0
-            state.managerModList.forEach(mod => {
-                if (mod.id > maxID) {
-                    maxID = mod.id
-                }
-            });
-            return maxID
-        },
         gamePath() {
             const settings = useSettings()
             return settings.settings.managerGame.gamePath
         },
         modStorage() {
             const settings = useSettings()
-            return `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}`
+            return `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}`
         },
         gameStorage() {
             const settings = useSettings()
             return settings.settings.managerGame.gamePath
+        },
+        filterModList(state) {
+            let type = state.filterType
+            let list = state.managerModList
+            if (type == 0) return list
+            return list.filter(item => item.modType == type)
         }
     },
     actions: {
@@ -68,6 +67,9 @@ export const useManager = defineStore('Manager', {
 
         // 将选中的Mod文件添加到管理器
         async addModFile(file: string) {
+            this.maxID++
+            let id = this.maxID.toString()
+            console.log(id);
             const settings = useSettings()
             const allowedExtensions = ['.zip', '.rar', '.7z'];
             if (!allowedExtensions.some(ext => file.endsWith(ext))) {
@@ -90,8 +92,8 @@ export const useManager = defineStore('Manager', {
 
             let target = path.join(
                 settings.settings.modStorageLocation,
-                settings.settings.managerGame.gameEnName,
-                (this.maxModID + 1).toString()
+                settings.settings.managerGame.gameName,
+                id
             )
 
             let res = await Unzipper.unzip(file, target)
@@ -101,13 +103,15 @@ export const useManager = defineStore('Manager', {
                     files.push(item.file)
                 }
             });
-            await this.addModInfo(file, this.maxModID + 1, files, md5);
+            await this.addModInfo(file, parseInt(id), files, md5);
         },
         /**
          * 通过下载任务添加Mod
          * @param task 
          */
         async addModByTask(task: IDownloadTask) {
+            this.maxID++
+            let id = this.maxID.toString()
             const settings = useSettings()
             if (settings.settings.modStorageLocation == '') {
                 ElMessage.error('请先选择Mod存放位置')
@@ -120,10 +124,13 @@ export const useManager = defineStore('Manager', {
                 ElMessage.error(`您已经添加过 『${path.basename(task.name)}』 这款Mod了!`)
                 return
             }
+
+            console.log(id);
+
             let target = path.join(
                 settings.settings.modStorageLocation,
-                settings.settings.managerGame.gameEnName,
-                (this.maxModID + 1).toString()
+                settings.settings.managerGame.gameName,
+                id
             )
 
             let res = await Unzipper.unzip(modStorage, target)
@@ -134,7 +141,7 @@ export const useManager = defineStore('Manager', {
                 }
             });
             this.managerModList.push({
-                id: this.maxModID + 1,
+                id: parseInt(id),
                 webId: task.id,
                 modName: task.name,
                 md5: md5,
@@ -166,21 +173,21 @@ export const useManager = defineStore('Manager', {
         // 保存Mod信息
         saveModInfo() {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameEnName)
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
             // console.log(savePath);
             Manager.saveModInfo(this.managerModList, savePath)
         },
         // 获取Mod信息
-        getModInfo() {
+        async getModInfo() {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameEnName)
-            this.managerModList = Manager.getModInfo(savePath)
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
+            this.managerModList = await Manager.getModInfo(savePath)
 
         },
         // 删除Mod
         deleteMod(mod: IModInfo) {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameEnName, mod.id.toString())
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName, mod.id.toString())
             let modIndex = this.managerModList.findIndex(item => item.id == mod.id)
             // console.log(savePath);
 

@@ -22,8 +22,8 @@ export const useDownload = defineStore('Download', {
         }
     },
     actions: {
-        initialization() {
-            let config = FileHandler.readFile(this.configPath, "[]")  // 读取文件
+        async initialization() {
+            let config = await FileHandler.readFile(this.configPath, "[]")  // 读取文件
             this.downloadTaskList = JSON.parse(config)    // 转换为对象
 
             this.downloadTaskList.forEach(item => {
@@ -58,6 +58,10 @@ export const useDownload = defineStore('Download', {
             const settings = useSettings()
             let fileExt = extname(task.link)
             let dest = `${settings.settings.modStorageLocation}\\cache\\${task.id}${fileExt}`
+
+            console.log(`删除: ${dest}`);
+
+            FileHandler.deleteFile(dest)
 
             let download = new Download(task, dest, this.listen(task).onProgress)
             this.downloadProcessList.push(download)

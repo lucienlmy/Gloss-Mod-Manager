@@ -7,13 +7,13 @@ const download = useDownload()
 <template>
     <v-row class="header">
         <v-col cols="12">
-            <v-tabs v-model="download.tab">
-                <v-tab :value="'all'">全部下载</v-tab>
-                <v-tab :value="1">正在下载</v-tab>
-                <v-tab :value="2">暂停</v-tab>
-                <v-tab :value="3">已完成</v-tab>
-                <v-tab :value="0">等待/失败</v-tab>
-            </v-tabs>
+            <v-chip-group v-model="download.tab" mandatory>
+                <v-chip label variant="text" :value="'all'">{{ $t('All downloads') }}</v-chip>
+                <v-chip label variant="text" :value="1">{{ $t('Downloading') }}</v-chip>
+                <v-chip label variant="text" :value="2">{{ $t('Paused') }}</v-chip>
+                <v-chip label variant="text" :value="3">{{ $t('Completed') }}</v-chip>
+                <v-chip label variant="text" :value="0">{{ $t('Waiting/Failure') }}</v-chip>
+            </v-chip-group>
         </v-col>
     </v-row>
 </template>

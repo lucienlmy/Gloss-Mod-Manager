@@ -33,13 +33,13 @@ export class Download {
      */
     public start(): Promise<void> {
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
 
             let dest = this.dest
             let url = this.url
 
             FileHandler.ensureDirectoryExistence(dest + '.downloaded')   // 创建文件
-            const downloadedSoFar = parseInt(FileHandler.readFile(`${dest}.downloaded`, '0'), 10) || 0;
+            const downloadedSoFar = parseInt(await FileHandler.readFile(`${dest}.downloaded`, '0'), 10) || 0;
             let startTime: number | undefined;
 
             this.request = https.get(url, { headers: { Range: `bytes=${downloadedSoFar}-` } }, response => {
@@ -119,25 +119,6 @@ export class Download {
         })
     }
 
-    // /**
-    //  * 监听下载 进度
-    //  * @param downloadedSize 已下载大小
-    //  * @param totalSize 总大小
-    //  * @param speed 下载速度
-    //  */
-    // private onProgress(downloadedSize: number, totalSize: number, speed: number) {
-    //     console.log(`${downloadedSize} | ${totalSize} | ${speed}`);
-    //     console.log(this.task);
-    //     this.task.speed = speed
-    //     // this.task.speed = speed
-    //     // this.task.totalSize = totalSize
-    //     // this.task.downloadedSize = downloadedSize
-    //     // // 状态
-    //     // this.task.state = 1
-    //     // if (downloadedSize == totalSize) this.task.state = DownloadStatus.COMPLETED
-    // }
-
-
     /**
      * 暂停下载
      */
@@ -159,62 +140,4 @@ export class Download {
         this.start()
     }
 
-
-
-
-    // // 下载文件
-    // public static downloadFile(url: string, dest: string, onProgress?: (downloadedSize: number, totalSize: number, speed: number) => void): Promise<void> {
-
-    //     FileHandler.ensureDirectoryExistence(dest + '.downloaded')   // 创建文件
-
-    //     const downloadedSoFar = parseInt(fs.readFileSync(dest + '.downloaded', { encoding: 'utf-8' }), 10) || 0;
-    //     let startTime: number | undefined;
-
-    //     return new Promise((resolve, reject) => {
-    //         const request = https.get(url, { headers: { Range: `bytes=${downloadedSoFar}-` } }, response => {
-    //             if (response.statusCode === 206) {
-    //                 // Partial content received, continue downloading
-    //             } else if (response.statusCode === 200) {
-    //                 // Starting a new download
-    //                 fs.writeFileSync(dest, '');
-    //             } else {
-    //                 reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
-    //                 return;
-    //             }
-
-    //             const totalSize = downloadedSoFar + parseInt(response.headers['content-length'] ?? '0', 10);
-    //             let downloadedSize = downloadedSoFar;
-
-    //             const fileStream = fs.createWriteStream(dest, { flags: 'a' }); // Append mode
-    //             response.pipe(fileStream);
-
-    //             response.on('data', chunk => {
-    //                 downloadedSize += chunk.length;
-
-    //                 if (!startTime) {
-    //                     startTime = Date.now();
-    //                 }
-
-    //                 const timeElapsed = Date.now() - startTime;
-    //                 const speed = Math.round(downloadedSize / timeElapsed * 1000);
-
-    //                 if (onProgress) {
-    //                     onProgress((downloadedSize + downloadedSoFar), totalSize, speed);
-    //                 }
-
-    //                 fs.writeFileSync(dest + '.downloaded', (downloadedSize + downloadedSoFar).toString(), { encoding: 'utf-8' });
-    //             });
-
-    //             fileStream.on('finish', () => {
-    //                 fileStream.close();
-    //                 fs.unlinkSync(dest + '.downloaded');
-    //                 resolve();
-    //             });
-    //         });
-
-    //         request.on('error', err => {
-    //             reject(err);
-    //         });
-    //     });
-    // }
 }

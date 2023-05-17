@@ -6,6 +6,7 @@ import { useDownload } from '@src/stores/useDownload';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, ref } from 'vue';
 import { FileHandler } from '@src/model/FileHandler'
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
     mod: IModInfo
@@ -14,6 +15,7 @@ const props = defineProps<{
 const settings = useSettings()
 const manager = useManager()
 const download = useDownload()
+const { t } = useI18n()
 
 let showInfo = ref(false)
 
@@ -27,24 +29,24 @@ let type = computed<IType | undefined>(() => {
 
 let info = computed(() => {
     let mod = props.mod
-    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}\\${mod.id}`
+    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}`
     let list = [
-        { title: "名称", content: mod.modName },
-        { title: "版本", content: mod.modVersion },
-        { title: "MD5", content: mod.md5 },
-        { title: "储存位置", content: modStorage },
+        { title: t('Name'), content: mod.modName },
+        { title: t('Version'), content: mod.modVersion },
+        { title: t('MD5'), content: mod.md5 },
+        { title: t('Storage Location'), content: modStorage },
     ]
 
     if (mod.webId) {
-        list.push({ title: "网址", content: `https://mod.3dmgame.com/mod/${mod.webId}` })
-        list.push({ title: "作者", content: mod.modAuthor ?? "" })
+        list.push({ title: t('Website'), content: `https://mod.3dmgame.com/mod/${mod.webId}` })
+        list.push({ title: t('Author'), content: mod.modAuthor ?? "" })
     }
 
     return list
 })
 
 function open() {
-    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}\\${props.mod.id}`
+    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${props.mod.id}`
     FileHandler.openFolder(modStorage)
 }
 
@@ -60,7 +62,7 @@ function toDel() {
 }
 
 function del() {
-    ElMessageBox.confirm("您确认要删除这个Mod吗?", { draggable: true })
+    ElMessageBox.confirm(t('Are you sure you want to delete this Mod?'), { draggable: true })
         .then(toDel)
         .catch(() => { })
 }
@@ -70,7 +72,7 @@ function reinstall() {
         toDel()
         download.addDownloadById(props.mod.webId)
     }
-    else ElMessage.error("该作品不是从管理器下载的, 无法获取更新")
+    else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
 }
 </script>
 <template>
@@ -79,12 +81,12 @@ function reinstall() {
             <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
         </template>
         <v-list>
-            <v-list-item append-icon="mdi-information-slab-circle-outline" title="信息" @click="showInfo = true">
+            <v-list-item append-icon="mdi-information-slab-circle-outline" :title="t('Info')" @click="showInfo = true">
             </v-list-item>
-            <v-list-item append-icon="mdi-folder-open-outline" title="打开" @click="open"></v-list-item>
-            <v-list-item v-if="mod.webId" append-icon="mdi-web" title="网站" @click="openWeb"></v-list-item>
-            <v-list-item v-if="mod.webId" append-icon="mdi-refresh" title="更新" @click="reinstall"></v-list-item>
-            <v-list-item append-icon="mdi-trash-can-outline" title="删除" @click="del"> </v-list-item>
+            <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
+            <v-list-item v-if="mod.webId" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
+            <v-list-item v-if="mod.webId" append-icon="mdi-refresh" :title="t('Update')" @click="reinstall"></v-list-item>
+            <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
         </v-list>
     </v-menu>
     <v-dialog v-model="showInfo" width="600">

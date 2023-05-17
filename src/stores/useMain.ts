@@ -1,17 +1,21 @@
 import { defineStore } from "pinia";
+import { ipcRenderer } from "electron";
 
 export const useMain = defineStore('Main', {
     state: () => ({
         leftMenu: true,
         leftMenuRail: false,
         host: 'https://mod.3dmgame.com',
+        version: "",
+        web: null as any,
     }),
     getters: {
-        lazy_img: (state) => `${state.host}/assets/image/lazy_img.webp`
+        lazy_img: (state) => `${state.host}/assets/image/lazy_img.webp`,
+
     },
     actions: {
         // 格式化数字
-        get_number(num?: number) {
+        getNumber(num?: number) {
             let number = "";
             if (num) {
                 if (num > 9999999) {
@@ -38,6 +42,16 @@ export const useMain = defineStore('Main', {
                 unitIndex++;
             }
             return `${size.toFixed(2)} ${units[unitIndex]}`;
+        },
+        // 获取版本号
+        async getVersion() {
+            let version = await ipcRenderer.invoke("get-version")
+            this.version = version[0]
+            this.web = version[1]
+            return version
+        },
+        async sleep(time: number): Promise<void> {
+            return new Promise(resolve => setTimeout(resolve, time));
         }
     }
 })

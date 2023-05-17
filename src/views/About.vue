@@ -1,18 +1,30 @@
 <script lang='ts' setup>
-import { ref } from "vue";
-import { marked } from 'marked';
-import 'github-markdown-css/github-markdown-dark.css'
+import { ref, computed, watch } from "vue";
+import marked from '@src/plugins/marked';
+import { useI18n } from "vue-i18n";
 
-marked.setOptions({
-    breaks: true,
-})
 let readme = ref('')
-// 浏览器读取 /public/EADME.md
-fetch('README.md')
-    .then(res => res.text())
-    .then(text => {
-        readme.value = marked(text)
-    })
+const { locale } = useI18n()
+
+let readmeFile = computed(() => {
+    // console.log(locale.value);
+    if (locale.value == "zh_CN") return 'README.md'
+    return `README_${locale.value}.md`
+})
+
+function getReadme() {
+    fetch(readmeFile.value)
+        .then(res => res.text())
+        .then(text => {
+            readme.value = marked(text)
+        })
+}
+
+watch(() => readmeFile.value, () => {
+    getReadme()
+})
+getReadme()
+
 </script>
 <template>
     <v-container fluid>

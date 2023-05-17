@@ -6,9 +6,11 @@ import { ElMessageBox, ElSwitch } from 'element-plus';
 import { h, ref } from 'vue'
 import { useSettings } from '@src/stores/useSettings';
 import { FileHandler } from '@src/model/FileHandler'
+import { useManager } from '@src/stores/useManager';
 
 const download = useDownload()
 const settings = useSettings()
+const manager = useManager()
 
 let delFile = ref(false)
 
@@ -37,19 +39,33 @@ function openFolder() {
     FileHandler.openFolder(modStorage)
 }
 
+function allInstell() {
+    download.downloadTaskList.forEach(item => {
+        manager.addModByTask(item)
+    })
+}
+
 </script>
 <template>
     <v-container fluid>
         <v-row>
             <v-col cols="12" class="top">
                 <div class="left">
-                    <h1>下载管理 <small>(共 {{ download.downloadTaskList.length }} 个任务)</small></h1>
+                    <h1>
+                        {{ $t('Download Manager') }}
+                        <small>({{ $t('{0} tasks', [download.downloadTaskList.length]) }})</small>
+                    </h1>
                 </div>
                 <div class="right">
-                    <v-text-field density="compact" variant="solo" label="搜索任务" append-inner-icon="mdi-magnify" single-line
-                        hide-details v-model="download.searchName"></v-text-field>
-                    <v-btn variant="text" append-icon="mdi-trash-can-outline" @click="openFolder">打开文件夹</v-btn>
-                    <v-btn variant="text" append-icon="mdi-trash-can-outline" @click="allDel">全部删除</v-btn>
+                    <v-text-field density="compact" variant="solo" :label="$t('Search task')"
+                        append-inner-icon="mdi-magnify" single-line hide-details
+                        v-model="download.searchName"></v-text-field>
+                    <v-chip label variant="text" append-icon="mdi-folder-open-outline"
+                        @click="openFolder">{{ $t('Open Folder') }}</v-chip>
+                    <v-chip label variant="text" append-icon="mdi-download"
+                        @click="allInstell">{{ $t('Install All') }}</v-chip>
+                    <v-chip label variant="text" append-icon="mdi-trash-can-outline"
+                        @click="allDel">{{ $t('Delete All') }}</v-chip>
                 </div>
             </v-col>
         </v-row>
@@ -66,7 +82,7 @@ export default {
 <style lang='less' scoped>
 .top {
     display: flex;
-
+    align-items: center;
     justify-content: space-between;
 
     .left {
@@ -82,6 +98,7 @@ export default {
     .right {
         display: flex;
         flex: 1 1 auto;
+        align-items: center;
     }
 
 }

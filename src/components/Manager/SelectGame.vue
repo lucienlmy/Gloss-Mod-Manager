@@ -5,10 +5,19 @@ import { basename, dirname } from 'path'
 import { ElMessage } from "element-plus";
 import { useMain } from "@src/stores/useMain";
 import { useSettings } from "@src/stores/useSettings";
+import { ref, computed } from "vue"
 
 const manager = useManager()
 const settings = useSettings()
 const { lazy_img } = useMain()
+
+let searchText = ref("")
+
+let list = computed(() => {
+    return manager.supportedGames.filter(item => {
+        return item.gameName.includes(searchText.value)
+    })
+})
 
 // =========== 让用户选择指定游戏 ===========
 function select() {
@@ -42,34 +51,34 @@ function select() {
 <template>
     <v-dialog v-model="manager.selectGameDialog" persistent width="900px">
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" append-icon="mdi-plus" v-bind="props">选择游戏</v-btn>
+            <v-chip label variant="text" append-icon="mdi-plus" v-bind="props">{{ $t('select game') }}</v-chip>
         </template>
         <v-card class="select-game">
             <v-row>
                 <v-col cols="12" class="top">
                     <div class="title">
-                        选择游戏
+                        <div class="text">
+                            {{ $t('select game') }}
+                        </div>
+                        <v-text-field density="compact" variant="solo" :label="$t('Search Game')"
+                            append-inner-icon="mdi-magnify" single-line hide-details v-model="searchText"></v-text-field>
                     </div>
                     <div class="close">
-                        <v-btn append-icon="mdi-close" @click="manager.selectGameDialog = false" variant="text">关闭</v-btn>
+                        <v-chip label append-icon="mdi-close" @click="manager.selectGameDialog = false"
+                            variant="text">{{ $t('Close') }}</v-chip>
                     </div>
                 </v-col>
                 <v-divider></v-divider>
-                <!-- <v-col cols="12" class="button">
-                    <v-btn variant="text" append-icon="mdi-autorenew" @click="autoSearchGame"
-                        :loading="audoButton">自动搜索</v-btn>
-                    <v-btn variant="text" append-icon="mdi-magnify" @click="select">手动选择</v-btn>
-                </v-col> -->
                 <v-col cols="12" class="content">
                     <v-row>
-                        <v-col cols="12" sm="6" md="4" lg="3" class="game-list" v-for="item in manager.supportedGames"
-                            :key="item.gameExe" @click="select">
+                        <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameExe"
+                            @click="select">
                             <v-row no-gutters>
                                 <v-col cols="12">
                                     <v-img :lazy-src="lazy_img" :aspect-ratio="247 / 139" :src="item.gameCoverImg"
                                         :alt="item.gameName" min-height="90px" />
                                 </v-col>
-                                <v-col class="game-name" cols="12">{{ item.gameName }}</v-col>
+                                <v-col class="game-name" cols="12">{{ $t(item.gameName) }}</v-col>
                             </v-row>
                         </v-col>
                     </v-row>
@@ -94,6 +103,8 @@ export default {
 
         .title {
             flex: 1 1 auto;
+            display: flex;
+            align-items: center;
         }
     }
 

@@ -26,6 +26,8 @@ let type = computed<IType | undefined>(() => {
 })
 
 watch(() => props.mod.isInstalled, () => {
+    // console.log(props.mod.isInstalled);
+
     if (props.mod.isInstalled) {
         // 安装
         type.value?.install(props.mod).then(res => {
@@ -65,8 +67,8 @@ let exid_name = ref(false)
             </v-col>
             <v-col cols="2">
                 <!-- 安装 -->
-                <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? '已安装' : '未安装'" :hide-details="true"
-                    color="#0288D1"></v-switch>
+                <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
+                    :hide-details="true" color="#0288D1"></v-switch>
             </v-col>
             <v-col cols="1">
                 <ContentModMenu :mod="mod"></ContentModMenu>

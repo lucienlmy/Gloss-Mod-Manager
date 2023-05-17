@@ -3,6 +3,10 @@ import { release } from 'node:os'
 import { join } from 'node:path'
 import { dialog } from 'electron'
 import { GetData } from '../model/GetData'
+import { path7za } from '7z-win'
+import AutoLaunch from 'auto-launch'
+
+// import { path7za } from "7zip-bin"
 
 // The built directory structure
 //
@@ -79,6 +83,9 @@ async function createWindow() {
         win.loadFile(indexHtml)
     }
 
+    // win.webContents.openDevTools()  // 打开Dev工具
+
+
     // Test actively push message to the Electron-Renderer
     win.webContents.on('did-finish-load', () => {
         win?.webContents.send('main-process-message', new Date().toLocaleString())
@@ -90,6 +97,7 @@ async function createWindow() {
         shell.openExternal(url)
     })
     // Make all links open with the browser, not with the application
+    // 新窗口打开链接
     win.webContents.setWindowOpenHandler(({ url }) => {
         if (url.startsWith('https:')) shell.openExternal(url)
         return { action: 'deny' }
@@ -198,4 +206,44 @@ ipcMain.handle('select-file', async (event, arg) => {
         properties, filters
     })
     return result.filePaths
+})
+
+// 获取系统目录
+ipcMain.handle('get-system-path', async (event, arg) => {
+    return app.getPath(arg);
+})
+
+// 获取版本
+ipcMain.handle('get-version', async (event, arg) => {
+    let localVersion = app.getVersion()
+    let modData = await GetData.getMod(197445)
+    return [localVersion, modData.data]
+})
+
+// 获取7z路径
+ipcMain.handle('get-7z-path', async (event, arg) => {
+    let _7z = path7za
+
+    if (!process.env.VITE_DEV_SERVER_URL) {
+        // 如果是生产环境
+        // 将 app.asar 替换为 app.asar.unpacked
+        _7z = _7z.replace("app.asar", "app.asar.unpacked")
+    }
+
+    return _7z
+})
+
+// 设置在开机自启
+ipcMain.handle('set-auto-launch', async (event, arg) => {
+    let autoLaunch = new AutoLaunch({
+        name: 'Gloss Mod Manager',
+        path: app.getPath('exe'),
+    })
+    if (arg) {
+        autoLaunch.enable()
+    } else {
+        autoLaunch.disable()
+    }
+    console.log(`Auto Launch:${arg}`);
+
 })

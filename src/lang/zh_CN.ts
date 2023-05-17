@@ -1,0 +1,160 @@
+const AppHeader = {
+    "Gloss Mod Manager": "极光模组管理器",
+    "Minimize window": "最小化窗口",
+    "Maximize/restore window": "放大/还原窗口",
+    "Close": "关闭"
+}
+const LeftMenu = {
+    "Home": "首页",
+    "Manager": "管理",
+    "Tour": "游览",
+    "Download": "下载",
+    "Settings": "设置",
+    "About": "关于"
+}
+const AutoUpdate = {
+    "New version": "有新版本",
+    "Current version": "当前版本",
+    "Latest version": "最新版本",
+    "Update log": "更新日志",
+    "Cancel": "取消",
+    "Update": "更新",
+}
+const Download = {
+    "Download Manager": "下载管理",
+    "{0} tasks": "共 {0} 个任务",
+    "Search task": "搜索任务",
+    "Open Folder": "打开文件夹",
+    "Delete All": "全部删除",
+}
+
+const DownloadHeader = {
+    "All downloads": "全部下载",
+    "Downloading": "正在下载",
+    "Paused": "暂停",
+    "Completed": "已完成",
+    "Waiting/Failure": "等待/失败",
+}
+
+const DownloadTasks = {
+    "Start": "开始",
+    "Pause": "暂停",
+    "Redownload": "重新下载",
+    "Delete": "删除",
+    "Install": "安装",
+    "Open website": "打开网站",
+    "Open file": "打开文件",
+    "Delete task?": "删除任务?",
+    "Delete local files": "同时删除本地文件",
+    "Waiting": "等待中",
+    "Downloading": "下载中",
+    "Paused": "暂停",
+    "Completed": "完成",
+    "Unknown": "未知",
+    "No download tasks available at the moment.": "暂无下载任务"
+}
+const ExploreDownloadBtn = {
+    "Please manage the game first.": "请先管理游戏",
+    "Downloaded": "已下载",
+}
+
+const ExploreFilter = {
+    "All": "全部",
+    "Essence": "精华",
+    "Original": "原创",
+    "Fanworks": "二次创作",
+    "Translation": "翻译",
+    "Today": "今天",
+    "7 Days": "近7天",
+    "30 Days": "近30天",
+    "3 Months": "近3个月",
+    "Default": "默认",
+    "Views": "最多游览",
+    "Downloads": "最多下载",
+    "Likes": "最多点赞",
+    "Favorites": "最多收藏",
+    "Newest": "最新发布",
+    "Type of creation": "创作类型",
+    "Update time": "更新时间",
+    "Sort": "排序方式",
+    "Search": "搜索作品",
+    "You can search for what you want here": "在这里可以搜索到你想要的东西哦"
+}
+
+const Welcome = {
+    "Welcome to use {0}, where you can": "欢迎使用 {0},在这里你可以..."
+}
+
+const ManagerContent = {
+    "Name": "名称",
+    "Version": "版本",
+    "Type": "类型",
+    "Status": "状态",
+    "Action": "操作",
+    "Drag and drop the Mod compressed package here for management": "将Mod压缩包拖拽到这里进行管理",
+    "Supports zpi, rar, 7z file types": "支持zpi、rar、7z类型文件",
+    "Installed": "已安装",
+    "Uninstalled": "未安装",
+    "MD5": "MD5",
+    "Storage Location": "储存位置",
+    "Website": "网址",
+    "Author": "作者",
+    "Are you sure you want to delete this Mod?": "您确认要删除这个Mod吗?",
+    "This mod was not downloaded from the manager and cannot be updated": "该作品不是从管理器下载的, 无法获取更新",
+    "Info": "信息",
+    "Open": "打开",
+    "Update": "更新",
+    "Delete": "删除",
+    "You have not selected a game yet. Please select a game first": "您当前还未选择游戏,请先选择游戏"
+}
+
+const ManagerHeader = {
+    "Import Mod": "导入Mod",
+    "Install All": "全部安装",
+    "Uninstall All": "全部卸载",
+    "Current Game": "当前游戏『{0}』",
+    "Not Selected": "未选择",
+    "select game": "选择游戏",
+    "Search Game": "搜索游戏",
+}
+
+const Settings = {
+    "Features": "功能",
+    "Clean cache": "清理缓存",
+    "Open Download Folder": "打开下载目录",
+    "Open Game Folder": "打开游戏目录",
+    "Support": "支持",
+    "Mod Folder": "Mod储存位置",
+    "Language": "语言",
+    "Select": "选择",
+    "Auto install for download": "下载完成后自动安装",
+    "Auto start for windows": "开机自启"
+}
+
+const Games = {
+    "Cyberpunk 2077": "赛博朋克2077",
+    "ELDEN RING": "艾尔登法环",
+    "Hogwarts Legacy": "霍格沃茨之遗",
+    "Left 4 Dead 2": "求生之路2",
+    "Sekiro": "只狼",
+}
+
+const lang = {
+    ...AppHeader,
+    ...LeftMenu,
+    ...AutoUpdate,
+    ...Download,
+    ...DownloadHeader,
+    ...DownloadTasks,
+    ...ExploreDownloadBtn,
+    ...ExploreFilter,
+    ...Welcome,
+    ...ManagerContent,
+    ...ManagerHeader,
+    ...Settings,
+    ...Games
+}
+
+
+
+export default lang

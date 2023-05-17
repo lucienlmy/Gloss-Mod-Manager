@@ -7,15 +7,39 @@ import { useSettings } from '@src/stores/useSettings';
 const settings = useSettings()
 const manager = useManager()
 
+
+function allInstall() {
+    let list = manager.filterModList
+    // console.log(list);
+    list.forEach(item => {
+        item.isInstalled = true
+    })
+}
+
+function allUnInstall() {
+    let list = manager.filterModList
+    // console.log(list);
+    list.forEach(item => {
+        item.isInstalled = false
+    })
+}
+
 </script>
 <template>
     <div class="header">
         <div class="header-btn">
             <SelectGame></SelectGame>
-            <v-btn variant="text" v-if="settings.settings.managerGame" append-icon="mdi-arrow-bottom-left-thick"
-                @click="manager.selectMoeFiles">导入Mod</v-btn>
+            <template v-if="settings.settings.managerGame">
+                <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
+                    @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
+                <v-chip label variant="text" append-icon="mdi-download" @click="allInstall">{{ $t('Install All') }}</v-chip>
+                <v-chip label variant="text" append-icon="mdi-close"
+                    @click="allUnInstall">{{ $t('Uninstall All') }}</v-chip>
+            </template>
         </div>
-        <div class="select-game">当前游戏 『{{ settings.settings.managerGame?.gameName ?? '未选择' }}』</div>
+        <div class="select-game">
+            {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}
+        </div>
     </div>
 </template>
 <script lang='ts'>

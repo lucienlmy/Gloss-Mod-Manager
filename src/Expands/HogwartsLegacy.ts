@@ -7,10 +7,9 @@ import { basename } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
 import { Manager } from "@src/model/Manager"
 
-let supportedGames: ISupportedGames = {
+export const supportedGames: ISupportedGames = {
     gameID: 302,
-    gameName: "霍格沃茨之遗",
-    gameEnName: "Hogwarts Legacy",
+    gameName: "Hogwarts Legacy",
     gameExe: 'HogwartsLegacy.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63e2f9656f092.webp",
     modType: [
@@ -44,5 +43,3 @@ let supportedGames: ISupportedGames = {
     }
 }
 
-
-export default supportedGames

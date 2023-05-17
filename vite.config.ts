@@ -1,4 +1,4 @@
-import { rmSync } from 'node:fs'
+import { rmSync, copyFileSync, mkdirSync, existsSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import electron from 'vite-plugin-electron'

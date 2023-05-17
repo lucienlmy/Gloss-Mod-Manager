@@ -32,7 +32,7 @@ let list = computed(() => {
             </v-row>
             <v-row v-else>
                 <v-col cols="12" class="empty">
-                    暂无下载任务
+                    {{ $t('No download tasks available at the moment.') }}
                 </v-col>
             </v-row>
         </v-card-text>

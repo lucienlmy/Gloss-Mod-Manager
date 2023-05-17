@@ -34,8 +34,8 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
         let list: string[] = SekiroDictionary.split("\r\n")
         const settings = useSettings()
         let res: IState[] = []
-        mod.modFiles.forEach(file => {
-            let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}\\${mod.id}\\${file}`
+        mod.modFiles.forEach(async file => {
+            let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}\\${file}`
             // 判断是否是文件
             if (!statSync(modStorage).isFile()) return
 
@@ -46,7 +46,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
                 let path = list.find(item => item.includes(name))
                 let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}\\${path}`
                 if (isInstall) {
-                    let state = FileHandler.copyFile(modStorage, gameStorage)
+                    let state = await FileHandler.copyFile(modStorage, gameStorage)
                     res.push({ file: file, state: state })
                 } else {
                     let state = FileHandler.deleteFile(gameStorage)
@@ -61,10 +61,9 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
     }
 }
 
-let supportedGames: ISupportedGames = {
+export const supportedGames: ISupportedGames = {
     gameID: 275,
-    gameName: "艾尔登法环",
-    gameEnName: "ELDEN RING",
+    gameName: "ELDEN RING",
     gameExe: 'eldenring.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/620b6924d8c0d.png",
     modType: [
@@ -87,9 +86,9 @@ let supportedGames: ISupportedGames = {
                 const manager = useManager()
                 let modStorage = `${manager.modStorage}\\${mod.id}`
                 if (manager.gameStorage) {
-                    FileHandler.copyFolder(modStorage, manager.gameStorage).then(() => {
-                        FileHandler.renameFile(`${manager.gameStorage}\\start_protected_game.exe`, `${manager.gameStorage}\\start_protected_game.exe.back`)
-                        FileHandler.renameFile(`${manager.gameStorage}\\modengine2_launcher.exe`, `${manager.gameStorage}\\start_protected_game.exe`)
+                    FileHandler.copyFolder(modStorage, manager.gameStorage).then(async () => {
+                        await FileHandler.renameFile(`${manager.gameStorage}\\start_protected_game.exe`, `${manager.gameStorage}\\start_protected_game.exe.back`)
+                        await FileHandler.renameFile(`${manager.gameStorage}\\modengine2_launcher.exe`, `${manager.gameStorage}\\start_protected_game.exe`)
                     })
                     return true
                 }
@@ -126,5 +125,3 @@ let supportedGames: ISupportedGames = {
         return 1
     }
 }
-
-export default supportedGames

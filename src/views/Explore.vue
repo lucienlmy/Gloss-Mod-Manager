@@ -43,7 +43,7 @@ watch(() => explore.page, () => {
         <Search></Search>
         <Filter></Filter>
         <v-row class="mod-wrap" v-if="explore.mods.length > 0">
-            <v-col cols="12" sm="6" md="4" lg="3" xl="2" class="mod-list" v-for="item in explore.mods" :key="item.id">
+            <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in explore.mods" :key="item.id">
                 <ModList :mod="item"></ModList>
             </v-col>
         </v-row>

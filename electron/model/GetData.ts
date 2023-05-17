@@ -11,4 +11,9 @@ export class GetData {
     public static async getMod(id: number) {
         return await callApi("/render/GetModDataForID", { id });
     }
+    // =========== 获取版本 ===========
+    public static async getWebVersion() {
+        let data = await callApi("https://mod.3dmgame.com/mod/API/197445");
+        return data.mods_version
+    }
 }

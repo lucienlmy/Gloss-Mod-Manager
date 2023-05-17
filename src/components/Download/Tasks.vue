@@ -10,32 +10,35 @@ import { computed } from "vue";
 import { h, ref } from 'vue'
 import { ElMessageBox, ElSwitch } from 'element-plus'
 import { useManager } from '@src/stores/useManager';
+import { useI18n } from "vue-i18n"
 
 const props = defineProps<{
-    task: IDownloadTask
+    task: IDownloadTask,
+    isUpdate?: boolean
 }>()
 const main = useMain()
 const settings = useSettings()
 const download = useDownload()
 const manager = useManager()
+const { t } = useI18n()
 
 const state = computed(() => {
     switch (props.task.state) {
         case 0:
-            return "等待中"
+            return t("Waiting")
             break;
         case 1:
-            return "下载中"
+            return t("Downloading")
             break;
         case 2:
-            return "暂停"
+            return t("Paused")
             break;
         case 3:
-            return "完成"
+            return t("Completed")
             break;
 
         default:
-            return "未知"
+            return t("Unknown")
             break;
     }
 })
@@ -60,14 +63,14 @@ let delFile = ref(false)
 
 function del() {
     ElMessageBox({
-        title: '删除任务?',
+        title: t("Delete task?"),
         // Should pass a function if VNode contains dynamic props
         message: () => h(ElSwitch, {
             modelValue: delFile.value,
             'onUpdate:modelValue': (val: boolean | string | number) => {
                 delFile.value = val as boolean
             },
-            'inactive-text': '同时删除本地文件'
+            'inactive-text': t("Delete local files")
         }),
     }).then(() => {
         if (delFile.value) {
@@ -103,29 +106,33 @@ function install() {
     <v-card class="task">
         <v-card-text>
             <v-row>
-                <v-col cols="8" class="name">{{ task.name }}</v-col>
-                <v-col cols="4" class="operation">
-                    <v-btn variant="text" title="开始" v-if="[0, 2].includes(task.state)" @click="downloadProcess?.resume()">
+                <v-col cols="6" md="8" class="name">{{ task.name }}</v-col>
+                <v-col cols="6" md="4" class="operation">
+                    <v-btn variant="text" :title="t('Start')" v-if="[0, 2].includes(task.state)"
+                        @click="downloadProcess?.resume()">
                         <v-icon>mdi-menu-right</v-icon>
                     </v-btn>
-                    <v-btn variant="text" title="暂停" v-if="[1].includes(task.state)" @click="downloadProcess?.pause()">
+                    <v-btn variant="text" :title="t('Pause')" v-if="[1].includes(task.state)"
+                        @click="downloadProcess?.pause()">
                         <v-icon>mdi-pause</v-icon>
                     </v-btn>
-                    <v-btn variant="text" title="重新下载" v-if="[3].includes(task.state)" @click="restart">
-                        <v-icon>mdi-restart</v-icon>
-                    </v-btn>
-                    <v-btn variant="text" title="删除" @click="del">
-                        <v-icon>mdi-trash-can-outline</v-icon>
-                    </v-btn>
-                    <v-btn variant="text" title="安装" @click="install"
-                        v-if="task.state == DownloadStatus.COMPLETED"><v-icon>mdi-download</v-icon></v-btn>
+                    <template v-if="!isUpdate">
+                        <v-btn variant="text" :title="t('Redownload')" v-if="[3].includes(task.state)" @click="restart">
+                            <v-icon>mdi-restart</v-icon>
+                        </v-btn>
+                        <v-btn variant="text" :title="t('Delete')" @click="del">
+                            <v-icon>mdi-trash-can-outline</v-icon>
+                        </v-btn>
+                        <v-btn variant="text" :itle="t('Install')" @click="install"
+                            v-if="task.state == DownloadStatus.COMPLETED"><v-icon>mdi-download</v-icon></v-btn>
+                    </template>
                     <v-menu open-on-hover>
                         <template v-slot:activator="{ props }">
                             <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
                         </template>
                         <v-list>
-                            <v-list-item append-icon="mdi-web" title="打开网站" @click="openWeb"> </v-list-item>
-                            <v-list-item append-icon="mdi-zip-box-outline" title="打开文件" @click="openFile"
+                            <v-list-item append-icon="mdi-web" :title="t('Open website')" @click="openWeb"> </v-list-item>
+                            <v-list-item append-icon="mdi-zip-box-outline" :title="t('Open file')" @click="openFile"
                                 :disabled="task.state !== DownloadStatus.COMPLETED">
                             </v-list-item>
                         </v-list>
@@ -138,10 +145,11 @@ function install() {
                 </v-col>
                 <v-col cols="12" class="state">
                     <div class="left">
-                        <div>{{ state }}</div>
+                        <!-- <div>{{ state }}</div> -->
                     </div>
                     <div class="right">
-                        <div>{{ `${main.formatSiez(task.speed)}/s` }}</div>
+                        <div v-if="task.state == DownloadStatus.DOWNLOADING">{{ `${main.formatSiez(task.speed)}/s` }}</div>
+                        <div v-else>{{ state }}</div>
                         <div>{{ `${main.formatSiez(task.downloadedSize)} / ${main.formatSiez(task.totalSize)}` }}</div>
                     </div>
                 </v-col>

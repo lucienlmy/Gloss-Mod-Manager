@@ -1,40 +1,47 @@
 <script lang='ts' setup>
 import { useMain } from '@src/stores/useMain';
+import { useSettings } from '@src/stores/useSettings';
+import { useI18n } from "vue-i18n";
+import { computed } from "vue";
 
-let lists = [
+
+const { t } = useI18n()
+
+let lists = computed(() => [
     {
-        title: '首页',
+        title: t("Home"),
         icon: "mdi-home",
         path: '/'
     },
     {
-        title: '模组管理',
+        title: t("Manager"),
         icon: "mdi-select-group",
         path: '/Manager'
     },
     {
-        title: "游览模组",
+        title: t("Tour"),
         icon: "mdi-gamepad-circle",
         path: "/Explore"
     },
     {
-        title: "下载管理",
+        title: t("Download"),
         icon: "mdi-download",
         path: "/Download"
     },
     {
-        title: '工具设置',
+        title: t("Settings"),
         icon: "mdi-cog",
         path: '/Settings'
     },
     {
-        title: '关于',
+        title: t("About"),
         icon: "mdi-information-slab-circle-outline",
         path: '/about'
     },
-]
+])
 
 const main = useMain()
+const settings = useSettings()
 
 function toTop() {
     // 返回顶部
@@ -55,7 +62,7 @@ function toBottom() {
 
 </script>
 <template>
-    <v-navigation-drawer v-model="main.leftMenu" :rail="main.leftMenuRail" permanent>
+    <v-navigation-drawer v-model="main.leftMenu" :rail="settings.settings.leftMenuRail" permanent>
         <v-list>
             <v-list-item v-for="item in lists" :key="item.path" :to="item.path" :prepend-icon="item.icon"
                 :title="item.title">
@@ -65,8 +72,8 @@ function toBottom() {
             <v-list>
                 <v-list-item @click="toTop" prepend-icon="mdi-arrow-up-bold"></v-list-item>
                 <v-list-item @click="toBottom" prepend-icon="mdi-arrow-down-bold"></v-list-item>
-                <v-list-item @click="main.leftMenuRail = !main.leftMenuRail"
-                    :prepend-icon="main.leftMenuRail ? 'mdi-chevron-double-right' : 'mdi-chevron-double-left'">
+                <v-list-item @click="settings.settings.leftMenuRail = !settings.settings.leftMenuRail"
+                    :prepend-icon="settings.settings.leftMenuRail ? 'mdi-chevron-double-right' : 'mdi-chevron-double-left'">
                 </v-list-item>
 
             </v-list>

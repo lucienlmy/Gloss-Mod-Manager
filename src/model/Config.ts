@@ -4,8 +4,6 @@ import { readFileSync, writeFile, existsSync, writeFileSync, mkdirSync } from 'n
 import { useSettings } from '@src/stores/useSettings'
 import { ISettings } from './Interfaces';
 import { useManager } from '@src/stores/useManager';
-import { execSync } from 'child_process'
-import { ElMessage } from "element-plus";
 
 export class Config {
 
@@ -32,8 +30,11 @@ export class Config {
             modStorageLocation: settings.modStorageLocation,
             managerGame: settings.managerGame,
             proxy: settings.proxy,
-            UnzipPath: settings.UnzipPath,
+            // UnzipPath: settings.UnzipPath,
             autoInstall: settings.autoInstall,
+            leftMenuRail: settings.leftMenuRail,
+            autoLaunch: settings.autoLaunch,
+            language: settings.language
         }
     }
     // 保存配置文件
@@ -60,12 +61,15 @@ export class Config {
             managerGame: data.managerGame,
             modStorageLocation: data.modStorageLocation ?? join(homedir(), 'My Documents', 'Gloss Mod Manager', 'mods'),
             proxy: data.proxy ?? "",
-            UnzipPath: data.UnzipPath ?? "",
+            // UnzipPath: data.UnzipPath ?? "",
             autoInstall: data.autoInstall ?? false,
+            leftMenuRail: data.leftMenuRail ?? true,
+            autoLaunch: data.autoLaunch ?? false,
+            language: data.language ?? "zh-CN",
         }
 
         // 初始化游戏
-        if (settings.settings.managerGame?.gameEnName) {
+        if (settings.settings.managerGame?.gameName) {
             let gameID = settings.settings.managerGame?.gameID
             Manager.supportedGames.forEach(item => {
                 if (item.gameID === gameID) {
@@ -76,19 +80,19 @@ export class Config {
         }
 
         // 初始化7-zip
-        if (settings.settings.UnzipPath == '') {
-            let installPath = ''
-            try {
-                const output = execSync('reg query "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\7zFM.exe" /ve').toString();
-                const match = output.match(/^(.*?)\s+REG_SZ\s+(.*)$/m);
-                installPath = (match && match[2]) as string;
-                installPath = join(dirname(installPath), '7z.exe');
-                settings.settings.UnzipPath = installPath
-                this.setConfig(settings.settings)
-            } catch (err) {
-                ElMessage.error('获取7-zip失败,可以没有安装,您可以手动选择')
-                console.log(err);
-            }
-        }
+        // if (settings.settings.UnzipPath == '') {
+        //     let installPath = ''
+        //     try {
+        //         const output = execSync('reg query "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\7zFM.exe" /ve').toString();
+        //         const match = output.match(/^(.*?)\s+REG_SZ\s+(.*)$/m);
+        //         installPath = (match && match[2]) as string;
+        //         installPath = join(dirname(installPath), '7z.exe');
+        //         settings.settings.UnzipPath = installPath
+        //         this.setConfig(settings.settings)
+        //     } catch (err) {
+        //         ElMessage.error('获取7-zip失败,可以没有安装,您可以手动选择')
+        //         console.log(err);
+        //     }
+        // }
     }
 }

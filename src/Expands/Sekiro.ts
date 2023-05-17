@@ -37,8 +37,8 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
         let list: string[] = SekiroDictionary.split("\r\n")
         const settings = useSettings()
         let res: IState[] = []
-        mod.modFiles.forEach(file => {
-            let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}\\${mod.id}\\${file}`
+        mod.modFiles.forEach(async file => {
+            let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}\\${file}`
             // 判断是否是文件
             if (!statSync(modStorage).isFile()) return
 
@@ -49,7 +49,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
                 let path = list.find(item => item.includes(name))
                 let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}\\${path}`
                 if (isInstall) {
-                    let state = FileHandler.copyFile(modStorage, gameStorage)
+                    let state = await FileHandler.copyFile(modStorage, gameStorage)
                     res.push({ file: file, state: state })
                 } else {
                     let state = FileHandler.deleteFile(gameStorage)
@@ -67,10 +67,9 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 
 
 
-let supportedGames: ISupportedGames = {
+export const supportedGames: ISupportedGames = {
     gameID: 185,
-    gameName: "只狼",
-    gameEnName: "Sekiro",
+    gameName: "Sekiro",
     gameExe: 'sekiro.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/185.png",
     corePlugins: [
@@ -117,5 +116,3 @@ let supportedGames: ISupportedGames = {
         return 1
     }
 }
-
-export default supportedGames

@@ -3,13 +3,14 @@
  */
 
 import { extractFull, Data } from 'node-7z'
-import { Config } from '@src/model/Config'
+import { ipcRenderer } from 'electron'
 
 export class Unzipper {
 
-    private static get7zip(): string {
-        let config = Config.getConfig()
-        return config.UnzipPath
+    private static async get7zip(): Promise<string> {
+
+        let zipPath = await ipcRenderer.invoke("get-7z-path")
+        return zipPath
     }
 
     /**
@@ -19,12 +20,10 @@ export class Unzipper {
      * @returns 解压状态
      */
     public static unzip(source: string, target: string): Promise<Data[]> {
-        console.log(target);
-
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             let files: Data[] = []
             const myStream = extractFull(source, target, {
-                $bin: this.get7zip(),
+                $bin: await this.get7zip(),
                 charset: 'utf-8'
             })
             myStream.on('data', function (data) {
@@ -36,7 +35,6 @@ export class Unzipper {
             myStream.on('end', function () {
                 resolve(files)
             })
-
         })
     }
 }

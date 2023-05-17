@@ -19,10 +19,10 @@ function handleClose() {
                 <v-avatar class="logo">
                     <v-img src="imgs/logo.png"></v-img>
                 </v-avatar>
-                <span>Gloss Mod Manager</span>
+                <span>{{ $t("Gloss Mod Manager") }}</span>
             </div>
             <div class="window-actions">
-                <li @click="handleMinimize" title="最小化窗口">
+                <li @click="handleMinimize" :title="$t('Minimize window')">
                     <svg version="1.1" role="presentation" width="12" height="12" viewBox="0 0 12 12" class="mo-icon">
                         <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
                             <line x1="1" y1="6" x2="11" y2="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -30,7 +30,7 @@ function handleClose() {
                         </g>
                     </svg>
                 </li>
-                <li @click="handleMaximize" title="放大/还原窗口">
+                <li @click="handleMaximize" :title="$t('Maximize/restore window')">
                     <svg version="1.1" role="presentation" width="12" height="12" viewBox="0 0 12 12" class="mo-icon">
                         <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
                             <polyline points="5.5 1.5 10.5 1.5 10.5 6.5" fill="none" stroke-linecap="round"
@@ -40,7 +40,7 @@ function handleClose() {
                         </g>
                     </svg>
                 </li>
-                <li @click="handleClose" title="关闭">
+                <li @click="handleClose" :title="$t('Close')">
                     <svg version="1.1" role="presentation" width="12" height="12" viewBox="0 0 12 12" class="mo-icon">
                         <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
                             <line x1="1.5" y1="1.5" x2="10.5" y2="10.5" fill="none" stroke-linecap="round"

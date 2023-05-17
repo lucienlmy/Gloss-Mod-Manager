@@ -7,11 +7,11 @@ const explore = useExplore()
 </script>
 <template>
     <div class="search">
-        <div class="search-title">搜索作品</div>
+        <div class="search-title">{{ $t('Search') }}</div>
         <div class="search-wrap">
-            <v-text-field v-model="explore.searchText" class="search-input " placeholder="在这里可以搜索到你想要的东西哦"
-                variant="underlined" @keydown.enter="explore.search" append-inner-icon="mdi-magnify"
-                @click:append-inner="explore.search">
+            <v-text-field v-model="explore.searchText" class="search-input "
+                :placeholder="$t('You can search for what you want here')" variant="underlined"
+                @keydown.enter="explore.search" append-inner-icon="mdi-magnify" @click:append-inner="explore.search">
             </v-text-field>
         </div>
     </div>

@@ -29,34 +29,27 @@ async function drop(event: DragEvent) {
     console.log(manager.managerModList);
 }
 
-if (manager.managerModList.length == 0) {
-    manager.getModInfo()
-}
-
-watch(() => manager.managerModList, () => {
-    manager.saveModInfo()
-}, { deep: true })
 
 </script>
 <template>
     <div class="list-wrap" @dragenter.prevent="dragenter($event)" @dragleave.prevent="dragleave"
         @drop.prevent="drop($event)" @dragover.prevent="dragover">
-        <div class="mod-list" v-if="manager.managerModList.length > 0">
+        <div class="mod-list" v-if="manager.filterModList.length > 0">
             <v-col cols="12">
                 <v-row>
-                    <v-col cols="6">名称</v-col>
-                    <v-col cols="1">版本</v-col>
-                    <v-col cols="2" class="text-center">类型</v-col>
-                    <v-col cols="2" class="text-center">状态</v-col>
-                    <v-col cols="1" class="text-center">操作</v-col>
+                    <v-col cols="6">{{ $t('Name') }}</v-col>
+                    <v-col cols="1">{{ $t('Version') }}</v-col>
+                    <v-col cols="2" class="text-center">{{ $t('Type') }}</v-col>
+                    <v-col cols="2" class="text-center">{{ $t('Status') }}</v-col>
+                    <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
                 </v-row>
             </v-col>
-            <ContentModList v-for="item in manager.managerModList" :mod="item"></ContentModList>
+            <ContentModList v-for="item in manager.filterModList" :mod="item"></ContentModList>
         </div>
         <div class="empty" v-else>
             <div class="empty-hint" @click="manager.selectMoeFiles">
-                <p>将Mod压缩包拖拽到这里进行管理</p>
-                <p>支持zpi、rar、7z类型文件</p>
+                <p>{{ $t('Drag and drop the Mod compressed package here for management') }}</p>
+                <p>{{ $t('Supports zpi, rar, 7z file types') }}</p>
             </div>
         </div>
     </div>

@@ -21,10 +21,10 @@ export class Manager {
 
     }
     // 获取Mod信息
-    public static getModInfo(savePath: string): IModInfo[] {
+    public static async getModInfo(savePath: string): Promise<IModInfo[]> {
         let configPath = join(savePath, 'mod.json')
         FileHandler.createDirectory(savePath)   // 创建目录
-        let config = FileHandler.readFile(configPath, "[]")  // 读取文件
+        let config = await FileHandler.readFile(configPath, "[]")  // 读取文件
         let modList: IModInfo[] = JSON.parse(config)    // 转换为对象
         return modList
     }
@@ -44,10 +44,10 @@ export class Manager {
         // console.log(mod.modFiles);
         const settings = useSettings()
         // console.log(settings.settings.managerGame);
-        let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameEnName}\\${mod.id}`
+        let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}`
         let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}`
         let res: IState[] = []
-        mod.modFiles.forEach(file => {
+        mod.modFiles.forEach(async file => {
             let source = `${modStorage}\\${file}`
             if (ignoredFolders) {
                 if (statSync(source).isDirectory()) {
@@ -55,7 +55,7 @@ export class Manager {
                 }
             }
             let target = `${gameStorage}\\${basename(file)}`
-            let state = FileHandler.copyFile(source, target)
+            let state = await FileHandler.copyFile(source, target)
             res.push({ file: file, state: state })
 
         })
