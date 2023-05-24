@@ -1,11 +1,16 @@
 <script lang='ts' setup>
 import { useExplore } from '@src/stores/useExplore';
+import { useSettings } from '@src/stores/useSettings';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-
 const explore = useExplore()
+const settings = useSettings()
 const { t } = useI18n()
+
+if (settings.settings.managerGame) {
+    explore.getGameType()
+}
 
 let original_filter = computed(() => [
     { text: t('All'), value: 0 },
@@ -30,6 +35,14 @@ let order_filter = computed(() => [
     { text: t('Newest'), value: 5 },
 ])
 
+let mod_types = computed(() => {
+    let list = [
+        { text: t('All'), value: 0 },
+        ...explore.gameTypeList
+    ]
+    return list
+})
+
 </script>
 <template>
     <v-row class="filter">
@@ -44,6 +57,10 @@ let order_filter = computed(() => [
         <v-col cols="12" sm="4" md="2">
             <v-select hide-details="auto" :label="t('Sort')" v-model="explore.order" :items="order_filter" item-title="text"
                 item-value="value" variant="solo"></v-select>
+        </v-col>
+        <v-col cols="12" sm="4" md="2" v-if="settings.settings.managerGame">
+            <v-select hide-details="auto" :label="t('Game Type')" v-model="explore.gameType" :items="mod_types"
+                item-title="text" item-value="value" variant="solo"></v-select>
         </v-col>
     </v-row>
 </template>

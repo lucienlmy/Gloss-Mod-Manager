@@ -78,11 +78,13 @@ const ExploreFilter = {
     "Update time": "更新时间",
     "Sort": "排序方式",
     "Search": "搜索作品",
-    "You can search for what you want here": "在这里可以搜索到你想要的东西哦"
+    "You can search for what you want here": "在这里可以搜索到你想要的东西哦",
+    "Game Type": "游戏类型",
 }
 
 const Welcome = {
-    "Welcome to use {0}, where you can": "欢迎使用 {0},在这里你可以..."
+    "Welcome to use {0}, where you can": "欢迎使用 {0},在这里你可以...",
+    "Partner": "合作方"
 }
 
 const ManagerContent = {
@@ -116,6 +118,8 @@ const ManagerHeader = {
     "Not Selected": "未选择",
     "select game": "选择游戏",
     "Search Game": "搜索游戏",
+    "Open Mod Folder": "打开文件夹",
+    "Launch Game": "启动游戏",
 }
 
 const Settings = {
@@ -137,6 +141,11 @@ const Games = {
     "Hogwarts Legacy": "霍格沃茨之遗",
     "Left 4 Dead 2": "求生之路2",
     "Sekiro": "只狼",
+    "Monster Hunter World": "怪物猎人: 世界",
+    "CODE VEIN": "噬血代码",
+    "RE4Remake": "生化危机4 重制版",
+    "Stardew Valley": "星露谷物语",
+    "Tale of Immortal": "鬼谷八荒",
 }
 
 const lang = {

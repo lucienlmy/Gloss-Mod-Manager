@@ -39,19 +39,22 @@ export const useDownload = defineStore('Download', {
         addDownloadTask(modData: any) {
 
             // 判断是否已经存在
-            if (!this.getTaskById(modData.id)) {
-                this.downloadTaskList.unshift({
-                    id: modData.id,
-                    name: modData.mods_title,
-                    version: modData.mods_version,
-                    state: DownloadStatus.WAITING,
-                    speed: 0,
-                    totalSize: 0,
-                    downloadedSize: 0,
-                    link: modData.mods_resource_url,
-                    modAuthor: modData.mods_author
-                })
+            if (this.getTaskById(modData.id)) {
+                // 如果已存在则移除
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != modData.id)
             }
+
+            this.downloadTaskList.unshift({
+                id: modData.id,
+                name: modData.mods_title,
+                version: modData.mods_version,
+                state: DownloadStatus.WAITING,
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: modData.mods_resource_url,
+                modAuthor: modData.mods_author
+            })
 
             let task = this.getTaskById(modData.id) as IDownloadTask
 

@@ -170,7 +170,6 @@ ipcMain.on('window-close', function () {
 
 // 获取Mod列表数据
 ipcMain.on('get-mod-list', async (event, arg) => {
-
     let data = {
         page: arg.page ?? 1,
         pageSize: arg.pageSize ?? 24,
@@ -179,7 +178,8 @@ ipcMain.on('get-mod-list', async (event, arg) => {
         time: arg.time ?? 0,
         order: arg.order ?? 0,
         key: arg.key ?? '',
-        gameId: arg.gameId ?? null
+        gameId: arg.gameId ?? null,
+        gameType: arg.gameType ?? 0
     }
 
     GetData.getModList(data).then((res) => {
@@ -191,12 +191,17 @@ ipcMain.on('get-mod-list', async (event, arg) => {
 
 // 获取Mod数据
 ipcMain.handle('get-mod-data', async (event, arg) => {
-
     let id = arg.id;
     let res = await GetData.getMod(id)
-
     return res.data
 })
+// 获取游戏类型
+ipcMain.handle('get-types', async (event, arg) => {
+    let gameId = arg.gameId;
+    let res = await GetData.getTypes(gameId)
+    return res.data
+})
+
 
 // 选择文件
 ipcMain.handle('select-file', async (event, arg) => {

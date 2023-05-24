@@ -38,8 +38,8 @@ const i18n = createI18n({
     legacy: false, // 使用Composition API，这里必须设置为false
     globalInjection: true,
     global: true,
-    locale: 'zh-CN',
-    fallbackLocale: 'zh-CN', // 默认语言
+    locale: 'zh_CN',
+    fallbackLocale: 'zh_CN', // 默认语言
     messages: getLangAll()
 });
 

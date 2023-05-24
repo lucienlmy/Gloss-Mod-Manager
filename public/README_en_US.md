@@ -6,7 +6,7 @@
 </center> 
 ---- 
 ### What is it?
-Gloss Mod Manager (GMM for short) is a comprehensive game mod manager. It is a powerful and versatile game mod manager that provides gamers with an easy-to-use way to manage and install various game mods. Whether you are new or experienced, using GMM will make your mod installation and management easier and faster.
+Gloss Mod Manager (GMM) is a comprehensive game mod manager. It is a powerful and versatile game mod manager that provides gamers with an easy-to-use way to manage and install various game mods. Whether you are new or experienced, using GMM will make your mod installation and management easier and faster.
 
 ### How to use it?
 - Download and install it.
@@ -16,20 +16,25 @@ Gloss Mod Manager (GMM for short) is a comprehensive game mod manager. It is a p
 - Enjoy!
 
 ### Supported Games
-- [x] Elden Ring (fully supported)
-- [x] Sekiro: Shadows Die Twice (fully supported)
-- [x] Hogwarts Legacy (fully supported)
-- [x] Left 4 Dead 2 (fully supported)
-- [ ] Cyberpunk 2077 (planned)
-- [ ] The Sims 4 (planned)
-- [ ] Monster Hunter: World (planned)
-- [ ] Monster Hunter Rise (planned)
-- [ ] The Witcher 3 (planned)
-- [ ] 7 Days to Die (planned)
-- [ ] Code Vein (planned)
-- [ ] Rainbow Six Siege (planned)
-- [ ] Doom Eternal (planned)
-- [ ] Company of Heroes (planned)
+- [x] Elden Ring (Fully supported)
+- [x] Sekiro: Shadows Die Twice (Fully supported)
+- [x] Hogwarts Legacy (Fully supported)
+- [x] Left 4 Dead (Fully supported)
+- [x] Cyberpunk 2077 (Fully supported)
+- [ ] ~~The Sims 4 (Planned) (Unable to open the game, currently on hold)~~
+- [x] Monster Hunter: World (Fully supported)
+- [ ] Monster Hunter Rise (Planned)
+- [x] Code Vein (Fully supported)
+- [x] Resident Evil 4 Remake (Partially supported)
+- [ ] Resident Evil 3 Remake (Planned)
+- [ ] Resident Evil 2 Remake (Planned)
+- [ ] Resident Evil 8 (Planned)
+- [ ] The Witcher 3 (Planned)
+- [ ] 7 Days to Die (Planned)
+- [ ] Devil May Cry 5 (Planned)
+- [x] Stardew Valley (Fully supported)
+- [ ] Dyson Sphere Program (Planned)
+- [ ] ... (Planned)
 
 ### Feedback Issues
 

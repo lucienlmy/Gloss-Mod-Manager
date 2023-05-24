@@ -18,23 +18,25 @@ export const useManager = defineStore('Manager', {
         filterType: 0 as number
     }),
     getters: {
-        gamePath() {
-            const settings = useSettings()
-            return settings.settings.managerGame.gamePath
-        },
+        /**
+         * Mod存储路径
+         * @returns 
+         */
         modStorage() {
             const settings = useSettings()
-            return `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}`
+            return path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
         },
+        /**
+        * 游戏路径
+        * @returns 
+        */
         gameStorage() {
             const settings = useSettings()
             return settings.settings.managerGame.gamePath
         },
         filterModList(state) {
-            let type = state.filterType
-            let list = state.managerModList
-            if (type == 0) return list
-            return list.filter(item => item.modType == type)
+            if (state.filterType == 0) return state.managerModList
+            return state.managerModList.filter(item => item.modType == state.filterType)
         }
     },
     actions: {
@@ -140,7 +142,7 @@ export const useManager = defineStore('Manager', {
                     files.push(item.file)
                 }
             });
-            this.managerModList.push({
+            let mod: IModInfo = {
                 id: parseInt(id),
                 webId: task.id,
                 modName: task.name,
@@ -150,14 +152,16 @@ export const useManager = defineStore('Manager', {
                 weight: 0,
                 modFiles: files,
                 modAuthor: task.modAuthor
+            }
+            mod.modType = settings.settings.managerGame.checkModType(mod)
 
-            })
+            this.managerModList.push(mod)
             ElMessage.success(`『${task.name}』已添加到管理列表`)
         },
         // 在管理器中添加Mod信息
         async addModInfo(file: string, id: number, files: string[], md5: string) {
             // console.log(md5);
-
+            const settings = useSettings()
             let mod: IModInfo = {
                 id: id,
                 modName: path.basename(file),
@@ -167,6 +171,8 @@ export const useManager = defineStore('Manager', {
                 weight: 0,
                 modFiles: files,
             }
+            mod.modType = settings.settings.managerGame.checkModType(mod)
+
             this.managerModList.push(mod)
             // this.saveModInfo()
         },

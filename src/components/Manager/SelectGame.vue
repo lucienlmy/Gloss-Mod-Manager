@@ -1,22 +1,33 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
 import { useManager } from '@src/stores/useManager';
-import { basename, dirname } from 'path'
+import { basename, dirname, join } from 'path'
 import { ElMessage } from "element-plus";
 import { useMain } from "@src/stores/useMain";
 import { useSettings } from "@src/stores/useSettings";
 import { ref, computed } from "vue"
+import { IGameExe } from "@src/model/Interfaces";
+import { useI18n } from "vue-i18n";
+import { Analytics } from "@src/model/Analytics"
 
 const manager = useManager()
 const settings = useSettings()
 const { lazy_img } = useMain()
+const { t } = useI18n()
 
 let searchText = ref("")
 
 let list = computed(() => {
-    return manager.supportedGames.filter(item => {
-        return item.gameName.includes(searchText.value)
-    })
+    const nameMapper = (item: any) => ({
+        name: t(item.gameName),
+        game: item,
+    });
+    const list = manager.supportedGames.map(nameMapper);
+    const filterList = list.filter(({ name }) =>
+        name.toLowerCase().includes(searchText.value.toLowerCase())
+    );
+    return filterList.map(({ game }) => game);
+
 })
 
 // =========== 让用户选择指定游戏 ===========
@@ -40,8 +51,28 @@ function select() {
                 console.log(settings.settings);
                 manager.selectGameDialog = false
                 manager.getModInfo()
+                Analytics.selectGame(supportedGame.gameName)
             } else {
-                ElMessage.error('您选择的游戏我们暂时不支持..')
+                let exe: IGameExe | undefined
+                supportedGame = manager.supportedGames.find(item => {
+                    if (typeof (item.gameExe) != 'string') {
+                        exe = item.gameExe.find(item => item.name === name)
+                        return exe ? true : false
+                    }
+                })
+                if (supportedGame && exe) {
+                    let path = join(filePath, exe.rootPath)
+                    settings.settings.managerGame = supportedGame
+                    settings.settings.managerGame.gamePath = dirname(path)
+                    console.log(settings.settings);
+                    manager.selectGameDialog = false
+                    manager.getModInfo()
+                    Analytics.selectGame(supportedGame.gameName)
+
+                } else {
+                    ElMessage.error('您选择的游戏我们暂时不支持..')
+                }
+
             }
         }
     })
@@ -71,7 +102,7 @@ function select() {
                 <v-divider></v-divider>
                 <v-col cols="12" class="content">
                     <v-row>
-                        <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameExe"
+                        <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameName"
                             @click="select">
                             <v-row no-gutters>
                                 <v-col cols="12">

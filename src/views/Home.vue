@@ -1,11 +1,13 @@
 <script lang='ts' setup>
 
-import welcome from '@src/components/home/welcome.vue'
+import Welcome from '@src/components/home/Welcome.vue'
+import Sponsor from '@src/components/home/Sponsor.vue'
 
 </script>
 <template>
     <v-container fluid>
-        <welcome></welcome>
+        <Welcome></Welcome>
+        <Sponsor></Sponsor>
     </v-container>
 </template>
 <script lang='ts'>

@@ -5,7 +5,7 @@
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import axios from "axios";
-import { basename } from 'node:path'
+import { basename, join } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler"
 import { statSync } from "fs";
 import { Manager } from "@src/model/Manager"
@@ -13,48 +13,46 @@ import { useManager } from "@src/stores/useManager";
 import { ElMessageBox, ElMessage } from "element-plus";
 import { useDownload } from "@src/stores/useDownload";
 
+let dictionaryList: string[] = []
 
 async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
     try {
         if (isInstall) {
-            const manager = useManager()
-            if (!manager.isAdded("e33023c54137fa25c489a442789843b1")) {
-                ElMessageBox.confirm("您还没有添加ModEngine, 是否现在下载?").then(() => {
-                    const download = useDownload()
-                    download.addDownloadById(71282)
-                }).catch(() => { })
-                return false
-            }
-            let engine = manager.getModInfoByMd5("e33023c54137fa25c489a442789843b1")
-            if (!(engine?.isInstalled)) {
-                ElMessageBox.confirm("该Mod需要ModEngine才能使用,您已添加到管理器,是否现在安装?").then(() => {
-                    engine!.isInstalled = true
-                }).catch(() => { })
-            }
+            if (!Manager.checkInstalled("e33023c54137fa25c489a442789843b1", "ModEngine", 71282)) return false
         }
 
-        let SekiroDictionary = (await axios.get("/res/SekiroDictionary.txt")).data
-        let list: string[] = SekiroDictionary.split("\r\n")
-        const settings = useSettings()
+        if (dictionaryList.length == 0) {
+            let SekiroDictionary = (await axios.get("res/SekiroDictionary.txt")).data
+            dictionaryList = SekiroDictionary.split("\r\n")
+        }
+        const manager = useManager()
         let res: IState[] = []
         mod.modFiles.forEach(async file => {
-            let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}\\${file}`
-            // 判断是否是文件
-            if (!statSync(modStorage).isFile()) return
+            try {
 
-            let name = basename(file)
-            // 判断name 是否在list中
-            if (list.some(item => item.includes(name))) {
-                // 获取对应的目录
-                let path = list.find(item => item.includes(name))
-                let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}\\${path}`
-                if (isInstall) {
-                    let state = await FileHandler.copyFile(modStorage, gameStorage)
-                    res.push({ file: file, state: state })
-                } else {
-                    let state = FileHandler.deleteFile(gameStorage)
-                    res.push({ file: file, state: state })
+
+                // let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}\\${file}`
+                let modStorage = join(manager.modStorage, mod.id.toString(), file)
+                // 判断是否是文件
+                if (!statSync(modStorage).isFile()) return
+
+                let name = basename(file)
+                // 判断name 是否在list中
+                if (dictionaryList.some(item => item.includes(name))) {
+                    // 获取对应的目录
+                    let path = dictionaryList.find(item => item.includes(name))
+                    // let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}\\${path}`
+                    let gameStorage = join(manager.gameStorage ?? "", installPath, path ?? "")
+                    if (isInstall) {
+                        let state = await FileHandler.copyFile(modStorage, gameStorage)
+                        res.push({ file: file, state: state })
+                    } else {
+                        let state = FileHandler.deleteFile(gameStorage)
+                        res.push({ file: file, state: state })
+                    }
                 }
+            } catch (error) {
+                res.push({ file: file, state: false })
             }
         })
         return res

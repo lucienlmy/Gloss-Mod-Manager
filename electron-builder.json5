@@ -14,7 +14,7 @@
     "dist"
   ],
   "mac": {
-    "artifactName": "${productName}.${ext}",
+    "artifactName": "${productName}_${version}.${ext}",
     "target": [
       "dmg"
     ]
@@ -28,7 +28,7 @@
         ]
       }
     ],
-    "artifactName": "${productName}.${ext}"
+    "artifactName": "${productName}_${version}.${ext}"
   },
   "nsis": {
     "oneClick": false,

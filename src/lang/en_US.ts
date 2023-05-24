@@ -79,12 +79,14 @@ const ExploreFilter = {
     "Update time": "Update Time",
     "Sort": "Sort",
     "Search": "Search Works",
-    "You can search for what you want here": "You can search for what you want here"
+    "You can search for what you want here": "You can search for what you want here",
+    "Game Type": "Game Type"
 
 }
 
 const Welcome = {
-    "Welcome to use {0}, where you can": "Welcome to use {0}, where you can..."
+    "Welcome to use {0}, where you can": "Welcome to {0}, where you can...",
+    "Partner": "Partner"
 }
 
 const ManagerContent = {
@@ -118,6 +120,8 @@ const ManagerHeader = {
     "Not Selected": "Not Selected",
     "select game": "Select Game",
     "Search Game": "Search Game",
+    "Open Mod Folder": "Open Folder",
+    "Launch Game": "Launch Game",
 }
 
 const Settings = {
@@ -138,6 +142,11 @@ const Games = {
     "Hogwarts Legacy": "Hogwarts Legacy",
     "Left 4 Dead 2": "Left 4 Dead 2",
     "Sekiro": "Sekiro",
+    "Monster Hunter World": "Monster Hunter World",
+    "CODE VEIN": "CODE VEIN",
+    "RE4Remake": "Resident Evil 4 Remake",
+    "Stardew Valley": "Stardew Valley",
+    "Tale of Immortal": "Tale of Immortal",
 }
 
 const lang = {

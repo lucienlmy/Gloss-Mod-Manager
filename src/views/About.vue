@@ -2,6 +2,9 @@
 import { ref, computed, watch } from "vue";
 import marked from '@src/plugins/marked';
 import { useI18n } from "vue-i18n";
+import { Analytics } from "@src/model/Analytics"
+
+Analytics.about()
 
 let readme = ref('')
 const { locale } = useI18n()

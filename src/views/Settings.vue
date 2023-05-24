@@ -2,7 +2,9 @@
 
 import SettingsBtn from '@src/components/Settings/SettingsBtn.vue'
 import SettingsInput from '@src/components/Settings/SettingsInput.vue'
+import { Analytics } from "@src/model/Analytics"
 
+Analytics.setting()
 
 </script>
 <template>

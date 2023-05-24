@@ -9,6 +9,7 @@ import ModList from '@src/components/Explore/ModList.vue'
 import Filter from '@src/components/Explore/Filter.vue'
 import TurnPage from "@src/components/Explore/TurnPage.vue";
 import { useSettings } from "@src/stores/useSettings";
+import { Analytics } from "@src/model/Analytics"
 
 const explore = useExplore()
 const settings = useSettings()
@@ -28,13 +29,21 @@ ipcRenderer.on("get-mod-list-reply", (event, arg) => {
     document.documentElement.scrollTop = 0
 })
 
-watch([() => explore.order, () => explore.original, () => explore.time, () => settings.settings.managerGame?.gameID], () => {
+watch([
+    () => explore.order,
+    () => explore.original,
+    () => explore.time,
+    () => settings.settings.managerGame?.gameID,
+    () => explore.gameType
+], () => {
     explore.page = 1
     explore.GetModList()
+    Analytics.viewMod()
 })
 
 watch(() => explore.page, () => {
     explore.GetModList()
+    Analytics.viewMod()
 })
 
 </script>

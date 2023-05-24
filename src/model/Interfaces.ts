@@ -94,10 +94,16 @@ export interface IModInfo {
     corePlugins?: IPlugins[]
 }
 
+export interface IGameExe {
+    name: string
+    rootPath: string
+}
+
 export interface IGameInfo {
     gameID: number
     gameName: string
-    gameExe: string
+    gameExe: string | IGameExe[]
+    startExe?: string,
     gamePath?: string
     gameVersion?: string
     gameCoverImg?: string

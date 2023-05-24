@@ -19,9 +19,9 @@ export class FileHandler {
      * 递归创建目录
      * @param dirPath 目录路径
      */
-    public static async createDirectory(dirPath: string) {
+    public static createDirectory(dirPath: string) {
         if (!fs.existsSync(dirPath)) {
-            await this.createDirectory(path.dirname(dirPath));
+            this.createDirectory(path.dirname(dirPath));
             fs.mkdirSync(dirPath);
         }
     }
@@ -31,7 +31,7 @@ export class FileHandler {
      * @param filePath 文件路径
      */
     public static async ensureDirectoryExistence(filePath: string, defaultValue: string = '') {
-        await this.createDirectory(path.dirname(filePath));
+        this.createDirectory(path.dirname(filePath));
         if (!fs.existsSync(filePath)) {
             fs.writeFileSync(filePath, defaultValue);
         }
@@ -47,7 +47,7 @@ export class FileHandler {
     public static copyFile(src: string, dest: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                await this.createDirectory(path.dirname(dest));
+                this.createDirectory(path.dirname(dest));
                 fs.copyFileSync(src, dest);
                 resolve(true)
             } catch (err) {
@@ -55,14 +55,6 @@ export class FileHandler {
                 reject(false)
             }
         })
-        // try {
-        //     this.createDirectory(path.dirname(dest));
-        //     fs.copyFileSync(src, dest);
-        //     return true
-        // } catch (err) {
-        //     this.writeLog(err as string)
-        //     return false
-        // }
     }
 
     /**
@@ -83,7 +75,7 @@ export class FileHandler {
                     const destFilePath = path.join(destPath, file);
                     // 如果是文件夹，则递归调用该文件夹下的所有文件和文件夹
                     if (fs.statSync(srcFilePath).isDirectory()) {
-                        await this.createDirectory(destFilePath);
+                        this.createDirectory(destFilePath);
                         await this.copyFolder(srcFilePath, destFilePath);
                     } else {
                         // 复制文件

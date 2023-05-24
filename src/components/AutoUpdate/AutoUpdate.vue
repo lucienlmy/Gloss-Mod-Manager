@@ -13,7 +13,8 @@ const main = useMain()
 let dialog = ref(false)
 let Version = ref()
 let data = ref()
-let updateContent = ref()
+let updateContent = ref("")
+let haveUpdate = ref(false)
 
 // 检查版本是否为最新
 function isLatestVersion(currentVersion: string, latestVersion: string): boolean {
@@ -36,7 +37,7 @@ async function checkUpdates() {
     Version.value = await main.getVersion()
     data.value = Version.value[1]
     if (!isLatestVersion(Version.value[0], data.value.mods_version)) {
-        console.log(data.value);
+        haveUpdate.value = true
         dialog.value = true
         let mods_content = data.value.mods_content
         // 获取字符串 ### 更新日志 之后的内容
@@ -62,6 +63,7 @@ function toUpdate() {
 
 </script>
 <template>
+    <v-list-item v-if="haveUpdate" @click="dialog = true" prepend-icon="mdi-refresh"></v-list-item>
     <v-dialog v-model="dialog" persistent width="600">
         <v-card>
             <v-card-title>{{ $t('New version') }}</v-card-title>

@@ -8,6 +8,9 @@ import { join } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
 import { useSettings } from "@src/stores/useSettings";
 import { basename } from 'node:path'
+import { useManager } from '@src/stores/useManager';
+import { useDownload } from '@src/stores/useDownload';
+import { ElMessageBox } from 'element-plus';
 
 
 export class Manager {
@@ -38,41 +41,76 @@ export class Manager {
 
     }
 
-    // 一般安装
-    public static generalInstall(mod: IModInfo, installPath: string, ignoredFolders: boolean = false): IState[] {
+    /**
+     * 一般安装 (复制文件到指定目录)
+     * @param mod 
+     * @param installPath 安装路径
+     * @param ignoredFolders 是否忽略文件夹
+     * @param keepPath 是否保留路径
+     * @returns 
+     */
+    public static generalInstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
         FileHandler.writeLog(`安装mod: ${mod.modName}`)
-        // console.log(mod.modFiles);
-        const settings = useSettings()
-        // console.log(settings.settings.managerGame);
-        let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}`
-        let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}`
-        let res: IState[] = []
-        mod.modFiles.forEach(async file => {
-            let source = `${modStorage}\\${file}`
-            if (ignoredFolders) {
-                if (statSync(source).isDirectory()) {
-                    return
-                }
-            }
-            let target = `${gameStorage}\\${basename(file)}`
-            let state = await FileHandler.copyFile(source, target)
-            res.push({ file: file, state: state })
+        const manager = useManager()
 
+        let modStorage = join(manager.modStorage, mod.id.toString())
+        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let res: IState[] = []
+        mod.modFiles.forEach(async item => {
+            try {
+                let source = `${modStorage}\\${item}`
+                if (statSync(source).isFile()) {
+                    let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
+                    let state = await FileHandler.copyFile(source, target)
+                    res.push({ file: item, state: state })
+                }
+            } catch (error) {
+                res.push({ file: item, state: false })
+            }
         })
         return res
     }
 
     // 一般卸载
-    public static generalUninstall(mod: IModInfo, installPath: string, ignoredFolders: boolean = false): IState[] {
+    public static generalUninstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
         FileHandler.writeLog(`卸载mod: ${mod.modName}`);
-        const settings = useSettings()
-        let gameStorage = `${settings.settings.managerGame.gamePath}\\${installPath}`
+        const manager = useManager()
+        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let modStorage = join(manager.modStorage, mod.id.toString())
+
         let res: IState[] = []
-        mod.modFiles.forEach(file => {
-            let target = `${gameStorage}\\${basename(file)}`
-            let state = FileHandler.deleteFile(target)
-            res.push({ file: file, state: state })
+        mod.modFiles.forEach(item => {
+            try {
+                let source = `${modStorage}\\${item}`
+                if (statSync(source).isFile()) {
+                    // console.log("source:", source);
+                    let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
+                    let state = FileHandler.deleteFile(target)
+                    res.push({ file: item, state: state })
+                }
+            } catch (error) {
+                res.push({ file: item, state: false })
+            }
         })
         return res
+    }
+
+    // 检查插件是否已经安装
+    public static checkInstalled(md5: string, name: string, webId: number) {
+        const manager = useManager()
+        if (!manager.isAdded(md5)) {
+            ElMessageBox.confirm(`您还没有添加${name}, 是否现在下载?`).then(() => {
+                const download = useDownload()
+                download.addDownloadById(webId)
+            }).catch(() => { })
+            return false
+        }
+        let engine = manager.getModInfoByMd5(md5)
+        if (!(engine?.isInstalled)) {
+            ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
+                engine!.isInstalled = true
+            }).catch(() => { })
+        }
+        return true
     }
 }

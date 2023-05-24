@@ -16,4 +16,8 @@ export class GetData {
         let data = await callApi("https://mod.3dmgame.com/mod/API/197445");
         return data.mods_version
     }
+
+    public static async getTypes(gameId: number) {
+        return await callApi("https://mod.3dmgame.com/mod/PublishModGetModTypeList", { gameId });
+    }
 }

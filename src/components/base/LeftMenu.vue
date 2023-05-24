@@ -3,6 +3,7 @@ import { useMain } from '@src/stores/useMain';
 import { useSettings } from '@src/stores/useSettings';
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
+import AutoUpdate from "@src/components/AutoUpdate/AutoUpdate.vue"
 
 
 const { t } = useI18n()
@@ -62,7 +63,7 @@ function toBottom() {
 
 </script>
 <template>
-    <v-navigation-drawer v-model="main.leftMenu" :rail="settings.settings.leftMenuRail" permanent>
+    <v-navigation-drawer v-model="main.leftMenu" :rail="settings.settings.leftMenuRail" permanent width="200">
         <v-list>
             <v-list-item v-for="item in lists" :key="item.path" :to="item.path" :prepend-icon="item.icon"
                 :title="item.title">
@@ -70,12 +71,12 @@ function toBottom() {
         </v-list>
         <template v-slot:append>
             <v-list>
+                <AutoUpdate></AutoUpdate>
                 <v-list-item @click="toTop" prepend-icon="mdi-arrow-up-bold"></v-list-item>
                 <v-list-item @click="toBottom" prepend-icon="mdi-arrow-down-bold"></v-list-item>
                 <v-list-item @click="settings.settings.leftMenuRail = !settings.settings.leftMenuRail"
                     :prepend-icon="settings.settings.leftMenuRail ? 'mdi-chevron-double-right' : 'mdi-chevron-double-left'">
                 </v-list-item>
-
             </v-list>
         </template>
     </v-navigation-drawer>

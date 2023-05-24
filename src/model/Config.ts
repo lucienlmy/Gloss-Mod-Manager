@@ -65,7 +65,7 @@ export class Config {
             autoInstall: data.autoInstall ?? false,
             leftMenuRail: data.leftMenuRail ?? true,
             autoLaunch: data.autoLaunch ?? false,
-            language: data.language ?? "zh-CN",
+            language: data.language ?? "zh_CN",
         }
 
         // 初始化游戏

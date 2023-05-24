@@ -1,7 +1,8 @@
 import { IState, ISupportedGames } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
-import { extname, basename } from 'path'
+import { extname, basename, join } from 'path'
 import { FileHandler } from "@src/model/FileHandler"
+import { useManager } from "@src/stores/useManager";
 
 // console.log(settings.settings.managerGame);
 
@@ -15,11 +16,12 @@ export const supportedGames: ISupportedGames = {
         {
             id: 1,
             name: '通用类型',
-            installPath: '\\left4dead2\\addons',
+            // installPath: '\\left4dead2\\addons',
+            installPath: join('left4dead2', 'addons'),
             async install(mod) {
-                const settings = useSettings()
-                let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}`
-                let gameStorage = `${settings.settings.managerGame.gamePath}\\${this.installPath}`
+                const manager = useManager()
+                let modStorage = join(manager.modStorage, mod.id.toString())
+                let gameStorage = join(manager.gameStorage ?? "", this.installPath ?? "")
 
                 let res: IState[] = []
 
@@ -35,10 +37,10 @@ export const supportedGames: ISupportedGames = {
                 return res
             },
             async uninstall(mod) {
-                const settings = useSettings()
+                const manager = useManager()
 
                 let res: IState[] = []
-                let gameStorage = `${settings.settings.managerGame.gamePath}\\${this.installPath}`
+                let gameStorage = join(manager.gameStorage ?? "", this.installPath ?? "")
                 mod.modFiles.forEach(async file => {
                     let fileExt = extname(file)
                     if (fileExt === '.vpk') {

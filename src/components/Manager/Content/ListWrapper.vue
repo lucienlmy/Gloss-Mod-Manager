@@ -2,7 +2,7 @@
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
-import { watch } from "vue";
+import { computed } from "vue";
 
 const manager = useManager()
 const settings = useSettings()
@@ -26,7 +26,7 @@ async function drop(event: DragEvent) {
             await manager.addModFile(files[i].path)
         }
     }
-    console.log(manager.managerModList);
+    // console.log(manager.managerModList);
 }
 
 
@@ -44,7 +44,7 @@ async function drop(event: DragEvent) {
                     <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
                 </v-row>
             </v-col>
-            <ContentModList v-for="item in manager.filterModList" :mod="item"></ContentModList>
+            <ContentModList v-for="item in manager.filterModList" :key="item.md5" :mod="item"></ContentModList>
         </div>
         <div class="empty" v-else>
             <div class="empty-hint" @click="manager.selectMoeFiles">
