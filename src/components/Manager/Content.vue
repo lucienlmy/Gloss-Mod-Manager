@@ -11,6 +11,7 @@ let types = computed(() => {
     return settings.settings.managerGame.modType
 })
 
+
 </script>
 <template>
     <div class="content">
@@ -20,14 +21,20 @@ let types = computed(() => {
             </div>
         </div>
         <div class="const-list" v-else>
-            <v-chip-group v-model="manager.filterType" mandatory>
-                <v-chip label variant="text" :value="0">{{ $t('All') }}
-                    <small v-if="manager.filterType == 0">({{ manager.filterModList.length }})</small> </v-chip>
-                <v-chip label variant="text" v-for="item in types" :key="item.id" :value="item.id">
-                    {{ item.name }}
-                    <small v-if="manager.filterType == item.id">({{ manager.filterModList.length }})</small>
-                </v-chip>
-            </v-chip-group>
+            <div class="const-header">
+                <v-chip-group v-model="manager.filterType" mandatory>
+                    <v-chip label variant="text" :value="0">{{ $t('All') }}
+                        <small v-if="manager.filterType == 0">({{ manager.filterModList.length }})</small> </v-chip>
+                    <v-chip label variant="text" v-for="item in types" :key="item.id" :value="item.id">
+                        {{ item.name }}
+                        <small v-if="manager.filterType == item.id">({{ manager.filterModList.length }})</small>
+                    </v-chip>
+                </v-chip-group>
+                <div class="const-search">
+                    <v-text-field density="compact" variant="solo" :label="$t('Search Mod')" append-inner-icon="mdi-magnify"
+                        single-line hide-details v-model="manager.search"></v-text-field>
+                </div>
+            </div>
             <ContentList></ContentList>
         </div>
     </div>
@@ -43,5 +50,15 @@ small {
     font-size: 12px;
     color: #999;
     margin-left: 0.5rem;
+}
+
+.const-header {
+    display: flex;
+    align-items: center;
+
+    .const-search {
+        margin-left: 1rem;
+        flex: 1 1 auto
+    }
 }
 </style>

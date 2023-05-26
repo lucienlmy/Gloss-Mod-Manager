@@ -63,7 +63,6 @@ export const useDownload = defineStore('Download', {
             let dest = `${settings.settings.modStorageLocation}\\cache\\${task.id}${fileExt}`
 
             console.log(`删除: ${dest}`);
-
             FileHandler.deleteFile(dest)
 
             let download = new Download(task, dest, this.listen(task).onProgress)

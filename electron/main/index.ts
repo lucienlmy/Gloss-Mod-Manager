@@ -1,10 +1,11 @@
 import { app, BrowserWindow, shell, ipcMain, } from 'electron'
 import { release } from 'node:os'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { dialog } from 'electron'
 import { GetData } from '../model/GetData'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
+import { existsSync } from 'fs'
 
 // import { path7za } from "7zip-bin"
 
@@ -83,7 +84,11 @@ async function createWindow() {
         win.loadFile(indexHtml)
     }
 
-    // win.webContents.openDevTools()  // 打开Dev工具
+    // 在生成环境打开开发者工具
+    if (existsSync(join(dirname(app.getPath('exe')), 'DEV'))) {
+        win.webContents.openDevTools()  // 打开Dev工具
+    }
+
 
 
     // Test actively push message to the Electron-Renderer

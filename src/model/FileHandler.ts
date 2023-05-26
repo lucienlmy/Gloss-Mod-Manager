@@ -51,6 +51,7 @@ export class FileHandler {
                 fs.copyFileSync(src, dest);
                 resolve(true)
             } catch (err) {
+                ElMessage.error(`复制文件失败：${err}`)
                 this.writeLog(err as string)
                 reject(false)
             }
@@ -126,9 +127,12 @@ export class FileHandler {
      */
     public static deleteFile(filePath: string) {
         try {
-            fs.unlinkSync(filePath);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
             return true
         } catch (err) {
+            ElMessage.error(`删除文件失败：${err}`)
             this.writeLog(err as string)
             return false
         }
@@ -153,7 +157,7 @@ export class FileHandler {
      * @param data 写入的数据
      * @returns 
      */
-    public static writeFile(filePath: string, data: string): Promise<boolean> {
+    public static writeFile(filePath: string, data: string | Buffer): Promise<boolean> {
         return new Promise((resolve, reject) => {
             try {
                 this.createDirectory(path.dirname(filePath));
@@ -168,6 +172,7 @@ export class FileHandler {
                 fs.writeFileSync(filePath, data);
                 resolve(true)
             } catch (err) {
+                ElMessage.error(`写入文件失败：${err}`)
                 reject(err)
             }
         })
@@ -216,6 +221,7 @@ export class FileHandler {
                 resolve(md5);
             });
             stream.on('error', (err) => {
+                ElMessage.error(`获取文件MD5失败:${err}`)
                 reject(err);
             });
         });

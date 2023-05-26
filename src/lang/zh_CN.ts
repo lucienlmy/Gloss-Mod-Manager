@@ -107,7 +107,7 @@ const ManagerContent = {
     "Open": "打开",
     "Update": "更新",
     "Delete": "删除",
-    "You have not selected a game yet. Please select a game first": "您当前还未选择游戏,请先选择游戏"
+    "You have not selected a game yet. Please select a game first": "您当前还未选择游戏,请先选择游戏",
 }
 
 const ManagerHeader = {
@@ -120,6 +120,7 @@ const ManagerHeader = {
     "Search Game": "搜索游戏",
     "Open Mod Folder": "打开文件夹",
     "Launch Game": "启动游戏",
+    "Search Mod": "搜索Mod",
 }
 
 const Settings = {
@@ -146,6 +147,8 @@ const Games = {
     "RE4Remake": "生化危机4 重制版",
     "Stardew Valley": "星露谷物语",
     "Tale of Immortal": "鬼谷八荒",
+    "The Scroll Of Taiwu": "太吾绘卷",
+    "MiChangSheng": "觅长生",
 }
 
 const lang = {

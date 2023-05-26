@@ -12,20 +12,22 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
     const manager = useManager()
     let modStorage = join(manager.modStorage, mod.id.toString())
     let gameStorage = join(manager.gameStorage ?? "", installPath)
-    let folder = ""
+    let folder: string[] = []
     mod.modFiles.forEach(item => {
         if (basename(item) == "manifest.json") {
-            folder = dirname(join(modStorage, item))
+            folder.push(dirname(join(modStorage, item)))
         }
     })
-    // console.log(folder);
-    if (folder != "") {
-        let target = join(gameStorage, basename(folder))
-        if (isInstall) {
-            FileHandler.copyFolder(folder, target)
-        } else {
-            FileHandler.deleteFolder(target)
-        }
+    if (folder.length > 0) {
+        folder.forEach(item => {
+            let target = join(gameStorage, basename(item))
+            if (isInstall) {
+                FileHandler.copyFolder(item, target)
+            } else {
+                FileHandler.deleteFolder(target)
+            }
+        })
+
     }
 
     return res

@@ -122,6 +122,7 @@ const ManagerHeader = {
     "Search Game": "Search Game",
     "Open Mod Folder": "Open Folder",
     "Launch Game": "Launch Game",
+    "Search Mod": "Search Mod",
 }
 
 const Settings = {
@@ -147,6 +148,8 @@ const Games = {
     "RE4Remake": "Resident Evil 4 Remake",
     "Stardew Valley": "Stardew Valley",
     "Tale of Immortal": "Tale of Immortal",
+    "The Scroll Of Taiwu": "The Scroll Of Taiwu",
+    "MiChangSheng": "Mi Chang Sheng",
 }
 
 const lang = {

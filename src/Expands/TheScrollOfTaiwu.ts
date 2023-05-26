@@ -13,7 +13,7 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
     let gameStorage = join(manager.gameStorage ?? "", installPath)
     let folder: string[] = []
     mod.modFiles.forEach(item => {
-        if (basename(item).toLowerCase() == "modexportdata.cache") {
+        if (basename(item).toLowerCase() == "config.lua") {
             folder.push(dirname(join(modStorage, item)))
         }
     })
@@ -32,15 +32,24 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 }
 
 export const supportedGames: ISupportedGames = {
-    gameID: 248,
-    gameName: "Tale of Immortal",
-    gameExe: 'guigubahuang.exe',
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/603e05b7aef61.png",
+    gameID: 167,
+    gameName: "The Scroll Of Taiwu",
+    gameExe: [
+        {
+            name: "The Scroll of Taiwu.exe",
+            rootPath: ""
+        },
+        {
+            name: "TaiwuLauncher.exe",
+            rootPath: ""
+        }
+    ],
+    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/167.png",
     modType: [
         {
             id: 1,
             name: "通用",
-            installPath: join("ModExportData"),
+            installPath: join("Mod"),
             async install(mod) {
                 return handlePlugins(mod, this.installPath ?? "", true)
             },
@@ -64,13 +73,11 @@ export const supportedGames: ISupportedGames = {
     checkModType(mod) {
         let isMod = false
         mod.modFiles.forEach(item => {
-            if (basename(item).toLowerCase() == "modexportdata.cache") {
+            if (basename(item).toLowerCase() == "config.lua") {
                 isMod = true
             }
         })
-
         if (isMod) return 1
-
 
         return 2
     }
