@@ -1,6 +1,7 @@
 # <center>极光模组管理器 <small>Gloss Mod Manager </small> </center>
 
 <center> 
+
 ![][license] ![][author] ![][Electron] ![][vue] ![][vuetify] [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager)
 </center> 
 ---- 
@@ -112,3 +113,12 @@
  - 避免代码冗余，将相似的代码封装到函数或组件中。
 
 
+
+[license]:https://p.aoe.top/shields/github/license/GlossMod/Gloss-Mod-Manager.svg
+[author]: https://p.aoe.top/shields/badge/作者-小莫-blue?logo=Cloudera
+[Electron]: https://p.aoe.top/shields/badge/Electron-22.0.3-47848F?logo=electron
+[vue]: https://p.aoe.top/shields/badge/Vue3-3.2.45-4FC08D?logo=vuedotjs
+[vuetify]: https://p.aoe.top/shields/badge/Vuetify-3.1.15-1867C0?logo=vuetify
+[pinia]: https://p.aoe.top/shields/badge/pinia-2.0.30-1867C0?logo=vuetify
+[typescript]: https://p.aoe.top/shields/badge/TypeScript-5.0.4-3178C6?logo=typescript
+[GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager.svg?style=social&label=Stars
