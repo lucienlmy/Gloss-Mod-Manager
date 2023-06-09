@@ -22,4 +22,12 @@ export default {
     name: 'Sponsor',
 }
 </script>
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+a {
+    transition: 1s;
+
+    :hover {
+        opacity: .8;
+    }
+}
+</style>

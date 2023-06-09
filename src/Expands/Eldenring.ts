@@ -81,47 +81,9 @@ export const supportedGames: ISupportedGames = {
             name: 'Engine 2',
             installPath: "\\",
             async install(mod) {
-                // const manager = useManager()
-                // let modStorage = join(manager.modStorage ?? "", mod.id.toString())
-                // if (manager.gameStorage) {
-                //     FileHandler.copyFolder(modStorage, manager.gameStorage).then(async () => {
-                //         // await FileHandler.renameFile(
-                //         //     join(manager.gameStorage ?? "", "start_protected_game.exe"),
-                //         //     join(manager.gameStorage ?? "", "start_protected_game.exe.back")
-                //         // )
-                //         // await FileHandler.renameFile(
-                //         //     join(manager.gameStorage ?? "", "modengine2_launcher.exe"),
-                //         //     join(manager.gameStorage ?? "", "start_protected_game.exe")
-                //         // )
-                //     })
-                //     return true
-                // }
-                // return false
                 return Manager.generalInstall(mod, this.installPath ?? "", true)
             },
             async uninstall(mod) {
-                // const manager = useManager()
-                // FileHandler.deleteFolder(join(manager.gameStorage ?? "", "modengine2"))
-                // let fileList = [
-                //     "config_darksouls3.toml",
-                //     "config_eldenring.toml",
-                //     "launchmod_darksouls3.bat",
-                //     "launchmod_eldenring.bat",
-                //     "start_protected_game.exe",
-                //     "README.txt",
-                //     "mod_loader_config.ini",
-                //     "dinput8.dll",
-                // ]
-
-                // fileList.forEach(file => {
-                //     FileHandler.deleteFile(join(manager.gameStorage ?? "", file))
-                // })
-
-                // FileHandler.renameFile(
-                //     join(manager.gameStorage ?? "", "start_protected_game.exe.back"),
-                //     join(manager.gameStorage ?? "", "start_protected_game.exe")
-                // )
-                // return true
                 return Manager.generalUninstall(mod, this.installPath ?? "", true)
 
             },

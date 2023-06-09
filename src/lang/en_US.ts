@@ -134,7 +134,7 @@ const Settings = {
     "Mod Folder": "Mod Folder",
     "Language": "Language",
     "Select": "Select",
-    "Auto install for download": "Auto install for download",
+    "Auto install for download": "Auto add to Manager for download",
     "Auto start for windows": "Autostart on Windows"
 }
 const Games = {

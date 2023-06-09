@@ -7,13 +7,11 @@ import { h, ref } from 'vue'
 import { useSettings } from '@src/stores/useSettings';
 import { FileHandler } from '@src/model/FileHandler'
 import { useManager } from '@src/stores/useManager';
-import { Analytics } from "@src/model/Analytics"
 
 const download = useDownload()
 const settings = useSettings()
 const manager = useManager()
 
-Analytics.downloadManager()
 
 let delFile = ref(false)
 

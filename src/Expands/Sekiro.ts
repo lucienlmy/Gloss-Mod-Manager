@@ -15,6 +15,16 @@ import { useDownload } from "@src/stores/useDownload";
 
 let dictionaryList: string[] = []
 
+function getDictionaryList(data: string[]) {
+    if (dictionaryList.length == 0) {
+        axios.get("res/SekiroDictionary.txt").then(({ data }) => {
+            dictionaryList = data.split("\r\n")
+            data = dictionaryList
+        })
+    }
+    return dictionaryList
+}
+
 async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
     try {
         if (isInstall) {
@@ -69,17 +79,8 @@ export const supportedGames: ISupportedGames = {
     gameID: 185,
     gameName: "Sekiro",
     gameExe: 'sekiro.exe',
+    startExe: 'sekiro.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/185.png",
-    corePlugins: [
-        {
-            id: 1,
-            name: "Mod Engine",
-            version: "0.1.16",
-            website: "https://www.nexusmods.com/sekiro/mods/6",
-            installPath: "\\",
-            md5: ["e33023c54137fa25c489a442789843b1"]
-        }
-    ],
     modType: [
         {
             id: 1,
@@ -107,10 +108,15 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     checkModType(mod) {
-        let md5s = this.corePlugins?.find(p => p.id === 1)?.md5 ?? []
-        if (md5s.includes(mod.md5)) {
-            return 2
-        }
+        if (mod.md5 == "e33023c54137fa25c489a442789843b1") return 2
+
+
+        // mod.modFiles.forEach(file => {
+        //     if (list.some(item => item.includes(basename(file)))) {
+
+        //     }
+        // })
+
         return 1
     }
 }

@@ -5,7 +5,7 @@ import { watch } from "vue";
 import { Config } from '@src/model/Config'
 import { useDownload } from "@src/stores/useDownload";
 import { useI18n } from "vue-i18n";
-import { Analytics } from "@src/model/Analytics"
+import { AppAnalytics } from "@src/model/Analytics"
 
 const settings = useSettings()
 const download = useDownload()
@@ -14,7 +14,7 @@ const { locale } = useI18n()
 
 Config.initialization()
 download.initialization()
-Analytics.startApp()
+AppAnalytics.sendEvent("start")
 
 // 初始化设置
 watch(() => settings.settings, () => {
@@ -32,7 +32,7 @@ watch(() => settings.settings.language, () => {
 }, { immediate: true })
 
 // 初始化Mod管理
-if (manager.managerModList.length == 0) {
+if (manager.managerModList.length == 0 && settings.settings.managerGame) {
     manager.getModInfo().then(() => {
         manager.maxID = manager.managerModList.reduce((pre, cur) => {
             return pre > cur.id ? pre : cur.id

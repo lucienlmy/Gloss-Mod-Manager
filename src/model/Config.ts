@@ -62,8 +62,8 @@ export class Config {
             modStorageLocation: data.modStorageLocation ?? join(homedir(), 'My Documents', 'Gloss Mod Manager', 'mods'),
             proxy: data.proxy ?? "",
             // UnzipPath: data.UnzipPath ?? "",
-            autoInstall: data.autoInstall ?? false,
-            leftMenuRail: data.leftMenuRail ?? true,
+            autoInstall: data.autoInstall ?? true,
+            leftMenuRail: data.leftMenuRail ?? false,
             autoLaunch: data.autoLaunch ?? false,
             language: data.language ?? "zh_CN",
         }

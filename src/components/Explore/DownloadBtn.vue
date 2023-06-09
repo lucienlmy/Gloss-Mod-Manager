@@ -6,6 +6,7 @@ import { useDownload } from "@src/stores/useDownload";
 import { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
+import { AppAnalytics } from "@src/model/Analytics";
 
 const props = defineProps<{
     id: number
@@ -47,8 +48,10 @@ async function toDownload() {
         data.mods_resource_url = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
         link.value = data.mods_resource_url
 
+        AppAnalytics.sendEvent("download")
+
         if (!link.value.includes("https://mod.3dmgame.com")) {
-            window.open(`https://mod.3dmgame.com/mod/${props.id}`)
+            window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)
             return
         }
         download.addDownloadTask(data)

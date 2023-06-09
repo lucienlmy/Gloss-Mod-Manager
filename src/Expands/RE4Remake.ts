@@ -34,6 +34,7 @@ export const supportedGames: ISupportedGames = {
     gameID: 303,
     gameName: "RE4Remake",
     gameExe: 're4.exe',
+    startExe: 're4.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63e310bf62591.webp",
     modType: [
         {

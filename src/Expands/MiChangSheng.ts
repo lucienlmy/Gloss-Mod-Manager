@@ -49,7 +49,9 @@ async function handlePlugins(mod: IModInfo, installPath: string, isInstall: bool
 export const supportedGames: ISupportedGames = {
     gameID: 255,
     gameName: "MiChangSheng",
+    // https://store.steampowered.com/app/1189490?snr=5000_5100___primarylinks
     gameExe: '觅长生.exe',
+    startExe: 'steam://rungameid/1189490',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/60d93f98c7462.png",
     modType: [
         {

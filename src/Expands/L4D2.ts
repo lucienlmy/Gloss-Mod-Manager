@@ -11,6 +11,7 @@ export const supportedGames: ISupportedGames = {
     gameID: 12,
     gameName: "Left 4 Dead 2",
     gameExe: 'left4dead2.exe',
+    startExe: 'left4dead2.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/12.jpg",
     modType: [
         {

@@ -52,6 +52,7 @@ export const supportedGames: ISupportedGames = {
     gameID: 161,
     gameName: "Monster Hunter World",
     gameExe: "MonsterHunterWorld.exe",
+    startExe: 'MonsterHunterWorld.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/161b.png",
     modType: [
         {

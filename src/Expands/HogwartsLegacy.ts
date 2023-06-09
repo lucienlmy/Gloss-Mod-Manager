@@ -12,6 +12,7 @@ export const supportedGames: ISupportedGames = {
     gameID: 302,
     gameName: "Hogwarts Legacy",
     gameExe: 'HogwartsLegacy.exe',
+    startExe: 'HogwartsLegacy.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63e2f9656f092.webp",
     modType: [
         {

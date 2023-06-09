@@ -6,10 +6,9 @@ import * as https from "https";
  * @param data 
  * @returns 
  */
-async function callApi(endpoint: string, data: any = {}): Promise<any> {
+async function callApi(path: string, data: any = {}, hostname: string = "mod.3dmgame.com"): Promise<any> {
     const options: https.RequestOptions = {
-        hostname: "mod.3dmgame.com",
-        path: endpoint,
+        hostname, path,
         method: "POST",
         headers: {
             "Content-Type": "application/json",

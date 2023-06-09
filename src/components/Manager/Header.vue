@@ -5,7 +5,7 @@ import { FileHandler } from '@src/model/FileHandler';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 import { join } from 'path';
-import { spawn } from 'child_process';
+import { spawn, exec } from 'child_process';
 import { ElMessage } from 'element-plus';
 
 const settings = useSettings()
@@ -36,10 +36,17 @@ function openFolder() {
 async function startGame() {
     let startExe = settings.settings.managerGame?.startExe
     if (startExe) {
-        startExe = join(settings.settings.managerGame?.gamePath ?? "", startExe)
-        // console.log(startExe);
-        spawn(startExe)
+
+        // 判断 startExe 里面是否包含 steam 
+        if (startExe.includes('steam')) {
+            exec(`start ${startExe}`)
+        } else {
+            startExe = join(settings.settings.managerGame?.gamePath ?? "", startExe)
+            // console.log(startExe);
+            spawn(startExe)
+        }
         ElMessage.success("启动成功~")
+
     }
 }
 

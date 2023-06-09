@@ -1,67 +1,41 @@
 /**
- * 数据分享
+ * 数据统计
  */
-// import { _hmt } from "@src/ts/hmt";
+import { ElectronStore } from '@src/model/ElectronStore'
+import { useUser } from '@src/stores/useUser';
 
-export class Analytics {
-    /**
-     * 启动应用
-     */
-    public static startApp() {
-        _hmt.push(['_trackPageview', "/?start_app"]);
-    }
-    /**
-     * 安装Mod
-     */
-    public static installMod() {
-        _hmt.push(['_trackPageview', "/?install_mod"]);
-    }
-    /**
-     * 卸载Mod
-     */
-    public static uninstallMod() {
-        _hmt.push(['_trackPageview', "/?uninstall_mod"]);
+
+export class AppAnalytics {
+
+    private static generateRandomNum() {
+        let randomNum = '';
+        for (let i = 0; i < 32; i++) {
+            randomNum += Math.floor(Math.random() * 10);//生成0到9之间的随机整数，并拼接到字符串中
+        }
+        return randomNum;
     }
 
-    /**
-     * 选择游戏
-     * @param game 
-     */
-    public static selectGame(game: string) {
-        _hmt.push(['_trackPageview', `/?select_game_${game}`]);
+    public static async getInstanceId() {
+        let id = await ElectronStore.getStore('app_instance_id')
+        if (!id) {
+            id = this.generateRandomNum()
+            ElectronStore.setStore('app_instance_id', id)
+        }
+        return id
     }
 
-    /**
-     * 游览Mod
-     */
-    public static viewMod() {
-        _hmt.push(['_trackPageview', "/?view_mod"]);
-    }
-    /**
-     * 下载管理
-     */
-    public static downloadManager() {
-        _hmt.push(['_trackPageview', "/?download_manager"]);
-    }
 
-    /**
-     * 设置
-     */
-    public static setting() {
-        _hmt.push(['_trackPageview', "/?setting"]);
-    }
+    public static async sendEvent(event_name: string, event_value?: any) {
 
-    /**
-     * 关于
-     */
-    public static about() {
-        _hmt.push(['_trackPageview', "/?about"]);
-    }
+        console.log(event_name, event_value);
+        const user_id = await this.getInstanceId()
+        const gmm_login = useUser().user?.id
 
-    /**
-     * 通用
-     */
-    public static general(key: string) {
-        _hmt.push(['_trackPageview', `/?${key}`]);
+        fetch(`https://mod.3dmgame.com/gmm/send`, {
+            method: "POST",
+            body: JSON.stringify({
+                event_name, event_value, user_id, gmm_login
+            })
+        })
     }
 }

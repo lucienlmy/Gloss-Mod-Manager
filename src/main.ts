@@ -14,7 +14,6 @@ import router from '@src/router'
 import { createPinia } from 'pinia'
 import i18n from '@src/lang'
 
-
 const app = createApp(App)
 app.use(router)
 app.use(vuetify)

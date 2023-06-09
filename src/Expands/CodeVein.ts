@@ -8,6 +8,7 @@ export const supportedGames: ISupportedGames = {
     gameID: 207,
     gameName: "CODE VEIN",
     gameExe: 'CodeVein.exe',
+    startExe: 'CodeVein.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/207.png",
     modType: [
         {

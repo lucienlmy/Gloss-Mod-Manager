@@ -35,6 +35,8 @@ export const supportedGames: ISupportedGames = {
     gameID: 248,
     gameName: "Tale of Immortal",
     gameExe: 'guigubahuang.exe',
+    // https://store.steampowered.com/app/1468810/_/
+    startExe: 'steam://rungameid/1468810',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/603e05b7aef61.png",
     modType: [
         {

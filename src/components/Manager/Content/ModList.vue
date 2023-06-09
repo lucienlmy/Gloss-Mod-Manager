@@ -3,7 +3,7 @@ import type { IModInfo, IType } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 import { computed, watch, ref } from "vue";
-import { Analytics } from "@src/model/Analytics"
+import { AppAnalytics } from "@src/model/Analytics"
 
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
 
@@ -30,7 +30,7 @@ watch(() => props.mod.isInstalled, () => {
     // console.log(props.mod.isInstalled);
 
     if (props.mod.isInstalled) {
-        Analytics.installMod()
+        AppAnalytics.sendEvent("install")
         // 安装
         type.value?.install(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {
@@ -38,7 +38,6 @@ watch(() => props.mod.isInstalled, () => {
             }
         })
     } else {
-        Analytics.uninstallMod()
         // 卸载
         type.value?.uninstall(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {

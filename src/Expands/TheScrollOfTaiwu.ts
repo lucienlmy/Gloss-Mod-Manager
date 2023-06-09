@@ -44,6 +44,8 @@ export const supportedGames: ISupportedGames = {
             rootPath: ""
         }
     ],
+    // https://store.steampowered.com/app/838350?snr=5000_5100___primarylinks
+    startExe: 'steam://rungameid/838350',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/167.png",
     modType: [
         {

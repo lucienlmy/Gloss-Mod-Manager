@@ -8,7 +8,7 @@ import { useSettings } from "@src/stores/useSettings";
 import { ref, computed } from "vue"
 import { IGameExe } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
-import { Analytics } from "@src/model/Analytics"
+import { AppAnalytics } from "@src/model/Analytics"
 
 const manager = useManager()
 const settings = useSettings()
@@ -51,7 +51,7 @@ function select() {
                 console.log(settings.settings);
                 manager.selectGameDialog = false
                 manager.getModInfo()
-                Analytics.selectGame(supportedGame.gameName)
+                AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
             } else {
                 let exe: IGameExe | undefined
                 supportedGame = manager.supportedGames.find(item => {
@@ -67,7 +67,7 @@ function select() {
                     console.log(settings.settings);
                     manager.selectGameDialog = false
                     manager.getModInfo()
-                    Analytics.selectGame(supportedGame.gameName)
+                    AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
 
                 } else {
                     ElMessage.error('您选择的游戏我们暂时不支持..')

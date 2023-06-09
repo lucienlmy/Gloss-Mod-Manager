@@ -132,7 +132,7 @@ const Settings = {
     "Mod Folder": "Mod储存位置",
     "Language": "语言",
     "Select": "选择",
-    "Auto install for download": "下载完成后自动安装",
+    "Auto install for download": "下载完成后添加到管理器",
     "Auto start for windows": "开机自启"
 }
 
