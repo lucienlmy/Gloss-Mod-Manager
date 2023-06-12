@@ -39,7 +39,7 @@ export class ElectronStore {
      * @param value 
      */
     public static async setStore(key: string, value: any) {
-        let data = await FileHandler.readFile(this.cache, this.encryptData('{}'))
+        let data = await FileHandler.readFileSync(this.cache, this.encryptData('{}'))
         let json = JSON.parse(this.decryptData(data))
         // console.log(json);
         json[key] = value
@@ -52,7 +52,7 @@ export class ElectronStore {
      * @returns 
      */
     public static async getStore(key: string) {
-        let data = await FileHandler.readFile(this.cache, this.encryptData('{}'))
+        let data = await FileHandler.readFileSync(this.cache, this.encryptData('{}'))
         let json = JSON.parse(this.decryptData(data))
         return json[key]
     }
@@ -62,7 +62,7 @@ export class ElectronStore {
      * @param key 
      */
     public static async removeStore(key: string) {
-        let data = await FileHandler.readFile(this.cache, this.encryptData('{}'))
+        let data = await FileHandler.readFileSync(this.cache, this.encryptData('{}'))
         let json = JSON.parse(this.decryptData(data))
         delete json[key]
         FileHandler.writeFile(this.cache, this.encryptData(JSON.stringify(json)))

@@ -29,8 +29,8 @@ if (!user.user) {
         <v-col cols="12" class="user-avatar" v-if="!user.user">
             <v-avatar icon="mdi-account" size="30" @click="user.loginBox = true"> </v-avatar>
             <div class="btn" v-if="!settings.settings.leftMenuRail">
-                <v-btn variant="text" @click="user.loginBox = true">登录</v-btn>
-                <v-btn variant="text" href="https://my.3dmgame.com/register">注册</v-btn>
+                <v-chip label variant="text" @click="user.loginBox = true">{{ $t('Login') }}</v-chip>
+                <v-chip label variant="text" href="https://my.3dmgame.com/register">{{ $t('Register') }}</v-chip>
             </div>
             <BaseLogin v-if="user.loginBox"></BaseLogin>
         </v-col>
@@ -40,7 +40,7 @@ if (!user.user) {
             </v-avatar>
             <div v-if="!settings.settings.leftMenuRail" class="user-operate">
                 <div class="user-name">{{ user.user.user_nickName }}</div>
-                <v-btn variant="text" @click="user.logout">退出</v-btn>
+                <v-chip label variant="text" @click="user.logout">{{ $t('Logout') }}</v-chip>
             </div>
         </v-col>
     </div>

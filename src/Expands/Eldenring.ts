@@ -17,7 +17,7 @@ let dictionaryList: string[] = []
 async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
     try {
         if (isInstall) {
-            if (!Manager.checkInstalled("0c11492c30c5a080d7417ba01729f350", "ModEngine2", 197418)) return false
+            if (!Manager.checkInstalled("ModEngine2", 197418)) return false
         }
 
         if (dictionaryList.length == 0) {

@@ -28,7 +28,7 @@ function getDictionaryList(data: string[]) {
 async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
     try {
         if (isInstall) {
-            if (!Manager.checkInstalled("e33023c54137fa25c489a442789843b1", "ModEngine", 71282)) return false
+            if (!Manager.checkInstalled("ModEngine", 71282)) return false
         }
 
         if (dictionaryList.length == 0) {

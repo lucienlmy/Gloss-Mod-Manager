@@ -51,7 +51,7 @@ export const useUser = defineStore('User', {
 
         async getUser() {
             let user = await ElectronStore.getStore("user")
-            console.log("user", user);
+            // console.log("user", user);
 
             if (user) {
                 this.user = user

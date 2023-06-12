@@ -23,7 +23,7 @@ function getCommonParentFolder(paths: string[]): string {
 function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 
     if (isInstall) {
-        if (!Manager.checkInstalled("9729110ccd52bed08dca225d8437b2cb", "CET", 197625)) return false
+        if (!Manager.checkInstalled("CET", 197625)) return false
     }
 
 

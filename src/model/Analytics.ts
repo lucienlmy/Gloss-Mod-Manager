@@ -27,7 +27,7 @@ export class AppAnalytics {
 
     public static async sendEvent(event_name: string, event_value?: any) {
 
-        console.log(event_name, event_value);
+        // console.log(event_name, event_value);
         const user_id = await this.getInstanceId()
         const gmm_login = useUser().user?.id
 

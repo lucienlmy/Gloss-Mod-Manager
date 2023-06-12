@@ -1,11 +1,16 @@
 import { createI18n } from 'vue-i18n'
+import { LocalLang } from '@src/model/LocalLang'
 
 const modules = import.meta.glob('./*', { eager: true })
 
-function getLangAll(): any {
+export function getLangAll() {
     // let message: any = {}
     let message = getLangFiles(modules)
+
+    LocalLang.getLocalLangData(message)
     //   getLangFiles(viewModules,message)
+    // console.log(message);
+
     return message
 }
 
@@ -28,7 +33,6 @@ function getLangFiles(mList: any) {
             } else {
                 msg[pathName] = mList[path].default
             }
-
         }
     }
     return msg

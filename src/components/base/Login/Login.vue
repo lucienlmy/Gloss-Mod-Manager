@@ -40,12 +40,13 @@ function login() {
                 <div class="top">
                     <div class="text">
                         <v-chip-group v-model="loginType" mandatory>
-                            <v-chip label variant="text" :value="0">快捷登录 </v-chip>
-                            <v-chip label variant="text" :value="1">账号登录 </v-chip>
+                            <v-chip label variant="text" :value="0">{{ $t('Qrlogin') }} </v-chip>
+                            <v-chip label variant="text" :value="1">{{ $t('UserNameLogin') }} </v-chip>
                         </v-chip-group>
                     </div>
                     <div class="close">
-                        <v-chip label append-icon="mdi-close" @click="user.loginBox = false" variant="text">关闭</v-chip>
+                        <v-chip label append-icon="mdi-close" @click="user.loginBox = false"
+                            variant="text">{{ $t('Close') }}</v-chip>
                     </div>
                 </div>
             </v-col>
@@ -58,25 +59,26 @@ function login() {
             <!-- 账号密码登录 -->
             <v-col cols="12" class="account-login" v-show="loginType == 1">
                 <v-form class="login-from" ref="form" lazy-validation>
-                    <v-text-field label="手机号码 / 3DM账号" :rules="rules.username" v-model="user.username"
+                    <v-text-field :label="$t('phone number / 3DM username')" :rules="rules.username" v-model="user.username"
                         prepend-inner-icon="mdi-account" @keydown.enter="login">
                     </v-text-field>
-                    <v-text-field type="password" label="密码" :rules="rules.password" v-model="user.password"
+                    <v-text-field type="password" :label="$t('password')" :rules="rules.password" v-model="user.password"
                         prepend-inner-icon="mdi-lock" @keydown.enter="login">
                     </v-text-field>
-                    <v-switch v-model="user.remember" label="记住我" color="blue darken-1" hide-details></v-switch>
+                    <v-switch v-model="user.remember" :label="$t('Remember me')" color="blue darken-1"
+                        hide-details></v-switch>
                     <div class="login-btn">
                         <div class="login-link">
-                            <a href="https://my.3dmgame.com/register">注册</a> | <a
-                                href="https://my.3dmgame.com/findpasswd">忘记密码</a>
+                            <a href="https://my.3dmgame.com/register">{{ $t('Register') }}</a> | <a
+                                href="https://my.3dmgame.com/findpasswd">{{ $t('Forgot password') }}</a>
                         </div>
-                        <v-btn :loading="loading" :disabled="loading" variant="text" append-icon="mdi-login-variant"
+                        <v-chip label :loading="loading" :disabled="loading" variant="text" append-icon="mdi-login-variant"
                             @click="login">
-                            登录
+                            {{ $t('Login') }}
                             <template v-slot:loader>
-                                <span>登录中...</span>
+                                <span>{{ $t('Logining') }}</span>
                             </template>
-                        </v-btn>
+                        </v-chip>
                     </div>
                 </v-form>
             </v-col>

@@ -7,7 +7,7 @@ import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
 
 function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
-    if (isInstall) if (!Manager.checkInstalled("bc5a4a887418886d8cbc29ebbcf244d3", "REFramework", 197869)) return false
+    if (isInstall) if (!Manager.checkInstalled("REFramework", 197869)) return false
     let res: IState[] = []
     const manager = useManager()
     mod.modFiles.forEach(async item => {

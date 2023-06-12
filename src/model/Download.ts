@@ -39,7 +39,7 @@ export class Download {
             let url = this.url
 
             FileHandler.ensureDirectoryExistence(dest + '.downloaded')   // 创建文件
-            const downloadedSoFar = parseInt(await FileHandler.readFile(`${dest}.downloaded`, '0'), 10) || 0;
+            const downloadedSoFar = parseInt(await FileHandler.readFileSync(`${dest}.downloaded`, '0'), 10) || 0;
             let startTime: number | undefined;
 
             this.request = https.get(url, { headers: { Range: `bytes=${downloadedSoFar}-` } }, response => {

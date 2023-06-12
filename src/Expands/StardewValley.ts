@@ -7,7 +7,7 @@ import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
 
 function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
-    if (isInstall) if (!Manager.checkInstalled("1000b735b627b50048a4b598cd9e6f7c", "SMAPI", 197894)) return false
+    if (isInstall) if (!Manager.checkInstalled("SMAPI", 197894)) return false
     let res: IState[] = []
     const manager = useManager()
     let modStorage = join(manager.modStorage, mod.id.toString())

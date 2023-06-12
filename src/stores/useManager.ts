@@ -56,7 +56,7 @@ export const useManager = defineStore('Manager', {
                 }
             })
         },
-
+        // 通过md5 判断是否已经添加
         isAdded(md5: string) {
             let is = false
             this.managerModList.forEach(item => {
@@ -67,7 +67,15 @@ export const useManager = defineStore('Manager', {
 
             return is
         },
+        // 通过id 判断是否已经添加
+        isAddedId(id: number) {
+            let is = false;
+            this.managerModList.forEach(item => {
+                if (item.id == id) is = true
+            })
 
+            return is
+        },
         // 将选中的Mod文件添加到管理器
         async addModFile(file: string) {
             this.maxID++
@@ -202,8 +210,13 @@ export const useManager = defineStore('Manager', {
             this.managerModList.splice(modIndex, 1)
 
         },
+        // 通过md5获取Mod信息
         getModInfoByMd5(md5: string) {
             return this.managerModList.find(item => item.md5 == md5)
+        },
+        // 通过id获取Mod信息
+        getModInfoById(id: number) {
+            return this.managerModList.find(item => item.id == id)
         }
     }
 })

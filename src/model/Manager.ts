@@ -27,7 +27,7 @@ export class Manager {
     public static async getModInfo(savePath: string): Promise<IModInfo[]> {
         let configPath = join(savePath, 'mod.json')
         FileHandler.createDirectory(savePath)   // 创建目录
-        let config = await FileHandler.readFile(configPath, "[]")  // 读取文件
+        let config = await FileHandler.readFileSync(configPath, "[]")  // 读取文件
         let modList: IModInfo[] = JSON.parse(config)    // 转换为对象
         return modList
     }
@@ -96,16 +96,16 @@ export class Manager {
     }
 
     // 检查插件是否已经安装
-    public static checkInstalled(md5: string, name: string, webId: number) {
+    public static checkInstalled(name: string, webId: number) {
         const manager = useManager()
-        if (!manager.isAdded(md5)) {
+        if (!manager.isAddedId(webId)) {
             ElMessageBox.confirm(`您还没有添加${name}, 是否现在下载?`).then(() => {
                 const download = useDownload()
                 download.addDownloadById(webId)
             }).catch(() => { })
             return false
         }
-        let engine = manager.getModInfoByMd5(md5)
+        let engine = manager.getModInfoById(webId)
         if (!(engine?.isInstalled)) {
             ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
                 engine!.isInstalled = true

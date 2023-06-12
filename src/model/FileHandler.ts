@@ -139,14 +139,24 @@ export class FileHandler {
     }
 
     /**
-     * 读取文件
+     * 读取文件 异步
      * @param filePath 文件路径
      * @param defaultValue 若文件不存在时的创建文件的默认值
      * @returns 
      */
-    public static async readFile(filePath: string, defaultValue: string = ''): Promise<string> {
+    public static async readFileSync(filePath: string, defaultValue: string = ''): Promise<string> {
         await this.ensureDirectoryExistence(filePath, defaultValue)
 
+        let data = fs.readFileSync(filePath, 'utf-8')
+        return data
+    }
+
+    /**
+     * 读取文件 同步
+     * @param filePath 
+     * @returns 
+     */
+    public static readFile(filePath: string) {
         let data = fs.readFileSync(filePath, 'utf-8')
         return data
     }
@@ -274,5 +284,24 @@ export class FileHandler {
             return size;
         }
         return 0
+    }
+
+    /**
+     * 获取文件夹下的所有文件
+     * @param folder 
+     */
+    public static getAllFiles(folder: string) {
+        let res: string[] = [];
+        const files = fs.readdirSync(folder);
+        files.forEach((file) => {
+            const filePath = path.join(folder, file);
+            const stat = fs.statSync(filePath);
+            if (stat.isFile()) {
+                res.push(filePath);
+            } else if (stat.isDirectory()) {
+                res = res.concat(this.getAllFiles(filePath));
+            }
+        });
+        return res;
     }
 }

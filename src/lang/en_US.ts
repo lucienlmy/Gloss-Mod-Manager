@@ -2,7 +2,7 @@ const AppHeader = {
     "Gloss Mod Manager": "Gloss Mod Manager",
     "Minimize window": "Minimize Window",
     "Maximize/restore window": "Maximize/Restore Window",
-    "Close": "Close"
+    "Close": "Close",
 }
 const LeftMenu = {
     "Home": "Home",
@@ -10,13 +10,26 @@ const LeftMenu = {
     "Tour": "Tour",
     "Download": "Download",
     "Settings": "Settings",
-    "About": "About"
+    "About": "About",
+}
+const User = {
+    "Login": "Login",
+    "Logout": "Logout",
+    "Register": "Register",
+    "Qrlogin": "QR Login",
+    "QrloginTip": "Open 3DM APP and scan the code to log in",
+    "UserNameLogin": "User Name ",
+    "phone number / 3DM username": "Phone Number / 3DM Username",
+    "password": "Password",
+    "Remember me": "Remember Me",
+    "Forgot password": "Forgot Password",
+    "Logining": "Logining..",
 }
 const AutoUpdate = {
-    "New version": "There is a new version",
-    "Current version": "Current version",
-    "Latest version": "Latest version",
-    "Update log": "Update log",
+    "New version": "There is a new version available",
+    "Current version": "Current Version",
+    "Latest version": "Latest Version",
+    "Update log": "Update Log",
     "Cancel": "Cancel",
     "Update": "Update",
 
@@ -24,13 +37,13 @@ const AutoUpdate = {
 const Download = {
     "Download Manager": "Download Manager",
     "{0} tasks": "{0} tasks",
-    "Search task": "Search task",
+    "Search task": "Search Task",
     "Open Folder": "Open Folder",
     "Delete All": "Delete All",
 }
 
 const DownloadHeader = {
-    "All downloads": "All downloads",
+    "All downloads": "Download All",
     "Downloading": "Downloading",
     "Paused": "Paused",
     "Completed": "Completed",
@@ -38,22 +51,24 @@ const DownloadHeader = {
 }
 
 const DownloadTasks = {
+    "Downloading": "Downloading",
+    "Paused": "Paused",
+    "Completed": "Completed",
     "Start": "Start",
     "Pause": "Pause",
     "Redownload": "Redownload",
     "Delete": "Delete",
     "Install": "Install",
-    "Open website": "Open website",
-    "Open file": "Open file",
-    "Delete task?": "Delete task?",
+    "Open website": "Open Website",
+    "Open file": "Open File",
+    "Delete task?": "Delete Task?",
     "Delete local files": "Delete local files as well",
     "Waiting": "Waiting",
-    "Downloading": "Downloading",
-    "Paused": "Paused",
-    "Completed": "Completed",
     "Unknown": "Unknown",
-    "No download tasks available at the moment.": "No download tasks available at the moment."
+    "No download tasks available at the moment.": "No download tasks available at the moment.",
+
 }
+
 const ExploreDownloadBtn = {
     "Please manage the game first.": "Please manage the game first.",
     "Downloaded": "Downloaded",
@@ -66,37 +81,43 @@ const ExploreFilter = {
     "Fanworks": "Fanworks",
     "Translation": "Translation",
     "Today": "Today",
-    "7 Days": "7 Days",
-    "30 Days": "30 Days",
-    "3 Months": "3 Months",
+    "7 Days": "Last 7 Days",
+    "30 Days": "Last 30 Days",
+    "3 Months": "Last 3 Months",
     "Default": "Default",
-    "Views": "Viewed",
-    "Downloads": "Downloaded",
-    "Likes": "Liked",
-    "Favorites": "Favorited",
+    "Views": "Most Viewed",
+    "Downloads": "Most Downloaded",
+    "Likes": "Most Liked",
+    "Favorites": "Most Favorited",
     "Newest": "Newest",
     "Type of creation": "Type of Creation",
     "Update time": "Update Time",
     "Sort": "Sort",
     "Search": "Search Works",
     "You can search for what you want here": "You can search for what you want here",
-    "Game Type": "Game Type"
+    "Game Type": "Game Type",
 
 }
 
 const Welcome = {
     "Welcome to use {0}, where you can": "Welcome to {0}, where you can...",
-    "Partner": "Partner"
+    "Partner": "Partner",
 }
 
 const ManagerContent = {
+    "Info": "Info",
+    "Open": "Open",
+    "Update": "Update",
+    "Delete": "Delete",
+    "You have not selected a game yet. Please select a game first": "You have not selected a game yet. Please select a game first.",
+    "Partner": "Partner",
     "Name": "Name",
     "Version": "Version",
     "Type": "Type",
     "Status": "Status",
     "Action": "Action",
     "Drag and drop the Mod compressed package here for management": "Drag and drop the Mod compressed package here for management",
-    "Supports zpi, rar, 7z file types": "Supports zpi, rar, 7z file types",
+    "Supports zpi, rar, 7z file types": "Supports file types in zpi, rar, 7z",
     "Installed": "Installed",
     "Uninstalled": "Uninstalled",
     "MD5": "MD5",
@@ -105,18 +126,14 @@ const ManagerContent = {
     "Author": "Author",
     "Are you sure you want to delete this Mod?": "Are you sure you want to delete this Mod?",
     "This mod was not downloaded from the manager and cannot be updated": "This mod was not downloaded from the manager and cannot be updated",
-    "Info": "Info",
-    "Open": "Open",
-    "Update": "Update",
-    "Delete": "Delete",
-    "You have not selected a game yet. Please select a game first": "You have not selected a game yet. Please select a game first."
+
 }
 
 const ManagerHeader = {
     "Import Mod": "Import Mod",
     "Install All": "Install All",
     "Uninstall All": "Uninstall All",
-    "Current Game": "Select Game 『{0}』",
+    "Current Game": "Selected Game 『{0}』",
     "Not Selected": "Not Selected",
     "select game": "Select Game",
     "Search Game": "Search Game",
@@ -134,8 +151,9 @@ const Settings = {
     "Mod Folder": "Mod Folder",
     "Language": "Language",
     "Select": "Select",
-    "Auto install for download": "Auto add to Manager for download",
-    "Auto start for windows": "Autostart on Windows"
+    "Auto install for download": "Automatically add to the Manager after downloaded",
+    "Auto start for windows": "Autostart on Windows",
+    "Export Language": "Export Language Pack",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",
@@ -155,6 +173,7 @@ const Games = {
 const lang = {
     ...AppHeader,
     ...LeftMenu,
+    ...User,
     ...AutoUpdate,
     ...Download,
     ...DownloadHeader,

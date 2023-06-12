@@ -7,10 +7,14 @@ import { ElMessage } from "element-plus";
 import { useSettings } from '@src/stores/useSettings';
 import { join } from "node:path"
 import { useDownload } from '@src/stores/useDownload';
+import { getLangAll } from '@src/lang'
+import { LocalLang } from '@src/model/LocalLang'
 
 const main = useMain()
 const settings = useSettings()
 const download = useDownload()
+
+LocalLang.init()
 
 let cache = ref(0)
 let cachePath = ref("")
@@ -36,6 +40,21 @@ function openGameFolder() {
     FileHandler.openFolder(settings.settings.managerGame.gamePath ?? "")
 }
 
+async function exportLang() {
+    let allLang = await getLangAll()
+    let langList = settings.langList
+
+    // console.log(allLang, langList);
+
+    FileHandler.writeFile(join(LocalLang.langFolder, "lang.json"), JSON.stringify(langList, null, 4))
+
+    Object.keys(allLang).forEach(key => {
+        // console.log(allLang[key]);
+        FileHandler.writeFile(join(LocalLang.langFolder, `${key}.json`), JSON.stringify(allLang[key], null, 4))
+    })
+
+}
+
 </script>
 <template>
     <v-row>
@@ -52,6 +71,8 @@ function openGameFolder() {
             </v-chip>
             <v-chip label variant="text" v-if="settings.settings.managerGame" append-icon="mdi-folder-arrow-right-outline"
                 @click="openGameFolder">{{ $t('Open Game Folder') }}</v-chip>
+            <v-chip label variant="text" append-icon="mdi-export-variant"
+                @click="exportLang">{{ $t('Export Language') }}</v-chip>
         </v-col>
         <v-col cols="12">
             <h3>{{ $t('Support') }}</h3>

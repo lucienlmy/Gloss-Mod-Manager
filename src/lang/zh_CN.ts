@@ -10,8 +10,24 @@ const LeftMenu = {
     "Tour": "游览",
     "Download": "下载",
     "Settings": "设置",
-    "About": "关于"
+    "About": "关于",
+
 }
+
+const User = {
+    "Login": "登录",
+    "Logout": "登出",
+    "Register": "注册",
+    "Qrlogin": "扫码登录",
+    "QrloginTip": "打开3DM APP 扫码即可登录",
+    "UserNameLogin": "账号登录",
+    "phone number / 3DM username": "手机号码 / 3DM账号",
+    "password": "密码",
+    "Remember me": "记住我",
+    "Forgot password": "忘记密码",
+    "Logining": "登录中...",
+}
+
 const AutoUpdate = {
     "New version": "有新版本",
     "Current version": "当前版本",
@@ -133,7 +149,8 @@ const Settings = {
     "Language": "语言",
     "Select": "选择",
     "Auto install for download": "下载完成后添加到管理器",
-    "Auto start for windows": "开机自启"
+    "Auto start for windows": "开机自启",
+    "Export Language": "导出语言包",
 }
 
 const Games = {
@@ -154,6 +171,7 @@ const Games = {
 const lang = {
     ...AppHeader,
     ...LeftMenu,
+    ...User,
     ...AutoUpdate,
     ...Download,
     ...DownloadHeader,
@@ -164,7 +182,7 @@ const lang = {
     ...ManagerContent,
     ...ManagerHeader,
     ...Settings,
-    ...Games
+    ...Games,
 }
 
 

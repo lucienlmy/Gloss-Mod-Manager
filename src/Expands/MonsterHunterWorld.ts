@@ -12,7 +12,7 @@ import { ElMessage } from "element-plus";
 
 async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
     if (isInstall) {
-        if (!Manager.checkInstalled("066b61e8ef8e47fdfea4225c2fe49f59", "Stracker's Loader", 197740)) return false
+        if (!Manager.checkInstalled("Stracker's Loader", 197740)) return false
     }
 
     // if (dictionaryList.length == 0) {

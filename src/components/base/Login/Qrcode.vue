@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { useUser } from "@src/stores/useUser";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 
 let qrcode = ref()
 const user = useUser()
@@ -13,10 +13,13 @@ user.timer = setInterval(() => {
 onMounted(() => {
     user.getQrcode(qrcode.value)
 })
+onUnmounted(() => {
+    clearInterval(user.timer!)
+})
 </script>
 <template>
     <div class="">
-        <div class="title">打开3DM APP 扫码即可登录</div>
+        <div class="title">{{ $t('QrloginTip') }}</div>
         <div class="qrcode">
             <canvas ref="qrcode"></canvas>
         </div>
@@ -28,4 +31,8 @@ export default {
     name: 'Qrcode',
 }
 </script>
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+.qrcode {
+    text-align: center;
+}
+</style>

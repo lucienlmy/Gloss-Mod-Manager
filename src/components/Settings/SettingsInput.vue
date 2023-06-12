@@ -23,10 +23,6 @@ watch(() => settings.settings.autoLaunch, () => {
 })
 
 
-let language = [
-    { text: "简体中文", value: 'zh_CN' },
-    { text: "English", value: 'en_US' },
-]
 
 </script>
 <template>
@@ -45,7 +41,7 @@ let language = [
         <v-col cols="12" md="6">
             <!-- <v-text-field clearable label="代理地址" v-model="settings.settings.proxy"
                 placeholder="例如:http://127.0.0.1:10809 不使用请留空,乱填将导致无法联网"> </v-text-field> -->
-            <v-select variant="solo" :label="$t('Language')" v-model="settings.settings.language" :items="language"
+            <v-select variant="solo" :label="$t('Language')" v-model="settings.settings.language" :items="settings.langList"
                 item-title="text" item-value="value"></v-select>
         </v-col>
         <v-col cols="12" sm="6" md="4">

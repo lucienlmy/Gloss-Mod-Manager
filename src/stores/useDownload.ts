@@ -23,7 +23,7 @@ export const useDownload = defineStore('Download', {
     },
     actions: {
         async initialization() {
-            let config = await FileHandler.readFile(this.configPath, "[]")  // 读取文件
+            let config = await FileHandler.readFileSync(this.configPath, "[]")  // 读取文件
             this.downloadTaskList = JSON.parse(config)    // 转换为对象
 
             this.downloadTaskList.forEach(item => {
