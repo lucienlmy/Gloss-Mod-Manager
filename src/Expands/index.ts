@@ -2,7 +2,7 @@
  * 导出所有扩展
  */
 
-import { ISupportedGames } from "@src/model/Interfaces"
+import type { ISupportedGames } from "@src/model/Interfaces"
 
 // 批量导入当前目录中的所有组件
 const modules = import.meta.glob('./*', { eager: true })

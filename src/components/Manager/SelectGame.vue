@@ -6,9 +6,10 @@ import { ElMessage } from "element-plus";
 import { useMain } from "@src/stores/useMain";
 import { useSettings } from "@src/stores/useSettings";
 import { ref, computed } from "vue"
-import { IGameExe } from "@src/model/Interfaces";
+import type { IGameExe, IGameInfo } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
+import { Steam } from "@src/model/Steam"
 
 const manager = useManager()
 const settings = useSettings()
@@ -18,11 +19,10 @@ const { t } = useI18n()
 let searchText = ref("")
 
 let list = computed(() => {
-    const nameMapper = (item: any) => ({
+    const list = manager.supportedGames.map((item) => ({
         name: t(item.gameName),
         game: item,
-    });
-    const list = manager.supportedGames.map(nameMapper);
+    }));
     const filterList = list.filter(({ name }) =>
         name.toLowerCase().includes(searchText.value.toLowerCase())
     );
@@ -31,10 +31,11 @@ let list = computed(() => {
 })
 
 // =========== 让用户选择指定游戏 ===========
-function select() {
+function select(item: IGameInfo) {
     ipcRenderer.invoke("select-file", {
         properties: ['openFile'],
-        filters: [{ name: '游戏主程序', extensions: ['exe'] }]
+        filters: [{ name: '游戏主程序', extensions: ['exe'] }],
+        defaultPath: Steam.getSteamGamePath(item.steamAppID, item.installdir)
     }).then((arg: string[]) => {
         if (arg.length > 0) {
             const filePath = arg[0]
@@ -68,11 +69,9 @@ function select() {
                     manager.selectGameDialog = false
                     manager.getModInfo()
                     AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
-
                 } else {
                     ElMessage.error('您选择的游戏我们暂时不支持..')
                 }
-
             }
         }
     })
@@ -103,7 +102,7 @@ function select() {
                 <v-col cols="12" class="content">
                     <v-row>
                         <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameName"
-                            @click="select">
+                            @click="select(item)">
                             <v-row no-gutters>
                                 <v-col cols="12">
                                     <v-img :lazy-src="lazy_img" :aspect-ratio="247 / 139" :src="item.gameCoverImg"

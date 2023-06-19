@@ -1,5 +1,5 @@
 const AppHeader = {
-    "Gloss Mod Manager": "极光模组管理器",
+    "Gloss Mod Manager": "Gloss Mod Manager",
     "Minimize window": "最小化窗口",
     "Maximize/restore window": "放大/还原窗口",
     "Close": "关闭"
@@ -124,6 +124,11 @@ const ManagerContent = {
     "Update": "更新",
     "Delete": "删除",
     "You have not selected a game yet. Please select a game first": "您当前还未选择游戏,请先选择游戏",
+    "Pack": "打包",
+    "Weight": "权重",
+    "Desc": "描述",
+    "Requirements": "依赖ID (WebId)",
+    "Requirements Name": "依赖名称",
 }
 
 const ManagerHeader = {
@@ -151,6 +156,7 @@ const Settings = {
     "Auto install for download": "下载完成后添加到管理器",
     "Auto start for windows": "开机自启",
     "Export Language": "导出语言包",
+    "Feed Xiaom": "投喂小莫",
 }
 
 const Games = {

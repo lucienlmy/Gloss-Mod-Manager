@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
@@ -102,6 +102,8 @@ function handleMixed(mod: IModInfo, isInstall: boolean) {
 
 export const supportedGames: ISupportedGames = {
     gameID: 195,
+    steamAppID: 1091500,
+    installdir: "Cyberpunk 2077",
     gameName: "Cyberpunk 2077",
     gameExe: [
         {
@@ -205,7 +207,7 @@ export const supportedGames: ISupportedGames = {
     ],
     checkModType(mod) {
         // 判断是否是CET
-        if (mod.md5 == "9729110ccd52bed08dca225d8437b2cb") return 1
+        if (mod.webId == 197625) return 1
 
 
         let archive = false

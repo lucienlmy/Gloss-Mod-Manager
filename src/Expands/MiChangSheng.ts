@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync, existsSync, writeFileSync, readFileSync } from "fs";
@@ -48,6 +48,8 @@ async function handlePlugins(mod: IModInfo, installPath: string, isInstall: bool
 
 export const supportedGames: ISupportedGames = {
     gameID: 255,
+    steamAppID: 1189490,
+    installdir: "觅长生",
     gameName: "MiChangSheng",
     // https://store.steampowered.com/app/1189490?snr=5000_5100___primarylinks
     gameExe: '觅长生.exe',

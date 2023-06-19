@@ -8,6 +8,8 @@ import { computed, ref } from 'vue';
 import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
 
+import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
+
 const props = defineProps<{
     mod: IModInfo
 }>()
@@ -84,6 +86,7 @@ function reinstall() {
             <v-list-item append-icon="mdi-information-slab-circle-outline" :title="t('Info')" @click="showInfo = true">
             </v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
+            <ContentPack :mod="mod"></ContentPack>
             <v-list-item v-if="mod.webId" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
             <v-list-item v-if="mod.webId" append-icon="mdi-refresh" :title="t('Update')" @click="reinstall"></v-list-item>
             <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
@@ -107,6 +110,8 @@ export default {
 <style lang='less' scoped>
 .info {
     padding: 1rem;
+    box-shadow: 0 0 5px black;
+
 
     * {
         // 允许复制

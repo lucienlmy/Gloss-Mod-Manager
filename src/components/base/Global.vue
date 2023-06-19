@@ -6,6 +6,7 @@ import { Config } from '@src/model/Config'
 import { useDownload } from "@src/stores/useDownload";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
+import { ipcRenderer } from 'electron'
 
 const settings = useSettings()
 const download = useDownload()
@@ -45,7 +46,13 @@ watch(() => manager.managerModList, () => {
     manager.saveModInfo()
 }, { deep: true })
 
-
+// 处理 .gmm 文件打开 
+ipcRenderer.on('open-gmm-file', (_, args) => {
+    console.log(args);
+    let path = args[args.length - 1]
+    // console.log(path);
+    manager.addModByGmm(path)
+})
 
 </script>
 <template></template>

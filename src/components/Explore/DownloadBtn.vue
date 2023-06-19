@@ -3,7 +3,7 @@ import { Download } from "@src/model/Download"
 import { ref, computed } from "vue";
 import { ipcRenderer } from "electron";
 import { useDownload } from "@src/stores/useDownload";
-import { IDownloadTask } from "@src/model/Interfaces";
+import type { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics";

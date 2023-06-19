@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
@@ -32,6 +32,8 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 
 export const supportedGames: ISupportedGames = {
     gameID: 303,
+    steamAppID: 2050650,
+    installdir: "RESIDENT EVIL 4  BIOHAZARD RE4",
     gameName: "RE4Remake",
     gameExe: 're4.exe',
     startExe: 're4.exe',
@@ -99,7 +101,7 @@ export const supportedGames: ISupportedGames = {
     checkModType(mod) {
         let natives = false
         let plugins = false
-        if (mod.md5 == "bc5a4a887418886d8cbc29ebbcf244d3") return 2
+        if (mod.webId == 197869) return 2
 
         mod.modFiles.forEach(item => {
             if (item.toLowerCase().includes('natives')) natives = true

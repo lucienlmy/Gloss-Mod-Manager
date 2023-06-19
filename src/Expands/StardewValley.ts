@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
@@ -35,6 +35,8 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 
 export const supportedGames: ISupportedGames = {
     gameID: 10,
+    steamAppID: 413150,
+    installdir: "Stardew Valley",
     gameName: "Stardew Valley",
     gameExe: 'Stardew Valley.exe',
     startExe: "StardewModdingAPI.exe",
@@ -77,7 +79,7 @@ export const supportedGames: ISupportedGames = {
     ],
     checkModType(mod) {
 
-        if (mod.md5 == "1000b735b627b50048a4b598cd9e6f7c") return 1
+        if (mod.webId == 197894) return 1
 
         let plugins = false
         // manifest.json

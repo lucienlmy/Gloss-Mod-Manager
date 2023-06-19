@@ -1,12 +1,13 @@
-import { IModInfo, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, ISupportedGames } from "@src/model/Interfaces";
 import { join, extname } from 'path'
 import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
 
-
 export const supportedGames: ISupportedGames = {
     gameID: 207,
+    steamAppID: 678960,
     gameName: "CODE VEIN",
+    installdir: "CodeVein",
     gameExe: 'CodeVein.exe',
     startExe: 'CodeVein.exe',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/207.png",

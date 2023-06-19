@@ -126,6 +126,11 @@ const ManagerContent = {
     "Author": "Author",
     "Are you sure you want to delete this Mod?": "Are you sure you want to delete this Mod?",
     "This mod was not downloaded from the manager and cannot be updated": "This mod was not downloaded from the manager and cannot be updated",
+    "Pack": "Pack",
+    "Weight": "Weight",
+    "Desc": "Desc",
+    "Requirements": "Requirements ID (WebId)",
+    "Requirements Name": "Requirements Name",
 
 }
 
@@ -154,6 +159,7 @@ const Settings = {
     "Auto install for download": "Automatically add to the Manager after downloaded",
     "Auto start for windows": "Autostart on Windows",
     "Export Language": "Export Language Pack",
+    "Feed Xiaom": "Feed Xiaom",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",

@@ -77,6 +77,8 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 
 export const supportedGames: ISupportedGames = {
     gameID: 185,
+    steamAppID: 814380,
+    installdir: "Sekiro",
     gameName: "Sekiro",
     gameExe: 'sekiro.exe',
     startExe: 'sekiro.exe',
@@ -108,7 +110,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     checkModType(mod) {
-        if (mod.md5 == "e33023c54137fa25c489a442789843b1") return 2
+        if (mod.webId == 71282) return 2
 
 
         // mod.modFiles.forEach(file => {

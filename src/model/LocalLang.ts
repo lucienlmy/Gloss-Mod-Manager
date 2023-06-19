@@ -34,6 +34,8 @@ export class LocalLang {
 
         // 获取目录中所有文件列表
         let list = FileHandler.getAllFiles(this.langFolder)
+        console.log(list);
+
         // 移除文件名是 lang.json 的文件
         list = list.filter(fileName => !fileName.includes("lang.json"));
         // let data: any = {}

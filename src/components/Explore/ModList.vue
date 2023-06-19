@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { ref, computed } from "vue";
-import { IMod } from "@src/model/Interfaces";
+import type { IMod } from "@src/model/Interfaces";
 import { useMain } from "@src/stores/useMain";
 import { useExplore } from "@src/stores/useExplore";
 
@@ -28,7 +28,8 @@ let mod_img = computed(() => {
 <template>
     <v-card class="mod">
         <a :href="`https://mod.3dmgame.com/mod/${mod.id}`" :title="mod.mods_desc">
-            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
+            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"
+                :class="{ 'vague': mod.mods_adult_content }"></v-img>
         </a>
         <v-card-title :title="mod.mods_title">
             <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a>
@@ -76,22 +77,13 @@ export default {
 .mod {
     position: relative;
 
-    .mod-img {
-        .mod-tag {
-            position: absolute;
-            right: 0;
-            top: 12px;
-            z-index: 10;
-        }
-
-        .vague {
-            // 高斯模糊
-            -webkit-filter: blur(10px);
-            /* Chrome, Opera */
-            -moz-filter: blur(10px);
-            -ms-filter: blur(10px);
-            filter: blur(10px);
-        }
+    .vague {
+        // 高斯模糊
+        -webkit-filter: blur(10px);
+        /* Chrome, Opera */
+        -moz-filter: blur(10px);
+        -ms-filter: blur(10px);
+        filter: blur(10px);
     }
 
 

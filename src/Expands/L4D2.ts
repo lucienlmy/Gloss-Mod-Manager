@@ -1,4 +1,4 @@
-import { IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IState, ISupportedGames } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { extname, basename, join } from 'path'
 import { FileHandler } from "@src/model/FileHandler"
@@ -9,6 +9,8 @@ import { useManager } from "@src/stores/useManager";
 
 export const supportedGames: ISupportedGames = {
     gameID: 12,
+    steamAppID: 550,
+    installdir: "left4dead2",
     gameName: "Left 4 Dead 2",
     gameExe: 'left4dead2.exe',
     startExe: 'left4dead2.exe',

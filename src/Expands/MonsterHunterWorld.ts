@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import axios from "axios";
 import { join, basename, extname } from 'path'
@@ -50,6 +50,8 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 
 export const supportedGames: ISupportedGames = {
     gameID: 161,
+    steamAppID: 582010,
+    installdir: "Monster Hunter World",
     gameName: "Monster Hunter World",
     gameExe: "MonsterHunterWorld.exe",
     startExe: 'MonsterHunterWorld.exe',
@@ -161,7 +163,7 @@ export const supportedGames: ISupportedGames = {
     ],
     checkModType(mod) {
         // 判断是否是 Stracker's Loader
-        if (mod.md5 == "066b61e8ef8e47fdfea4225c2fe49f59") return 1
+        if (mod.webId == 197740) return 1
 
         let nativePC = false
         let plugins = false

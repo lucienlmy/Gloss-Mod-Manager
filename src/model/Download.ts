@@ -6,7 +6,8 @@ import * as fs from 'fs';
 import * as http from 'http';
 import * as https from 'https';
 import { FileHandler } from "@src/model/FileHandler"
-import { DownloadStatus, IDownloadTask } from "@src/model/Interfaces"
+import type { IDownloadTask } from "@src/model/Interfaces"
+import { DownloadStatus } from "@src/model/Interfaces"
 
 export class Download {
 

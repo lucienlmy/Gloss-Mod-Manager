@@ -47,24 +47,25 @@ watch(() => props.mod.isInstalled, () => {
     }
 })
 
-let exid_name = ref(false)
+let exit_name = ref(false)
 
 </script>
 <template>
     <v-col cols="12">
         <v-row class="mod-list">
-            <v-col cols="6">
+            <v-col cols="6" class="mod-name">
                 <!-- 名称 -->
-                <p v-if="!exid_name" @dblclick="exid_name = true" class="text-truncate" :title="mod.modName">
-                    {{ mod.modName }}</p>
-                <v-text-field v-else @blur="exid_name = false" @keydown.enter="exid_name = false" v-model="mod.modName"
-                    variant="solo" :hide-details="true"></v-text-field>
+                <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                    {{ mod.modName }} <v-btn variant="text" class="exit-btn" @click="exit_name = true"
+                        icon="mdi-circle-edit-outline"></v-btn> </p>
+                <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"
+                    variant="solo-filled" :hide-details="true"></v-text-field>
             </v-col>
             <v-col cols="1">{{ mod.modVersion }}</v-col>
             <v-col cols="2">
                 <!-- 类型 -->
                 <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame.modType"
-                    :hide-details="true" item-title="name" item-value="id" :disabled="mod.isInstalled">
+                    :hide-details="true" item-title="name" item-value="id">
                 </v-select>
             </v-col>
             <v-col cols="2">
@@ -88,13 +89,27 @@ export default {
 .mod-list {
     display: flex;
     align-items: center;
-
-    // 动画
     transition: all 0.3s;
+
+
 
     &:hover {
         // 底部阴影
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+
+
+    }
+
+    .mod-name {
+        .exit-btn {
+            display: none;
+        }
+
+        &:hover {
+            .exit-btn {
+                display: inline-grid;
+            }
+        }
     }
 }
 </style>

@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
@@ -33,6 +33,8 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 
 export const supportedGames: ISupportedGames = {
     gameID: 248,
+    steamAppID: 1468810,
+    installdir: "鬼谷八荒",
     gameName: "Tale of Immortal",
     gameExe: 'guigubahuang.exe',
     // https://store.steampowered.com/app/1468810/_/

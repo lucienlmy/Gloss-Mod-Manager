@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import { IUser } from "@src/model/Interfaces";
+import type { IUser } from "@src/model/Interfaces";
 import { ElectronStore } from '@src/model/ElectronStore'
 import { ElMessage } from "element-plus";
 import QRCode from 'qrcode'
@@ -51,7 +51,7 @@ export const useUser = defineStore('User', {
 
         async getUser() {
             let user = await ElectronStore.getStore("user")
-            // console.log("user", user);
+            console.log("user", user);
 
             if (user) {
                 this.user = user
@@ -77,8 +77,7 @@ export const useUser = defineStore('User', {
 
                 this.code = crypto.createHash('md5').update(`${InstanceId}${time}`).digest('hex')
                 this.code = `3dmmod://${this.code}`
-                // 3dmmod://557ba1a038fc4e0bfc2b202933295bae
-                // console.log(code);
+
             }
             return this.code
         },
@@ -94,7 +93,7 @@ export const useUser = defineStore('User', {
                 body: JSON.stringify({ code })
             }).then(async (res) => {
                 let text = JSON.parse(await res.text())
-                console.log(text);
+                // console.log(text);
                 if (text.code == '00') {
                     this.saveUser(text.user)
                     this.loginBox = false

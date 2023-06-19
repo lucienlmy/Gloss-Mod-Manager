@@ -2,7 +2,7 @@
  * @description 艾尔登法环 支持
 */
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { Manager } from "@src/model/Manager";
 import { useDownload } from "@src/stores/useDownload";
 import { useManager } from "@src/stores/useManager";
@@ -60,6 +60,8 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 
 export const supportedGames: ISupportedGames = {
     gameID: 275,
+    steamAppID: 1245620,
+    installdir: "Elden Ring",
     gameName: "ELDEN RING",
     gameExe: 'eldenring.exe',
     startExe: "modengine2_launcher.exe",
@@ -90,8 +92,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     checkModType(mod) {
-        let md5 = '0c11492c30c5a080d7417ba01729f350'
-        if (mod.md5 == md5) {
+        if (mod.webId == 197418) {
             return 2
         }
         return 1

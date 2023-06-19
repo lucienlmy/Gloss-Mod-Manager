@@ -83,6 +83,7 @@ export interface IModInfo {
     id: number
     webId?: number
     modName: string
+    gameID?: number
     md5: string
     modVersion: string
     modType?: number
@@ -91,7 +92,9 @@ export interface IModInfo {
     modFiles: string[]
     modDesc?: string
     modAuthor?: string
-    corePlugins?: IPlugins[]
+    corePlugins?: [
+        { id: number, name: string }
+    ]
 }
 
 export interface IGameExe {
@@ -101,6 +104,8 @@ export interface IGameExe {
 
 export interface IGameInfo {
     gameID: number
+    steamAppID: number
+    installdir?: string
     gameName: string
     gameExe: string | IGameExe[]
     startExe?: string,
@@ -183,4 +188,11 @@ export interface IDownloadTask {
     downloadedSize: number
     link: string
     modAuthor: string
+}
+
+export interface IFileTreeNode {
+    label: string;
+    path: string;
+    checked?: boolean;
+    children?: IFileTreeNode[];
 }

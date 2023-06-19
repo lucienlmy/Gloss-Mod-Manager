@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import { IGameInfo, IMod } from "@src/model/Interfaces";
+import type { IGameInfo, IMod } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
+import { useUser } from "./useUser";
 
 export const useExplore = defineStore('Explore', {
     state: () => ({
@@ -25,6 +26,7 @@ export const useExplore = defineStore('Explore', {
     actions: {
         GetModList() {
             const settings = useSettings()
+            const user = useUser()
             ipcRenderer.send("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
@@ -34,7 +36,9 @@ export const useExplore = defineStore('Explore', {
                 order: this.order,
                 key: this.key,
                 gameId: settings.settings.managerGame?.gameID ?? null,
-                gameType: this.gameType
+                gameType: this.gameType,
+                show_adult: user.user?.user_p_show_adult == 1 ?? null,
+                show_charge: user.user?.user_p_show_charge == 1 ?? null,
             })
         },
         getGameType() {

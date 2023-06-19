@@ -35,5 +35,12 @@
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
     "deleteAppDataOnUninstall": false
+  },
+  "fileAssociations": {
+    "ext": "gmm",
+    "name": "Gloss Mod Manager",
+    "description": "Gloss Mod Manager File",
+    "icon": "public/favicon.ico",
+    "role": "Shell"
   }
 }

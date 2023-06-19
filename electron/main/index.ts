@@ -1,12 +1,11 @@
-import { app, BrowserWindow, shell, ipcMain, } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, ipcRenderer, } from 'electron'
 import { release } from 'node:os'
-import { join, dirname } from 'node:path'
+import { join, dirname, resolve } from 'node:path'
 import { dialog } from 'electron'
 import { GetData } from '../model/GetData'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
 import { existsSync } from 'fs'
-import axios from 'axios'
 
 
 process.env.DIST_ELECTRON = join(__dirname, '..')
@@ -101,9 +100,15 @@ async function createWindow() {
         if (url.startsWith('https:')) shell.openExternal(url)
         return { action: 'deny' }
     })
+
+    // app.setAsDefaultProtocolClient('gmm', process.execPath, [resolve(process.argv[1])])
+
+    app.setAsDefaultProtocolClient('gmm');
+
 }
 
 app.whenReady().then(createWindow)
+
 
 app.on('window-all-closed', () => {
     win = null
@@ -126,6 +131,11 @@ app.on('activate', () => {
         createWindow()
     }
 })
+
+app.on('second-instance', (event, argv) => {
+    win.webContents.send('open-gmm-file', argv)
+})
+
 
 // New window example arg: new windows url
 ipcMain.handle('open-win', (_, arg) => {
@@ -178,7 +188,9 @@ ipcMain.on('get-mod-list', async (event, arg) => {
         order: arg.order ?? 0,
         key: arg.key ?? '',
         gameId: arg.gameId ?? null,
-        gameType: arg.gameType ?? 0
+        gameType: arg.gameType ?? 0,
+        show_adult: arg.show_adult ?? null,
+        show_charge: arg.show_charge ?? null,
     }
 
     GetData.getModList(data).then((res) => {
@@ -204,12 +216,17 @@ ipcMain.handle('get-types', async (event, arg) => {
 
 // 选择文件
 ipcMain.handle('select-file', async (event, arg) => {
-    let properties = arg.properties
-    let filters = arg.filters
     const result = await dialog.showOpenDialog({
-        properties, filters
+        ...arg
     })
     return result.filePaths
+})
+
+ipcMain.handle('save-file', async (event, arg) => {
+    const result = await dialog.showSaveDialog({
+        ...arg
+    })
+    return result.filePath
 })
 
 // 获取系统目录

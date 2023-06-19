@@ -1,5 +1,5 @@
 import { FileHandler } from "@src/model/FileHandler";
-import { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
@@ -33,6 +33,8 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 
 export const supportedGames: ISupportedGames = {
     gameID: 167,
+    steamAppID: 838350,
+    installdir: "The Scroll Of Taiwu",
     gameName: "The Scroll Of Taiwu",
     gameExe: [
         {

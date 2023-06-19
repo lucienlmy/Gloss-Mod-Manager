@@ -1,7 +1,7 @@
 /** 
  * @description 霍格沃茨之遗 安装
 */
-import { IModInfo, ISupportedGames } from "@src/model/Interfaces";
+import type { IModInfo, ISupportedGames } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { basename, join, extname } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
@@ -10,6 +10,8 @@ import { ElMessage } from "element-plus";
 
 export const supportedGames: ISupportedGames = {
     gameID: 302,
+    steamAppID: 990080,
+    installdir: "HogwartsLegacy",
     gameName: "Hogwarts Legacy",
     gameExe: 'HogwartsLegacy.exe',
     startExe: 'HogwartsLegacy.exe',

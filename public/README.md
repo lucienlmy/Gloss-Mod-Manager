@@ -1,4 +1,4 @@
-# <center>极光模组管理器 <small>Gloss Mod Manager </small> </center>
+# <center>戈司模组管理器 <small>Gloss Mod Manager </small> </center>
 
 <center> 
 
@@ -7,7 +7,7 @@
 ---- 
 
 ### 这是什么？
-极光模组管理器(Gloss Mod Manager) 简称GMM, 是一款综合性的游戏模组管理器.
+戈司模组管理器(Gloss Mod Manager) 简称GMM, 是一款综合性的游戏模组管理器.
 是一款功能强大的综合性游戏Mod管理器, 它为游戏玩家提供了简单易用的方式来管理和安装各种游戏Mod.
 无论你是新手还是老手,使用GMM都会让你的Mod安装和管理更加轻松和快捷.
 
@@ -46,11 +46,6 @@
 - [ ] 戴森球计划 (计划中)
 - [ ] ... (计划中)
 
-### 反馈问题
-
-- [GitHub](https://github.com/GlossMod)
-- [Discord](https://discord.gg/TF46tu7Upw)
-- [Patreon](https://www.patreon.com/GlossModManager)
 
 
 ### 开发计划
@@ -60,16 +55,22 @@
 - [x] 实现安装和管理Mod功能。
 - [x] 适配一些热门游戏
 - [x] 自动检查更新
-- [ ] 实现制作Mod包功能
+- [x] 实现制作Mod包功能
 - [ ] 添加上传Mod包功能到Mod站。
 - [ ] 自动检查Mod更新功能
 - [ ] 实现Mod排序功能, 并允许用户自定义排序方式。
 - [ ] 自动处理Mod冲突问题
-- [ ] 用户登录功能，以便管理云端数据。
+- [x] 用户登录功能
+    - APP 扫描登录 & 账号密码登录
 - [x] 添加启动游戏功能，并允许用户选择游戏路径。
-    - 部分游戏已支持
 - [x] 多语言国际化，允许用户切换应用程序语言。
 
+
+### 反馈问题
+
+- [GitHub](https://github.com/GlossMod)
+- [Discord](https://discord.gg/TF46tu7Upw)
+- [Patreon](https://www.patreon.com/GlossModManager)
 
 ### 协助开发
 在 Discord 里面联系我们.
@@ -81,4 +82,5 @@
 [vuetify]: https://p.aoe.top/shields/badge/Vuetify-3.1.15-1867C0?logo=vuetify
 [pinia]: https://p.aoe.top/shields/badge/pinia-2.0.30-1867C0?logo=vuetify
 [typescript]: https://p.aoe.top/shields/badge/TypeScript-5.0.4-3178C6?logo=typescript
-[GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager.svg?style=social&label=Stars
+[GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager?style=social
+

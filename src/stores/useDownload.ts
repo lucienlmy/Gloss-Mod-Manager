@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { extname } from "node:path";
-import { DownloadStatus, IDownloadTask } from "@src/model/Interfaces";
+import type { IDownloadTask } from "@src/model/Interfaces";
+import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 import { Download } from "@src/model/Download"
 import { FileHandler } from "@src/model/FileHandler"

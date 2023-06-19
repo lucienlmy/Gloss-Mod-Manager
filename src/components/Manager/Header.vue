@@ -7,6 +7,7 @@ import { useSettings } from '@src/stores/useSettings';
 import { join } from 'path';
 import { spawn, exec } from 'child_process';
 import { ElMessage } from 'element-plus';
+import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -58,13 +59,22 @@ async function startGame() {
             <template v-if="settings.settings.managerGame">
                 <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
                     @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
-                <v-chip label variant="text" append-icon="mdi-download" @click="allInstall">{{ $t('Install All') }}</v-chip>
-                <v-chip label variant="text" append-icon="mdi-close"
-                    @click="allUnInstall">{{ $t('Uninstall All') }}</v-chip>
-                <v-chip label variant="text" @click="openFolder"
-                    append-icon="mdi-folder-open-outline">{{ $t("Open Mod Folder") }}</v-chip>
                 <v-chip label variant="text" v-if="settings.settings.managerGame?.startExe" @click="startGame"
                     append-icon="mdi-menu-right">{{ $t("Launch Game") }}</v-chip>
+                <v-menu open-on-hover>
+                    <template v-slot:activator="{ props }">
+                        <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item :title="$t('Install All')" append-icon="mdi-download"
+                            @click="allInstall"></v-list-item>
+                        <v-list-item :title="$t('Uninstall All')" append-icon="mdi-close"
+                            @click="allUnInstall"></v-list-item>
+                        <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <ContentPack :mod="{}"></ContentPack>
+                    </v-list>
+                </v-menu>
             </template>
         </div>
         <div class="select-game">

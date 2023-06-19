@@ -3,7 +3,7 @@ import { useSettings } from '@src/stores/useSettings';
 import { Download } from "@src/model/Download"
 import { ref, computed, reactive } from 'vue';
 import DownloadTasks from '@src/components/Download/Tasks.vue'
-import { DownloadStatus, IDownloadTask } from '@src/model/Interfaces';
+import { DownloadStatus } from '@src/model/Interfaces';
 import { useMain } from '@src/stores/useMain';
 import { useDownload } from '@src/stores/useDownload';
 import { ElMessage } from 'element-plus';

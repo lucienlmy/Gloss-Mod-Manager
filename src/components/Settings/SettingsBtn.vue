@@ -62,10 +62,10 @@ async function exportLang() {
             <h3>{{ $t('Features') }}</h3>
         </v-col>
         <v-col cols="12">
-            <v-chip label variant="text" append-icon="mdi-delete-clock-outline" @click="clearCache">
+            <!-- <v-chip label variant="text" append-icon="mdi-delete-clock-outline" @click="clearCache">
                 {{ $t('Clean cache') }}
                 <small>({{ main.formatSiez(cache) }})</small>
-            </v-chip>
+            </v-chip> -->
             <v-chip label variant="text" append-icon="mdi-folder-download-outline" @click="openDownloadCache">
                 {{ $t('Open Download Folder') }}
             </v-chip>
@@ -89,6 +89,8 @@ async function exportLang() {
                     </svg>
                 </template>
                 Discord </v-chip>
+            <v-chip variant="text" label href="https://aoe.top/donate"
+                append-icon="mdi-gift-outline">{{ $t('Feed Xiaom') }}</v-chip>
         </v-col>
     </v-row>
 </template>
