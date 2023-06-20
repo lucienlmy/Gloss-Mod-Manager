@@ -108,7 +108,7 @@ export class Manager {
             }
             return true
         } else {
-            ElMessageBox.confirm(`您还没有添加${name}, 是否现在下载?`).then(() => {
+            ElMessageBox.confirm(`该Mod需要${name}才能使用, 是否现在下载?`).then(() => {
                 const download = useDownload()
                 download.addDownloadById(webId)
             }).catch(() => { })

@@ -9,8 +9,10 @@ const { locale } = useI18n()
 
 let readmeFile = computed(() => {
     // console.log(locale.value);
-    if (locale.value == "zh_CN") return 'README.md'
-    return `README_${locale.value}.md`
+    // let host = `https://raw.githubusercontent.com/GlossMod/Gloss-Mod-Manager-info/main/`
+    let file = `README_${locale.value}.md`
+    if (locale.value == "en_US") file = 'README.md'
+    return `https://p.aoe.top/githubusercontent/GlossMod/Gloss-Mod-Manager-info/main/${file}`
 })
 
 function getReadme() {
