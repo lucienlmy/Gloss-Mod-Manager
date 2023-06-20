@@ -4,6 +4,7 @@
 
 ![][license] ![][author] ![][Electron] ![][vue] ![][vuetify] [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager)
 </center> 
+
 ---- 
 
 ### 这是什么？
@@ -65,12 +66,26 @@
 - [x] 添加启动游戏功能，并允许用户选择游戏路径。
 - [x] 多语言国际化，允许用户切换应用程序语言。
 
+### 帮助翻译
+如果您愿意帮助我们将 GMM 翻译成您的语言,您可以这样操作：
+
+- 在[设置](#/Settings) 中点击 “导出语言包”, 
+- 导出的语言包会在`我的文档\Gloss Mod Manager\lang`中.
+- 复制一份您熟悉的语言(我们会优先更新 简体中文 和 English 的语言包)
+- 重命名为您的语言代码, 并在 `lang.json`文件中添加 (记得注意json格式规范)
+- 在管理器里面按`Ctrl + R`重载管理器, 即可在设置页面的语言列表里面看到您的文本
+- 使用您喜欢的文本编辑器打开`*.json`文件, 然后进行翻译.
+- 您可以随时按`Ctrl + R`重载管理器来即时查看翻译.
+- 事后您可以将翻译完成的文件通过邮箱`mod.3dmgame.com`或`xm@aoe.top`发送给我
+- 请记得在邮件中附上您翻译的语言和您的著名
 
 ### 反馈问题
 
 - [GitHub](https://github.com/GlossMod)
 - [Discord](https://discord.gg/TF46tu7Upw)
 - [Patreon](https://www.patreon.com/GlossModManager)
+- [QQ反馈群: 825182128](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PHA9FOcayzFlxe0iU8QPWcHOy_NbBOdW&authKey=fgJvklKDg%2FeWXpG6rNDsPON7ls2omDWGJNZGGRT06QEcEDVjL%2BRLNLB7QFFPvBDL&noverify=0&group_code=825182128)
+
 
 ### 协助开发
 在 Discord 里面联系我们.
