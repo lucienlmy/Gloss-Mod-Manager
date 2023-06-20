@@ -50,7 +50,7 @@ export class Manager {
      * @returns 
      */
     public static generalInstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
-        FileHandler.writeLog(`安装mod: ${mod.modName}`)
+        // FileHandler.writeLog(`安装mod: ${mod.modName}`)
         const manager = useManager()
 
         let modStorage = join(manager.modStorage, mod.id.toString())
@@ -73,7 +73,7 @@ export class Manager {
 
     // 一般卸载
     public static generalUninstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
-        FileHandler.writeLog(`卸载mod: ${mod.modName}`);
+        // FileHandler.writeLog(`卸载mod: ${mod.modName}`);
         const manager = useManager()
         let gameStorage = join(manager.gameStorage ?? "", installPath)
         let modStorage = join(manager.modStorage, mod.id.toString())
@@ -98,19 +98,21 @@ export class Manager {
     // 检查插件是否已经安装
     public static checkInstalled(name: string, webId: number) {
         const manager = useManager()
-        if (!manager.isAddedId(webId)) {
+        let modId = manager.isAddedWebId(webId)
+        if (modId) {
+            let engine = manager.getModInfoById(modId)
+            if (!(engine?.isInstalled)) {
+                ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
+                    engine!.isInstalled = true
+                }).catch(() => { })
+            }
+            return true
+        } else {
             ElMessageBox.confirm(`您还没有添加${name}, 是否现在下载?`).then(() => {
                 const download = useDownload()
                 download.addDownloadById(webId)
             }).catch(() => { })
             return false
         }
-        let engine = manager.getModInfoById(webId)
-        if (!(engine?.isInstalled)) {
-            ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
-                engine!.isInstalled = true
-            }).catch(() => { })
-        }
-        return true
     }
 }

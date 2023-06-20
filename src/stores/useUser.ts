@@ -19,6 +19,7 @@ export const useUser = defineStore('User', {
         timer: null as NodeJS.Timeout | null
     }),
     getters: {
+
     },
     actions: {
         async login(username: string, password: string) {
@@ -45,16 +46,24 @@ export const useUser = defineStore('User', {
         },
         saveUser(user: IUser) {
             this.user = user
+            // 15 天
+            let timeout = new Date().getTime() + (1000 * 60 * 60 * 24 * 15)
+            user.timeout = timeout
             ElectronStore.setStore("user", user)
             ElMessage.success('登录成功.')
         },
 
         async getUser() {
             let user = await ElectronStore.getStore("user")
-            console.log("user", user);
-
             if (user) {
-                this.user = user
+                // console.log(user.timeout, new Date().getTime());
+                if (user.timeout < new Date().getTime()) {
+                    // 登录过期, 清除登录信息
+                    ElectronStore.removeStore("user")
+                    this.user = null
+                } else {
+                    this.user = user
+                }
             }
         },
         async getQrcode(canvas: HTMLCanvasElement) {
@@ -74,19 +83,15 @@ export const useUser = defineStore('User', {
             if (!this.code) {
                 const time = new Date().getTime()
                 const InstanceId = AppAnalytics.getInstanceId()
-
                 this.code = crypto.createHash('md5').update(`${InstanceId}${time}`).digest('hex')
                 this.code = `3dmmod://${this.code}`
-
             }
             return this.code
         },
         async checkQrcodeLogin() {
-
             if (this.user) {
                 clearInterval(this.timer!)
             }
-
             let code = this.createCode()
             fetch(`https://mod.3dmgame.com/gmm/checkLogin`, {
                 method: "POST",

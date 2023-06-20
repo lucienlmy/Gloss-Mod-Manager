@@ -78,6 +78,13 @@ export const useManager = defineStore('Manager', {
 
             return is
         },
+        isAddedWebId(id: number) {
+            let modId = null as null | number;
+            this.managerModList.forEach(item => {
+                if (item.webId == id) modId = item.id
+            })
+            return modId
+        },
         // 将选中的Mod文件添加到管理器
         async addModFile(file: string) {
 

@@ -77,6 +77,7 @@ export interface IUser {
     mod_original_conut?: number
     mod_translate_conut?: number
     user_protocol_time?: string
+    timeout?: number
 }
 
 export interface IModInfo {

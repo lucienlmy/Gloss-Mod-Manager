@@ -11,9 +11,7 @@ import { Unzipper } from '@src/model/Unzipper'
 import { join } from 'path'
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{
-    mod: IModInfo
-}>()
+const props = defineProps(['mod'])
 const manager = useManager()
 const settings = useSettings()
 const { t } = useI18n()

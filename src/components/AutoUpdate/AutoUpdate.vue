@@ -81,7 +81,7 @@ function toUpdate() {
                 </v-row>
             </v-card-text>
             <v-card-actions class="btn">
-                <v-btn variant="text" @click="dialog = false">{{ $t('Cancel') }}</v-btn>
+                <!-- <v-btn variant="text" @click="dialog = false">{{ $t('Cancel') }}</v-btn> -->
                 <v-btn variant="text" @click="toUpdate">{{ $t('Update') }}</v-btn>
             </v-card-actions>
         </v-card>

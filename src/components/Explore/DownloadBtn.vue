@@ -7,6 +7,7 @@ import type { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics";
+import axios from "axios";
 
 const props = defineProps<{
     id: number
@@ -54,6 +55,7 @@ async function toDownload() {
             window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)
             return
         }
+        // axios.post('https://mod.3dmgame.com/mod/modDownload', { id: props.id })
         download.addDownloadTask(data)
     } catch (error) {
     }

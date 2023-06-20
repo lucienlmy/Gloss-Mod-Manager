@@ -8,12 +8,19 @@ import { join } from 'path';
 import { spawn, exec } from 'child_process';
 import { ElMessage } from 'element-plus';
 import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
+import { useUser } from '@src/stores/useUser';
 
 const settings = useSettings()
 const manager = useManager()
-
+const user = useUser()
 
 function allInstall() {
+    if (!user.user) {
+        user.loginBox = true
+        ElMessage.warning('登录后可使用本功能！')
+        return
+    }
+
     let list = manager.filterModList
     // console.log(list);
     list.forEach(item => {
@@ -22,6 +29,11 @@ function allInstall() {
 }
 
 function allUnInstall() {
+    if (!user.user) {
+        user.loginBox = true
+        ElMessage.warning('登录后可使用本功能！')
+        return
+    }
     let list = manager.filterModList
     // console.log(list);
     list.forEach(item => {

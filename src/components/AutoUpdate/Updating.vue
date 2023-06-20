@@ -63,8 +63,6 @@ function autoInstall() {
         console.log(exe);
         spawn(exe, [])
     })
-
-    // start 
 }
 
 </script>

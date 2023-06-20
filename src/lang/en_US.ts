@@ -159,7 +159,9 @@ const Settings = {
     "Auto install for download": "Automatically add to the Manager after downloaded",
     "Auto start for windows": "Autostart on Windows",
     "Export Language": "Export Language Pack",
-    "Feed Xiaom": "Feed Xiaom",
+    // "Feed Xiaom": "Feed Xiaom",
+    "Feedback": "Feedback",
+    "QQChat": "QQChat",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",

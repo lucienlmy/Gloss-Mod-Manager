@@ -62,6 +62,18 @@ Gloss Mod Manager (GMM) is a comprehensive game mod manager. It is a powerful an
 - [x] Add the function of starting the game and allow users to choose the game path.
 - [x] Multi-language internationalization, allowing users to switch the application language.
 
+### Translation Assistance
+If you would like to help us translate GMM into your language, you can follow these steps:
+
+- Click "Export Language Pack" in [Settings](#/Settings)
+- The exported language pack will be located in `My Documents\Gloss Mod Manager\lang`
+- Make a copy of a language file you are familiar with (we prioritize updating Simplified Chinese and English language packs)
+- Rename it with your language code and add it to the `lang.json` file (be sure to follow JSON format standards)
+- Press `Ctrl + R` in the manager to reload it and see your text in the language list on the settings page
+- Use your favorite text editor to open `*.json` files and make translations
+- You can always press `Ctrl + R` to reload the manager for instant translation preview
+- After finishing your translation, you can send the translated files to me via email to `mod.3dmgame.com` or `xm@aoe.top`
+- Please remember to include the name of your translated language and your name in the email.
 
 ### Feedback
 
@@ -74,7 +86,7 @@ Contact us on Discord.
 
 
 [license]:https://p.aoe.top/shields/github/license/GlossMod/Gloss-Mod-Manager.svg
-[author]: https://p.aoe.top/shields/badge/Author-小莫-blue?logo=Cloudera
+[author]: https://p.aoe.top/shields/badge/Author-3DM-blue?logo=Cloudera
 [Electron]: https://p.aoe.top/shields/badge/Electron-22.0.3-47848F?logo=electron
 [vue]: https://p.aoe.top/shields/badge/Vue3-3.2.45-4FC08D?logo=vuedotjs
 [vuetify]: https://p.aoe.top/shields/badge/Vuetify-3.1.15-1867C0?logo=vuetify

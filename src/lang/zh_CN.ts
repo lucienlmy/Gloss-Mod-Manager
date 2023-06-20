@@ -156,7 +156,9 @@ const Settings = {
     "Auto install for download": "下载完成后添加到管理器",
     "Auto start for windows": "开机自启",
     "Export Language": "导出语言包",
-    "Feed Xiaom": "投喂小莫",
+    // "Feed Xiaom": "投喂小莫",
+    "Feedback": "反馈",
+    "QQChat": "QQ群: 825182128",
 }
 
 const Games = {

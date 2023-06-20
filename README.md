@@ -1,4 +1,4 @@
-# <center>戈司模组管理器 <small>Gloss Mod Manager </small> </center>
+# <center> Gloss Mod Manager </center>
 
 <center> 
 
@@ -7,7 +7,7 @@
 ---- 
 
 ### 这是什么？
-戈司模组管理器(Gloss Mod Manager) 简称GMM, 是一款综合性的游戏模组管理器.
+管模模(Gloss Mod Manager) 简称GMM, 是一款综合性的游戏模组管理器.
 是一款功能强大的综合性游戏Mod管理器, 它为游戏玩家提供了简单易用的方式来管理和安装各种游戏Mod.
 无论你是新手还是老手,使用GMM都会让你的Mod安装和管理更加轻松和快捷.
 
