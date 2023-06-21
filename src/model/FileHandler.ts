@@ -304,4 +304,9 @@ export class FileHandler {
         });
         return res;
     }
+
+    // 运行程序
+    public static runExe(exe: string) {
+        exec(`"${exe}"`)
+    }
 }

@@ -61,7 +61,8 @@ function autoInstall() {
         await FileHandler.renameFile(`${folder}\\Gloss Mod Manager.exe`, `${folder}\\Gloss Mod Manager_${main.web.mods_version}.exe`)
         let exe = `${folder}\\Gloss Mod Manager_${main.web.mods_version}.exe`
         console.log(exe);
-        spawn(exe, [])
+        // spawn(exe, [])
+        FileHandler.runExe(exe)
     })
 }
 
