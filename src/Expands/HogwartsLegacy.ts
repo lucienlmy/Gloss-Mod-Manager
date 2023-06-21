@@ -2,8 +2,7 @@
  * @description 霍格沃茨之遗 安装
 */
 import type { IModInfo, ISupportedGames } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
-import { basename, join, extname } from 'node:path'
+import { join, extname } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
 import { Manager } from "@src/model/Manager"
 import { ElMessage } from "element-plus";

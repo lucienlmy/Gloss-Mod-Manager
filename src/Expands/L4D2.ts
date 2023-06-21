@@ -1,5 +1,4 @@
 import type { IState, ISupportedGames } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
 import { extname, basename, join } from 'path'
 import { FileHandler } from "@src/model/FileHandler"
 import { useManager } from "@src/stores/useManager";

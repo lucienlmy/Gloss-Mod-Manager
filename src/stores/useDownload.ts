@@ -7,7 +7,7 @@ import { Download } from "@src/model/Download"
 import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
-import { useManager } from "./useManager";
+import { useManager } from "@src/stores/useManager";
 
 export const useDownload = defineStore('Download', {
     state: () => ({

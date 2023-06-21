@@ -1,7 +1,6 @@
 import { FileHandler } from "@src/model/FileHandler";
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
-import axios from "axios";
 import { join, basename, extname } from 'path'
 import { statSync } from "fs";
 import { Manager } from "@src/model/Manager";

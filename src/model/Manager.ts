@@ -6,7 +6,6 @@ import { existsSync, statSync } from 'node:fs'
 import type { IModInfo, IState } from "@src/model/Interfaces";
 import { join } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
-import { useSettings } from "@src/stores/useSettings";
 import { basename } from 'node:path'
 import { useManager } from '@src/stores/useManager';
 import { useDownload } from '@src/stores/useDownload';

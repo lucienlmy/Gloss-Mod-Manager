@@ -95,9 +95,6 @@ function handleMixed(mod: IModInfo, isInstall: boolean) {
     } else {
         return FileHandler.deleteFolder(join(gameStorage, 'bin', 'x64', 'plugins', 'cyber_engine_tweaks', 'mods', lastFolder))
     }
-
-
-
 }
 
 export const supportedGames: ISupportedGames = {
@@ -105,6 +102,7 @@ export const supportedGames: ISupportedGames = {
     steamAppID: 1091500,
     installdir: "Cyberpunk 2077",
     gameName: "Cyberpunk 2077",
+    startExe: join('bin', 'x64', 'Cyberpunk2077.exe'),
     gameExe: [
         {
             name: 'Cyberpunk2077.exe',

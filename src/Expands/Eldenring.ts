@@ -4,9 +4,7 @@
 import { FileHandler } from "@src/model/FileHandler";
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { Manager } from "@src/model/Manager";
-import { useDownload } from "@src/stores/useDownload";
 import { useManager } from "@src/stores/useManager";
-import { useSettings } from "@src/stores/useSettings";
 import axios from "axios";
 import { ElMessage } from "element-plus";
 import { statSync } from "fs";

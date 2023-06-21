@@ -8,7 +8,7 @@ import { ipcRenderer } from 'electron';
 import PackRequirements from '@src/components/Manager/Content/Pack/Requirements.vue'
 import ContentPackFiles from '@src/components/Manager/Content/Pack/Files.vue'
 import { Unzipper } from '@src/model/Unzipper'
-import { join } from 'path'
+import { join, basename } from 'path'
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps(['mod'])
@@ -74,10 +74,10 @@ async function pack() {
             Unzipper.createZip(res, manager.packInfo)
             for (let index = 0; index < filesList.length; index++) {
                 const item = filesList[index];
+                packlingNow.value = basename(item)
                 let filePath = join(manager.modStorage, props.mod.id.toString(), item)
                 await Unzipper.addAndRenameToZip(res, filePath, setFilePath(item))
                 packlingProgress.value = Math.round((index + 1) / filesList.length * 100)
-                packlingNow.value = item
             }
             packling.value = false
             manager.packDialog = false

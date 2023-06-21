@@ -2,7 +2,7 @@
 
 <center> 
 
-![][license] ![][author] ![][Electron] ![][vue] ![][vuetify] [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager)
+![][license] ![][author] ![][Electron] ![][vue] ![][vuetify] [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager-info)
 </center> 
 
 ---- 
@@ -81,7 +81,7 @@
 
 ### 反馈问题
 
-- [GitHub](https://github.com/GlossMod)
+- [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager-info)
 - [Discord](https://discord.gg/TF46tu7Upw)
 - [Patreon](https://www.patreon.com/GlossModManager)
 - [QQ反馈群: 825182128](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PHA9FOcayzFlxe0iU8QPWcHOy_NbBOdW&authKey=fgJvklKDg%2FeWXpG6rNDsPON7ls2omDWGJNZGGRT06QEcEDVjL%2BRLNLB7QFFPvBDL&noverify=0&group_code=825182128)

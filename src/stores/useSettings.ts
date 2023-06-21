@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
-import { ipcRenderer } from "electron";
 import type { ISettings } from "@src/model/Interfaces";
 import { Config } from '@src/model/Config'
-import { LocalLang } from '@src/model/LocalLang'
 
 
 export const useSettings = defineStore('Settings', {

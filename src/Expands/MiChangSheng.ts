@@ -2,8 +2,7 @@ import { FileHandler } from "@src/model/FileHandler";
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, extname, sep, basename, dirname } from 'path'
-import { statSync, existsSync, writeFileSync, readFileSync } from "fs";
-import { Manager } from "@src/model/Manager";
+import { existsSync } from "fs";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 

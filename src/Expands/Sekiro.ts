@@ -3,15 +3,13 @@
  */
 
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
 import axios from "axios";
 import { basename, join } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler"
 import { statSync } from "fs";
 import { Manager } from "@src/model/Manager"
 import { useManager } from "@src/stores/useManager";
-import { ElMessageBox, ElMessage } from "element-plus";
-import { useDownload } from "@src/stores/useDownload";
+import { ElMessage } from "element-plus";
 
 let dictionaryList: string[] = []
 
