@@ -69,10 +69,11 @@ function toUpdate() {
             <v-card-title>{{ $t('New version') }}
                 <v-chip variant="text" label href="https://mod.3dmgame.com/mod/197445" target="_blank">3DM Mods</v-chip>
                 | <v-chip variant="text" label href="https://github.com/GlossMod/Gloss-Mod-Manager-info/releases"
-                    target="_blank">GitHub</v-chip> </v-card-title>
+                    target="_blank">GitHub</v-chip>
+            </v-card-title>
             <v-card-text>
                 <v-row>
-                    <v-col cols=" 6">{{ `${$t('Current version')} : ${Version[0]}` }}</v-col>
+                    <v-col cols="6">{{ `${$t('Current version')} : ${Version[0]}` }}</v-col>
                     <v-col cols="6">{{ `${$t('Latest version')} : ${data.mods_version}` }}</v-col>
                     <v-col cols="12" v-if="!updateing">
                         <h3>{{ $t('Update log') }}</h3>
@@ -84,7 +85,7 @@ function toUpdate() {
                 </v-row>
             </v-card-text>
             <v-card-actions class="btn">
-                <!-- <v-btn variant="text" @click="dialog = false">{{ $t('Cancel') }}</v-btn> -->
+                <v-btn variant="text" @click="dialog = false">{{ $t('Cancel') }}</v-btn>
                 <v-btn variant="text" @click="toUpdate">{{ $t('Update') }}</v-btn>
             </v-card-actions>
         </v-card>

@@ -2,6 +2,7 @@
  * 数据统计
  */
 import { ElectronStore } from '@src/model/ElectronStore'
+import { useMain } from '@src/stores/useMain';
 import { useUser } from '@src/stores/useUser';
 
 
@@ -30,11 +31,15 @@ export class AppAnalytics {
         // console.log(event_name, event_value);
         const user_id = await this.getInstanceId()
         const gmm_login = useUser().user?.id
+        const version = (await useMain().getVersion())[0]
+
+        // console.log(`version:${version}`);
+
 
         fetch(`https://mod.3dmgame.com/gmm/send`, {
             method: "POST",
             body: JSON.stringify({
-                event_name, event_value, user_id, gmm_login
+                event_name, event_value, user_id, gmm_login, version
             })
         })
     }

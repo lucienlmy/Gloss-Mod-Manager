@@ -33,6 +33,10 @@ manager.packInfo = {
 }
 manager.packInfo.gameID = settings.settings.managerGame.gameID
 
+const modType = computed(() => {
+    return manager.supportedGames.find(item => item.gameID == manager.packInfo.gameID)?.modType
+})
+
 async function pack() {
     // 检查依赖是否合法
     manager.packInfo.corePlugins?.forEach(async item => {
@@ -73,11 +77,16 @@ async function pack() {
             manager.packInfo.modFiles = filesList.map(item => setFilePath(item))
             Unzipper.createZip(res, manager.packInfo)
             for (let index = 0; index < filesList.length; index++) {
-                const item = filesList[index];
-                packlingNow.value = basename(item)
-                let filePath = join(manager.modStorage, props.mod.id.toString(), item)
-                await Unzipper.addAndRenameToZip(res, filePath, setFilePath(item))
-                packlingProgress.value = Math.round((index + 1) / filesList.length * 100)
+                try {
+                    const item = filesList[index];
+                    packlingNow.value = basename(item)
+                    let filePath = join(manager.modStorage, props.mod.id.toString(), item)
+                    await Unzipper.addAndRenameToZip(res, filePath, setFilePath(item))
+                    packlingProgress.value = Math.round((index + 1) / filesList.length * 100)
+                } catch (error) {
+                    ElMessage.error(`错误: ${error}`)
+                }
+
             }
             packling.value = false
             manager.packDialog = false
@@ -140,9 +149,8 @@ function setFilePath(item: string) {
                                 v-model="manager.packInfo.modVersion"></v-text-field>
                         </v-col>
                         <v-col cols="3">
-                            <v-select v-model="manager.packInfo.modType" variant="solo-filled"
-                                :items="settings.settings.managerGame.modType" :hide-details="true" item-title="name"
-                                item-value="id" :disabled="mod.isInstalled">
+                            <v-select v-model="manager.packInfo.modType" variant="solo-filled" :items="modType"
+                                :hide-details="true" item-title="name" item-value="id">
                             </v-select>
                         </v-col>
                         <v-col cols="3">

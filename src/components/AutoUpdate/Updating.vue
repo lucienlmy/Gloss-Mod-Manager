@@ -23,13 +23,13 @@ let begin = ref(false)
 let task = reactive({
     id: 197445,
     name: "Gloss Mod Manager",
-    version: main.web.mods_version,
+    version: main.webVersion.mods_version,
     state: DownloadStatus.WAITING,
     speed: 0,
     totalSize: 0,
     downloadedSize: 0,
-    link: main.web.mods_resource_url,
-    modAuthor: main.web.mods_author
+    link: main.webVersion.mods_resource_url,
+    modAuthor: main.webVersion.mods_author
 })
 
 let dest = `${settings.settings.modStorageLocation}\\cache\\update\\${task.id}.zip`
@@ -58,8 +58,8 @@ function autoInstall() {
     main.sleep(3000).then(async () => {
         let folder = dirname(dest)
         await Unzipper.unzip(dest, folder)
-        await FileHandler.renameFile(`${folder}\\Gloss Mod Manager.exe`, `${folder}\\Gloss Mod Manager_${main.web.mods_version}.exe`)
-        let exe = `${folder}\\Gloss Mod Manager_${main.web.mods_version}.exe`
+        await FileHandler.renameFile(`${folder}\\Gloss Mod Manager.exe`, `${folder}\\Gloss Mod Manager_${main.webVersion.mods_version}.exe`)
+        let exe = `${folder}\\Gloss Mod Manager_${main.webVersion.mods_version}.exe`
         console.log(exe);
         // spawn(exe, [])
         FileHandler.runExe(exe)
