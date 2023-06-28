@@ -7,10 +7,10 @@ import type { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics";
-import axios from "axios";
 
 const props = defineProps<{
-    id: number
+    id: number,
+    size?: string
 }>()
 const download = useDownload()
 const settings = useSettings()
@@ -66,7 +66,7 @@ let text = computed(() => {
     if (task.value && task.value.totalSize == task.value.downloadedSize) return t('Downloaded')
     if (isDownloading.value) return `${downloaded.value} %`
 
-    return t('Download')
+    return `${t('Download')} | ${props.size}`
 })
 
 

@@ -14,6 +14,9 @@ const { getNumber, lazy_img, host } = useMain()
 
 let mod = ref<IMod>(props.mod);
 
+// console.log('mod', mod.value);
+
+
 let mod_img = computed(() => {
     let img = ''
     if (mod.value.mods_image_url) {
@@ -63,7 +66,7 @@ let mod_img = computed(() => {
             </v-row>
         </v-card-subtitle>
         <v-card-actions class="flex-row-reverse">
-            <ExploreDownloadBtn :id="mod.id"></ExploreDownloadBtn>
+            <ExploreDownloadBtn :id="mod.id" :size="mod.mods_resource_size"></ExploreDownloadBtn>
         </v-card-actions>
     </v-card>
 </template>

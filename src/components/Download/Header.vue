@@ -8,7 +8,7 @@ const download = useDownload()
     <v-row class="header">
         <v-col cols="12">
             <v-chip-group v-model="download.tab" mandatory>
-                <v-chip label variant="text" :value="'all'">{{ $t('All downloads') }}</v-chip>
+                <v-chip label variant="text" :value="'all'">{{ $t('All') }}</v-chip>
                 <v-chip label variant="text" :value="1">{{ $t('Downloading') }}</v-chip>
                 <v-chip label variant="text" :value="2">{{ $t('Paused') }}</v-chip>
                 <v-chip label variant="text" :value="3">{{ $t('Completed') }}</v-chip>

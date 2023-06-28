@@ -63,8 +63,7 @@ function allInstell() {
                         v-model="download.searchName"></v-text-field>
                     <v-chip label variant="text" append-icon="mdi-folder-open-outline"
                         @click="openFolder">{{ $t('Open Folder') }}</v-chip>
-                    <v-chip label variant="text" append-icon="mdi-download"
-                        @click="allInstell">{{ $t('Install All') }}</v-chip>
+                    <v-chip label variant="text" append-icon="mdi-download" @click="allInstell">{{ $t('Add All') }}</v-chip>
                     <v-chip label variant="text" append-icon="mdi-trash-can-outline"
                         @click="allDel">{{ $t('Delete All') }}</v-chip>
                 </div>

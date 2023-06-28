@@ -67,7 +67,8 @@ const DownloadTasks = {
     "Paused": "暂停",
     "Completed": "完成",
     "Unknown": "未知",
-    "No download tasks available at the moment.": "暂无下载任务"
+    "No download tasks available at the moment.": "暂无下载任务",
+    "Add All": "全部添加到管理器",
 }
 const ExploreDownloadBtn = {
     "Please manage the game first.": "请先管理游戏",

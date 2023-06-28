@@ -12,7 +12,7 @@ export const supportedGames: ISupportedGames = {
     installdir: "left4dead2",
     gameName: "Left 4 Dead 2",
     gameExe: 'left4dead2.exe',
-    startExe: 'left4dead2.exe',
+    startExe: 'steam://rungameid/550',
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/12.jpg",
     modType: [
         {

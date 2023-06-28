@@ -43,6 +43,7 @@ async function exportLang() {
         FileHandler.writeFile(join(LocalLang.langFolder, `${key}.json`), JSON.stringify(allLang[key], null, 4))
     })
     ElMessage.success("导出完成~")
+    FileHandler.openFolder(LocalLang.langFolder)
 }
 
 

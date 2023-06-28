@@ -66,6 +66,7 @@ const DownloadTasks = {
     "Waiting": "Waiting",
     "Unknown": "Unknown",
     "No download tasks available at the moment.": "No download tasks available at the moment.",
+    "Add All": "All added to the Manager",
 
 }
 

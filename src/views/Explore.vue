@@ -3,12 +3,13 @@ import { ipcRenderer } from "electron";
 import { useExplore } from "@src/stores/useExplore";
 import { ElMessage } from "element-plus";
 import { watch } from "vue";
+import { useSettings } from "@src/stores/useSettings";
 
 import Search from '@src/components/Explore/Search.vue'
 import ModList from '@src/components/Explore/ModList.vue'
 import Filter from '@src/components/Explore/Filter.vue'
 import TurnPage from "@src/components/Explore/TurnPage.vue";
-import { useSettings } from "@src/stores/useSettings";
+import Header from "@src/components/Explore/Header.vue";
 
 const explore = useExplore()
 const settings = useSettings()
@@ -46,6 +47,7 @@ watch(() => explore.page, () => {
 </script>
 <template>
     <v-container fluid>
+        <Header></Header>
         <Search></Search>
         <Filter></Filter>
         <v-row class="mod-wrap" v-if="explore.mods.length > 0">
