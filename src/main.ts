@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from '@src/App.vue'
-import '@src/samples/node-api'
+// import '@src/samples/node-api'
 
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -13,6 +13,7 @@ import { vuetify } from '@src/plugins/vuetify'
 import router from '@src/router'
 import { createPinia } from 'pinia'
 import i18n from '@src/lang'
+
 
 const app = createApp(App)
 app.use(router)

@@ -1,12 +1,13 @@
 <script lang='ts' setup>
 import { useSettings } from "@src/stores/useSettings";
 import { useManager } from '@src/stores/useManager';
-import { watch } from "vue";
+import { watch, onMounted } from "vue";
 import { Config } from '@src/model/Config'
 import { useDownload } from "@src/stores/useDownload";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
 import { ipcRenderer } from 'electron'
+import { FileHandler } from '@src/model/FileHandler'
 
 const settings = useSettings()
 const download = useDownload()
@@ -50,8 +51,14 @@ watch(() => manager.managerModList, () => {
 ipcRenderer.on('open-gmm-file', (_, args) => {
     console.log(args);
     let path = args[args.length - 1]
-    // console.log(path);
-    manager.addModByGmm(path)
+    // console.log(path);  // gmm://installmod/?id=172999&game=185&name=只狼：影逝二度
+
+    // 判断是否是 gmm://installmod 开头
+    if (path.startsWith("gmm://installmod")) {
+        download.addDownloadByWeb(path)
+    } else if (FileHandler.fileExists(path)) {
+        manager.addModByGmm(path)
+    }
 })
 
 </script>

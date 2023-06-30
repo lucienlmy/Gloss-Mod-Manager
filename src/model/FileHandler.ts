@@ -16,11 +16,21 @@ export class FileHandler {
     public static logFile = path.join(homedir(), 'My Documents', 'Gloss Mod Manager', 'log.txt')
 
     /**
+     * 判断文件是否存在
+     * @param filePath 
+     * @returns 
+     */
+    public static fileExists(filePath: string): boolean {
+        return fs.existsSync(filePath);
+    }
+
+
+    /**
      * 递归创建目录
      * @param dirPath 目录路径
      */
     public static createDirectory(dirPath: string) {
-        if (!fs.existsSync(dirPath)) {
+        if (!this.fileExists(dirPath)) {
             this.createDirectory(path.dirname(dirPath));
             fs.mkdirSync(dirPath);
         }
@@ -32,7 +42,7 @@ export class FileHandler {
      */
     public static async ensureDirectoryExistence(filePath: string, defaultValue: string = '') {
         this.createDirectory(path.dirname(filePath));
-        if (!fs.existsSync(filePath)) {
+        if (!this.fileExists(filePath)) {
             fs.writeFileSync(filePath, defaultValue);
         }
 
@@ -127,7 +137,7 @@ export class FileHandler {
      */
     public static deleteFile(filePath: string) {
         try {
-            if (fs.existsSync(filePath)) {
+            if (this.fileExists(filePath)) {
                 fs.unlinkSync(filePath);
             }
             return true
@@ -173,7 +183,7 @@ export class FileHandler {
                 this.createDirectory(path.dirname(filePath));
 
                 // 判断文件是否存在
-                if (!fs.existsSync(filePath)) {
+                if (!this.fileExists(filePath)) {
                     fs.writeFileSync(filePath, data);
                     resolve(true)
                     return

@@ -101,10 +101,19 @@ async function createWindow() {
         return { action: 'deny' }
     })
 
-    // app.setAsDefaultProtocolClient('gmm', process.execPath, [resolve(process.argv[1])])
+    if (process.defaultApp) {
+        if (process.argv.length >= 1) {
+            app.setAsDefaultProtocolClient('gmm', process.execPath, [resolve(process.argv[1])])
+        }
+    } else {
+        app.setAsDefaultProtocolClient('gmm')
+    }
 
-    app.setAsDefaultProtocolClient('gmm');
 
+    // 稍微等待一下渲染进程
+    setTimeout(() => {
+        app.emit("second-instance", null, process.argv);
+    }, 3000)
 }
 
 app.whenReady().then(createWindow)
@@ -115,13 +124,15 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
 })
 
-app.on('second-instance', () => {
+app.on('second-instance', (event, argv) => {
     if (win) {
         // Focus on the main window if the user tried to open another
         if (win.isMinimized()) win.restore()
         win.focus()
     }
+    win.webContents.send('open-gmm-file', argv)
 })
+
 
 app.on('activate', () => {
     const allWindows = BrowserWindow.getAllWindows()
@@ -130,10 +141,6 @@ app.on('activate', () => {
     } else {
         createWindow()
     }
-})
-
-app.on('second-instance', (event, argv) => {
-    win.webContents.send('open-gmm-file', argv)
 })
 
 
@@ -272,4 +279,9 @@ ipcMain.handle('set-auto-launch', async (event, arg) => {
 ipcMain.handle('user-login', async (event, arg) => {
     let res = await GetData.login(arg.username, arg.password)
     return res
+})
+
+
+ipcMain.on('open-gmm-file', (event, arg) => {
+    win.webContents.send('open-gmm-file', arg)
 })

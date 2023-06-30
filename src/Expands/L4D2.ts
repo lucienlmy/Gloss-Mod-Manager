@@ -9,7 +9,7 @@ import { useManager } from "@src/stores/useManager";
 export const supportedGames: ISupportedGames = {
     gameID: 12,
     steamAppID: 550,
-    installdir: "left4dead2",
+    installdir: "Left 4 Dead 2",
     gameName: "Left 4 Dead 2",
     gameExe: 'left4dead2.exe',
     startExe: 'steam://rungameid/550',

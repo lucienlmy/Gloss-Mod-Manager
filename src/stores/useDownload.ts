@@ -129,6 +129,24 @@ export const useDownload = defineStore('Download', {
                     }
                 }
             }
+        },
+        async addDownloadByWeb(url: string) {
+            if (!url.startsWith("gmm://installmod")) return
+            // let url = gmm://installmod/172999?game=185&name=只狼：影逝二度
+            const params = new URLSearchParams(url.replace("gmm://installmod/", ""));
+            const id = params.get("id");
+            const game = params.get("game");
+            const name = params.get("name");
+            const settings = useSettings()
+
+
+            if (game != (settings.settings.managerGame.gameID).toString()) {
+                ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)
+                return
+            }
+
+            this.addDownloadById(Number(id))
+
         }
     }
 })
