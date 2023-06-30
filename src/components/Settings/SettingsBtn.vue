@@ -32,7 +32,7 @@ function openDownloadCache() {
 }
 
 function openGameFolder() {
-    FileHandler.openFolder(settings.settings.managerGame.gamePath ?? "")
+    FileHandler.openFolder(settings.settings.managerGame?.gamePath ?? "")
 }
 
 async function exportLang() {

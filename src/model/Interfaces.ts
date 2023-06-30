@@ -148,7 +148,7 @@ export interface ISupportedGames extends IGameInfo {
 }
 
 export interface ISettings {
-    managerGame: ISupportedGames
+    managerGame?: ISupportedGames
     modStorageLocation: string
     proxy: string
     // UnzipPath: string

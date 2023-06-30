@@ -7,6 +7,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { computed, ref } from 'vue';
 import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
+import { join } from 'path'
 
 import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
 
@@ -22,7 +23,7 @@ const { t } = useI18n()
 let showInfo = ref(false)
 
 let type = computed<IType | undefined>(() => {
-    return settings.settings.managerGame.modType.find((item) => {
+    return settings.settings.managerGame?.modType.find((item) => {
         return item.id == props.mod.modType
     })
 })
@@ -31,7 +32,8 @@ let type = computed<IType | undefined>(() => {
 
 let info = computed(() => {
     let mod = props.mod
-    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${mod.id}`
+    // let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame?.gameName}\\${mod.id}`
+    let modStorage = join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id.toString())
     let list = [
         { title: t('Name'), content: mod.modName },
         { title: t('Version'), content: mod.modVersion },
@@ -48,7 +50,8 @@ let info = computed(() => {
 })
 
 function open() {
-    let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${props.mod.id}`
+    // let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${props.mod.id}`
+    let modStorage = join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", props.mod.id.toString())
     FileHandler.openFolder(modStorage)
 }
 

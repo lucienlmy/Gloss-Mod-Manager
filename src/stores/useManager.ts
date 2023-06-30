@@ -27,7 +27,7 @@ export const useManager = defineStore('Manager', {
          */
         modStorage() {
             const settings = useSettings()
-            return path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
+            return path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
         },
         /**
         * 游戏路径
@@ -35,7 +35,7 @@ export const useManager = defineStore('Manager', {
         */
         gameStorage() {
             const settings = useSettings()
-            return settings.settings.managerGame.gamePath
+            return settings.settings.managerGame?.gamePath ?? ""
         },
         filterModList(state) {
             if (state.filterType == 0) return state.managerModList.filter((item) => item.modName.indexOf(state.search) != -1)
@@ -119,7 +119,7 @@ export const useManager = defineStore('Manager', {
 
             let target = path.join(
                 settings.settings.modStorageLocation,
-                settings.settings.managerGame.gameName,
+                settings.settings.managerGame?.gameName ?? "",
                 id
             )
 
@@ -156,7 +156,7 @@ export const useManager = defineStore('Manager', {
 
             let target = path.join(
                 settings.settings.modStorageLocation,
-                settings.settings.managerGame.gameName,
+                settings.settings.managerGame?.gameName || "",
                 id
             )
 
@@ -178,7 +178,7 @@ export const useManager = defineStore('Manager', {
                 modFiles: files,
                 modAuthor: task.modAuthor
             }
-            mod.modType = settings.settings.managerGame.checkModType(mod)
+            mod.modType = settings.settings.managerGame?.checkModType(mod)
 
             this.managerModList.push(mod)
             ElMessage.success(`『${task.name}』已添加到管理列表`)
@@ -196,7 +196,7 @@ export const useManager = defineStore('Manager', {
                 weight: 0,
                 modFiles: files,
             }
-            mod.modType = settings.settings.managerGame.checkModType(mod)
+            mod.modType = settings.settings.managerGame?.checkModType(mod)
 
             this.managerModList.push(mod)
             // this.saveModInfo()
@@ -204,21 +204,21 @@ export const useManager = defineStore('Manager', {
         // 保存Mod信息
         saveModInfo() {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
             // console.log(savePath);
             Manager.saveModInfo(this.managerModList, savePath)
         },
         // 获取Mod信息
         async getModInfo() {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName)
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
             this.managerModList = await Manager.getModInfo(savePath)
 
         },
         // 删除Mod
         deleteMod(mod: IModInfo) {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame.gameName, mod.id.toString())
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id.toString())
             let modIndex = this.managerModList.findIndex(item => item.id == mod.id)
             // console.log(savePath);
 
@@ -246,6 +246,11 @@ export const useManager = defineStore('Manager', {
             console.log(info);
 
             const settings = useSettings()
+
+            if (!settings.settings.managerGame) {
+                ElMessage.error('请先选择游戏后再添加Mod')
+                return
+            }
 
             // 检查游戏是否正确
             if (info.gameID != settings.settings.managerGame.gameID) {

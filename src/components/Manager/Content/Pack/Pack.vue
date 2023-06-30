@@ -31,7 +31,7 @@ const gameList = computed(() => {
 manager.packInfo = {
     ...props.mod
 }
-manager.packInfo.gameID = settings.settings.managerGame.gameID
+manager.packInfo.gameID = settings.settings.managerGame?.gameID
 
 const modType = computed(() => {
     return manager.supportedGames.find(item => item.gameID == manager.packInfo.gameID)?.modType

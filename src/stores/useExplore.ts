@@ -43,7 +43,7 @@ export const useExplore = defineStore('Explore', {
         },
         getGameType() {
             const settings = useSettings()
-            ipcRenderer.invoke("get-types", { gameId: settings.settings.managerGame.gameID }).then(data => {
+            ipcRenderer.invoke("get-types", { gameId: settings.settings.managerGame?.gameID }).then(data => {
                 // console.log(data);
                 data.forEach((item: any) => {
                     this.gameTypeList.push({

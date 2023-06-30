@@ -139,6 +139,11 @@ export const useDownload = defineStore('Download', {
             const name = params.get("name");
             const settings = useSettings()
 
+            if (!settings.settings.managerGame) {
+                ElMessage.error(`该Mod是 ${name} 的Mod, 请先在“管理”中选择此游戏.`)
+                return
+            }
+
 
             if (game != (settings.settings.managerGame.gameID).toString()) {
                 ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)

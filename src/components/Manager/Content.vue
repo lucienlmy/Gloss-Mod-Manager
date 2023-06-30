@@ -8,7 +8,7 @@ const manager = useManager()
 const settings = useSettings()
 
 let types = computed(() => {
-    return settings.settings.managerGame.modType
+    return settings.settings.managerGame?.modType ?? []
 })
 
 

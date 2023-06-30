@@ -17,11 +17,11 @@ const settings = useSettings()
 
 if (!props.mod.modType) {
     // console.log(settings.settings.managerGame);
-    props.mod.modType = settings.settings.managerGame.checkModType(props.mod)
+    props.mod.modType = settings.settings.managerGame?.checkModType(props.mod)
 }
 
 let type = computed<IType | undefined>(() => {
-    return settings.settings.managerGame.modType.find((item) => {
+    return settings.settings.managerGame?.modType.find((item) => {
         return item.id == props.mod.modType
     })
 })
@@ -30,7 +30,7 @@ watch(() => props.mod.isInstalled, () => {
     // console.log(props.mod.isInstalled);
 
     if (props.mod.isInstalled) {
-        AppAnalytics.sendEvent("install")
+        AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
         // 安装
         type.value?.install(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {
@@ -64,7 +64,7 @@ let exit_name = ref(false)
             <v-col cols="1">{{ mod.modVersion }}</v-col>
             <v-col cols="2">
                 <!-- 类型 -->
-                <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame.modType"
+                <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame?.modType"
                     :hide-details="true" item-title="name" item-value="id">
                 </v-select>
             </v-col>

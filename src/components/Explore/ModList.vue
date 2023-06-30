@@ -31,8 +31,7 @@ let mod_img = computed(() => {
 <template>
     <v-card class="mod">
         <a :href="`https://mod.3dmgame.com/mod/${mod.id}`" :title="mod.mods_desc">
-            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"
-                :class="{ 'vague': mod.mods_adult_content }"></v-img>
+            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
         </a>
         <v-card-title :title="mod.mods_title">
             <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a>
