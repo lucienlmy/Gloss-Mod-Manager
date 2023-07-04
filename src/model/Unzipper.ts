@@ -7,8 +7,6 @@ import { ipcRenderer } from 'electron'
 import { exec, execSync } from 'child_process';
 import path from 'path'
 import { FileHandler } from '@src/model/FileHandler'
-import AdmZip from 'adm-zip'
-import fs from 'fs'
 import { useSettings } from '@src/stores/useSettings';
 
 export class Unzipper {
@@ -70,7 +68,7 @@ export class Unzipper {
             })
             myStream.on('end', function () {
                 let data = FileHandler.readFile(path.join(target, file))
-                resolve(data)
+                resolve(data ?? "")
             })
         })
     }

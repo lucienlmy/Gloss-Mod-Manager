@@ -167,8 +167,12 @@ export class FileHandler {
      * @returns 
      */
     public static readFile(filePath: string) {
-        let data = fs.readFileSync(filePath, 'utf-8')
-        return data
+        if (this.fileExists(filePath)) {
+            let data = fs.readFileSync(filePath, 'utf-8')
+            return data
+        } else {
+            return null
+        }
     }
 
     /**
@@ -318,5 +322,30 @@ export class FileHandler {
     // 运行程序
     public static runExe(exe: string) {
         exec(`"${exe}"`)
+    }
+
+    // 创建软连接
+    public static createLink(target: string, path: string) {
+        // symlinkSync
+        try {
+            fs.symlinkSync(target, path, 'junction');
+            return true
+        } catch (error) {
+            ElMessage.error(`创建软连接失败：${error}`)
+            this.writeLog(error as string)
+            return false
+        }
+    }
+
+    // 移除软连接
+    public static removeLink(path: string) {
+        try {
+            fs.unlinkSync(path)
+            return true
+        } catch (error) {
+            ElMessage.error(`移除软连接失败：${error}`)
+            this.writeLog(error as string)
+            return false
+        }
     }
 }

@@ -177,6 +177,9 @@ const Games = {
     "Tale of Immortal": "Tale of Immortal",
     "The Scroll Of Taiwu": "The Scroll Of Taiwu",
     "MiChangSheng": "Mi Chang Sheng",
+    "MonsterHunterRise": "Monster Hunter Rise",
+    "SkyrimSE": "Skyrim Special Edition",
+    "The Sims 4": "The Sims 4",
 }
 
 const lang = {

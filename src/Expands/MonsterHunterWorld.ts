@@ -167,7 +167,7 @@ export const supportedGames: ISupportedGames = {
         let nativePC = false
         let plugins = false
         mod.modFiles.forEach(item => {
-            if (item.includes('nativePC')) nativePC = true
+            if (item.toLowerCase().includes('natives')) nativePC = true
             // 判断后缀是否有 dll
             if (item.endsWith('.dll')) plugins = true
         })

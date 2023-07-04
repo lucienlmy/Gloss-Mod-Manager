@@ -175,6 +175,9 @@ const Games = {
     "Tale of Immortal": "鬼谷八荒",
     "The Scroll Of Taiwu": "太吾绘卷",
     "MiChangSheng": "觅长生",
+    "MonsterHunterRise": "怪物猎人: 崛起",
+    "SkyrimSE": "上古卷轴5: 重制版",
+    "The Sims 4": "模拟人生4",
 }
 
 const lang = {

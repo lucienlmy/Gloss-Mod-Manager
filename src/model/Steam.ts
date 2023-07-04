@@ -26,23 +26,22 @@ export class Steam {
         // console.log(steamPath);
         // C:\Program Files (x86)\Steam\steamapps\libraryfolders.vdf
         let fileData = FileHandler.readFile(path.join(steamPath, 'steamapps', 'libraryfolders.vdf'))
-        let data: any = parse(fileData)
-
-        let gameRootPath = ''
-        for (const folderId in data.libraryfolders) {
-            const folder = data.libraryfolders[folderId];
-            // console.log(folder);
-            if (!folder.apps) continue;
-            if (folder.apps.hasOwnProperty(steamAppID)) {
-                // console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
-                gameRootPath = folder.path
-                break;
+        if (fileData) {
+            let data: any = parse(fileData)
+            let gameRootPath = ''
+            for (const folderId in data.libraryfolders) {
+                const folder = data.libraryfolders[folderId];
+                // console.log(folder);
+                if (!folder.apps) continue;
+                if (folder.apps.hasOwnProperty(steamAppID)) {
+                    // console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
+                    gameRootPath = folder.path
+                    break;
+                }
             }
-        }
-        // console.log(installdir);
-
-        if (gameRootPath != '') {
-            return path.join(gameRootPath, 'steamapps', 'common', installdir)
+            if (gameRootPath != '') {
+                return path.join(gameRootPath, 'steamapps', 'common', installdir)
+            }
         }
 
         return undefined

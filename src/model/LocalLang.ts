@@ -44,8 +44,7 @@ export class LocalLang {
 
             let list = FileHandler.readFile(item)
             // console.log(list);
-
-            data[`${name}_local`] = JSON.parse(list)
+            data[`${name}_local`] = JSON.parse(list ?? "{}")
             // console.log(data);
 
         })
