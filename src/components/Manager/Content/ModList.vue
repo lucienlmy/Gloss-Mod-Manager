@@ -49,6 +49,7 @@ watch(() => props.mod.isInstalled, () => {
 
 let exit_name = ref(false)
 
+
 </script>
 <template>
     <v-col cols="12">

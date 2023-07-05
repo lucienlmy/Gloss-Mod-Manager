@@ -2,7 +2,7 @@
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
-import { computed } from "vue";
+import { computed, watch } from "vue";
 
 const manager = useManager()
 const settings = useSettings()
@@ -28,7 +28,6 @@ async function drop(event: DragEvent) {
     }
     // console.log(manager.managerModList);
 }
-
 
 </script>
 <template>
