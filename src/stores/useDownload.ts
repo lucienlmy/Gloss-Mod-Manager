@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { extname } from "node:path";
+import { extname, join } from "node:path";
 import type { IDownloadTask } from "@src/model/Interfaces";
 import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
@@ -124,7 +124,15 @@ export const useDownload = defineStore('Download', {
 
                         if (settings.settings.autoInstall) {
                             const manager = useManager()
-                            manager.addModByTask(task)
+
+                            if (extname(task.link) == '.gmm') {
+                                let file = join(settings.settings.modStorageLocation, 'cache', `${task.id}.gmm`)
+                                manager.addModByGmm(file)
+                            } else {
+                                manager.addModByTask(task)
+                            }
+
+
                         }
                     }
                 }

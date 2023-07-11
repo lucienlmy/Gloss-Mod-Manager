@@ -1,13 +1,13 @@
 import { FileHandler } from "@src/model/FileHandler";
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
-import { join, basename, extname } from 'path'
+import { join, basename, extname, parse } from 'path'
 import { statSync } from "fs";
 import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
 
 function handlePlugins(mod: IModInfo, installPath: string, split: string, isInstall: boolean) {
-    if (isInstall) if (!Manager.checkInstalled("REFramework", 197869)) return false
+    if (isInstall) if (!Manager.checkInstalled("REFramework", 199521)) return false
     let res: IState[] = []
     const manager = useManager()
     mod.modFiles.forEach(async item => {
@@ -40,7 +40,7 @@ function handleMod(mod: IModInfo, installPath: string, isInstall: boolean) {
             let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
 
             if (statSync(modStorage).isFile()) {
-                // 获取 nativePC 后的路径, 包含 nativePC
+                // 获取 natives 后的路径, 包含 natives
                 let path = modStorage.split(/natives/i)[1]
                 if (path) {
                     let gameStorage = join(manager.gameStorage ?? "", installPath, path ?? "")
@@ -106,8 +106,8 @@ export const supportedGames: ISupportedGames = {
         },
         {
             id: 4,
-            name: "nativePC",
-            installPath: join('nativePC'),
+            name: "natives",
+            installPath: join('natives'),
             async install(mod) {
                 return handleMod(mod, this.installPath ?? "", true)
             },
@@ -128,6 +128,17 @@ export const supportedGames: ISupportedGames = {
             }
         },
         {
+            id: 6,
+            name: "组合插件",
+            installPath: join('reframework'),
+            async install(mod) {
+                return handlePlugins(mod, this.installPath ?? "", "reframework", true)
+            },
+            async uninstall(mod) {
+                return handlePlugins(mod, this.installPath ?? "", "reframework", false)
+            }
+        },
+        {
             id: 99,
             name: "未知",
             installPath: join(''),
@@ -145,11 +156,13 @@ export const supportedGames: ISupportedGames = {
         let luaPlugins = false
         let dllPlugins = false
         let pak = false
+        let reframework = false
 
-        if (mod.webId == 197869) return 1
+        if (mod.webId == 199521) return 1
 
         mod.modFiles.forEach(item => {
             if (item.toLowerCase().includes('natives')) natives = true
+            if (item.toLowerCase().includes('reframework')) reframework = true
             if (extname(item) == '.lua') luaPlugins = true
             if (extname(item) == '.dll') dllPlugins = true
             if (extname(item) == '.pak') pak = true
@@ -157,6 +170,7 @@ export const supportedGames: ISupportedGames = {
 
         // if (natives && plugins) return 4
 
+        if (reframework) return 6
         if (luaPlugins) return 2
         if (dllPlugins) return 3
         if (natives) return 4

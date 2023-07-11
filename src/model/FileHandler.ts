@@ -338,9 +338,10 @@ export class FileHandler {
     }
 
     // 移除软连接
-    public static removeLink(path: string) {
+    public static removeLink(linkPath: string) {
         try {
-            fs.unlinkSync(path)
+            this.createDirectory(path.join(linkPath, '..'))
+            fs.unlinkSync(linkPath)
             return true
         } catch (error) {
             ElMessage.error(`移除软连接失败：${error}`)

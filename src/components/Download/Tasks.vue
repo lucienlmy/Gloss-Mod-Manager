@@ -6,7 +6,7 @@ import { DownloadStatus } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { useMain } from '@src/stores/useMain';
 import { useSettings } from '@src/stores/useSettings';
-import { extname } from "node:path";
+import { extname, join } from "node:path";
 import { computed } from "vue";
 import { h, ref } from 'vue'
 import { ElMessageBox, ElSwitch } from 'element-plus'
@@ -99,8 +99,15 @@ function openFile() {
     FileHandler.openFolder(modStorage.value)
 }
 function install() {
-    // console.log('downloadProcess', downloadProcess);
-    manager.addModByTask(props.task)
+
+    if (extname(props.task.link) == '.gmm') {
+        let file = join(settings.settings.modStorageLocation, 'cache', `${props.task.id}.gmm`)
+        manager.addModByGmm(file)
+    } else {
+        // console.log('downloadProcess', downloadProcess);
+        manager.addModByTask(props.task)
+    }
+
 }
 </script>
 <template>
