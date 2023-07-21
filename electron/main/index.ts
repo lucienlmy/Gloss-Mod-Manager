@@ -6,7 +6,9 @@ import { GetData } from '../model/GetData'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
 import { existsSync } from 'fs'
+import dotenv from 'dotenv'
 
+dotenv.config();
 
 process.env.DIST_ELECTRON = join(__dirname, '..')
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')

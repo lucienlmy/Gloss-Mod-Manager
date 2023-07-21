@@ -59,7 +59,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     gameID: 275,
     steamAppID: 1245620,
-    installdir: "Elden Ring",
+    installdir: join('Elden Ring', 'Game'),
     gameName: "ELDEN RING",
     gameExe: 'eldenring.exe',
     startExe: "modengine2_launcher.exe",

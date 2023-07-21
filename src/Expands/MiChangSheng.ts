@@ -36,9 +36,11 @@ async function handlePlugins(mod: IModInfo, installPath: string, isInstall: bool
         folder.forEach(item => {
             let target = join(gameStorage, basename(item))
             if (isInstall) {
-                FileHandler.copyFolder(item, target)
+                // FileHandler.copyFolder(item, target)
+                FileHandler.createLink(item, target)
             } else {
-                FileHandler.deleteFolder(target)
+                // FileHandler.deleteFolder(target)
+                FileHandler.removeLink(target)
             }
         })
     }

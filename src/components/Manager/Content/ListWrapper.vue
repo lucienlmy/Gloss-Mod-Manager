@@ -2,11 +2,11 @@
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
-import { computed, watch } from "vue";
+import { ref } from "vue";
 
 const manager = useManager()
 const settings = useSettings()
-
+let loading = ref(false)
 // 移入时触发 第一次
 function dragenter(event: DragEvent) {
 }
@@ -22,9 +22,11 @@ function dragover() { }
 async function drop(event: DragEvent) {
     let files = event.dataTransfer?.files
     if (files) {
+        loading.value = true
         for (let i = 0; i < files.length; i++) {
             await manager.addModFile(files[i].path)
         }
+        loading.value = false
     }
     // console.log(manager.managerModList);
 }
@@ -33,24 +35,30 @@ async function drop(event: DragEvent) {
 <template>
     <div class="list-wrap" @dragenter.prevent="dragenter($event)" @dragleave.prevent="dragleave"
         @drop.prevent="drop($event)" @dragover.prevent="dragover">
-        <div class="mod-list" v-if="manager.filterModList.length > 0">
-            <v-col cols="12">
-                <v-row>
-                    <v-col cols="6">{{ $t('Name') }}</v-col>
-                    <v-col cols="1">{{ $t('Version') }}</v-col>
-                    <v-col cols="2" class="text-center">{{ $t('Type') }}</v-col>
-                    <v-col cols="2" class="text-center">{{ $t('Status') }}</v-col>
-                    <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
-                </v-row>
-            </v-col>
-            <ContentModList v-for="item in manager.filterModList" :key="item.md5" :mod="item"></ContentModList>
-        </div>
-        <div class="empty" v-else>
-            <div class="empty-hint" @click="manager.selectMoeFiles">
-                <p>{{ $t('Drag and drop the Mod compressed package here for management') }}</p>
-                <p>{{ $t('Supports zpi, rar, 7z file types') }}</p>
+        <v-card :loading="loading">
+            <template v-slot:loader="{ isActive }">
+                <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
+            </template>
+            <div class="mod-list" v-if="manager.filterModList.length > 0">
+                <v-col cols="12">
+                    <v-row>
+                        <v-col cols="6">{{ $t('Name') }}</v-col>
+                        <v-col cols="1">{{ $t('Version') }}</v-col>
+                        <v-col cols="2" class="text-center">{{ $t('Type') }}</v-col>
+                        <v-col cols="2" class="text-center">{{ $t('Status') }}</v-col>
+                        <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
+                    </v-row>
+                </v-col>
+                <ContentModList v-for="item in manager.filterModList" :key="item.md5" :mod="item"></ContentModList>
             </div>
-        </div>
+            <div class="empty" v-else>
+                <div class="empty-hint" @click="manager.selectMoeFiles">
+                    <p>{{ $t('Drag and drop the Mod compressed package here for management') }}</p>
+                    <p>{{ $t('Supports zpi, rar, 7z file types') }}</p>
+                </div>
+            </div>
+        </v-card>
+
     </div>
 </template>
 <script lang='ts'>

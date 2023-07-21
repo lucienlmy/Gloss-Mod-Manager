@@ -325,10 +325,11 @@ export class FileHandler {
     }
 
     // 创建软连接
-    public static createLink(target: string, path: string) {
+    public static createLink(target: string, destPath: string) {
         // symlinkSync
         try {
-            fs.symlinkSync(target, path, 'junction');
+            this.createDirectory(path.join(destPath, '..'))
+            fs.symlinkSync(target, destPath, 'junction');
             return true
         } catch (error) {
             ElMessage.error(`创建软连接失败：${error}`)
@@ -348,5 +349,10 @@ export class FileHandler {
             this.writeLog(error as string)
             return false
         }
+    }
+
+    // 将路径转换为数组
+    public static pathToArray(filePath: string) {
+        return filePath.split(path.sep)
     }
 }

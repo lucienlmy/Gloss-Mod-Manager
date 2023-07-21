@@ -55,7 +55,7 @@ async function startGame() {
             exec(`start ${startExe}`)
         } else {
             startExe = join(settings.settings.managerGame?.gamePath ?? "", startExe)
-            // console.log(startExe);
+            console.log(startExe);
             spawn(startExe)
         }
         ElMessage.success("启动成功~")

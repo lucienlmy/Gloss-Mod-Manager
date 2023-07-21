@@ -180,6 +180,8 @@ const Games = {
     "MonsterHunterRise": "Monster Hunter Rise",
     "SkyrimSE": "Skyrim Special Edition",
     "The Sims 4": "The Sims 4",
+    "The Witcher 3": "The Witcher 3",
+    "Fallout 4": "Fallout 4",
 }
 
 const lang = {

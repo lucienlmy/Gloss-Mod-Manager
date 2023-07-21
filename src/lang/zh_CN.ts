@@ -178,6 +178,8 @@ const Games = {
     "MonsterHunterRise": "怪物猎人: 崛起",
     "SkyrimSE": "上古卷轴5: 重制版",
     "The Sims 4": "模拟人生4",
+    "The Witcher 3": "巫师3: 狂猎",
+    "Fallout 4": "辐射4",
 }
 
 const lang = {
