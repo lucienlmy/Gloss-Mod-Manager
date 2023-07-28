@@ -180,6 +180,7 @@ const Games = {
     "The Sims 4": "模拟人生4",
     "The Witcher 3": "巫师3: 狂猎",
     "Fallout 4": "辐射4",
+    "MountBlade2": "骑马与砍杀2: 领主",
 }
 
 const lang = {

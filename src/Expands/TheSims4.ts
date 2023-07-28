@@ -2,9 +2,6 @@ import { FileHandler } from "@src/model/FileHandler";
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { useManager } from "@src/stores/useManager";
 import { join, basename, extname } from 'path'
-import { statSync, symlinkSync } from "fs";
-import { Manager } from "@src/model/Manager";
-import { ElMessage } from "element-plus";
 import { homedir } from "os";
 
 function handleMod(mod: IModInfo, isInstall: boolean) {

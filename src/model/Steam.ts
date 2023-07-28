@@ -34,7 +34,7 @@ export class Steam {
                 // console.log(folder);
                 if (!folder.apps) continue;
                 if (folder.apps.hasOwnProperty(steamAppID)) {
-                    // console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
+                    console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
                     gameRootPath = folder.path
                     break;
                 }

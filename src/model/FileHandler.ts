@@ -321,7 +321,9 @@ export class FileHandler {
 
     // 运行程序
     public static runExe(exe: string) {
-        exec(`"${exe}"`)
+        let folder = path.dirname(exe)
+        let name = path.basename(exe)
+        exec(`cd "${folder}" && ${name} `)
     }
 
     // 创建软连接

@@ -9,6 +9,7 @@ import { spawn, exec } from 'child_process';
 import { ElMessage } from 'element-plus';
 import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
 import { useUser } from '@src/stores/useUser';
+import ManagerSort from '@src/components/Manager/Sort.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -56,10 +57,9 @@ async function startGame() {
         } else {
             startExe = join(settings.settings.managerGame?.gamePath ?? "", startExe)
             console.log(startExe);
-            spawn(startExe)
+            FileHandler.runExe(startExe)
         }
         ElMessage.success("启动成功~")
-
     }
 }
 
@@ -85,6 +85,7 @@ async function startGame() {
                         <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
                             append-icon="mdi-folder-open-outline"></v-list-item>
                         <ContentPack :mod="{}"></ContentPack>
+                        <ManagerSort></ManagerSort>
                     </v-list>
                 </v-menu>
             </template>

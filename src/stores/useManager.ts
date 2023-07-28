@@ -18,7 +18,8 @@ export const useManager = defineStore('Manager', {
         filterType: 0 as number,
         search: "",
         packDialog: false,
-        packInfo: {} as IModInfo
+        packInfo: {} as IModInfo,
+        dragIndex: 0
     }),
     getters: {
         /**

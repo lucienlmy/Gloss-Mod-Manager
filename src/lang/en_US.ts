@@ -182,6 +182,7 @@ const Games = {
     "The Sims 4": "The Sims 4",
     "The Witcher 3": "The Witcher 3",
     "Fallout 4": "Fallout 4",
+    "MountBlade2": "Mount & Blade II: Bannerlord",
 }
 
 const lang = {

@@ -3,11 +3,9 @@
  */
 
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
-import axios from "axios";
 import { basename, join } from "node:path"
 import { FileHandler } from "@src/model/FileHandler"
 import { statSync } from "fs";
-import { Manager } from "@src/model/Manager"
 import { useManager } from "@src/stores/useManager";
 import { ElMessage } from "element-plus";
 
@@ -72,8 +70,8 @@ export const supportedGames: ISupportedGames = {
             rootPath: join("..", "..")
         }
     ],
-    // startExe: join("bin", "x64", "witcher3.exe"),
-    startExe: "REDprelauncher.exe",
+    startExe: join("bin", "x64", "witcher3.exe"),
+    // startExe: "REDprelauncher.exe",
     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/4a.jpg",
     modType: [
         {

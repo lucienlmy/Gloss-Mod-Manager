@@ -1,11 +1,12 @@
 /**
- * @description 辐射4 安装支持
+ * @description 骑马与砍杀2 安装支持
  */
 
 import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { basename, join, extname, dirname } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler"
 import { statSync } from "fs";
+import { Manager } from "@src/model/Manager"
 import { useManager } from "@src/stores/useManager";
 import { ElMessage } from "element-plus";
 
@@ -16,7 +17,7 @@ function getModFolder(mod: IModInfo) {
         const item = mod.modFiles[index];
         let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
         if (statSync(modStorage).isFile()) {
-            if (extname(modStorage) == '.esp') {
+            if (basename(modStorage).toLowerCase() == 'submodule.xml') {
                 modFolder = dirname(modStorage)
                 break
             }
@@ -30,63 +31,63 @@ function handleMods(mod: IModInfo, installPath: string, isInstall: boolean) {
 
     let modFolder = getModFolder(mod)
     const manager = useManager()
-    let res: IState[] = []
-    mod.modFiles.forEach(async item => {
-        try {
-            let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
-            if (statSync(modStorage).isFile()) {
-                // console.log(modStorage);
-                // 从 modStorage 中移除 modFolder
-                let gamePath = modStorage.replace(modFolder, "")
-                let target = join(manager.gameStorage ?? "", installPath, gamePath)
-                // console.log(target);
-                if (isInstall) {
-                    let state = await FileHandler.copyFile(modStorage, target)
-                    res.push({ file: item, state: state })
-                } else {
-                    let state = FileHandler.deleteFile(target)
-                    res.push({ file: item, state: state })
-                }
-            }
-        } catch (error) {
-            res.push({ file: item, state: false })
-        }
 
-    })
+    let gameStorage = join(manager.gameStorage ?? "", installPath, basename(modFolder))
 
-    return res
+    if (isInstall) return FileHandler.createLink(modFolder, gameStorage)
+    else return FileHandler.removeLink(gameStorage)
+
 }
 
 
 export const supportedGames: ISupportedGames = {
-    gameID: 6,
-    steamAppID: 377160,
-    installdir: join("Fallout 4"),
-    gameName: "Fallout 4",
+    gameID: 225,
+    steamAppID: 261550,
+    installdir: join("Mount & Blade II Bannerlord", "bin", "Win64_Shipping_Client"),
+    gameName: "MountBlade2",
     gameExe: [
         {
-            name: '"Fallout4.exe"',
-            rootPath: ""
+            name: '"Bannerlord.exe"',
+            rootPath: join('..', '..')
         },
         {
-            name: "Fallout4Launcher.exe",
-            rootPath: ""
+            name: "Bannerlord.Native.exe",
+            rootPath: join('..', '..')
+        },
+        {
+            name: "Launcher.Native.exe",
+            rootPath: join('..', '..')
+        },
+        {
+            name: "TaleWorlds.MountAndBlade.Launcher.exe",
+            rootPath: join('..', '..')
+        },
+        {
+            name: "TaleWorlds.MountAndBlade.Launcher.Multiplayer.exe",
+            rootPath: join('..', '..')
+        },
+        {
+            name: "TaleWorlds.MountAndBlade.Launcher.Singleplayer.exe",
+            rootPath: join('..', '..')
+        },
+        {
+            name: "TaleWorlds.MountAndBlade.SteamWorkshop.exe",
+            rootPath: join('..', '..')
         }
     ],
-    // startExe: join('bin', 'x64', 'witcher3.exe'),
-    startExe: "Fallout4.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6b.png",
+    startExe: join("bin", "Win64_Shipping_Client", "TaleWorlds.MountAndBlade.Launcher.exe"),
+    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/225.png",
     modType: [
         {
             id: 1,
-            name: 'esp',
-            installPath: 'Data',
+            name: "Modules",
+            installPath: "Modules",
             async install(mod) {
                 return handleMods(mod, this.installPath ?? "", true)
             },
             async uninstall(mod) {
                 return handleMods(mod, this.installPath ?? "", false)
-            },
+            }
         },
         {
             id: 99,
@@ -102,13 +103,13 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     checkModType(mod) {
-        let esp = false
+        let modules = false
 
         mod.modFiles.forEach(item => {
-            if (extname(item) == '.esp') esp = true
+            if (basename(item).toLowerCase() == 'submodule.xml') modules = true
         })
 
-        if (esp) return 1
+        if (modules) return 1
 
         return 99
     }

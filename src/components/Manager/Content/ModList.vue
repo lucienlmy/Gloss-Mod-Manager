@@ -8,7 +8,8 @@ import { AppAnalytics } from "@src/model/Analytics"
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
 
 const props = defineProps<{
-    mod: IModInfo
+    mod: IModInfo,
+    index: number
 }>()
 
 const manager = useManager()
@@ -48,37 +49,75 @@ watch(() => props.mod.isInstalled, () => {
 })
 
 let exit_name = ref(false)
+// let dragIndex = 0
+// let index = props.index
+
+
+function dragstart(e: any, index: number) {
+    e.stopPropagation()
+    manager.dragIndex = index
+    setTimeout(() => {
+        e.target.classList.add('moveing')
+    }, 0)
+}
+function dragenter(e: any, index: number) {
+    e.preventDefault()
+    // 拖拽到原位置时不触发
+    if (manager.dragIndex !== index) {
+
+        const source = manager.managerModList[manager.dragIndex];
+
+        manager.managerModList.splice(manager.dragIndex, 1);
+        manager.managerModList.splice(index, 0, source);
+
+        // 更新节点位置
+        manager.dragIndex = index
+    }
+}
+function dragover(e: any) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+}
+function dragend(e: any) {
+    e.target.classList.remove('moveing')
+}
+
+
 
 
 </script>
 <template>
-    <v-col cols="12">
-        <v-row class="mod-list">
-            <v-col cols="6" class="mod-name">
-                <!-- 名称 -->
-                <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
-                    {{ mod.modName }} <v-btn variant="text" class="exit-btn" @click="exit_name = true"
-                        icon="mdi-circle-edit-outline"></v-btn> </p>
-                <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"
-                    variant="solo-filled" :hide-details="true"></v-text-field>
-            </v-col>
-            <v-col cols="1">{{ mod.modVersion }}</v-col>
-            <v-col cols="2">
-                <!-- 类型 -->
-                <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame?.modType"
-                    :hide-details="true" item-title="name" item-value="id">
-                </v-select>
-            </v-col>
-            <v-col cols="2">
-                <!-- 安装 -->
-                <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                    :hide-details="true" color="#0288D1"></v-switch>
-            </v-col>
-            <v-col cols="1">
-                <ContentModMenu :mod="mod"></ContentModMenu>
-            </v-col>
-        </v-row>
-    </v-col>
+    <div class="wrap">
+        <v-col cols="12">
+            <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
+                @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
+                <v-col cols="6" class="mod-name">
+                    <!-- 名称 -->
+                    <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        {{ mod.modName }}
+                        <!-- <v-btn variant="text" class="exit-btn" @click="exit_name = true" icon="mdi-circle-edit-outline"></v-btn> -->
+                    </p>
+                    <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"
+                        variant="solo-filled" :hide-details="true"></v-text-field>
+                </v-col>
+                <v-col cols="1">{{ mod.modVersion }}</v-col>
+                <v-col cols="2">
+                    <!-- 类型 -->
+                    <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame?.modType"
+                        :hide-details="true" item-title="name" item-value="id">
+                    </v-select>
+                </v-col>
+                <v-col cols="2">
+                    <!-- 安装 -->
+                    <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
+                        :hide-details="true" color="#0288D1"></v-switch>
+                </v-col>
+                <v-col cols="1">
+                    <ContentModMenu :mod="mod"></ContentModMenu>
+                </v-col>
+            </v-row>
+        </v-col>
+    </div>
 </template>
 <script lang='ts'>
 
@@ -87,18 +126,19 @@ export default {
 }
 </script>
 <style lang='less' scoped>
+.wrap {
+    height: 80px;
+
+}
+
 .mod-list {
     display: flex;
     align-items: center;
     transition: all 0.3s;
 
-
-
     &:hover {
         // 底部阴影
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-
-
     }
 
     .mod-name {
@@ -112,5 +152,9 @@ export default {
             }
         }
     }
+}
+
+.moveing {
+    opacity: 0;
 }
 </style>

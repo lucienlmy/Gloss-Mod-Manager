@@ -49,7 +49,10 @@ async function drop(event: DragEvent) {
                         <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
                     </v-row>
                 </v-col>
-                <ContentModList v-for="item in manager.filterModList" :key="item.md5" :mod="item"></ContentModList>
+                <TransitionGroup name="list" tag="div" class="container">
+                    <ContentModList v-for="(item, index) in manager.filterModList" :key="item.md5" :mod="item"
+                        :index="index"></ContentModList>
+                </TransitionGroup>
             </div>
             <div class="empty" v-else>
                 <div class="empty-hint" @click="manager.selectMoeFiles">
@@ -76,5 +79,12 @@ export default {
 
 .empty-hint {
     flex-direction: column;
+}
+
+.list-move,
+/* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.2s ease;
 }
 </style>
