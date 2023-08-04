@@ -47,7 +47,7 @@ export const supportedGames: ISupportedGames = {
     gameName: "MountBlade2",
     gameExe: [
         {
-            name: '"Bannerlord.exe"',
+            name: "Bannerlord.exe",
             rootPath: join('..', '..')
         },
         {

@@ -146,6 +146,9 @@ const ManagerHeader = {
     "Open Mod Folder": "Open Folder",
     "Launch Game": "Launch Game",
     "Search Mod": "Search Mod",
+    "sort by": "Sort by",
+    "sort by {0}": "Sort by {0}",
+    "state": "state",
 }
 
 const Settings = {

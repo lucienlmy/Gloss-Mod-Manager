@@ -131,8 +131,6 @@ export const useDownload = defineStore('Download', {
                             } else {
                                 manager.addModByTask(task)
                             }
-
-
                         }
                     }
                 }

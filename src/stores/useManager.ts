@@ -110,7 +110,9 @@ export const useManager = defineStore('Manager', {
             let id = this.maxID.toString()
             console.log(id);
 
-            let md5 = await FileHandler.getFileMd5(file)
+            let md5 = await FileHandler.getFileMd5(file).catch(err => {
+                return ''
+            })
 
             // 检查是否已经添加
             if (this.isAdded(md5)) {
@@ -146,7 +148,9 @@ export const useManager = defineStore('Manager', {
                 return
             }
             const modStorage = `${settings.settings.modStorageLocation}\\cache\\${task.id}${path.extname(task.link)}`
-            let md5 = await FileHandler.getFileMd5(modStorage)
+            let md5 = await FileHandler.getFileMd5(modStorage).catch(err => {
+                return ''
+            })
             // 检查是否已经添加
             if (this.isAdded(md5)) {
                 ElMessage.error(`您已经添加过 『${path.basename(task.name)}』 这款Mod了!`)

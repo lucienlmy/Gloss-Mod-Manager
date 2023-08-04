@@ -321,9 +321,13 @@ export class FileHandler {
 
     // 运行程序
     public static runExe(exe: string) {
-        let folder = path.dirname(exe)
-        let name = path.basename(exe)
-        exec(`cd "${folder}" && ${name} `)
+        let { root, dir: folder, base: name } = path.parse(exe)
+        // 去除 root 中的 \
+        root = root.replace(/\\/g, '')
+
+        let cmd = `${root} && cd "${folder}" && "${name}" `;
+        console.log(cmd);
+        exec(cmd)
     }
 
     // 创建软连接

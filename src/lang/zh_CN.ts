@@ -143,6 +143,9 @@ const ManagerHeader = {
     "Open Mod Folder": "打开文件夹",
     "Launch Game": "启动游戏",
     "Search Mod": "搜索Mod",
+    "sort by": "排序方式",
+    "sort by {0}": "按{0}排序",
+    "state": "状态",
 }
 
 const Settings = {

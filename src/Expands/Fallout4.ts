@@ -65,7 +65,7 @@ export const supportedGames: ISupportedGames = {
     gameName: "Fallout 4",
     gameExe: [
         {
-            name: '"Fallout4.exe"',
+            name: "Fallout4.exe",
             rootPath: ""
         },
         {

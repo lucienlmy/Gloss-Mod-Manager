@@ -44,7 +44,11 @@ function select(item: IGameInfo) {
 
             // 判断 supportedGames 中是否有该游戏
             let supportedGame = manager.supportedGames.find((item) => {
-                return item.gameExe === name
+                if (typeof (item.gameExe) == 'string') {
+                    return item.gameExe === name
+                } else {
+                    return item.gameExe.find(item => item.name === name)
+                }
             })
             if (supportedGame) {
                 settings.settings.managerGame = supportedGame
@@ -54,24 +58,7 @@ function select(item: IGameInfo) {
                 manager.getModInfo()
                 AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
             } else {
-                let exe: IGameExe | undefined
-                supportedGame = manager.supportedGames.find(item => {
-                    if (typeof (item.gameExe) != 'string') {
-                        exe = item.gameExe.find(item => item.name === name)
-                        return exe ? true : false
-                    }
-                })
-                if (supportedGame && exe) {
-                    let path = join(filePath, exe.rootPath)
-                    settings.settings.managerGame = supportedGame
-                    settings.settings.managerGame.gamePath = dirname(path)
-                    console.log(settings.settings);
-                    manager.selectGameDialog = false
-                    manager.getModInfo()
-                    AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
-                } else {
-                    ElMessage.error('您选择的游戏我们暂时不支持..')
-                }
+                ElMessage.error('您选择的游戏我们暂时不支持..')
             }
         }
     })
