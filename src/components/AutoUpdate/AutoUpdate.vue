@@ -39,10 +39,21 @@ async function checkUpdates() {
     if (!isLatestVersion(Version.value[0], data.value.mods_version)) {
         haveUpdate.value = true
         dialog.value = true
-        let mods_content = data.value.mods_content
-        // 获取字符串 ### 更新日志 之后的内容
-        let index = mods_content.indexOf('### 更新日志')
-        updateContent.value = mods_content.substring(index + 8)
+        // let mods_content = data.value.mods_content
+        // // 获取字符串 ### 更新日志 之后的内容
+        // let index = mods_content.indexOf('### 更新日志')
+        // updateContent.value = mods_content.substring(index + 8)
+
+        fetch('https://p.aoe.top/githubusercontent/GlossMod/Gloss-Mod-Manager-info/main/CHANGELOG.md').then(async res => {
+            let data = await res.text()
+
+            // 移除 ## 更新日志
+            data = data.replace('## 更新日志', '')
+
+            updateContent.value = data;
+
+        })
+
     }
 }
 checkUpdates()

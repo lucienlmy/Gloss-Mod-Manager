@@ -1,6 +1,6 @@
 {
   "name": "gmm",
-  "version": "1.5.3",
+  "version": "1.6.0",
   "main": "dist-electron/main/index.js",
   "description": "Gloss Mod Manager",
   "author": "3DMGAME <mod@3dmgame.com>",
@@ -56,8 +56,12 @@
   },
   "dependencies": {
     "7z-win": "^1.0.6",
+    "@types/xml2js": "^0.4.11",
     "auto-launch": "^5.0.5",
     "axios": "^1.4.0",
-    "dotenv-expand": "^10.0.0"
+    "dotenv-expand": "^10.0.0",
+    "edge-js": "^19.3.0",
+    "electron-edge-js": "^23.0.0",
+    "xml2js": "^0.6.2"
   }
 }

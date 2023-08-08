@@ -17,7 +17,7 @@ export const useDownload = defineStore('Download', {
         searchName: "",
     }),
     getters: {
-        configPath() {
+        configPath(): string {
             const settings = useSettings()
             return `${settings.settings.modStorageLocation}\\cache\\download.json`
         }

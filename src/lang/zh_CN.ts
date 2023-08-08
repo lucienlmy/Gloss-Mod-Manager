@@ -184,6 +184,7 @@ const Games = {
     "The Witcher 3": "巫师3: 狂猎",
     "Fallout 4": "辐射4",
     "MountBlade2": "骑马与砍杀2: 领主",
+    "Baldurs Gate 3": "博德之门3",
 }
 
 const lang = {

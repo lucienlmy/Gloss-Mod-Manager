@@ -239,6 +239,9 @@ export const useManager = defineStore('Manager', {
         getModInfoById(id: number) {
             return this.managerModList.find(item => item.id == id)
         },
+        getModInfoByWebId(webId: number) {
+            return this.managerModList.find(item => item.webId == webId)
+        },
         /**
          * 通过Gmm包安装文件
          * @param file 

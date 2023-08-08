@@ -52,7 +52,15 @@ function select(item: IGameInfo) {
             })
             if (supportedGame) {
                 settings.settings.managerGame = supportedGame
-                settings.settings.managerGame.gamePath = dirname(filePath)
+
+                // 判断是否是有多个 exe 的游戏 
+                if (typeof (supportedGame.gameExe) == 'string') {
+                    settings.settings.managerGame.gamePath = dirname(filePath)
+                } else {
+                    let exe = supportedGame.gameExe.find(item => item.name == name)
+                    settings.settings.managerGame.gamePath = join(dirname(filePath), exe!.rootPath)
+                }
+
                 console.log(settings.settings);
                 manager.selectGameDialog = false
                 manager.getModInfo()
