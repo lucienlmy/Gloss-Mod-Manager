@@ -1,0 +1,3 @@
+[submodule "src/Expands"]
+	path = src/Expands
+	url = https://github.com/GlossMod/gmm-expands.git

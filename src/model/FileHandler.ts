@@ -361,4 +361,14 @@ export class FileHandler {
     public static pathToArray(filePath: string) {
         return filePath.split(path.sep)
     }
+
+    // 获取文件夹中的文件列表
+    public static getFolderFiles(folderPath: string) {
+
+        // 判断目录是否存在
+        if (this.fileExists(folderPath)) {
+            return fs.readdirSync(folderPath)
+        }
+        return []
+    }
 }
