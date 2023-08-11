@@ -187,6 +187,7 @@ const Games = {
     "Fallout 4": "Fallout 4",
     "MountBlade2": "Mount & Blade II: Bannerlord",
     "Baldurs Gate 3": "Baldurs Gate 3",
+    "Don't Starve Together": "Don't Starve Together",
 }
 
 const lang = {

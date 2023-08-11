@@ -8,6 +8,7 @@ import { exec, execSync } from 'child_process';
 import path from 'path'
 import { FileHandler } from '@src/model/FileHandler'
 import { useSettings } from '@src/stores/useSettings';
+import { ElMessage } from 'element-plus';
 
 export class Unzipper {
 
@@ -25,21 +26,28 @@ export class Unzipper {
      */
     public static unzip(source: string, target: string, cherryPick?: string[]): Promise<Data[]> {
         return new Promise(async (resolve, reject) => {
-            let files: Data[] = []
-            const myStream = extractFull(source, target, {
-                $bin: await this.get7zip(),
-                charset: 'utf-8',
-                $cherryPick: cherryPick
-            })
-            myStream.on('data', function (data) {
-                files.push(data)
-            })
-            myStream.on('error', (err) => {
-                reject(err)
-            })
-            myStream.on('end', function () {
-                resolve(files)
-            })
+            try {
+                let files: Data[] = []
+                const myStream = extractFull(source, target, {
+                    $bin: await this.get7zip(),
+                    charset: 'utf-8',
+                    $cherryPick: cherryPick
+                })
+                myStream.on('data', function (data) {
+                    files.push(data)
+                })
+                myStream.on('error', (err) => {
+                    ElMessage.error(`错误: ${err}`)
+                    reject(err)
+                })
+                myStream.on('end', function () {
+                    resolve(files)
+                })
+            } catch (error) {
+                ElMessage.error(`错误: ${error}`)
+                reject(error)
+            }
+
         })
     }
 

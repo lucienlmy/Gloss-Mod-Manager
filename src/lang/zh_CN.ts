@@ -185,6 +185,7 @@ const Games = {
     "Fallout 4": "辐射4",
     "MountBlade2": "骑马与砍杀2: 领主",
     "Baldurs Gate 3": "博德之门3",
+    "Don't Starve Together": "饥荒 & 联机版",
 }
 
 const lang = {

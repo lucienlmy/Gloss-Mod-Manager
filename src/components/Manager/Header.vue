@@ -4,12 +4,12 @@ import SelectGame from '@src/components/Manager/SelectGame.vue'
 import { FileHandler } from '@src/model/FileHandler';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
-import { join } from 'path';
-import { spawn, exec } from 'child_process';
+
 import { ElMessage } from 'element-plus';
 import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
 import { useUser } from '@src/stores/useUser';
 import ManagerSort from '@src/components/Manager/Sort.vue'
+import StartGame from '@src/components/Manager/StartGame.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -47,22 +47,6 @@ function openFolder() {
     FileHandler.openFolder(modStorage)
 }
 
-async function startGame() {
-    let startExe = settings.settings.managerGame?.startExe
-    if (startExe) {
-
-        // 判断 startExe 里面是否包含 steam 
-        if (startExe.includes('steam')) {
-            exec(`start ${startExe}`)
-        } else {
-            startExe = join(settings.settings.managerGame?.gamePath ?? "", startExe)
-            console.log(startExe);
-            FileHandler.runExe(startExe)
-        }
-        ElMessage.success("启动成功~")
-    }
-}
-
 </script>
 <template>
     <div class="header">
@@ -71,8 +55,7 @@ async function startGame() {
             <template v-if="settings.settings.managerGame">
                 <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
                     @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
-                <v-chip label variant="text" v-if="settings.settings.managerGame?.startExe" @click="startGame"
-                    append-icon="mdi-menu-right">{{ $t("Launch Game") }}</v-chip>
+                <StartGame></StartGame>
                 <v-menu open-on-hover>
                     <template v-slot:activator="{ props }">
                         <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>

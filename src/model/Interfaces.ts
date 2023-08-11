@@ -102,6 +102,10 @@ export interface IGameExe {
     name: string
     rootPath: string
 }
+export interface IStartExe {
+    name: string
+    exePath: string
+}
 
 export interface IGameInfo {
     gameID: number
@@ -109,7 +113,7 @@ export interface IGameInfo {
     installdir?: string
     gameName: string
     gameExe: string | IGameExe[]
-    startExe?: string,
+    startExe?: string | IStartExe[],
     gamePath?: string
     gameVersion?: string
     gameCoverImg?: string
