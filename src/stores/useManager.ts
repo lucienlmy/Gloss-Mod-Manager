@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
 import path from 'path'
 import { getAllExpands } from "@src/Expands";
-import type { ISupportedGames, IModInfo, IDownloadTask } from "@src/model/Interfaces";
+import type { ISupportedGames, IModInfo, IDownloadTask, IInfo } from "@src/model/Interfaces";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { useSettings } from '@src/stores/useSettings';
 import { Manager } from "@src/model/Manager";
 import { FileHandler } from "@src/model/FileHandler"
 import { Unzipper } from '@src/model/Unzipper'
+import { usePacks } from "./usePacks";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -17,9 +18,8 @@ export const useManager = defineStore('Manager', {
         maxID: 0,
         filterType: 0 as number,
         search: "",
-        packDialog: false,
-        packInfo: {} as IModInfo,
-        dragIndex: 0
+        dragIndex: 0,
+        installLoading: false,
     }),
     getters: {
         /**
@@ -79,6 +79,7 @@ export const useManager = defineStore('Manager', {
 
             return is
         },
+        // 通过webId 判断是否已经添加
         isAddedWebId(id: number) {
             let modId = null as null | number;
             this.managerModList.forEach(item => {
@@ -248,48 +249,69 @@ export const useManager = defineStore('Manager', {
          */
         async addModByGmm(file: string) {
             if (path.extname(file) != '.gmm') return
-            let data = await Unzipper.readZipFile(file, 'info.json')
-            let info: IModInfo = JSON.parse(data)
 
-            console.log(info);
-
+            //#region 读取info
+            const packs = usePacks()
+            this.installLoading = true
             const settings = useSettings()
+            let info: any = JSON.parse(await Unzipper.readZipFile(file, 'info.json'))
+            this.installLoading = false
 
-            if (!settings.settings.managerGame) {
-                ElMessage.error('请先选择游戏后再添加Mod')
+            if (info.gameID != settings.settings.managerGame?.gameID) {
+                ElMessage.error(`该 .GMM 包并不属于${settings.settings.managerGame?.gameName}, 请先选择正确的游戏.`)
                 return
             }
+            console.log(info);
+            packs.Info = info
+            packs.inputPacks = info.packs
+            packs.inpurtFile = file
+            packs.inpurtDialog = true
+            //#endregion
 
-            // 检查游戏是否正确
-            if (info.gameID != settings.settings.managerGame.gameID) {
-                ElMessage.error(`『${info.modName}』不是『${settings.settings.managerGame.gameName}』的Mod`)
-                return
-            }
+            // packs.installGmm(file)
 
-            // 检查是否已经添加
-            if (this.isAdded(info.md5)) {
-                ElMessage.error(`您已经添加过『${info.modName}』这款Mod了!`)
-                return
-            }
+            // let data = await Unzipper.readZipFile(file, 'info.json')
+            // let info: IModInfo = JSON.parse(data)
 
-            // 检查依赖是否已经添加
-            if (info.corePlugins && info.corePlugins.length > 0) {
-                info.corePlugins.forEach((item) => {
-                    if (!Manager.checkInstalled(item.name, item.id)) return false
-                })
-            }
+            // console.log(info);
 
-            this.maxID++
-            info.id = this.maxID
-            let id = this.maxID.toString()
-            let target = path.join(
-                settings.settings.modStorageLocation,
-                settings.settings.managerGame.gameName,
-                id
-            )
-            let res = await Unzipper.unzip(file, target)
-            this.managerModList.push(info)
-            ElMessage.success(`『${info.modName}』已添加到管理列表`)
+            // const settings = useSettings()
+
+            // if (!settings.settings.managerGame) {
+            //     ElMessage.error('请先选择游戏后再添加Mod')
+            //     return
+            // }
+
+            // // 检查游戏是否正确
+            // if (info.gameID != settings.settings.managerGame.gameID) {
+            //     ElMessage.error(`『${info.modName}』不是『${settings.settings.managerGame.gameName}』的Mod`)
+            //     return
+            // }
+
+            // // 检查是否已经添加
+            // if (this.isAdded(info.md5)) {
+            //     ElMessage.error(`您已经添加过『${info.modName}』这款Mod了!`)
+            //     return
+            // }
+
+            // // 检查依赖是否已经添加
+            // if (info.corePlugins && info.corePlugins.length > 0) {
+            //     info.corePlugins.forEach((item) => {
+            //         if (!Manager.checkInstalled(item.name, item.id)) return false
+            //     })
+            // }
+
+            // this.maxID++
+            // info.id = this.maxID
+            // let id = this.maxID.toString()
+            // let target = path.join(
+            //     settings.settings.modStorageLocation,
+            //     settings.settings.managerGame.gameName,
+            //     id
+            // )
+            // let res = await Unzipper.unzip(file, target)
+            // this.managerModList.push(info)
+            // ElMessage.success(`『${info.modName}』已添加到管理列表`)
         }
     }
 })

@@ -5,7 +5,7 @@ import { useSettings } from "@src/stores/useSettings";
 import fs from 'fs'
 
 export class LocalLang {
-    public static langFolder = path.join(homedir(), 'My Documents', 'Gloss Mod Manager', 'lang')
+    public static langFolder = path.join('C:', 'Gloss Mod Manager', 'lang')
 
     public static init() {
 

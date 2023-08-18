@@ -149,6 +149,20 @@ const ManagerHeader = {
     "sort by": "Sort by",
     "sort by {0}": "Sort by {0}",
     "state": "state",
+
+    "Please select a mod to {0}": "Please select a mod to {0}",
+    "package": "Package",
+    "inport": "Inport",
+    "Previous": "Previous",
+    "Next": "Next",
+    "Finish": "Finish",
+    "No introduction": "No introduction",
+    "Logs": "Logs",
+    "Your GMM package has been exported, you can...": "Your GMM package has been exported, you can...",
+    "Share to Mod Station": "Share to Mod Station",
+    "Open location": "Open location",
+    "Import completed, you can now enable these mods in the manager and enter the game...": "Import completed, you can now enable these mods in the manager and enter the game...",
+
 }
 
 const Settings = {
@@ -166,6 +180,10 @@ const Settings = {
     // "Feed Xiaom": "Feed Xiaom",
     "Feedback": "Feedback",
     "QQChat": "QQChat",
+    "Theme": "Theme",
+    "Light": "Light",
+    "Dark": "Dark",
+    "Auto": "Auto",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",

@@ -24,14 +24,13 @@ export class Unzipper {
      * @param target 解压到的目录
      * @returns 解压状态
      */
-    public static unzip(source: string, target: string, cherryPick?: string[]): Promise<Data[]> {
+    public static unzip(source: string, target: string): Promise<Data[]> {
         return new Promise(async (resolve, reject) => {
             try {
                 let files: Data[] = []
                 const myStream = extractFull(source, target, {
                     $bin: await this.get7zip(),
-                    charset: 'utf-8',
-                    $cherryPick: cherryPick
+                    charset: 'utf-8'
                 })
                 myStream.on('data', function (data) {
                     files.push(data)
@@ -47,7 +46,43 @@ export class Unzipper {
                 ElMessage.error(`错误: ${error}`)
                 reject(error)
             }
+        })
+    }
 
+    // 解压文件 
+    public static unzip2(source: string, target: string, files: string[]) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let _7z = await this.get7zip()
+                exec(`"${_7z}" x "${source}" -o"${target}" ${files.join(' ')} -y`, (err, stdout, stderr) => {
+                    if (err) reject(err)
+                    if (stderr) reject(stderr)
+                    if (stdout) {
+                        resolve(stdout)
+                    }
+                })
+            } catch (error) {
+                reject(error)
+            }
+        })
+    }
+
+    /**
+     * 将文件夹压缩为压缩包
+     * @param source 需要压缩的目录
+     * @param target 压缩后的目录
+     * @returns 
+     */
+    public static async zip(source: string, target: string): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            let _7z = await this.get7zip()
+            exec(`"${_7z}" a "${target}" "${source}\\*"`, (err, stdout, stderr) => {
+                if (err) reject(err)
+                if (stderr) reject(stderr)
+                if (stdout) {
+                    resolve(stdout)
+                }
+            })
         })
     }
 
@@ -61,23 +96,34 @@ export class Unzipper {
             const settings = useSettings()
             let target = path.join(settings.settings.modStorageLocation, 'temp')
             console.log(target);
+            let _7z = await this.get7zip()
+            exec(`"${_7z}" x "${zipPath}" -o"${target}" i ${file}`, (err, stdout, stderr) => {
+                if (err) reject(err)
+                if (stderr) reject(stderr)
+                if (stdout) {
+                    let data = FileHandler.readFile(path.join(target, file))
+                    FileHandler.deleteFolder(target)
+                    resolve(data ?? "")
+                }
+            })
 
-            const myStream = extractFull(zipPath, target, {
-                $bin: await this.get7zip(),
-                charset: 'utf-8',
-                $cherryPick: [file]
-            })
-            myStream.on('data', function (data) {
-                console.log(data);
+            // const myStream = extractFull(zipPath, target, {
+            //     $bin: await this.get7zip(),
+            //     charset: 'utf-8',
+            //     $cherryPick: [file]
+            // })
+            // myStream.on('data', function (data) {
+            //     console.log(data);
 
-            })
-            myStream.on('error', (err) => {
-                reject(err)
-            })
-            myStream.on('end', function () {
-                let data = FileHandler.readFile(path.join(target, file))
-                resolve(data ?? "")
-            })
+            // })
+            // myStream.on('error', (err) => {
+            //     reject(err)
+            // })
+            // myStream.on('end', function () {
+            //     let data = FileHandler.readFile(path.join(target, file))
+            //     FileHandler.deleteFolder(target)
+            //     resolve(data ?? "")
+            // })
         })
     }
 

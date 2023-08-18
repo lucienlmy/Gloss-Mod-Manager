@@ -13,7 +13,7 @@ import { exec } from 'child_process';
 
 export class FileHandler {
 
-    public static logFile = path.join(homedir(), 'My Documents', 'Gloss Mod Manager', 'log.txt')
+    public static logFile = path.join('C:', 'Gloss Mod Manager', 'log.txt')
 
     /**
      * 判断文件是否存在
@@ -99,7 +99,43 @@ export class FileHandler {
                 reject(false)
             }
         })
+    }
 
+
+    // 移动文件
+    public static moveFile(srcPath: string, destPath: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                this.createDirectory(path.dirname(destPath));
+                fs.renameSync(srcPath, destPath)
+                resolve(true)
+            } catch (error) {
+                this.writeLog(`${error}`)
+                reject(false)
+            }
+        })
+    }
+
+    /**
+     * 移动文件夹
+     * @param srcPath 原文件夹
+     * @param destPath 目标文件夹
+     * @returns 
+     */
+    public static moveFolder(srcPath: string, destPath: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                this.getAllFiles(srcPath).forEach(async file => {
+                    let dest = file.replace(srcPath, destPath)
+                    await this.moveFile(file, dest)
+                })
+                this.deleteFolder(srcPath)
+                resolve(true)
+            } catch (error) {
+                this.writeLog(`${error}`)
+                reject(false)
+            }
+        })
     }
 
     /**
@@ -213,7 +249,7 @@ export class FileHandler {
             // console.log(this.logFile);
             this.createDirectory(path.dirname(this.logFile));
             let time = new Date().toLocaleString();
-            let log = `${time}: ${msg}\n`
+            let log = `[${time}]: ${msg}\n`
             console.log(log);
             fs.appendFileSync(this.logFile, log);
 
@@ -271,6 +307,9 @@ export class FileHandler {
 
     /**
      * 重命名文件
+     * @param filePath 文件路径
+     * @param newName 目标名称
+     * @returns 
      */
     public static renameFile(filePath: string, newName: string): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -319,7 +358,10 @@ export class FileHandler {
         return res;
     }
 
-    // 运行程序
+    /**
+     * 运行程序
+     * @param exe 程序路径
+     */
     public static runExe(exe: string) {
         let { root, dir: folder, base: name } = path.parse(exe)
         // 去除 root 中的 \
@@ -330,12 +372,17 @@ export class FileHandler {
         exec(cmd)
     }
 
-    // 创建软连接
-    public static createLink(target: string, destPath: string) {
+    /**
+     * 创建软连接
+     * @param folderPath 文件夹路径
+     * @param destPath 软链接路径
+     * @returns 
+     */
+    public static createLink(folderPath: string, destPath: string) {
         // symlinkSync
         try {
             this.createDirectory(path.join(destPath, '..'))
-            fs.symlinkSync(target, destPath, 'junction');
+            fs.symlinkSync(folderPath, destPath, 'junction');
             return true
         } catch (error) {
             ElMessage.error(`创建软连接失败：${error}`)
@@ -344,7 +391,11 @@ export class FileHandler {
         }
     }
 
-    // 移除软连接
+    /**
+     * 移除软连接
+     * @param linkPath 软连接路径
+     * @returns 
+     */
     public static removeLink(linkPath: string) {
         try {
             this.createDirectory(path.join(linkPath, '..'))
@@ -357,12 +408,20 @@ export class FileHandler {
         }
     }
 
-    // 将路径转换为数组
+    /**
+     * 将路径转换为数组
+     * @param filePath 路径
+     * @returns 
+     */
     public static pathToArray(filePath: string) {
         return filePath.split(path.sep)
     }
 
-    // 获取文件夹中的文件列表
+    /**
+     * 获取文件夹中的文件列表
+     * @param folderPath 路径
+     * @returns 
+     */
     public static getFolderFiles(folderPath: string) {
 
         // 判断目录是否存在

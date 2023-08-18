@@ -9,9 +9,8 @@ export const useSettings = defineStore('Settings', {
         langList: [
             { text: "简体中文", value: 'zh_CN' },
             { text: "English", value: 'en_US' },
-            { text: "Turkish by:sinnerclown", value: 'tr_TR' },
+            { text: "Turkish by:sinnerclown", value: 'tr' },
         ],
-
     }),
     getters: {
         configFile: () => Config.configFile(),

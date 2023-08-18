@@ -7,7 +7,7 @@ export class ElectronStore {
 
     private static key = Buffer.from([53, 109, 4, 104, 98, 90, 156, 151, 117, 28, 6, 141, 146, 10, 31, 84, 179, 240, 115, 0, 55, 244, 208, 228, 99, 23, 107, 149, 54, 213, 136, 157])
     private static iv = Buffer.from([97, 168, 108, 221, 110, 76, 110, 190, 119, 216, 137, 60, 120, 84, 88, 30])
-    private static cache = join(homedir(), 'My Documents', 'Gloss Mod Manager', 'gmm.cache')
+    private static cache = join('C:', 'Gloss Mod Manager', 'gmm.cache')
 
     /**
      * 加密数据

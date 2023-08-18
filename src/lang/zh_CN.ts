@@ -146,6 +146,19 @@ const ManagerHeader = {
     "sort by": "排序方式",
     "sort by {0}": "按{0}排序",
     "state": "状态",
+
+    "Please select a mod to {0}": "请选择要{0}的Mod",
+    "package": "打包",
+    "inport": "导入",
+    "Previous": "上一步",
+    "Next": "下一步",
+    "Finish": "完成",
+    "No introduction": "暂无介绍",
+    "Logs": "日志",
+    "Your GMM package has been exported, you can...": "您的 GMM 包已经导出完成, 接下来你可以...",
+    "Share to Mod Station": "分享到Mod站",
+    "Open location": "打开所在位置",
+    "Import completed, you can now enable these mods in the manager and enter the game...": "导入完成, 接下来你可以在管理器中启用这些模组并进入游戏了...",
 }
 
 const Settings = {
@@ -163,6 +176,10 @@ const Settings = {
     // "Feed Xiaom": "投喂小莫",
     "Feedback": "反馈",
     "QQChat": "QQ群: 825182128",
+    "Theme": "主题",
+    "Light": "浅色",
+    "Dark": "深色",
+    "Auto": "自动",
 }
 
 const Games = {

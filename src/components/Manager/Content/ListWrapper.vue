@@ -22,20 +22,19 @@ function dragover() { }
 async function drop(event: DragEvent) {
     let files = event.dataTransfer?.files
     if (files) {
-        loading.value = true
+        manager.installLoading = true
         for (let i = 0; i < files.length; i++) {
             await manager.addModFile(files[i].path)
         }
-        loading.value = false
+        manager.installLoading = false
     }
-    // console.log(manager.managerModList);
 }
 
 </script>
 <template>
     <div class="list-wrap" @dragenter.prevent="dragenter($event)" @dragleave.prevent="dragleave"
         @drop.prevent="drop($event)" @dragover.prevent="dragover">
-        <v-card :loading="loading">
+        <v-card :loading="manager.installLoading">
             <template v-slot:loader="{ isActive }">
                 <v-progress-linear :active="isActive" color="deep-purple" height="4" indeterminate></v-progress-linear>
             </template>

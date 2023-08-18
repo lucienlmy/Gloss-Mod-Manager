@@ -2,7 +2,16 @@
 import { ref, computed, watch } from "vue";
 import marked from '@src/plugins/marked';
 import { useI18n } from "vue-i18n";
+import { useTheme } from 'vuetify'
 
+const theme = useTheme()
+
+
+if (theme.name.value == 'dark') {
+    import('github-markdown-css/github-markdown-dark.css');
+} else {
+    import('github-markdown-css/github-markdown-light.css');
+}
 
 let readme = ref('')
 const { locale } = useI18n()
@@ -27,6 +36,8 @@ watch(() => readmeFile.value, () => {
     getReadme()
 })
 getReadme()
+
+
 
 </script>
 <template>

@@ -6,10 +6,11 @@ import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 
 import { ElMessage } from 'element-plus';
-import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
+import ContentPack from '@src/components/Manager/Pack/Pack.vue'
 import { useUser } from '@src/stores/useUser';
 import ManagerSort from '@src/components/Manager/Sort.vue'
 import StartGame from '@src/components/Manager/StartGame.vue'
+import PackInport from '@src/components/Manager/Pack/Inport.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -51,6 +52,7 @@ function openFolder() {
 <template>
     <div class="header">
         <div class="header-btn">
+            <PackInport></PackInport>
             <SelectGame></SelectGame>
             <template v-if="settings.settings.managerGame">
                 <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
@@ -67,7 +69,7 @@ function openFolder() {
                             @click="allUnInstall"></v-list-item>
                         <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
                             append-icon="mdi-folder-open-outline"></v-list-item>
-                        <ContentPack :mod="{}"></ContentPack>
+                        <ContentPack></ContentPack>
                         <ManagerSort></ManagerSort>
                     </v-list>
                 </v-menu>

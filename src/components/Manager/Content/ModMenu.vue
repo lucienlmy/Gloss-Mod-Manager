@@ -9,7 +9,6 @@ import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
 import { join } from 'path'
 
-import ContentPack from '@src/components/Manager/Content/Pack/Pack.vue'
 
 const props = defineProps<{
     mod: IModInfo
@@ -89,7 +88,6 @@ function reinstall() {
             <v-list-item append-icon="mdi-information-slab-circle-outline" :title="t('Info')" @click="showInfo = true">
             </v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
-            <ContentPack :mod="mod"></ContentPack>
             <v-list-item v-if="mod.webId" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
             <v-list-item v-if="mod.webId" append-icon="mdi-refresh" :title="t('Update')" @click="reinstall"></v-list-item>
             <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
@@ -97,10 +95,13 @@ function reinstall() {
     </v-menu>
     <v-dialog v-model="showInfo" width="600">
         <v-card class="info">
-            <v-row v-for="item in info" :key="item.title">
-                <v-col cols="2">{{ item.title }}</v-col>
-                <v-col cols="10" class="text-truncate" :title="item.content">{{ item.content }}</v-col>
-            </v-row>
+            <v-card-text>
+                <v-row v-for="item in info" :key="item.title">
+                    <v-col cols="2">{{ item.title }}</v-col>
+                    <v-col cols="10" class="text-truncate" :title="item.content">{{ item.content }}</v-col>
+                </v-row>
+            </v-card-text>
+
         </v-card>
     </v-dialog>
 </template>

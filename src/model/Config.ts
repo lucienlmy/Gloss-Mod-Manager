@@ -4,20 +4,30 @@ import { readFileSync, writeFile, existsSync, writeFileSync, mkdirSync } from 'n
 import { useSettings } from '@src/stores/useSettings'
 import { ISettings } from './Interfaces';
 import { useManager } from '@src/stores/useManager';
+import { ipcRenderer } from 'electron';
+import { FileHandler } from '@src/model/FileHandler'
 
 export class Config {
 
     // 配置文件路径
     public static configFile() {
-        const documents = join(homedir(), 'My Documents', 'Gloss Mod Manager')
-        let configPath = join(documents, 'config.json');
-        if (!existsSync(documents)) {
-            mkdirSync(documents)
+
+        let oldConfigFolder = join(join(homedir(), 'My Documents', 'Gloss Mod Manager'))
+        let newConfigFolder = join("C:", 'Gloss Mod Manager')
+
+        if (FileHandler.fileExists(oldConfigFolder)) {
+            console.log('文件夹存在');
+            // console.log(join("C:", 'Gloss Mod Manager'));
+            // FileHandler.moveFolder(oldConfigFolder, newConfigFolder)
+            FileHandler.copyFolder(oldConfigFolder, newConfigFolder)
+            FileHandler.deleteFolder(oldConfigFolder)
         }
 
-        if (!existsSync(configPath)) {
-            writeFileSync(configPath, '{}', 'utf8');
-        }
+
+        const configPath = join(newConfigFolder, 'config.json')
+
+        FileHandler.ensureDirectoryExistence(configPath, '{}')
+
         return configPath
     }
 
@@ -34,7 +44,8 @@ export class Config {
             autoInstall: settings.autoInstall,
             leftMenuRail: settings.leftMenuRail,
             autoLaunch: settings.autoLaunch,
-            language: settings.language
+            language: settings.language,
+            theme: settings.theme
         }
     }
     // 保存配置文件
@@ -53,19 +64,20 @@ export class Config {
         })
     }
 
-    public static initialization() {
+    public static async initialization() {
         const settings = useSettings()
         const Manager = useManager()
         let data = this.getConfig()
         settings.settings = {
             managerGame: data.managerGame,
-            modStorageLocation: data.modStorageLocation ?? join(homedir(), 'My Documents', 'Gloss Mod Manager', 'mods'),
+            modStorageLocation: data.modStorageLocation ?? join('C:', 'Gloss Mod Manager', 'mods'),
             proxy: data.proxy ?? "",
             // UnzipPath: data.UnzipPath ?? "",
             autoInstall: data.autoInstall ?? true,
             leftMenuRail: data.leftMenuRail ?? false,
             autoLaunch: data.autoLaunch ?? false,
-            language: data.language ?? "zh_CN",
+            language: data.language ?? await ipcRenderer.invoke('get-system-language'),
+            theme: data.theme ?? 'system'
         }
 
         // 初始化游戏

@@ -8,6 +8,7 @@ import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
 import { ipcRenderer } from 'electron'
 import { FileHandler } from '@src/model/FileHandler'
+import { useTheme } from 'vuetify'
 
 const settings = useSettings()
 const download = useDownload()
@@ -18,22 +19,26 @@ Config.initialization()
 download.initialization()
 AppAnalytics.sendEvent("start")
 
-// 初始化设置
+//#region  初始化设置
 watch(() => settings.settings, () => {
     Config.setConfig(settings.settings)
 }, { deep: true })
 
-// 初始化下载
+//#endregion
+
+//#region 初始化下载
 watch(() => download.downloadTaskList, () => {
     download.saveTaskConfig()
 }, { deep: true })
+//#endregion
 
-// 初始化语言
+//#region 初始化语言
 watch(() => settings.settings.language, () => {
     locale.value = settings.settings.language
 }, { immediate: true })
+//#endregion
 
-// 初始化Mod管理
+//#region 初始化Mod管理
 if (manager.managerModList.length == 0 && settings.settings.managerGame) {
     manager.getModInfo().then(() => {
         manager.maxID = manager.managerModList.reduce((pre, cur) => {
@@ -46,8 +51,9 @@ if (manager.managerModList.length == 0 && settings.settings.managerGame) {
 watch(() => manager.managerModList, () => {
     manager.saveModInfo()
 }, { deep: true })
+//#endregion
 
-// 处理 .gmm 文件打开 
+//#region 处理 .gmm 文件打开 
 ipcRenderer.on('open-gmm-file', (_, args) => {
     console.log(args);
     let path = args[args.length - 1]
@@ -60,6 +66,68 @@ ipcRenderer.on('open-gmm-file', (_, args) => {
         manager.addModByGmm(path)
     }
 })
+//#endregion
+
+//#region 主题
+
+const theme = useTheme()
+
+
+watch(() => settings.settings.theme, () => {
+    setHtmlClass()
+}, { immediate: true })
+
+// 监听系统主题变化
+onMounted(() => {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (settings.settings.theme == "system") {
+            if (e.matches) {
+                setDarkTheme()
+            } else {
+                setLightTheme()
+            }
+        }
+    })
+})
+
+// console.log(settings.settings.theme);
+
+
+function setHtmlClass() {
+    switch (settings.settings.theme) {
+        case "system":
+            if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                setDarkTheme()
+            } else {
+                setLightTheme()
+            }
+            break;
+        case 'dark':
+            setDarkTheme()
+            break;
+        case 'light':
+            setLightTheme()
+            break;
+        default:
+            break;
+    }
+}
+
+function setDarkTheme() {
+    let html = document.querySelector("html")
+    html?.classList.add("dark")
+    theme.global.name.value = "dark"
+}
+
+function setLightTheme() {
+    let html = document.querySelector("html")
+    html?.classList.remove("dark")
+    theme.global.name.value = "light"
+}
+
+//#endregion
+
+
 
 </script>
 <template></template>

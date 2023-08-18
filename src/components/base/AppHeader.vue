@@ -101,7 +101,7 @@ export default {
         font-size: 0;
 
         li {
-            color: #eee;
+            color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
             display: inline-block;
             padding: 5px 18px;
             font-size: 16px;

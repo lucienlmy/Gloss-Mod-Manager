@@ -1,11 +1,11 @@
-import { app, BrowserWindow, shell, ipcMain, ipcRenderer, } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, ipcRenderer, nativeTheme, } from 'electron'
 import { release } from 'node:os'
 import { join, dirname, resolve } from 'node:path'
 import { dialog } from 'electron'
 import { GetData } from '../model/GetData'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
-import { existsSync } from 'fs'
+import { existsSync, readdirSync } from 'fs'
 import dotenv from 'dotenv'
 
 dotenv.config();
@@ -50,8 +50,8 @@ async function createWindow() {
     let width = 1280
     let height = 720
 
-    // 判断环境是否是开发环境
-    if (process.env.NODE_ENV === 'development') {
+    // 判断环境是否是开发环境 或调试环境
+    if (process.env.NODE_ENV === 'development' || (existsSync(join(dirname(app.getPath('exe')), 'DEV')))) {
         width += 550
     }
 
@@ -286,4 +286,20 @@ ipcMain.handle('user-login', async (event, arg) => {
 
 ipcMain.on('open-gmm-file', (event, arg) => {
     win.webContents.send('open-gmm-file', arg)
+})
+
+// 获取系统语言
+ipcMain.handle('get-system-language', async (event, arg) => {
+    let locale = app.getLocale()
+
+    // 将 - 替换为 _
+    locale = locale.replace('-', '_')
+
+    return locale
+})
+
+
+// 打印程序目录下的所有文件列表
+readdirSync(__dirname).forEach(file => {
+    console.log(file);
 })

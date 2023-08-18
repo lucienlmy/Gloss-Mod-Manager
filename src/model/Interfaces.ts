@@ -160,6 +160,7 @@ export interface ISettings {
     leftMenuRail: boolean
     autoLaunch: boolean
     language: string
+    theme: 'light' | 'dark' | 'system'
 }
 
 
@@ -200,4 +201,13 @@ export interface IFileTreeNode {
     path: string;
     checked?: boolean;
     children?: IFileTreeNode[];
+}
+
+
+export interface IInfo {
+    name?: string
+    version: string
+    description?: string
+    gameID?: number
+    author?: string
 }
