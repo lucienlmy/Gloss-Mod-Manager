@@ -30,7 +30,7 @@ export class Unzipper {
                 let files: Data[] = []
                 const myStream = extractFull(source, target, {
                     $bin: await this.get7zip(),
-                    charset: 'utf-8'
+                    charset: 'utf-8',
                 })
                 myStream.on('data', function (data) {
                     files.push(data)

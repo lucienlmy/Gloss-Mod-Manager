@@ -4,8 +4,17 @@ import { ref } from "vue";
 import marked from '@src/plugins/marked';
 
 import Updating from '@src/components/AutoUpdate/Updating.vue'
+import { useTheme } from 'vuetify';
 
 const main = useMain()
+const theme = useTheme()
+
+
+if (theme.name.value == 'dark') {
+    import('github-markdown-css/github-markdown-dark.css');
+} else {
+    import('github-markdown-css/github-markdown-light.css');
+}
 
 
 

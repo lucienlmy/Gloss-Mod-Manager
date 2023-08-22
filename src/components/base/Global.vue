@@ -19,38 +19,56 @@ Config.initialization()
 download.initialization()
 AppAnalytics.sendEvent("start")
 
+console.log(`正在初始化.`);
+
+
 //#region  初始化设置
 watch(() => settings.settings, () => {
     Config.setConfig(settings.settings)
+    GetModInfo()
+    console.log(`当前配置目录: ${Config.configFolder()}`);
 }, { deep: true })
+
+
 
 //#endregion
 
 //#region 初始化下载
 watch(() => download.downloadTaskList, () => {
     download.saveTaskConfig()
+    console.log(`当前下载缓存目录: ${settings.settings.modStorageLocation}\\cache`);
 }, { deep: true })
+
+
 //#endregion
 
 //#region 初始化语言
 watch(() => settings.settings.language, () => {
     locale.value = settings.settings.language
+    console.log(`当前语言: ${settings.settings.language}`);
 }, { immediate: true })
+
 //#endregion
 
 //#region 初始化Mod管理
-if (manager.managerModList.length == 0 && settings.settings.managerGame) {
-    manager.getModInfo().then(() => {
-        manager.maxID = manager.managerModList.reduce((pre, cur) => {
-            return pre > cur.id ? pre : cur.id
-        }, 0)
-        console.log(manager.maxID);
-
-    })
-}
+GetModInfo()
 watch(() => manager.managerModList, () => {
     manager.saveModInfo()
 }, { deep: true })
+
+function GetModInfo() {
+    // manager.managerModList.length == 0 && settings.settings.managerGame
+    if (settings.settings.managerGame) {
+        manager.getModInfo().then(() => {
+            manager.maxID = manager.managerModList.reduce((pre, cur) => {
+                return pre > cur.id ? pre : cur.id
+            }, 0)
+            console.log(`Mod 最大ID : ${manager.maxID}`);
+        })
+    }
+}
+
+
 //#endregion
 
 //#region 处理 .gmm 文件打开 
@@ -75,6 +93,8 @@ const theme = useTheme()
 
 watch(() => settings.settings.theme, () => {
     setHtmlClass()
+    console.log(`当前主题: ${settings.settings.theme}`);
+
 }, { immediate: true })
 
 // 监听系统主题变化

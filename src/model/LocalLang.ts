@@ -1,11 +1,11 @@
-import { homedir } from "os";
 import path from 'path'
+import { Config } from "@src/model/Config";
 import { FileHandler } from '@src/model/FileHandler'
 import { useSettings } from "@src/stores/useSettings";
 import fs from 'fs'
 
 export class LocalLang {
-    public static langFolder = path.join('C:', 'Gloss Mod Manager', 'lang')
+    public static langFolder = path.join(Config.configFolder(), 'lang')
 
     public static init() {
 

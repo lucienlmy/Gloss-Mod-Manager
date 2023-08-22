@@ -9,25 +9,23 @@ import { FileHandler } from '@src/model/FileHandler'
 
 export class Config {
 
+    /**
+     * 配置目录
+     * @returns 
+     */
+    public static configFolder() {
+        let ConfigFolder = join(homedir(), 'My Documents', 'Gloss Mod Manager')
+        // let newConfigFolder = join("C:", 'Gloss Mod Manager')
+        if (!FileHandler.fileExists(join(homedir(), 'My Documents'))) {
+            ConfigFolder = join("C:", 'Gloss Mod Manager')
+        }
+        return ConfigFolder
+    }
+
     // 配置文件路径
     public static configFile() {
-
-        let oldConfigFolder = join(join(homedir(), 'My Documents', 'Gloss Mod Manager'))
-        let newConfigFolder = join("C:", 'Gloss Mod Manager')
-
-        if (FileHandler.fileExists(oldConfigFolder)) {
-            console.log('文件夹存在');
-            // console.log(join("C:", 'Gloss Mod Manager'));
-            // FileHandler.moveFolder(oldConfigFolder, newConfigFolder)
-            FileHandler.copyFolder(oldConfigFolder, newConfigFolder)
-            FileHandler.deleteFolder(oldConfigFolder)
-        }
-
-
-        const configPath = join(newConfigFolder, 'config.json')
-
+        const configPath = join(this.configFolder(), 'config.json')
         FileHandler.ensureDirectoryExistence(configPath, '{}')
-
         return configPath
     }
 
@@ -68,9 +66,10 @@ export class Config {
         const settings = useSettings()
         const Manager = useManager()
         let data = this.getConfig()
+
         settings.settings = {
             managerGame: data.managerGame,
-            modStorageLocation: data.modStorageLocation ?? join('C:', 'Gloss Mod Manager', 'mods'),
+            modStorageLocation: data.modStorageLocation ?? join(this.configFolder(), 'mods'),
             proxy: data.proxy ?? "",
             // UnzipPath: data.UnzipPath ?? "",
             autoInstall: data.autoInstall ?? true,
@@ -90,21 +89,5 @@ export class Config {
                 }
             })
         }
-
-        // 初始化7-zip
-        // if (settings.settings.UnzipPath == '') {
-        //     let installPath = ''
-        //     try {
-        //         const output = execSync('reg query "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\7zFM.exe" /ve').toString();
-        //         const match = output.match(/^(.*?)\s+REG_SZ\s+(.*)$/m);
-        //         installPath = (match && match[2]) as string;
-        //         installPath = join(dirname(installPath), '7z.exe');
-        //         settings.settings.UnzipPath = installPath
-        //         this.setConfig(settings.settings)
-        //     } catch (err) {
-        //         ElMessage.error('获取7-zip失败,可以没有安装,您可以手动选择')
-        //         console.log(err);
-        //     }
-        // }
     }
 }

@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 // import fs from 'fs/promises';
 import * as path from 'path';
-import { homedir } from "os";
+import { Config } from "@src/model/Config";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
 import { exec } from 'child_process';
@@ -13,7 +13,7 @@ import { exec } from 'child_process';
 
 export class FileHandler {
 
-    public static logFile = path.join('C:', 'Gloss Mod Manager', 'log.txt')
+    public static logFile = () => path.join(Config.configFolder(), 'log.txt')
 
     /**
      * 判断文件是否存在
@@ -247,11 +247,11 @@ export class FileHandler {
     public static writeLog(msg: string, isErr: boolean = false): boolean {
         try {
             // console.log(this.logFile);
-            this.createDirectory(path.dirname(this.logFile));
+            this.createDirectory(path.dirname(this.logFile()));
             let time = new Date().toLocaleString();
             let log = `[${time}]: ${msg}\n`
             console.log(log);
-            fs.appendFileSync(this.logFile, log);
+            fs.appendFileSync(this.logFile(), log);
 
             if (isErr) {
                 ElMessage.error(log)

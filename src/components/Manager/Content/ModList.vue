@@ -87,7 +87,7 @@ function dragend(e: any) {
 
 </script>
 <template>
-    <div class="wrap">
+    <div class="wrap" v-if="mod?.id">
         <v-col cols="12">
             <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
                 @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
