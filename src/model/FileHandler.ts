@@ -51,14 +51,21 @@ export class FileHandler {
     /**
      * 复制文件
      * @param src 原文件 
-     * @param dest 目标文件
+     * @param target 目标文件
      * @returns 
      */
-    public static copyFile(src: string, dest: string): Promise<boolean> {
+    public static copyFile(src: string, target: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
-                this.createDirectory(path.dirname(dest));
-                fs.copyFileSync(src, dest);
+                this.createDirectory(path.dirname(target));
+
+                // 判断文件是否存在 如果存在则备份文件 名称为 *.gmmback
+                if (this.fileExists(target)) {
+                    console.log(`${target} 文件存在, 进行备份`);
+                    let backFile = target + '.gmmback'
+                    await this.copyFile(target, backFile)
+                }
+                fs.copyFileSync(src, target);
                 resolve(true)
             } catch (err) {
                 ElMessage.error(`复制文件失败：${err}`)
@@ -71,9 +78,9 @@ export class FileHandler {
     /**
      * 复制文件夹
      * @param srcPath 原文件夹
-     * @param destPath 目标文件夹
+     * @param target 目标文件夹
      */
-    public static copyFolder(srcPath: string, destPath: string) {
+    public static copyFolder(srcPath: string, target: string) {
         return new Promise<boolean>((resolve, reject) => {
             try {
                 // 获取源文件夹内所有的文件和子文件夹
@@ -83,7 +90,7 @@ export class FileHandler {
                     // 源文件/文件夹的完整路径
                     const srcFilePath = path.join(srcPath, file);
                     // 目标文件/文件夹的完整路径
-                    const destFilePath = path.join(destPath, file);
+                    const destFilePath = path.join(target, file);
                     // 如果是文件夹，则递归调用该文件夹下的所有文件和文件夹
                     if (fs.statSync(srcFilePath).isDirectory()) {
                         this.createDirectory(destFilePath);
@@ -175,6 +182,12 @@ export class FileHandler {
         try {
             if (this.fileExists(filePath)) {
                 fs.unlinkSync(filePath);
+                // 判断是否有备份文件
+                let backFile = filePath + '.gmmback'
+                if (this.fileExists(backFile)) {
+                    console.log(`${filePath} 存在备份，进行还原`);
+                    this.renameFile(backFile, filePath)
+                }
             }
             return true
         } catch (err) {
@@ -313,10 +326,14 @@ export class FileHandler {
      */
     public static renameFile(filePath: string, newName: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            fs.rename(filePath, newName, (err) => {
-                if (err) throw reject(err);
+            try {
+                fs.renameSync(filePath, newName)
                 resolve()
-            })
+            } catch (error) {
+                ElMessage.error(`错误: ${error}`)
+                reject(error)
+            }
+
         })
     }
 
@@ -398,7 +415,7 @@ export class FileHandler {
      */
     public static removeLink(linkPath: string) {
         try {
-            this.createDirectory(path.join(linkPath, '..'))
+            // this.createDirectory(path.join(linkPath, '..'))
             fs.unlinkSync(linkPath)
             return true
         } catch (error) {
@@ -429,5 +446,26 @@ export class FileHandler {
             return fs.readdirSync(folderPath)
         }
         return []
+    }
+
+    /**
+     * 从指定路径中获取指定文件夹后的目录
+     * @param folderPath 路径
+     * @param folderName 查找的文件夹名
+     * @param include 是否包含查找的文件夹
+     * @returns 
+     */
+    public static getFolderFromPath(folderPath: string, folderName: string, include = false): string | null {
+        let folders = this.pathToArray(folderPath)
+        // 不区分大小写
+        let index = folders.findIndex(item => item.toLowerCase() == folderName.toLowerCase())
+        if (index === -1) {
+            return null
+        }
+        if (include) {
+            return folders.slice(index).join(path.sep)
+        } else {
+            return folders.slice(index + 1).join(path.sep)
+        }
     }
 }

@@ -49,8 +49,9 @@ async function drop(event: DragEvent) {
                     </v-row>
                 </v-col>
                 <TransitionGroup name="list" tag="div" class="container">
-                    <ContentModList v-for="(item, index) in manager.filterModList" :key="item.md5" :mod="item"
-                        :index="index"></ContentModList>
+                    <template v-for="(item, index) in manager.filterModList">
+                        <ContentModList v-if="item" :key="item.md5" :mod="item" :index="index"></ContentModList>
+                    </template>
                 </TransitionGroup>
             </div>
             <div class="empty" v-else>

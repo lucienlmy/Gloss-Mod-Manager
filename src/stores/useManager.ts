@@ -39,8 +39,8 @@ export const useManager = defineStore('Manager', {
             return settings.settings.managerGame?.gamePath ?? ""
         },
         filterModList(state) {
-            if (state.filterType == 0) return state.managerModList.filter((item) => item.modName.indexOf(state.search) != -1)
-            return state.managerModList.filter(item => item.modType == state.filterType && item.modName.indexOf(state.search) != -1)
+            if (state.filterType == 0) return state.managerModList.filter((item) => item?.modName.indexOf(state.search) != -1)
+            return state.managerModList.filter(item => item?.modType == state.filterType && item?.modName.indexOf(state.search) != -1)
         }
     },
     actions: {

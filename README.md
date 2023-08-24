@@ -2,13 +2,13 @@
 
 <center> 
 
-![][license] ![][author] ![][Electron] ![][vue] ![][vuetify] [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager-info)
+![][license] ![][author] ![][Vite] ![][Electron] ![][vue] ![][version]  [![][GitHub]](https://github.com/GlossMod/Gloss-Mod-Manager-info)
 </center> 
 
 ---- 
 
 ### 这是什么？
-管模模(Gloss Mod Manager) 简称GMM, 是一款综合性的游戏模组管理器.
+Gloss Mod Manager 简称GMM, 是一款综合性的游戏模组管理器.
 是一款功能强大的综合性游戏Mod管理器, 它为游戏玩家提供了简单易用的方式来管理和安装各种游戏Mod.
 无论你是新手还是老手,使用GMM都会让你的Mod安装和管理更加轻松和快捷.
 
@@ -24,9 +24,11 @@
     - APP 扫码登录 & 账号密码登录
 - [x] 添加启动游戏功能，并允许用户选择游戏路径。
 - [x] 多语言国际化，允许用户切换应用程序语言。
-- [ ] 添加上传Mod包功能到Mod站。
+- [x] 添加上传Mod包功能到Mod站。
+- [x] 自适应系统语言
+- [x] 自适应系统主题
 - [ ] 自动检查Mod更新功能
-- [ ] 实现Mod排序功能, 并允许用户自定义排序方式。
+- [x] 实现Mod排序功能, 并允许用户自定义排序方式。
 - [ ] 自动处理Mod冲突问题
 
 
@@ -79,8 +81,9 @@
 [author]: https://p.aoe.top/shields/badge/作者-小莫-blue?logo=Cloudera
 [Electron]: https://p.aoe.top/shields/badge/Electron-22.0.3-47848F?logo=electron
 [vue]: https://p.aoe.top/shields/badge/Vue3-3.2.45-4FC08D?logo=vuedotjs
-[vuetify]: https://p.aoe.top/shields/badge/Vuetify-3.1.15-1867C0?logo=vuetify
-[pinia]: https://p.aoe.top/shields/badge/pinia-2.0.30-1867C0?logo=vuetify
+[Vite]: https://p.aoe.top/shields/badge/Vite-4.0.4-646CFF?logo=vite
+[pinia]: https://p.aoe.top/shields/badge/Pinia-2.0.30-ecb732?logo=Pinia
 [typescript]: https://p.aoe.top/shields/badge/TypeScript-5.0.4-3178C6?logo=typescript
 [GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager-info?style=social
+[version]: https://p.aoe.top/shields/github/package-json/v/GlossMod/Gloss-Mod-Manager-info
 

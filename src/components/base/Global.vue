@@ -61,7 +61,7 @@ function GetModInfo() {
     if (settings.settings.managerGame) {
         manager.getModInfo().then(() => {
             manager.maxID = manager.managerModList.reduce((pre, cur) => {
-                return pre > cur.id ? pre : cur.id
+                return pre > cur?.id ? pre : cur?.id
             }, 0)
             console.log(`Mod 最大ID : ${manager.maxID}`);
         })
