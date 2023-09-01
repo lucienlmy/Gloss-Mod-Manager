@@ -60,6 +60,12 @@ function GetModInfo() {
     // manager.managerModList.length == 0 && settings.settings.managerGame
     if (settings.settings.managerGame) {
         manager.getModInfo().then(() => {
+
+            // 移除 manager.managerModList 中为 null 的值
+            manager.managerModList = manager.managerModList.filter((item) => {
+                return item != null
+            })
+
             manager.maxID = manager.managerModList.reduce((pre, cur) => {
                 return pre > cur?.id ? pre : cur?.id
             }, 0)
