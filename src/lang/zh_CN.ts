@@ -204,6 +204,7 @@ const Games = {
     "Baldurs Gate 3": "博德之门3",
     "Don't Starve Together": "饥荒 & 联机版",
     "Starfield": "星空",
+    "Armored Core 6": "装甲核心6",
 }
 
 const lang = {

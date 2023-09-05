@@ -42,5 +42,9 @@
     "description": "Gloss Mod Manager File",
     "icon": "public/favicon.ico",
     "role": "Shell"
+  },
+  "extraResources": {
+    "from": "./resources/",
+    "to": ""
   }
 }

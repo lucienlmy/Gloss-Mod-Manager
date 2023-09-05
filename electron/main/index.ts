@@ -291,13 +291,10 @@ ipcMain.on('open-gmm-file', (event, arg) => {
 // 获取系统语言
 ipcMain.handle('get-system-language', async (event, arg) => {
     let locale = app.getLocale()
-
     // 将 - 替换为 _
     locale = locale.replace('-', '_')
-
     return locale
 })
-
 
 // 打印程序目录下的所有文件列表
 readdirSync(__dirname).forEach(file => {

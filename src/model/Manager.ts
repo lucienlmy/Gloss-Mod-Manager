@@ -9,7 +9,7 @@ import { FileHandler } from "@src/model/FileHandler";
 import { basename } from 'node:path'
 import { useManager } from '@src/stores/useManager';
 import { useDownload } from '@src/stores/useDownload';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 
 export class Manager {
@@ -57,7 +57,8 @@ export class Manager {
         let res: IState[] = []
         mod.modFiles.forEach(async item => {
             try {
-                let source = `${modStorage}\\${item}`
+                // let source = `${modStorage}\\${item}`
+                let source = join(modStorage, item)
                 if (statSync(source).isFile()) {
                     let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
                     let state = await FileHandler.copyFile(source, target)
@@ -80,7 +81,7 @@ export class Manager {
         let res: IState[] = []
         mod.modFiles.forEach(item => {
             try {
-                let source = `${modStorage}\\${item}`
+                let source = join(modStorage, item)
                 if (statSync(source).isFile()) {
                     // console.log("source:", source);
                     let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
@@ -113,5 +114,49 @@ export class Manager {
             }).catch(() => { })
             return false
         }
+    }
+
+    /**
+     * 以某个文件夹为分割 安装文件
+     * @param mod mod
+     * @param installPath 安装路径
+     * @param folderName 文件夹名称 
+     * @param isInstall 是否安装
+     * @param include 是否包含文件夹
+     * @returns 
+     */
+    public static async installByFolder(mod: IModInfo, installPath: string, folderName: string, isInstall: boolean, include: boolean = false, spare: boolean = false) {
+        const manager = useManager()
+        let res: IState[] = []
+        mod.modFiles.forEach(async item => {
+            try {
+                let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
+                if (statSync(modStorage).isFile()) {
+                    let path = FileHandler.getFolderFromPath(modStorage, folderName, include)
+                    if (path) {
+                        let gameStorage = join(manager.gameStorage ?? "", installPath, path)
+                        if (isInstall) {
+                            let state = await FileHandler.copyFile(modStorage, gameStorage)
+                            res.push({ file: item, state: state })
+                        } else {
+                            let state = FileHandler.deleteFile(gameStorage)
+                            res.push({ file: item, state: state })
+                        }
+                    } else if (spare) {
+                        let gameStorage = join(manager.gameStorage ?? "", installPath, item)
+                        if (isInstall) {
+                            let state = await FileHandler.copyFile(modStorage, gameStorage)
+                            res.push({ file: item, state: state })
+                        } else {
+                            let state = FileHandler.deleteFile(gameStorage)
+                            res.push({ file: item, state: state })
+                        }
+                    }
+                }
+            } catch (error) {
+                ElMessage.error(`错误: ${error}`)
+            }
+        })
+        return res
     }
 }

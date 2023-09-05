@@ -8,14 +8,12 @@ import { ipcRenderer } from 'electron';
 import { FileHandler } from '@src/model/FileHandler'
 
 export class Config {
-
     /**
      * 配置目录
      * @returns 
      */
     public static configFolder() {
         let ConfigFolder = join(homedir(), 'My Documents', 'Gloss Mod Manager')
-        // let newConfigFolder = join("C:", 'Gloss Mod Manager')
         if (!FileHandler.fileExists(join(homedir(), 'My Documents'))) {
             ConfigFolder = join("C:", 'Gloss Mod Manager')
         }

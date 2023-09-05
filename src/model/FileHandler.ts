@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 // import fs from 'fs/promises';
 import * as path from 'path';
+import { homedir } from "os";
 import { Config } from "@src/model/Config";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
@@ -467,5 +468,53 @@ export class FileHandler {
         } else {
             return folders.slice(index + 1).join(path.sep)
         }
+    }
+
+    public static getResourcesPath() {
+        return path.join(process.cwd(), 'resources')
+    }
+
+    /**
+     * 获取我的文档路径
+     * @returns 
+     */
+    public static async getMyDocuments() {
+
+        let documents = path.join(homedir(), 'My Documents')
+        if (this.fileExists(documents)) return documents     // 如果能直接找到则直接返回
+
+        const edge = require('electron-edge-js')
+        let assemblyFile = path.join(this.getResourcesPath(), "dll", "GetSpecialFolder.dll")
+        let Invoke = edge.func({
+            assemblyFile: assemblyFile,
+            typeName: 'GetSpecialFolder.Program',
+            methodName: 'GetMyDocuments'
+        })
+        return new Promise<string>((resolve, reject) => {
+            Invoke(null, async (error: any, result: any) => {
+                if (error) reject(error);
+                console.log(result);
+                resolve(result);
+            })
+        })
+    }
+
+    /**
+     * 获取公共父文件夹
+     * @param paths  文件列表
+     * @returns 
+     */
+    public static getCommonParentFolder(paths: string[]): string {
+
+        /// AI 给的写法 虽然看不懂 但感觉很酷
+        const dirs = paths.map((p) => p.split(path.sep));
+        if (dirs.some((d) => d.length === 0)) return "";
+        for (let i = 0; i < dirs[0].length; i++) {
+            const current = dirs[0][i];
+            if (dirs.some((d) => d[i] !== current)) {
+                return dirs[0].slice(0, i).join(path.sep);
+            }
+        }
+        return dirs[0].join(path.sep);
     }
 }

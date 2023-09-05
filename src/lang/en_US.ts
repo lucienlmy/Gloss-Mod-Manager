@@ -207,6 +207,7 @@ const Games = {
     "Baldurs Gate 3": "Baldurs Gate 3",
     "Don't Starve Together": "Don't Starve Together",
     "Starfield": "Starfield",
+    "Armored Core 6": "Armored Core 6",
 }
 
 const lang = {
