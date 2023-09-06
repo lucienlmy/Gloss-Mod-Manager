@@ -117,7 +117,7 @@ export class Manager {
     }
 
     /**
-     * 以某个文件夹为分割 安装文件
+     * 以某个文件夹为分割 安装/卸载 文件
      * @param mod mod
      * @param installPath 安装路径
      * @param folderName 文件夹名称 
