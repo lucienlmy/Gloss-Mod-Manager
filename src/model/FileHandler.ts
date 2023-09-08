@@ -470,6 +470,7 @@ export class FileHandler {
         }
     }
 
+    // 获取程序目录下的 resources 目录
     public static getResourcesPath() {
         return path.join(process.cwd(), 'resources')
     }
@@ -516,5 +517,14 @@ export class FileHandler {
             }
         }
         return dirs[0].join(path.sep);
+    }
+
+    // 获取路径下所有的文件
+    public static getAllFilesInFolder(folderPath: string) {
+        let files: string[] = []
+        if (this.fileExists(folderPath)) {
+            files = fs.readdirSync(folderPath)
+        }
+        return files
     }
 }

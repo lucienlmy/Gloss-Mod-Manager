@@ -47,6 +47,9 @@ function openFolder() {
     const modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame?.gameName}`
     FileHandler.openFolder(modStorage)
 }
+function openGameFolder() {
+    FileHandler.openFolder(settings.settings.managerGame?.gamePath ?? "")
+}
 
 </script>
 <template>
@@ -68,6 +71,8 @@ function openFolder() {
                         <v-list-item :title="$t('Uninstall All')" append-icon="mdi-close"
                             @click="allUnInstall"></v-list-item>
                         <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
                             append-icon="mdi-folder-open-outline"></v-list-item>
                         <ContentPack></ContentPack>
                         <ManagerSort></ManagerSort>

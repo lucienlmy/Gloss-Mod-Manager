@@ -11,11 +11,28 @@ const props = defineProps<{
 
 const packs = usePacks()
 
+function select(all: boolean) {
+    // console.log(packs.packs);
+    if (all) {
+        packs.packs = props.modList
+    } else {
+        // 反选
+        packs.packs = props.modList.filter(item => !packs.packs.includes(item))
+    }
+}
 
 </script>
 <template>
     <v-item-group multiple v-model="packs.packs">
-        <v-list-subheader>{{ `${subheader} (${packs.packs.length})` }}</v-list-subheader>
+        <v-list-subheader>
+            <div class="subheader">
+                <div class="text">{{ `${subheader} (${packs.packs.length})` }}</div>
+                <div class="btn">
+                    <v-chip label append-icon="mdi-check" @click="select(true)" variant="text">全选</v-chip>
+                    <v-chip label append-icon="mdi-close" @click="select(false)" variant="text">反选</v-chip>
+                </div>
+            </div>
+        </v-list-subheader>
         <div class="list-wrap">
             <v-item v-for="item in modList" v-slot="{ isSelected, toggle }" :value="item">
                 <v-list-item :title="item.modName" @click="toggle">
@@ -39,5 +56,11 @@ export default {
 .list-wrap {
     max-height: 400px;
     overflow-y: auto;
+}
+
+.subheader {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
 }
 </style>

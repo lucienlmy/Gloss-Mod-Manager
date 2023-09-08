@@ -6,10 +6,11 @@ import { ElMessage } from "element-plus";
 import { useMain } from "@src/stores/useMain";
 import { useSettings } from "@src/stores/useSettings";
 import { ref, computed } from "vue"
-import type { IGameExe, IGameInfo } from "@src/model/Interfaces";
+import type { IGameExe, IGameInfo, ISupportedGames } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
 import { Steam } from "@src/model/Steam"
+import { FileHandler } from "@src/model/FileHandler";
 
 const manager = useManager()
 const settings = useSettings()
@@ -18,7 +19,7 @@ const { t } = useI18n()
 
 let searchText = ref("")
 
-let list = computed(() => {
+let list = computed<ISupportedGames[]>(() => {
     const list = manager.supportedGames.map((item) => ({
         name: t(item.gameName),
         game: item,
@@ -31,52 +32,89 @@ let list = computed(() => {
 })
 
 // =========== 让用户选择指定游戏 ===========
-function select(item: IGameInfo) {
+function select(item: ISupportedGames) {
     ipcRenderer.invoke("select-file", {
-        properties: ['openFile'],
+        properties: ['openDirectory'],
         filters: [{ name: '游戏主程序', extensions: ['exe'] }],
         defaultPath: Steam.getSteamGamePath(item.steamAppID, item.installdir)
     }).then((arg: string[]) => {
         if (arg.length > 0) {
-            const filePath = arg[0]
-            let name = basename(filePath)
-            console.log(name);
+            let files = FileHandler.getAllFilesInFolder(arg[0])
+            if (typeof (item.gameExe) == 'string') {
+                // 判断 item.gameExe 是否存在于 files 中
+                if (files.includes(item.gameExe)) {
+                    settings.settings.managerGame = item
+                    settings.settings.managerGame.gamePath = arg[0]
 
-            // 判断 supportedGames 中是否有该游戏
-            let supportedGame = manager.supportedGames.find((item) => {
-                if (typeof (item.gameExe) == 'string') {
-                    return item.gameExe === name
                 } else {
-                    return item.gameExe.find(item => item.name === name)
+                    ElMessage.error(`请选择 ${item.gameExe} 所在目录.`)
+                    return
                 }
-            })
-            if (supportedGame) {
-                settings.settings.managerGame = supportedGame
-
-                // 判断是否是有多个 exe 的游戏 
-                if (typeof (supportedGame.gameExe) == 'string') {
-                    settings.settings.managerGame.gamePath = dirname(filePath)
-                } else {
-                    let exe = supportedGame.gameExe.find(item => item.name == name)
-                    settings.settings.managerGame.gamePath = join(dirname(filePath), exe!.rootPath)
-                }
-
-                console.log(settings.settings);
-                manager.selectGameDialog = false
-                manager.getModInfo()
-                AppAnalytics.sendEvent(`switch_game`, supportedGame.gameName)
             } else {
-                ElMessage.error('您选择的游戏我们暂时不支持..')
+                // 判断 item.gameExe 是否存在于 files 中
+                let exe = item.gameExe.find(item => files.includes(item.name))
+                if (exe) {
+                    console.log(exe);
+                    settings.settings.managerGame = item
+                    settings.settings.managerGame.gamePath = join(arg[0], exe.rootPath)
+                } else {
+                    let exename = item.gameExe.map(item => item.name).join(' 或 ')
+                    ElMessage.error(`请选择 ${exename} 所在目录.`)
+                    return
+                }
+            }
+
+            console.log(settings.settings);
+            manager.selectGameDialog = false
+            manager.getModInfo()
+            AppAnalytics.sendEvent(`switch_game`, item.gameName)
+
+            // 判断 settings.settings.managerGameList 中是否有 item
+            let game = settings.settings.managerGameList?.find(game => game.gameName === item.gameName)
+            if (game) {
+                // game = item
+                // 更新 settings.settings.managerGameList
+                settings.settings.managerGameList = settings.settings.managerGameList.map(game => {
+                    if (game.gameName === item.gameName) {
+                        return item
+                    } else {
+                        return game
+                    }
+                })
+            } else {
+                settings.settings.managerGameList = [...settings.settings.managerGameList, item]
             }
         }
     })
+}
+
+// 快捷 切换游戏
+function switchGame(game: ISupportedGames) {
+    settings.settings.managerGame = game
+    manager.getModInfo()
 }
 
 </script>
 <template>
     <v-dialog v-model="manager.selectGameDialog" persistent width="900px">
         <template v-slot:activator="{ props }">
-            <v-chip label variant="text" append-icon="mdi-plus" v-bind="props">{{ $t('select game') }}</v-chip>
+            <template v-if="settings.settings.managerGameList?.length > 0">
+                <v-menu open-on-hover>
+                    <template v-slot:activator="{ props }">
+                        <v-btn variant="text" append-icon="mdi-menu-down" v-bind="props">{{ $t('select game') }}</v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item :title="$t('select game')" append-icon="mdi-plus"
+                            @click="manager.selectGameDialog = true"></v-list-item>
+                        <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameID"
+                            @click="switchGame(item)" :title="$t(item.gameName)">
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+            </template>
+            <template v-else>
+                <v-chip label variant="text" append-icon="mdi-plus" v-bind="props">{{ $t('select game') }}</v-chip>
+            </template>
         </template>
         <v-card class="select-game">
             <v-row>

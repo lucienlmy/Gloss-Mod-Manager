@@ -35,13 +35,14 @@ export class Config {
         return {
             modStorageLocation: settings.modStorageLocation,
             managerGame: settings.managerGame,
+            managerGameList: settings.managerGameList,
             proxy: settings.proxy,
             // UnzipPath: settings.UnzipPath,
             autoInstall: settings.autoInstall,
             leftMenuRail: settings.leftMenuRail,
             autoLaunch: settings.autoLaunch,
             language: settings.language,
-            theme: settings.theme
+            theme: settings.theme,
         }
     }
     // 保存配置文件
@@ -74,7 +75,8 @@ export class Config {
             leftMenuRail: data.leftMenuRail ?? false,
             autoLaunch: data.autoLaunch ?? false,
             language: data.language ?? await ipcRenderer.invoke('get-system-language'),
-            theme: data.theme ?? 'system'
+            theme: data.theme ?? 'system',
+            managerGameList: data.managerGameList ?? []
         }
 
         // 初始化游戏

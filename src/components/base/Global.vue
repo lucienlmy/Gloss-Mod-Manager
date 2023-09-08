@@ -29,7 +29,9 @@ watch(() => settings.settings, () => {
     console.log(`当前配置目录: ${Config.configFolder()}`);
 }, { deep: true })
 
-
+if (!settings.settings.managerGameList) {
+    settings.settings.managerGameList = []
+}
 
 //#endregion
 

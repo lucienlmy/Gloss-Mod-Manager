@@ -147,12 +147,13 @@ export interface IType {
 
 export interface ISupportedGames extends IGameInfo {
     modType: IType[]
-    corePlugins?: IPlugins[]
+    // corePlugins?: IPlugins[]
     checkModType: (mod: IModInfo) => number
 }
 
 export interface ISettings {
     managerGame?: ISupportedGames
+    managerGameList: ISupportedGames[]
     modStorageLocation: string
     proxy: string
     // UnzipPath: string
