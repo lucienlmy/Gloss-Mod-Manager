@@ -87,6 +87,7 @@ export interface IModInfo {
     gameID?: number
     md5: string
     modVersion: string
+    isUpdate?: boolean
     modType?: number
     isInstalled: boolean
     weight: number

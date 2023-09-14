@@ -20,13 +20,13 @@ download.initialization()
 AppAnalytics.sendEvent("start")
 
 console.log(`正在初始化.`);
+console.log(`当前配置目录: ${Config.configFolder()}`);
 
 
 //#region  初始化设置
 watch(() => settings.settings, () => {
     Config.setConfig(settings.settings)
     GetModInfo()
-    console.log(`当前配置目录: ${Config.configFolder()}`);
 }, { deep: true })
 
 if (!settings.settings.managerGameList) {
@@ -62,16 +62,17 @@ function GetModInfo() {
     // manager.managerModList.length == 0 && settings.settings.managerGame
     if (settings.settings.managerGame) {
         manager.getModInfo().then(() => {
-
             // 移除 manager.managerModList 中为 null 的值
             manager.managerModList = manager.managerModList.filter((item) => {
                 return item != null
             })
-
             manager.maxID = manager.managerModList.reduce((pre, cur) => {
                 return pre > cur?.id ? pre : cur?.id
             }, 0)
             console.log(`Mod 最大ID : ${manager.maxID}`);
+
+            // 检查Mod更新
+            manager.checkAllModUpdate()
         })
     }
 }

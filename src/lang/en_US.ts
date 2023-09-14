@@ -139,6 +139,7 @@ const ManagerHeader = {
     "Import Mod": "Import Mod",
     "Install All": "Install All",
     "Uninstall All": "Uninstall All",
+    "Check Mod Update": "Check Mod Update",
     "Current Game": "Selected Game 『{0}』",
     "Not Selected": "Not Selected",
     "select game": "Select Game",

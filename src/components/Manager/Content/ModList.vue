@@ -6,6 +6,7 @@ import { computed, watch, ref } from "vue";
 import { AppAnalytics } from "@src/model/Analytics"
 
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
+import { FileHandler } from '@src/model/FileHandler';
 
 const props = defineProps<{
     mod: IModInfo,
@@ -31,6 +32,7 @@ watch(() => props.mod.isInstalled, () => {
     // console.log(props.mod.isInstalled);
 
     if (props.mod.isInstalled) {
+        FileHandler.writeLog(`安装: ${props.mod.modName}`)
         AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
         // 安装
         type.value?.install(props.mod).then(res => {
@@ -39,6 +41,7 @@ watch(() => props.mod.isInstalled, () => {
             }
         })
     } else {
+        FileHandler.writeLog(`卸载: ${props.mod.modName}`)
         // 卸载
         type.value?.uninstall(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {
@@ -87,7 +90,7 @@ function dragend(e: any) {
 
 </script>
 <template>
-    <div class="wrap" v-if="mod?.id">
+    <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
         <v-col cols="12">
             <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
                 @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
@@ -129,32 +132,36 @@ export default {
 .wrap {
     height: 80px;
 
-}
+    // &.new-version {
+    //     background-color: rgb(119 39 39 / 39%);
+    // }
 
-.mod-list {
-    display: flex;
-    align-items: center;
-    transition: all 0.3s;
 
-    &:hover {
-        // 底部阴影
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .mod-name {
-        .exit-btn {
-            display: none;
-        }
+    .mod-list {
+        display: flex;
+        align-items: center;
+        transition: all 0.3s;
 
         &:hover {
+            // 底部阴影
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .mod-name {
             .exit-btn {
-                display: inline-grid;
+                display: none;
+            }
+
+            &:hover {
+                .exit-btn {
+                    display: inline-grid;
+                }
             }
         }
     }
-}
 
-.moveing {
-    opacity: 0;
+    .moveing {
+        opacity: 0;
+    }
 }
 </style>

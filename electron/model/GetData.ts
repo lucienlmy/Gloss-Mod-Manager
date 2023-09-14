@@ -28,4 +28,8 @@ export class GetData {
             appKey: 'agKawA3V4H%@enTBs!ehzRAvLjJapFd4L32wI#Lw',
         });
     }
+
+    public static async checkAllModUpdate(modId: number[]) {
+        return callApi("/gmm/checkAllModUpdate", { modId });
+    }
 }

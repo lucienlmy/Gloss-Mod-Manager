@@ -1,4 +1,5 @@
 import * as https from "https";
+import * as http from "http";
 
 /**
  * 封装的请求接口方法

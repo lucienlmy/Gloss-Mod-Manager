@@ -70,6 +70,8 @@ function openGameFolder() {
                             @click="allInstall"></v-list-item>
                         <v-list-item :title="$t('Uninstall All')" append-icon="mdi-close"
                             @click="allUnInstall"></v-list-item>
+                        <v-list-item :title="$t('Check Mod Update')" append-icon="mdi-refresh"
+                            @click="manager.checkAllModUpdate"></v-list-item>
                         <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
                             append-icon="mdi-folder-open-outline"></v-list-item>
                         <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"

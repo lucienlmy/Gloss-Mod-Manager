@@ -9,6 +9,7 @@ import { Manager } from "@src/model/Manager";
 import { FileHandler } from "@src/model/FileHandler"
 import { Unzipper } from '@src/model/Unzipper'
 import { usePacks } from "./usePacks";
+import axios from "axios";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -90,6 +91,8 @@ export const useManager = defineStore('Manager', {
         // 将选中的Mod文件添加到管理器
         async addModFile(file: string) {
 
+            FileHandler.writeLog(`添加: ${file}`)
+
             if (path.extname(file) == '.gmm') {
                 return this.addModByGmm(file)
             }
@@ -141,6 +144,9 @@ export const useManager = defineStore('Manager', {
          * @param task 
          */
         async addModByTask(task: IDownloadTask) {
+
+            FileHandler.writeLog(`添加: ${task.name}`)
+
             this.maxID++
             let id = this.maxID.toString()
             const settings = useSettings()
@@ -268,6 +274,25 @@ export const useManager = defineStore('Manager', {
             packs.inpurtDialog = true
             //#endregion
 
+        },
+        // 检查所有Mod更新
+        async checkAllModUpdate() {
+            let modId = [] as number[]
+            this.managerModList.forEach(item => {
+                if (item.webId) modId.push(item.webId)
+            })
+
+            ipcRenderer.invoke("check-mod-update", modId).then(({ data }) => {
+                data.forEach((item: any) => {
+                    let mod = this.getModInfoByWebId(item.id)
+                    if (mod) {
+                        if (mod.modVersion != item.mods_version) {
+                            mod.isUpdate = true
+                            console.log(`『${mod.modName}』 有新版本可用.`);
+                        }
+                    }
+                })
+            })
         }
     }
 })

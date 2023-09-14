@@ -62,6 +62,7 @@ function toDel() {
     if (props.mod.isInstalled) {
         type.value?.uninstall(props.mod)
     }
+    FileHandler.writeLog(`删除: ${props.mod.modName}`)
     manager.deleteMod(props.mod)
 }
 
@@ -73,6 +74,7 @@ function del() {
 
 function reinstall() {
     if (props.mod.webId) {
+        FileHandler.writeLog(`更新: ${props.mod.modName}`)
         toDel()
         download.addDownloadById(props.mod.webId)
     }
@@ -82,14 +84,26 @@ function reinstall() {
 <template>
     <v-menu open-on-hover>
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
+            <v-btn variant="text" v-bind="props">
+                <v-badge v-if="mod.isUpdate" dot floating color="success">
+                    <v-icon>mdi-menu</v-icon>
+                </v-badge>
+                <v-icon v-else>mdi-menu</v-icon>
+            </v-btn>
         </template>
         <v-list>
             <v-list-item append-icon="mdi-information-slab-circle-outline" :title="t('Info')" @click="showInfo = true">
             </v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
             <v-list-item v-if="mod.webId" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
-            <v-list-item v-if="mod.webId" append-icon="mdi-refresh" :title="t('Update')" @click="reinstall"></v-list-item>
+            <v-list-item v-if="mod.webId" :title="t('Update')" @click="reinstall">
+                <template v-slot:append>
+                    <v-badge v-if="mod.isUpdate" dot floating color="success">
+                        <v-icon>mdi-refresh</v-icon>
+                    </v-badge>
+                    <v-icon v-else>mdi-refresh</v-icon>
+                </template>
+            </v-list-item>
             <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
         </v-list>
     </v-menu>

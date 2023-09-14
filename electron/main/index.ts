@@ -283,6 +283,11 @@ ipcMain.handle('user-login', async (event, arg) => {
     return res
 })
 
+// 检查Mod更新
+ipcMain.handle('check-mod-update', async (event, arg) => {
+    let res = await GetData.checkAllModUpdate(arg)
+    return res
+})
 
 ipcMain.on('open-gmm-file', (event, arg) => {
     win.webContents.send('open-gmm-file', arg)
