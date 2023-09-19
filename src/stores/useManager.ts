@@ -9,7 +9,6 @@ import { Manager } from "@src/model/Manager";
 import { FileHandler } from "@src/model/FileHandler"
 import { Unzipper } from '@src/model/Unzipper'
 import { usePacks } from "./usePacks";
-import axios from "axios";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -21,6 +20,7 @@ export const useManager = defineStore('Manager', {
         search: "",
         dragIndex: 0,
         installLoading: false,
+
     }),
     getters: {
         /**

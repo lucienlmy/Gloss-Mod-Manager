@@ -43,6 +43,7 @@ export class Config {
             autoLaunch: settings.autoLaunch,
             language: settings.language,
             theme: settings.theme,
+            fold: settings.fold,
         }
     }
     // 保存配置文件
@@ -76,7 +77,8 @@ export class Config {
             autoLaunch: data.autoLaunch ?? false,
             language: data.language ?? await ipcRenderer.invoke('get-system-language'),
             theme: data.theme ?? 'system',
-            managerGameList: data.managerGameList ?? []
+            managerGameList: data.managerGameList ?? [],
+            fold: data.fold ?? false,
         }
 
         // 初始化游戏

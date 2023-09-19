@@ -409,6 +409,20 @@ export class FileHandler {
         }
     }
 
+    // 判断路径是否是软链
+    public static isSymlink(path: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            fs.lstat(path, (err, stats) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(stats.isSymbolicLink());
+                }
+            });
+        });
+    }
+
+
     /**
      * 移除软连接
      * @param linkPath 软连接路径

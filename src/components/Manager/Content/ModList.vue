@@ -91,7 +91,8 @@ function dragend(e: any) {
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
-        <v-col cols="12">
+        <v-col cols="12" :class="{ fold: settings.settings.fold }">
+            <!-- :no-gutters="manager.fold" -->
             <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
                 @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
                 <v-col cols="6" class="mod-name">
@@ -106,14 +107,20 @@ function dragend(e: any) {
                 <v-col cols="1">{{ mod.modVersion }}</v-col>
                 <v-col cols="2">
                     <!-- 类型 -->
-                    <v-select v-model="mod.modType" variant="solo" :items="settings.settings.managerGame?.modType"
-                        :hide-details="true" item-title="name" item-value="id">
+                    <v-select :density="settings.settings.fold ? 'compact' : 'default'" v-model="mod.modType" variant="solo"
+                        :items="settings.settings.managerGame?.modType" :hide-details="true" item-title="name"
+                        item-value="id">
+                        <template v-slot:item="{ props, item }">
+                            <v-list-item v-bind="props" :title="$t(item.title)"></v-list-item>
+                            <!-- <v-chip label variant="text" v-bind="props">{{ $t(item.title) }}</v-chip> -->
+                        </template>
                     </v-select>
                 </v-col>
                 <v-col cols="2">
                     <!-- 安装 -->
-                    <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                        :hide-details="true" color="#0288D1"></v-switch>
+                    <v-switch :density="settings.settings.fold ? 'compact' : 'default'" v-model="mod.isInstalled"
+                        :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" :hide-details="true"
+                        color="#0288D1"></v-switch>
                 </v-col>
                 <v-col cols="1">
                     <ContentModMenu :mod="mod"></ContentModMenu>
@@ -130,17 +137,23 @@ export default {
 </script>
 <style lang='less' scoped>
 .wrap {
-    height: 80px;
+    // height: 80px;
 
     // &.new-version {
     //     background-color: rgb(119 39 39 / 39%);
     // }
 
+    .fold {
+        padding-top: 0.1rem;
+        padding-bottom: 0.1rem;
+    }
 
     .mod-list {
         display: flex;
         align-items: center;
         transition: all 0.3s;
+
+
 
         &:hover {
             // 底部阴影

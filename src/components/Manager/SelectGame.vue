@@ -90,7 +90,19 @@ function select(item: ISupportedGames) {
 
 // 快捷 切换游戏
 function switchGame(game: ISupportedGames) {
-    settings.settings.managerGame = game
+    // console.log(game);
+    // manager.supportedGames
+
+    let sGame = manager.supportedGames.find(item => item.gameID == game.gameID)
+
+
+    settings.settings.managerGame = {
+        ...game,
+        ...sGame,
+    }
+
+    console.log(settings.settings.managerGame);
+
     manager.getModInfo()
 }
 

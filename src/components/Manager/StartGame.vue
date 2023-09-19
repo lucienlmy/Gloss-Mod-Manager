@@ -37,7 +37,7 @@ async function startGame(startExe: string) {
             </template>
             <v-card>
                 <v-list>
-                    <v-list-item v-for="item in settings.settings.managerGame.startExe" :title="item.name"
+                    <v-list-item v-for="item in settings.settings.managerGame.startExe" :title="$t(item.name)"
                         @click="startGame(item.exePath)"></v-list-item>
                 </v-list>
             </v-card>

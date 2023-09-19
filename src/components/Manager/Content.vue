@@ -26,7 +26,7 @@ let types = computed(() => {
                     <v-chip label variant="text" :value="0">{{ $t('All') }}
                         <small v-if="manager.filterType == 0">({{ manager.filterModList.length }})</small> </v-chip>
                     <v-chip label variant="text" v-for="item in types" :key="item.id" :value="item.id">
-                        {{ item.name }}
+                        {{ $t(item.name) }}
                         <small v-if="manager.filterType == item.id">({{ manager.filterModList.length }})</small>
                     </v-chip>
                 </v-chip-group>

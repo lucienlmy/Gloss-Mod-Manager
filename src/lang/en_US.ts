@@ -164,6 +164,7 @@ const ManagerHeader = {
     "Open location": "Open location",
     "Import completed, you can now enable these mods in the manager and enter the game...": "Import completed, you can now enable these mods in the manager and enter the game...",
 
+    "Fold": "Fold",
 }
 
 const Settings = {
@@ -211,6 +212,35 @@ const Games = {
     "Armored Core 6": "Armored Core 6",
 }
 
+const Other = {
+    // 类型
+    "通用": "General",
+    "未知": "Unknown",
+    "SMAPI": "SMAPI",
+    "通用类型": "General",
+    "Engine 2": "Engine 2",
+    "游戏根目录": "Game Root",
+    "前置插件": "Pre-Plugin",
+    "Plugins": "Plugins",
+    "esp": "esp",
+    "data": "data",
+    "插件": "Plugins",
+    "脚本": "Script",
+    "混合": "Mixed",
+
+    // 启动
+    "启动 激活Mod": "Start and Enable Mod",
+    "启动 x32": "Start x32",
+    "启动 x64": "Start x64",
+    "Steam 启动": "Steam Start",
+    "SFSE 启动": "SFSE Start",
+    "直接启动": "Direct Start",
+    "启用 Mod 并启动游戏": "Enable Mod and Start Game",
+    "禁用 Mod 并启动游戏": "Disable Mod and Start Game",
+    "Steam 启动 (无Mod)": "Steam Start (No Mod)",
+
+}
+
 const lang = {
     ...AppHeader,
     ...LeftMenu,
@@ -225,7 +255,8 @@ const lang = {
     ...ManagerContent,
     ...ManagerHeader,
     ...Settings,
-    ...Games
+    ...Games,
+    ...Other,
 }
 
 

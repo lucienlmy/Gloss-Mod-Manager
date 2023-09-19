@@ -163,6 +163,7 @@ export interface ISettings {
     autoLaunch: boolean
     language: string
     theme: 'light' | 'dark' | 'system'
+    fold: boolean,
 }
 
 
