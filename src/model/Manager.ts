@@ -123,6 +123,7 @@ export class Manager {
      * @param folderName 文件夹名称 
      * @param isInstall 是否安装
      * @param include 是否包含文件夹
+     * @param spare 是否保留其他文件
      * @returns 
      */
     public static async installByFolder(mod: IModInfo, installPath: string, folderName: string, isInstall: boolean, include: boolean = false, spare: boolean = false) {

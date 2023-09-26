@@ -106,6 +106,10 @@ function switchGame(game: ISupportedGames) {
     manager.getModInfo()
 }
 
+function delSwitchGame(game: ISupportedGames) {
+    settings.settings.managerGameList = settings.settings.managerGameList.filter(item => item.gameID !== game.gameID)
+}
+
 </script>
 <template>
     <v-dialog v-model="manager.selectGameDialog" persistent width="900px">
@@ -119,7 +123,10 @@ function switchGame(game: ISupportedGames) {
                         <v-list-item :title="$t('select game')" append-icon="mdi-plus"
                             @click="manager.selectGameDialog = true"></v-list-item>
                         <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameID"
-                            @click="switchGame(item)" :title="$t(item.gameName)">
+                            @click.pointer="switchGame(item)" :title="$t(item.gameName)">
+                            <template v-slot:append>
+                                <v-btn icon="mdi-delete-outline" @click="delSwitchGame(item)" variant="text"></v-btn>
+                            </template>
                         </v-list-item>
                     </v-list>
                 </v-menu>

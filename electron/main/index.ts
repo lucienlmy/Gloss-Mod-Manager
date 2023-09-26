@@ -56,7 +56,7 @@ async function createWindow() {
     }
 
     win = new BrowserWindow({
-        title: 'GMM',
+        title: 'Gloss Mod Manager',
         icon: join(process.env.PUBLIC, 'favicon.ico'),
         webPreferences: {
             preload,

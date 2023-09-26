@@ -210,6 +210,9 @@ const Games = {
     "Don't Starve Together": "Don't Starve Together",
     "Starfield": "Starfield",
     "Armored Core 6": "Armored Core 6",
+    "FINAL FANTASY VII REMAKE": "FINAL FANTASY VII REMAKE",
+    "Lies of P": "Lies of P",
+    "Divinity Original Sin 2": "Divinity Original Sin 2",
 }
 
 const Other = {
@@ -227,6 +230,7 @@ const Other = {
     "插件": "Plugins",
     "脚本": "Script",
     "混合": "Mixed",
+    "主目录": "Main Folder",
 
     // 启动
     "启动 激活Mod": "Start and Enable Mod",

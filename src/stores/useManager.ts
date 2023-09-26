@@ -282,17 +282,19 @@ export const useManager = defineStore('Manager', {
                 if (item.webId) modId.push(item.webId)
             })
 
-            ipcRenderer.invoke("check-mod-update", modId).then(({ data }) => {
-                data.forEach((item: any) => {
-                    let mod = this.getModInfoByWebId(item.id)
-                    if (mod) {
-                        if (mod.modVersion != item.mods_version) {
-                            mod.isUpdate = true
-                            console.log(`『${mod.modName}』 有新版本可用.`);
+            if (modId.length > 0) {
+                ipcRenderer.invoke("check-mod-update", modId).then(({ data }) => {
+                    data?.forEach((item: any) => {
+                        let mod = this.getModInfoByWebId(item.id)
+                        if (mod) {
+                            if (mod.modVersion != item.mods_version) {
+                                mod.isUpdate = true
+                                console.log(`『${mod.modName}』 有新版本可用.`);
+                            }
                         }
-                    }
+                    })
                 })
-            })
+            }
         }
     }
 })

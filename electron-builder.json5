@@ -2,49 +2,52 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "appId": "gmm.aoe.top",
-  "asar": true,
-  "icon": "public/favicon.ico",
-  "productName": "Gloss Mod Manager",
-  "directories": {
-    "output": "release/${version}"
-  },
-  "files": [
-    "dist-electron",
-    "dist"
-  ],
-  "mac": {
-    "artifactName": "${productName}_${version}.${ext}",
-    "target": [
-      "dmg"
-    ]
-  },
-  "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
-    ],
-    "artifactName": "${productName}_${version}.${ext}"
-  },
-  "nsis": {
-    "oneClick": false,
-    "perMachine": false,
-    "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
-  },
-  "fileAssociations": {
-    "ext": "gmm",
-    "name": "Gloss Mod Manager",
-    "description": "Gloss Mod Manager File",
+    "appId": "gmm.aoe.top",
+    "asar": true,
     "icon": "public/favicon.ico",
-    "role": "Shell"
-  },
-  "extraResources": {
-    "from": "./resources/",
-    "to": ""
-  }
+    "productName": "Gloss Mod Manager",
+    "directories": {
+        "output": "release/${version}"
+    },
+    "files": [
+        "dist-electron",
+        "dist"
+    ],
+    "mac": {
+        "artifactName": "${productName}_${version}.${ext}",
+        "target": [
+            "dmg"
+        ]
+    },
+    "win": {
+        "target": [
+            {
+                "target": "nsis",
+                "arch": [
+                    "x64"
+                ]
+            }
+        ],
+        "artifactName": "${productName}_${version}.${ext}",
+        "certificateFile": "./.key/gmm.pfx",
+        "certificatePassword": "MUGqwPYqBD7QY2c3p7hWqhsB8cg8cSNPNNS3dr3gJ9a2H3stI1",
+        "publisherName": "aoe.top"
+    },
+    "nsis": {
+        "oneClick": false,
+        "perMachine": false,
+        "allowToChangeInstallationDirectory": true,
+        "deleteAppDataOnUninstall": false
+    },
+    "fileAssociations": {
+        "ext": "gmm",
+        "name": "Gloss Mod Manager",
+        "description": "Gloss Mod Manager File",
+        "icon": "public/favicon.ico",
+        "role": "Shell"
+    },
+    "extraResources": {
+        "from": "./resources/",
+        "to": ""
+    }
 }
