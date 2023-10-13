@@ -183,6 +183,7 @@ const Settings = {
     "Light": "浅色",
     "Dark": "深色",
     "Auto": "自动",
+    "Mod Folder Tip": "你可以将它设置为任何目录, 但不要设置为游戏目录，以免出现未知错误",
 }
 
 const Games = {
@@ -211,6 +212,7 @@ const Games = {
     "FINAL FANTASY VII REMAKE": "最终幻想7 重制版",
     "Lies of P": "匹诺曹的谎言",
     "Divinity Original Sin 2": "神界: 原罪2",
+    "RimWorld": "边缘世界",
 }
 
 const Other = {

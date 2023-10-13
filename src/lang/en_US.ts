@@ -186,6 +186,7 @@ const Settings = {
     "Light": "Light",
     "Dark": "Dark",
     "Auto": "Auto",
+    "Mod Folder Tip": "You can set it to any directory, but don't set it to the game directory to avoid unknown errors",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",
@@ -213,6 +214,7 @@ const Games = {
     "FINAL FANTASY VII REMAKE": "FINAL FANTASY VII REMAKE",
     "Lies of P": "Lies of P",
     "Divinity Original Sin 2": "Divinity Original Sin 2",
+    "RimWorld": "RimWorld"
 }
 
 const Other = {

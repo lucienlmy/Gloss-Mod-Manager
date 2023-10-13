@@ -1,9 +1,8 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
 import { useSettings } from '@src/stores/useSettings';
-import { ElMessage } from "element-plus";
 import { watch } from "vue";
-import os from 'os'
+
 
 const settings = useSettings()
 
@@ -32,11 +31,13 @@ watch(() => settings.settings.autoLaunch, () => {
 
         <v-col cols="12" md="4">
             <!-- 设置Mod储存路径 -->
-            <v-text-field :label="$t('Mod Folder')" v-model="settings.settings.modStorageLocation">
+            <v-text-field :label="$t('Mod Folder')" v-model="settings.settings.modStorageLocation"
+                :hint="$t('Mod Folder Tip')" persistent-hint>
                 <template v-slot:append-inner>
                     <v-btn variant="text" @click="selectModStorageLocation">{{ $t('Select') }}</v-btn>
                 </template>
             </v-text-field>
+
         </v-col>
         <v-col cols="12" md="4">
             <!-- 设置语言 -->

@@ -42,8 +42,7 @@ export class Download {
             FileHandler.ensureDirectoryExistence(dest + '.downloaded')   // 创建文件
             const downloadedSoFar = parseInt(await FileHandler.readFileSync(`${dest}.downloaded`, '0'), 10) || 0;
             let startTime: number | undefined;
-
-            this.request = https.get(url, { headers: { Range: `bytes=${downloadedSoFar}-` } }, response => {
+            this.request = https.get(url, { headers: { Range: `bytes=${downloadedSoFar}-` } }, async response => {
                 if (response.statusCode === 206) {
                     // Partial content received, continue downloading
                 } else if (response.statusCode === 200) {
