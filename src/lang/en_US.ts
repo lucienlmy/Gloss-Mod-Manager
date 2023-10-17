@@ -214,7 +214,10 @@ const Games = {
     "FINAL FANTASY VII REMAKE": "FINAL FANTASY VII REMAKE",
     "Lies of P": "Lies of P",
     "Divinity Original Sin 2": "Divinity Original Sin 2",
-    "RimWorld": "RimWorld"
+    "RimWorld": "RimWorld",
+    "Total War THREE KINGDOMS": "Total War THREE KINGDOMS",
+    "Total War WARHAMMER III": "Total War WARHAMMER III",
+    "SiFu": "SiFu"
 }
 
 const Other = {

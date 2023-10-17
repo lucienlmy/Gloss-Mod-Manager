@@ -213,6 +213,9 @@ const Games = {
     "Lies of P": "匹诺曹的谎言",
     "Divinity Original Sin 2": "神界: 原罪2",
     "RimWorld": "边缘世界",
+    "Total War THREE KINGDOMS": "全面战争: 三国",
+    "Total War WARHAMMER III": "全面战争: 战锤3",
+    "SiFu": "师父",
 }
 
 const Other = {

@@ -51,11 +51,11 @@ export class FileHandler {
 
     /**
      * 复制文件
-     * @param src 原文件 
+     * @param source 原文件 
      * @param target 目标文件
      * @returns 
      */
-    public static copyFile(src: string, target: string): Promise<boolean> {
+    public static copyFile(source: string, target: string): Promise<boolean> {
         return new Promise<boolean>(async (resolve, reject) => {
             try {
                 this.createDirectory(path.dirname(target));
@@ -66,7 +66,7 @@ export class FileHandler {
                     let backFile = target + '.gmmback'
                     await this.copyFile(target, backFile)
                 }
-                fs.copyFileSync(src, target);
+                fs.copyFileSync(source, target);
                 resolve(true)
             } catch (err) {
                 ElMessage.error(`复制文件失败：${err}`)
@@ -540,5 +540,26 @@ export class FileHandler {
             files = fs.readdirSync(folderPath)
         }
         return files
+    }
+
+    // 判断程序是否已经启动
+    public static async existsSync(name: string) {
+
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                let cmd = `tasklist | findstr ${path.basename(name)}`
+                exec(cmd, (err, stdout, stderr) => {
+                    console.log(stdout);
+                    if (stdout != '') {
+                        resolve(true)
+                    } else {
+                        resolve(false)
+                    }
+                });
+            } catch (error) {
+                reject(error)
+            }
+
+        })
     }
 }

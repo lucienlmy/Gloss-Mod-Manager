@@ -29,9 +29,9 @@
             }
         ],
         "artifactName": "${productName}_${version}.${ext}",
-        "certificateFile": "./.key/gmm.pfx",
-        "certificatePassword": "MUGqwPYqBD7QY2c3p7hWqhsB8cg8cSNPNNS3dr3gJ9a2H3stI1",
-        "publisherName": "aoe.top"
+        // "certificateFile": "./.key/gmm.pfx",
+        // "certificatePassword": "MUGqwPYqBD7QY2c3p7hWqhsB8cg8cSNPNNS3dr3gJ9a2H3stI1",
+        // "publisherName": "aoe.top"
     },
     "nsis": {
         "oneClick": false,

@@ -1,7 +1,14 @@
 <script lang='ts' setup>
 import { useDownload } from '@src/stores/useDownload';
+import { APIAria2 } from '@src/model/APIAria2'
 
 const download = useDownload()
+
+
+function test() {
+    // let api = new APIAria2()
+    APIAria2.init()
+}
 
 </script>
 <template>
@@ -14,6 +21,7 @@ const download = useDownload()
                 <v-chip label variant="text" :value="3">{{ $t('Completed') }}</v-chip>
                 <v-chip label variant="text" :value="0">{{ $t('Waiting/Failure') }}</v-chip>
             </v-chip-group>
+            <!-- <v-chip label variant="text" @click="test">测试</v-chip> -->
         </v-col>
     </v-row>
 </template>
