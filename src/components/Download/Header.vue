@@ -1,14 +1,23 @@
 <script lang='ts' setup>
 import { useDownload } from '@src/stores/useDownload';
 import { APIAria2 } from '@src/model/APIAria2'
+import { useSettings } from '@src/stores/useSettings';
+import { join } from 'node:path'
 
 const download = useDownload()
+const settings = useSettings()
 
+// function test() {
+//     let url = "https://mod.3dmgame.com/static/upload/resource2/202310/9688990_20231017152110_69661.zip"
+//     download.aria2.addUri(url, '测试.zip', join(settings.settings.modStorageLocation, 'cache')).then((gid: any) => {
+//         console.log(`Added download task: ${gid}`);
+//         download.aria2.onProgress(gid.result).subscribe((progress) => {
+//             console.log(progress);
+//         });
 
-function test() {
-    // let api = new APIAria2()
-    APIAria2.init()
-}
+//     })
+//     // download.aria2.tellActive()
+// }
 
 </script>
 <template>

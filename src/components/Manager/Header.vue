@@ -53,42 +53,45 @@ function openGameFolder() {
 
 </script>
 <template>
-    <div class="header">
-        <div class="header-btn">
-            <PackInport></PackInport>
-            <SelectGame></SelectGame>
-            <template v-if="settings.settings.managerGame">
-                <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
-                    @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
-                <StartGame></StartGame>
-                <v-btn variant="text" @click="settings.settings.fold = !settings.settings.fold" :title="$t('Fold')"> <v-icon
-                        :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
-                </v-btn>
-                <v-menu open-on-hover>
-                    <template v-slot:activator="{ props }">
-                        <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
-                    </template>
-                    <v-list>
-                        <v-list-item :title="$t('Install All')" append-icon="mdi-download"
-                            @click="allInstall"></v-list-item>
-                        <v-list-item :title="$t('Uninstall All')" append-icon="mdi-close"
-                            @click="allUnInstall"></v-list-item>
-                        <v-list-item :title="$t('Check Mod Update')" append-icon="mdi-refresh"
-                            @click="manager.checkAllModUpdate"></v-list-item>
-                        <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
-                            append-icon="mdi-folder-open-outline"></v-list-item>
-                        <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
-                            append-icon="mdi-folder-open-outline"></v-list-item>
-                        <ContentPack></ContentPack>
-                        <ManagerSort></ManagerSort>
-                    </v-list>
-                </v-menu>
-            </template>
+    <v-app-bar :elevation="0">
+        <div class="header">
+            <div class="header-btn">
+                <PackInport></PackInport>
+                <SelectGame></SelectGame>
+                <template v-if="settings.settings.managerGame">
+                    <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
+                        @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
+                    <StartGame></StartGame>
+                    <v-btn variant="text" @click="settings.settings.fold = !settings.settings.fold" :title="$t('Fold')">
+                        <v-icon
+                            :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
+                    </v-btn>
+                    <v-menu open-on-hover>
+                        <template v-slot:activator="{ props }">
+                            <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
+                        </template>
+                        <v-list>
+                            <v-list-item :title="$t('Install All')" append-icon="mdi-download"
+                                @click="allInstall"></v-list-item>
+                            <v-list-item :title="$t('Uninstall All')" append-icon="mdi-close"
+                                @click="allUnInstall"></v-list-item>
+                            <v-list-item :title="$t('Check Mod Update')" append-icon="mdi-refresh"
+                                @click="manager.checkAllModUpdate"></v-list-item>
+                            <v-list-item :title="$t('Open Mod Folder')" @click="openFolder"
+                                append-icon="mdi-folder-open-outline"></v-list-item>
+                            <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
+                                append-icon="mdi-folder-open-outline"></v-list-item>
+                            <ContentPack></ContentPack>
+                            <ManagerSort></ManagerSort>
+                        </v-list>
+                    </v-menu>
+                </template>
+            </div>
+            <div class="select-game">
+                {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}
+            </div>
         </div>
-        <div class="select-game">
-            {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}
-        </div>
-    </div>
+    </v-app-bar>
 </template>
 <script lang='ts'>
 
@@ -101,5 +104,6 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
 }
 </style>

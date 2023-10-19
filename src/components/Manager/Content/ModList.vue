@@ -7,6 +7,7 @@ import { AppAnalytics } from "@src/model/Analytics"
 
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
 import { FileHandler } from '@src/model/FileHandler';
+import { ElMessageBox } from 'element-plus';
 
 const props = defineProps<{
     mod: IModInfo,
@@ -29,8 +30,6 @@ let type = computed<IType | undefined>(() => {
 })
 
 watch(() => props.mod.isInstalled, () => {
-    // console.log(props.mod.isInstalled);
-
     if (props.mod.isInstalled) {
         FileHandler.writeLog(`安装: ${props.mod.modName}`)
         AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
@@ -51,10 +50,23 @@ watch(() => props.mod.isInstalled, () => {
     }
 })
 
-let exit_name = ref(false)
-// let dragIndex = 0
-// let index = props.index
+let modType = computed({
+    get: () => props.mod.modType,
+    set: (value) => {
+        if (props.mod.modType != 99) {
+            ElMessageBox.confirm(`除非你真的知道自己在做什么, 否则不要随意修改类型, 不然会导致Mod失效!`).then(() => {
+                props.mod.modType = value
+            }).catch(() => {
+                // props.mod.modType = ondValue
+            })
+        } else {
+            props.mod.modType = value
+        }
+    }
+})
 
+
+let exit_name = ref(false)
 
 function dragstart(e: any, index: number) {
     e.stopPropagation()
@@ -86,12 +98,37 @@ function dragend(e: any) {
 }
 
 
-
-
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
-        <v-col cols="12" :class="{ fold: settings.settings.fold }">
+        <el-col :span="24" v-if="settings.settings.fold">
+            <!-- 小列表 -->
+            <el-row draggable="true" @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index)"
+                @dragend="dragend" @dragover="dragover">
+                <el-col :span="12">
+                    <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        {{ mod.modName }}
+                    </p>
+                    <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
+                        v-model="mod.modName"></el-input>
+                </el-col>
+                <el-col :span="2">{{ mod.modVersion }}</el-col>
+                <el-col :span="4">
+                    <el-select v-model="modType" :disabled="mod.isInstalled">
+                        <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id" :label="item.name"
+                            :value="item.id" />
+                    </el-select>
+                </el-col>
+                <el-col :span="4" class="small-install">
+                    <el-switch v-model="mod.isInstalled" size="small"
+                        :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
+                </el-col>
+                <el-col :span="2">
+                    <ContentModMenu :mod="mod"></ContentModMenu>
+                </el-col>
+            </el-row>
+        </el-col>
+        <v-col cols="12" v-else>
             <!-- :no-gutters="manager.fold" -->
             <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
                 @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
@@ -107,9 +144,8 @@ function dragend(e: any) {
                 <v-col cols="1">{{ mod.modVersion }}</v-col>
                 <v-col cols="2">
                     <!-- 类型 -->
-                    <v-select :density="settings.settings.fold ? 'compact' : 'default'" v-model="mod.modType" variant="solo"
-                        :items="settings.settings.managerGame?.modType" :hide-details="true" item-title="name"
-                        item-value="id">
+                    <v-select v-model="modType" variant="solo" :items="settings.settings.managerGame?.modType"
+                        :hide-details="true" item-title="name" item-value="id" :disabled="mod.isInstalled">
                         <template v-slot:item="{ props, item }">
                             <v-list-item v-bind="props" :title="$t(item.title)"></v-list-item>
                             <!-- <v-chip label variant="text" v-bind="props">{{ $t(item.title) }}</v-chip> -->
@@ -118,9 +154,8 @@ function dragend(e: any) {
                 </v-col>
                 <v-col cols="2">
                     <!-- 安装 -->
-                    <v-switch :density="settings.settings.fold ? 'compact' : 'default'" v-model="mod.isInstalled"
-                        :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" :hide-details="true"
-                        color="#0288D1"></v-switch>
+                    <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
+                        :hide-details="true" color="#0288D1"></v-switch>
                 </v-col>
                 <v-col cols="1">
                     <ContentModMenu :mod="mod"></ContentModMenu>
@@ -171,6 +206,13 @@ export default {
                 }
             }
         }
+
+
+    }
+
+    .small-install {
+        display: flex;
+        justify-content: center;
     }
 
     .moveing {

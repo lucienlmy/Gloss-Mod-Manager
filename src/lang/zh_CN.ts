@@ -121,6 +121,7 @@ const ManagerContent = {
     "Are you sure you want to delete this Mod?": "您确认要删除这个Mod吗?",
     "This mod was not downloaded from the manager and cannot be updated": "该作品不是从管理器下载的, 无法获取更新",
     "Info": "信息",
+    "Edit": "编辑",
     "Open": "打开",
     "Update": "更新",
     "Delete": "删除",
@@ -147,6 +148,7 @@ const ManagerHeader = {
     "sort by": "排序方式",
     "sort by {0}": "按{0}排序",
     "state": "状态",
+    "{0} games": "共 {0} 款游戏",
 
     "Please select a mod to {0}": "请选择要{0}的Mod",
     "package": "打包",
@@ -200,7 +202,7 @@ const Games = {
     "The Scroll Of Taiwu": "太吾绘卷",
     "MiChangSheng": "觅长生",
     "MonsterHunterRise": "怪物猎人: 崛起",
-    "SkyrimSE": "上古卷轴5: 重制版",
+    "Skyrim Special Edition": "上古卷轴5: 重制版",
     "The Sims 4": "模拟人生4",
     "The Witcher 3": "巫师3: 狂猎",
     "Fallout 4": "辐射4",
@@ -216,6 +218,9 @@ const Games = {
     "Total War THREE KINGDOMS": "全面战争: 三国",
     "Total War WARHAMMER III": "全面战争: 战锤3",
     "SiFu": "师父",
+    "Resident Evil 2": "生化危机2: 重制版",
+    "Resident Evil Village": "生化危机8: 村庄",
+    "Devil May Cry 5": "鬼泣5",
 }
 
 const Other = {

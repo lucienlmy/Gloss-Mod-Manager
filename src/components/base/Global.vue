@@ -9,6 +9,7 @@ import { AppAnalytics } from "@src/model/Analytics"
 import { ipcRenderer } from 'electron'
 import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
+import { APIAria2 } from "@src/model/APIAria2";
 
 const settings = useSettings()
 const download = useDownload()
@@ -157,6 +158,8 @@ function setLightTheme() {
 //#endregion
 
 
+// 初始化 Aria2
+// APIAria2.init()
 
 </script>
 <template></template>

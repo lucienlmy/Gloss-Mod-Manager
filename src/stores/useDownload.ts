@@ -8,6 +8,7 @@ import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
 import { useManager } from "@src/stores/useManager";
+import { APIAria2 } from "@src/model/APIAria2";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -15,6 +16,7 @@ export const useDownload = defineStore('Download', {
         downloadTaskList: [] as IDownloadTask[],    // 下载任务列表
         downloadProcessList: [] as Download[],      // 下载进程列表 进程列表会在重启软件后清空
         searchName: "",
+        // aria2: new APIAria2()
     }),
     getters: {
         configPath(): string {

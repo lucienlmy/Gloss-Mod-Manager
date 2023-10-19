@@ -19,7 +19,7 @@ export class LocalLang {
 
 
     private static async getLocalLangList() {
-        let list = await FileHandler.readFileSync(path.join(this.langFolder, 'lang.json'))
+        let list = await FileHandler.readFileSync(path.join(this.langFolder, 'lang.json'), '[]')
         let langList = JSON.parse(list)
 
         langList.forEach((item: any) => {
@@ -39,17 +39,11 @@ export class LocalLang {
         // 移除文件名是 lang.json 的文件
         list = list.filter(fileName => !fileName.includes("lang.json"));
         // let data: any = {}
-        list.forEach(async item => {
+        list?.forEach(async item => {
             let name = path.basename(item, '.json')
-
             let list = FileHandler.readFile(item)
-            // console.log(list);
             data[`${name}_local`] = JSON.parse(list ?? "{}")
-            // console.log(data);
-
         })
-
-
     }
 
 }

@@ -141,6 +141,7 @@ function delSwitchGame(game: ISupportedGames) {
                     <div class="title">
                         <div class="text">
                             {{ $t('select game') }}
+                            <small>({{ $t('{0} games', [list.length]) }})</small>
                         </div>
                         <v-text-field density="compact" variant="solo" :label="$t('Search Game')"
                             append-inner-icon="mdi-magnify" single-line hide-details v-model="searchText"></v-text-field>
@@ -187,6 +188,10 @@ export default {
             flex: 1 1 auto;
             display: flex;
             align-items: center;
+
+            small {
+                opacity: .8;
+            }
         }
     }
 

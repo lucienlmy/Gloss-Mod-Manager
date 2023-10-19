@@ -94,6 +94,7 @@ export interface IModInfo {
     modFiles: string[]
     modDesc?: string
     modAuthor?: string
+    modWebsite?: string
     corePlugins?: [
         { id: number, name: string }
     ]
@@ -213,4 +214,11 @@ export interface IInfo {
     description?: string
     gameID?: number
     author?: string
+}
+
+export interface IAria2Request {
+    jsonrpc: string;
+    id?: string;
+    method: string;
+    params: any[];
 }

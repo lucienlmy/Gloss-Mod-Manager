@@ -97,7 +97,6 @@ const ExploreFilter = {
     "Search": "Search Works",
     "You can search for what you want here": "You can search for what you want here",
     "Game Type": "Game Type",
-
 }
 
 const Welcome = {
@@ -107,6 +106,7 @@ const Welcome = {
 
 const ManagerContent = {
     "Info": "Info",
+    "Edit": "Edit",
     "Open": "Open",
     "Update": "Update",
     "Delete": "Delete",
@@ -150,6 +150,7 @@ const ManagerHeader = {
     "sort by": "Sort by",
     "sort by {0}": "Sort by {0}",
     "state": "state",
+    "{0} games": "{0} games",
 
     "Please select a mod to {0}": "Please select a mod to {0}",
     "package": "Package",
@@ -202,7 +203,7 @@ const Games = {
     "The Scroll Of Taiwu": "The Scroll Of Taiwu",
     "MiChangSheng": "Mi Chang Sheng",
     "MonsterHunterRise": "Monster Hunter Rise",
-    "SkyrimSE": "Skyrim Special Edition",
+    "Skyrim Special Edition": "Skyrim Special Edition",
     "The Sims 4": "The Sims 4",
     "The Witcher 3": "The Witcher 3",
     "Fallout 4": "Fallout 4",
@@ -217,7 +218,10 @@ const Games = {
     "RimWorld": "RimWorld",
     "Total War THREE KINGDOMS": "Total War THREE KINGDOMS",
     "Total War WARHAMMER III": "Total War WARHAMMER III",
-    "SiFu": "SiFu"
+    "SiFu": "SiFu",
+    "Resident Evil 2": "Resident Evil 2",
+    "Resident Evil Village": "Resident Evil Village",
+    "Devil May Cry 5": "Devil May Cry 5",
 }
 
 const Other = {

@@ -1,12 +1,9 @@
 <script lang='ts' setup>
 import ContentModList from '@src/components/Manager/Content/ModList.vue'
 import { useManager } from '@src/stores/useManager';
-import { useSettings } from '@src/stores/useSettings';
 import { ref } from "vue";
 
 const manager = useManager()
-const settings = useSettings()
-let loading = ref(false)
 // 移入时触发 第一次
 function dragenter(event: DragEvent) {
 }

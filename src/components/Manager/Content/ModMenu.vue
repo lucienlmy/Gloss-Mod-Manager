@@ -19,7 +19,7 @@ const manager = useManager()
 const download = useDownload()
 const { t } = useI18n()
 
-let showInfo = ref(false)
+let showEdit = ref(false)
 
 let type = computed<IType | undefined>(() => {
     return settings.settings.managerGame?.modType.find((item) => {
@@ -28,24 +28,23 @@ let type = computed<IType | undefined>(() => {
 })
 
 
-
-let info = computed(() => {
-    let mod = props.mod
-    // let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame?.gameName}\\${mod.id}`
-    let modStorage = join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id.toString())
-    let list = [
-        { title: t('Name'), content: mod.modName },
-        { title: t('Version'), content: mod.modVersion },
-        { title: t('MD5'), content: mod.md5 },
-        { title: t('Storage Location'), content: modStorage },
-    ]
-
-    if (mod.webId) {
-        list.push({ title: t('Website'), content: `https://mod.3dmgame.com/mod/${mod.webId}` })
-        list.push({ title: t('Author'), content: mod.modAuthor ?? "" })
+let modStorage = computed({
+    get: () => join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", props.mod.id.toString()),
+    set: (value) => { }
+})
+let MD5 = computed({
+    get: () => props.mod.md5,
+    set: (value) => { }
+})
+let Website = computed({
+    get: () => {
+        if (props.mod.modWebsite) return props.mod.modWebsite
+        if (props.mod.webId) return `https://mod.3dmgame.com/mod/${props.mod.webId}`
+        else return undefined
+    },
+    set: (value) => {
+        props.mod.modWebsite = value
     }
-
-    return list
 })
 
 function open() {
@@ -55,7 +54,11 @@ function open() {
 }
 
 function openWeb() {
-    window.open(`https://mod.3dmgame.com/mod/${props.mod.webId}`)
+    if (Website.value) {
+        window.open(Website.value)
+    } else {
+        ElMessage.error(t('This mod has no website'))
+    }
 }
 
 function toDel() {
@@ -92,10 +95,10 @@ function reinstall() {
             </v-btn>
         </template>
         <v-list>
-            <v-list-item append-icon="mdi-information-slab-circle-outline" :title="t('Info')" @click="showInfo = true">
+            <v-list-item append-icon="mdi-square-edit-outline" :title="t('Edit')" @click="showEdit = true">
             </v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
-            <v-list-item v-if="mod.webId" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
+            <v-list-item v-if="Website" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
             <v-list-item v-if="mod.webId" :title="t('Update')" @click="reinstall">
                 <template v-slot:append>
                     <v-badge v-if="mod.isUpdate" dot floating color="success">
@@ -107,15 +110,30 @@ function reinstall() {
             <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
         </v-list>
     </v-menu>
-    <v-dialog v-model="showInfo" width="600">
-        <v-card class="info">
+    <v-dialog v-model="showEdit" width="600">
+        <v-card class="info" :title="$t('Edit')">
             <v-card-text>
-                <v-row v-for="item in info" :key="item.title">
-                    <v-col cols="2">{{ item.title }}</v-col>
-                    <v-col cols="10" class="text-truncate" :title="item.content">{{ item.content }}</v-col>
-                </v-row>
+                <el-form label-width="80px">
+                    <el-form-item :label="t('Name')">
+                        <el-input v-model="mod.modName"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="t('Version')">
+                        <el-input v-model="mod.modVersion"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="t('MD5')">
+                        <el-input v-model="MD5" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item :label="t('Storage Location')">
+                        <el-input v-model="modStorage" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item :label="t('Website')">
+                        <el-input v-model="Website"></el-input>
+                    </el-form-item>
+                    <el-form-item :label="t('Author')">
+                        <el-input v-model="mod.modAuthor"></el-input>
+                    </el-form-item>
+                </el-form>
             </v-card-text>
-
         </v-card>
     </v-dialog>
 </template>

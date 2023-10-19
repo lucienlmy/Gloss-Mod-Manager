@@ -31,7 +31,7 @@ watch(() => settings.settings.autoLaunch, () => {
 
         <v-col cols="12" md="4">
             <!-- 设置Mod储存路径 -->
-            <v-text-field :label="$t('Mod Folder')" v-model="settings.settings.modStorageLocation"
+            <v-text-field :label="$t('Storage Location')" v-model="settings.settings.modStorageLocation"
                 :hint="$t('Mod Folder Tip')" persistent-hint>
                 <template v-slot:append-inner>
                     <v-btn variant="text" @click="selectModStorageLocation">{{ $t('Select') }}</v-btn>
