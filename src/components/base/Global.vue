@@ -159,7 +159,7 @@ function setLightTheme() {
 
 
 // 初始化 Aria2
-// APIAria2.init()
+APIAria2.init()
 
 </script>
 <template></template>

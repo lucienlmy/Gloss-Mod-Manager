@@ -7,9 +7,9 @@ const explore = useExplore()
 
 </script>
 <template>
-    <div class="turn-page">
+    <v-col cols="12" class="turn-page">
         <v-pagination v-model="explore.page" :length="explore.pageLength"></v-pagination>
-    </div>
+    </v-col>
 </template>
 <script lang='ts'>
 

@@ -1,4 +1,4 @@
-import { Download } from "@src/model/Download"
+// import { Download } from "@src/model/Download"
 
 
 export interface IMod {
@@ -167,32 +167,12 @@ export interface ISettings {
     fold: boolean,
 }
 
-
-export enum DownloadStatus {
-    /**
-     * 等待中
-     */
-    WAITING = 0,
-    /**
-     * 下载中
-     */
-    DOWNLOADING = 1,
-    /**
-     * 暂停
-     */
-    PAUSED = 2,
-    /**
-     * 完成
-     */
-    COMPLETED = 3,
-}
-
-
 export interface IDownloadTask {
     id: number
+    gid?: string
     name: string
     version: string
-    state: DownloadStatus
+    status?: "active" | "waiting" | "paused" | "error" | "complete" | "removed"
     speed: number
     totalSize: number
     downloadedSize: number

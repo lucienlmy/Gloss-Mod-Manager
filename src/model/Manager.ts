@@ -4,9 +4,8 @@
 
 import { existsSync, statSync } from 'node:fs'
 import type { IModInfo, IState } from "@src/model/Interfaces";
-import { join } from 'node:path'
+import { join, dirname, basename } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
-import { basename } from 'node:path'
 import { useManager } from '@src/stores/useManager';
 import { useDownload } from '@src/stores/useDownload';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -44,7 +43,6 @@ export class Manager {
      * 一般安装 (复制文件到指定目录)
      * @param mod 
      * @param installPath 安装路径
-     * @param ignoredFolders 是否忽略文件夹
      * @param keepPath 是否保留路径
      * @returns 
      */
@@ -159,5 +157,36 @@ export class Manager {
             }
         })
         return res
+    }
+
+    /**
+     * 以某个文件为基础, 软链安装/卸载 文件
+     * @param mod mod
+     * @param installPath 安装路径
+     * @param fileName 文件名称
+     * @param isInstall 是否是安装
+     */
+    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean) {
+        const manager = useManager()
+        let modStorage = join(manager.modStorage, mod.id.toString())
+        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let folder: string[] = []
+        mod.modFiles.forEach(item => {
+            if (basename(item).toLowerCase() == fileName) {
+                folder.push(dirname(join(modStorage, item)))
+            }
+        })
+
+        if (folder.length > 0) {
+            folder.forEach(item => {
+                let target = join(gameStorage, basename(item))
+                if (isInstall) {
+                    FileHandler.createLink(item, target, true)
+                } else {
+                    FileHandler.removeLink(target)
+                }
+            })
+        }
+        return true
     }
 }

@@ -48,28 +48,32 @@ function allInstell() {
 
 </script>
 <template>
+    <v-app-bar :elevation="0">
+        <v-container fluid>
+            <v-row>
+                <v-col cols="12" class="top">
+                    <div class="left">
+                        <h1>
+                            {{ $t('Download Manager') }}
+                            <small>({{ $t('{0} tasks', [download.downloadTaskList.length]) }})</small>
+                        </h1>
+                    </div>
+                    <div class="right">
+                        <v-text-field density="compact" variant="solo" :label="$t('Search task')"
+                            append-inner-icon="mdi-magnify" single-line hide-details
+                            v-model="download.searchName"></v-text-field>
+                        <v-chip label variant="text" append-icon="mdi-folder-open-outline"
+                            @click="openFolder">{{ $t('Open Folder') }}</v-chip>
+                        <v-chip label variant="text" append-icon="mdi-download"
+                            @click="allInstell">{{ $t('Add All') }}</v-chip>
+                        <v-chip label variant="text" append-icon="mdi-trash-can-outline"
+                            @click="allDel">{{ $t('Delete All') }}</v-chip>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-app-bar>
     <v-container fluid>
-        <v-row>
-            <v-col cols="12" class="top">
-                <div class="left">
-                    <h1>
-                        {{ $t('Download Manager') }}
-                        <small>({{ $t('{0} tasks', [download.downloadTaskList.length]) }})</small>
-                    </h1>
-                </div>
-                <div class="right">
-                    <v-text-field density="compact" variant="solo" :label="$t('Search task')"
-                        append-inner-icon="mdi-magnify" single-line hide-details
-                        v-model="download.searchName"></v-text-field>
-                    <v-chip label variant="text" append-icon="mdi-folder-open-outline"
-                        @click="openFolder">{{ $t('Open Folder') }}</v-chip>
-                    <v-chip label variant="text" append-icon="mdi-download" @click="allInstell">{{ $t('Add All') }}</v-chip>
-                    <v-chip label variant="text" append-icon="mdi-trash-can-outline"
-                        @click="allDel">{{ $t('Delete All') }}</v-chip>
-                </div>
-            </v-col>
-        </v-row>
-        <v-divider></v-divider>
         <DownloadWrap></DownloadWrap>
     </v-container>
 </template>

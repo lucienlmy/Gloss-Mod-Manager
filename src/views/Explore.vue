@@ -10,9 +10,11 @@ import ModList from '@src/components/Explore/ModList.vue'
 import Filter from '@src/components/Explore/Filter.vue'
 import TurnPage from "@src/components/Explore/TurnPage.vue";
 import Header from "@src/components/Explore/Header.vue";
+import { useManager } from "@src/stores/useManager";
 
 const explore = useExplore()
 const settings = useSettings()
+const manager = useManager()
 explore.GetModList()
 
 ipcRenderer.on("get-mod-list-reply", (event, arg) => {
@@ -50,12 +52,17 @@ watch(() => explore.page, () => {
         <Header></Header>
         <Search></Search>
         <Filter></Filter>
-        <v-row class="mod-wrap" v-if="explore.mods.length > 0">
+        <v-row v-if="!settings.settings.managerGame" class="empty">
+            <div @click="manager.selectGameDialog = true" class="empty-hint">
+                {{ $t('You have not selected a game yet. Please select a game first') }} <v-icon>mdi-plus</v-icon>
+            </div>
+        </v-row>
+        <v-row class="mod-wrap" v-else-if="explore.mods.length > 0">
             <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in explore.mods" :key="item.id">
                 <ModList :mod="item"></ModList>
             </v-col>
+            <TurnPage></TurnPage>
         </v-row>
-        <TurnPage></TurnPage>
     </v-container>
 </template>
 <script lang='ts'>

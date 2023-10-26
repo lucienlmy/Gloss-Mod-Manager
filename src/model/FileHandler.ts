@@ -396,9 +396,17 @@ export class FileHandler {
      * @param destPath 软链接路径
      * @returns 
      */
-    public static createLink(folderPath: string, destPath: string) {
+    public static createLink(folderPath: string, destPath: string, backup: boolean = false) {
         // symlinkSync
         try {
+
+            if (backup) {
+                if (this.fileExists(destPath)) {
+                    let backFile = destPath + '_back'
+                    this.renameFile(destPath, backFile)
+                }
+            }
+
             this.createDirectory(path.join(destPath, '..'))
             fs.symlinkSync(folderPath, destPath, 'junction');
             return true

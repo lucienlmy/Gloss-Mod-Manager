@@ -62,17 +62,24 @@ const DownloadTasks = {
     "Open file": "打开文件",
     "Delete task?": "删除任务?",
     "Delete local files": "同时删除本地文件",
-    "Waiting": "等待中",
+    // "Waiting": "等待中",
     "Downloading": "下载中",
     "Paused": "暂停",
     "Completed": "完成",
     "Unknown": "未知",
     "No download tasks available at the moment.": "暂无下载任务",
     "Add All": "全部添加到管理器",
+    "active": "下载中",
+    "waiting": "等待中",
+    "paused": "暂停中",
+    "error": "错误",
+    "complete": "完成",
+    "removed": "已删除",
 }
 const ExploreDownloadBtn = {
-    "Please manage the game first.": "请先管理游戏",
+    "Please manage the game first.": "请先选择游戏",
     "Downloaded": "已下载",
+    "Upload a Mod": "上传作品",
 }
 
 const ExploreFilter = {
@@ -221,6 +228,11 @@ const Games = {
     "Resident Evil 2": "生化危机2: 重制版",
     "Resident Evil Village": "生化危机8: 村庄",
     "Devil May Cry 5": "鬼泣5",
+    "XCOM2": "幽浮2",
+    "No Man's Sky": "无人深空",
+    "7 Days to Die": "七日杀",
+    "Planet Zoo": "动物园之星",
+    "GTA San Andreas Definitive Edition": "GTA 圣安地列斯 最终版",
 }
 
 const Other = {

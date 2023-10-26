@@ -1,5 +1,4 @@
 <script lang='ts' setup>
-import { Download } from "@src/model/Download"
 import { ref, computed } from "vue";
 import { ipcRenderer } from "electron";
 import { useDownload } from "@src/stores/useDownload";

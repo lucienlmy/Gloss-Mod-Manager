@@ -56,14 +56,16 @@ export class APIAria2 {
     }
 
     // 发送消息
-    public send(request: IAria2Request) {
+    public send(request: IAria2Request): Promise<any> {
         return new Promise((resolve, reject) => {
             if (!request.id) request.id = APIAria2.uuid()
+
+            request.params = [`token:${APIAria2.Token()}`, ...request.params]
 
             this.socket.send(JSON.stringify(request))
             this.listener.pipe(
                 filter((msg: any) => msg.id === request.id),
-                pluck('result'),
+                // pluck('result'),
                 // map(x => x?.result)
             ).subscribe(resolve);
         })
@@ -107,17 +109,16 @@ export class APIAria2 {
 
     // 下载进度
     public onProgress(gid: string) {
-        // return this.send({
-        //     jsonrpc: '2.0',
-        //     id: 'progress',
-        //     method: 'aria2.tellStatus',
-        //     params: [gid],
-        // })
-
-        return this.listener.pipe(
-            filter((msg: any) => msg.result?.gid === gid),
-            // pluck('params', '1'),
-        );
+        return this.send({
+            jsonrpc: '2.0',
+            id: 'progress',
+            method: 'aria2.tellStatus',
+            params: [gid, ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir"]],
+        })
+        // return this.listener.pipe(
+        //     filter((msg: any) => msg.result?.gid === gid),
+        //     // pluck('params', '1'),
+        // );
     }
 
     // 下载列表
@@ -130,5 +131,12 @@ export class APIAria2 {
         });
     }
 
-
+    // public tellStatus(gid: string) {
+    //     return this.send({
+    //         jsonrpc: '2.0',
+    //         id: 'progress',
+    //         method: 'aria2.tellStatus',
+    //         params: [gid, ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir"]],
+    //     })
+    // }
 }

@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
 import type { IDownloadTask } from "@src/model/Interfaces";
-import { DownloadStatus } from "@src/model/Interfaces";
+// import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
-import { Download } from "@src/model/Download"
+// import { Download } from "@src/model/Download"
 import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
@@ -12,11 +12,11 @@ import { APIAria2 } from "@src/model/APIAria2";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
-        tab: 'all' as 'all' | 0 | 1 | 2 | 3,
+        tab: 'all' as 'all' | "active" | "waiting" | "paused" | "error" | "complete" | "removed",
         downloadTaskList: [] as IDownloadTask[],    // 下载任务列表
-        downloadProcessList: [] as Download[],      // 下载进程列表 进程列表会在重启软件后清空
+        // downloadProcessList: [] as Download[],      // 下载进程列表 进程列表会在重启软件后清空
         searchName: "",
-        // aria2: new APIAria2()
+        aria2: new APIAria2()
     }),
     getters: {
         configPath(): string {
@@ -29,17 +29,17 @@ export const useDownload = defineStore('Download', {
             let config = await FileHandler.readFileSync(this.configPath, "[]")  // 读取文件
             this.downloadTaskList = JSON.parse(config)    // 转换为对象
 
-            this.downloadTaskList.forEach(item => {
-                if (item.state == DownloadStatus.DOWNLOADING) {
-                    item.state = DownloadStatus.PAUSED
-                }
-            })
+            // this.downloadTaskList.forEach(item => {
+            //     if (item.state == DownloadStatus.DOWNLOADING) {
+            //         item.state = DownloadStatus.PAUSED
+            //     }
+            // })
         },
         /**
          * 添加下载任务
          * @param modData 
          */
-        addDownloadTask(modData: any) {
+        async addDownloadTask(modData: any) {
 
             // 判断是否已经存在
             if (this.getTaskById(modData.id)) {
@@ -51,7 +51,7 @@ export const useDownload = defineStore('Download', {
                 id: modData.id,
                 name: modData.mods_title,
                 version: modData.mods_version,
-                state: DownloadStatus.WAITING,
+                // state: DownloadStatus.WAITING,
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
@@ -60,18 +60,16 @@ export const useDownload = defineStore('Download', {
             })
 
             let task = this.getTaskById(modData.id) as IDownloadTask
-
             const settings = useSettings()
             let fileExt = extname(task.link)
-            let dest = `${settings.settings.modStorageLocation}\\cache\\${task.id}${fileExt}`
+            // let dest = `${settings.settings.modStorageLocation}\\cache\\`
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+            FileHandler.deleteFile(join(dest, `${task.id}${fileExt}`))
 
-            console.log(`删除: ${dest}`);
-            FileHandler.deleteFile(dest)
+            let gid = await this.aria2.addUri(task.link, `${task.id}${fileExt}`, dest)
+            task.gid = gid.result
 
-            let download = new Download(task, dest, this.listen(task).onProgress)
-            this.downloadProcessList.push(download)
             ElMessage.success(`${task.name} 已添加到下载列表`)
-            download.start()
 
         },
         /**
@@ -107,37 +105,37 @@ export const useDownload = defineStore('Download', {
             let tasks: IDownloadTask[] = JSON.parse(JSON.stringify(this.downloadTaskList))
             FileHandler.writeFile(this.configPath, JSON.stringify(tasks))
         },
-        listen(task: IDownloadTask) {
-            return {
-                task,
-                onProgress(downloadedSize: number, totalSize: number, speed: number) {
-                    // // 计算下载进度 并保留2位小数
-                    task.speed = speed
-                    task.totalSize = totalSize
-                    task.downloadedSize = downloadedSize
-                    // 状态
-                    task.state = DownloadStatus.DOWNLOADING
-                    if (downloadedSize >= totalSize) {
-                        ElMessage.success(`${task.name} 下载完成`)
-                        task.state = DownloadStatus.COMPLETED
+        // listen(task: IDownloadTask) {
+        //     return {
+        //         task,
+        //         onProgress(downloadedSize: number, totalSize: number, speed: number) {
+        //             // // 计算下载进度 并保留2位小数
+        //             task.speed = speed
+        //             task.totalSize = totalSize
+        //             task.downloadedSize = downloadedSize
+        //             // 状态
+        //             task.state = DownloadStatus.DOWNLOADING
+        //             if (downloadedSize >= totalSize) {
+        //                 ElMessage.success(`${task.name} 下载完成`)
+        //                 task.state = DownloadStatus.COMPLETED
 
-                        const settings = useSettings()
-                        console.log(settings.settings.autoInstall);
+        //                 const settings = useSettings()
+        //                 console.log(settings.settings.autoInstall);
 
-                        if (settings.settings.autoInstall) {
-                            const manager = useManager()
+        //                 if (settings.settings.autoInstall) {
+        //                     const manager = useManager()
 
-                            if (extname(task.link) == '.gmm') {
-                                let file = join(settings.settings.modStorageLocation, 'cache', `${task.id}.gmm`)
-                                manager.addModByGmm(file)
-                            } else {
-                                manager.addModByTask(task)
-                            }
-                        }
-                    }
-                }
-            }
-        },
+        //                     if (extname(task.link) == '.gmm') {
+        //                         let file = join(settings.settings.modStorageLocation, 'cache', `${task.id}.gmm`)
+        //                         manager.addModByGmm(file)
+        //                     } else {
+        //                         manager.addModByTask(task)
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
         async addDownloadByWeb(url: string) {
             if (!url.startsWith("gmm://installmod")) return
             // let url = gmm://installmod/172999?game=185&name=只狼：影逝二度

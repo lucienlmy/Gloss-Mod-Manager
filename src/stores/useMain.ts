@@ -32,16 +32,22 @@ export const useMain = defineStore('Main', {
         },
         // 格式化大小
         formatSiez(b: number) {
-            const units = ['B', 'KB', 'MB', 'GB'];
-            let size = b;
-            let unitIndex = 0;
-            if (!size || size == 0) return "0B"
+            try {
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let size = b;
+                let unitIndex = 0;
+                if (!size || size == 0) return "0B"
 
-            while (size >= 1024 && unitIndex < units.length - 1) {
-                size /= 1024;
-                unitIndex++;
+                while (size >= 1024 && unitIndex < units.length - 1) {
+                    size /= 1024;
+                    unitIndex++;
+                }
+                return `${size.toFixed(2)} ${units[unitIndex]}`;
+            } catch (error) {
+                console.log(b);
+                return `${b}B`
             }
-            return `${size.toFixed(2)} ${units[unitIndex]}`;
+
         },
         // 获取版本号
         async getVersion() {

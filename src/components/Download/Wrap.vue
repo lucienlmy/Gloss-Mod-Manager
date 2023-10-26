@@ -16,7 +16,7 @@ let list = computed(() => {
         return (item.name.includes(download.searchName))
     })
     return download.downloadTaskList.filter(item => {
-        return (item.state == tab && item.name.includes(download.searchName))
+        return (item.status == tab && item.name.includes(download.searchName))
     })
 })
 
@@ -26,7 +26,7 @@ let list = computed(() => {
         <v-card-text>
             <DownloadHeader></DownloadHeader>
             <v-row v-if="download.downloadTaskList.length > 0">
-                <v-col cols="12" v-for="item in list" :key="item.id">
+                <v-col cols="12" v-for="item in list" :key="item.gid">
                     <DownloadTasks :task="(item as IDownloadTask)"></DownloadTasks>
                 </v-col>
             </v-row>
