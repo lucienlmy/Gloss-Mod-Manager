@@ -56,7 +56,8 @@ export const useDownload = defineStore('Download', {
                 totalSize: 0,
                 downloadedSize: 0,
                 link: modData.mods_resource_url,
-                modAuthor: modData.mods_author
+                modAuthor: modData.mods_author,
+                status: "waiting"
             })
 
             let task = this.getTaskById(modData.id) as IDownloadTask
@@ -67,6 +68,12 @@ export const useDownload = defineStore('Download', {
             FileHandler.deleteFile(join(dest, `${task.id}${fileExt}`))
 
             let gid = await this.aria2.addUri(task.link, `${task.id}${fileExt}`, dest)
+            console.log(gid);
+
+            if (!gid.result) {
+                ElMessage.error(`下载错误: ${JSON.stringify(gid)}`)
+            }
+
             task.gid = gid.result
 
             ElMessage.success(`${task.name} 已添加到下载列表`)

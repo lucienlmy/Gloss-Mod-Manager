@@ -172,7 +172,7 @@ export interface IDownloadTask {
     gid?: string
     name: string
     version: string
-    status?: "active" | "waiting" | "paused" | "error" | "complete" | "removed"
+    status: "active" | "waiting" | "paused" | "error" | "complete" | "removed"
     speed: number
     totalSize: number
     downloadedSize: number

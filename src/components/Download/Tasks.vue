@@ -95,6 +95,13 @@ async function start() {
     if (props.task.gid) {
         let result = await download.aria2.unpause(props.task.gid)
         console.log(result);
+
+        if (result.error) {
+            ElMessage.error(result.error.message)
+            props.task.status = "error"
+            return
+        }
+
         // 继续 timer
         timer = setInterval(onProgress, 100)
     }
@@ -134,8 +141,8 @@ function install() {
         <v-card-text>
             <v-row>
                 <v-col cols="6" md="8" class="name">{{ task.name }}</v-col>
-                <v-col cols="6" md="4" class="operation" v-if="task.status">
-                    <v-btn variant="text" :title="t('Start')" v-if="['error', 'waiting', 'paused'].includes(task.status)"
+                <v-col cols="6" md="4" class="operation">
+                    <v-btn variant="text" :title="t('Start')" v-if="['waiting', 'paused'].includes(task.status)"
                         @click="start()">
                         <v-icon>mdi-menu-right</v-icon>
                     </v-btn>
@@ -143,8 +150,8 @@ function install() {
                         <v-icon>mdi-pause</v-icon>
                     </v-btn>
                     <template v-if="!isUpdate">
-                        <v-btn variant="text" :title="t('Redownload')" v-if="['complete'].includes(task.status)"
-                            @click="restart">
+                        <v-btn variant="text" :title="t('Redownload')"
+                            v-if="['complete', 'error'].includes(task.status) || !task.gid" @click="restart">
                             <v-icon>mdi-restart</v-icon>
                         </v-btn>
                         <v-btn variant="text" :title="t('Delete')" @click="del">
