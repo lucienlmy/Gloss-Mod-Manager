@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -9,6 +9,7 @@ import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
 import { useManager } from "@src/stores/useManager";
 import { APIAria2 } from "@src/model/APIAria2";
+import { useNexusMods } from "./useNexusMods";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -39,7 +40,7 @@ export const useDownload = defineStore('Download', {
          * 添加下载任务
          * @param modData 
          */
-        async addDownloadTask(modData: any) {
+        async addDownloadTask(modData: IMod, type: "GlossMod" | "NexusMods" = "GlossMod") {
 
             // 判断是否已经存在
             if (this.getTaskById(modData.id)) {
@@ -49,9 +50,10 @@ export const useDownload = defineStore('Download', {
 
             this.downloadTaskList.unshift({
                 id: modData.id,
+                type: type,
+                nexus_id: modData.nexus_id,
                 name: modData.mods_title,
-                version: modData.mods_version,
-                // state: DownloadStatus.WAITING,
+                version: modData.mods_version ?? "1.0.0",
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
@@ -67,7 +69,11 @@ export const useDownload = defineStore('Download', {
             let dest = join(settings.settings.modStorageLocation, 'cache')
             FileHandler.deleteFile(join(dest, `${task.id}${fileExt}`))
 
-            let gid = await this.aria2.addUri(task.link, `${task.id}${fileExt}`, dest)
+            let gid = await this.aria2.addUri(task.link,
+                type == "GlossMod" ?
+                    `${task.id}${fileExt}` :
+                    `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`,
+                dest)
             console.log(gid);
 
             if (!gid.result) {
@@ -112,37 +118,11 @@ export const useDownload = defineStore('Download', {
             let tasks: IDownloadTask[] = JSON.parse(JSON.stringify(this.downloadTaskList))
             FileHandler.writeFile(this.configPath, JSON.stringify(tasks))
         },
-        // listen(task: IDownloadTask) {
-        //     return {
-        //         task,
-        //         onProgress(downloadedSize: number, totalSize: number, speed: number) {
-        //             // // 计算下载进度 并保留2位小数
-        //             task.speed = speed
-        //             task.totalSize = totalSize
-        //             task.downloadedSize = downloadedSize
-        //             // 状态
-        //             task.state = DownloadStatus.DOWNLOADING
-        //             if (downloadedSize >= totalSize) {
-        //                 ElMessage.success(`${task.name} 下载完成`)
-        //                 task.state = DownloadStatus.COMPLETED
 
-        //                 const settings = useSettings()
-        //                 console.log(settings.settings.autoInstall);
-
-        //                 if (settings.settings.autoInstall) {
-        //                     const manager = useManager()
-
-        //                     if (extname(task.link) == '.gmm') {
-        //                         let file = join(settings.settings.modStorageLocation, 'cache', `${task.id}.gmm`)
-        //                         manager.addModByGmm(file)
-        //                     } else {
-        //                         manager.addModByTask(task)
-        //                     }
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
+        /**
+         * 通过网页添加下载任务
+         * @param url 
+         */
         async addDownloadByWeb(url: string) {
             if (!url.startsWith("gmm://installmod")) return
             // let url = gmm://installmod/172999?game=185&name=只狼：影逝二度
@@ -157,14 +137,53 @@ export const useDownload = defineStore('Download', {
                 return
             }
 
-
             if (game != (settings.settings.managerGame.gameID).toString()) {
                 ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)
                 return
             }
 
             this.addDownloadById(Number(id))
+        },
+
+        /**
+         * 通过 N网 添加下载任务
+         */
+        async addDownloadByNexus(mod: IMod, url: string, game_domain_name: string) {
+            console.log(mod);
+            console.log(url);
+            // https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88
+            // 正则获取文件后缀 .zip
+            let fileExt = url.match(/\.(\w+)(\?.*)?$/)?.[1]
+            // 正则匹配 https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88 中的  1-0-0 为 1.0.0
+            let version = url.match(/-(\d+-\d+-\d+-\d+)-/)?.[1]?.replace(/-/g, '.')
+            version = version?.replace(`${mod.id}.`, '')
+            console.log(fileExt);
+
+            mod.mods_version = version
+            mod.mods_resource_url = url
+            mod.nexus_id = `${game_domain_name}_${mod.id}`;
+
+            this.addDownloadTask(mod, "NexusMods")
+        },
+
+        async addDownloadByNuxusId(id: number, game_domain_name: string) {
+
+            const nexusMods = useNexusMods()
+            let data = await nexusMods.GetModData(id, game_domain_name);
+            let url = await nexusMods.GetDownloadUrl(id, game_domain_name)
+
+            let mod: any = {
+                id: data.mod_id,
+                mods_title: data.name,
+                mods_author: data.author,
+                // mods_resource_url:url,
+                // mods_version: data.version,
+                // nexus_id: `${game_domain_name}_${id}`,
+            }
+
+            this.addDownloadByNexus(mod, url, game_domain_name)
 
         }
+
     }
 })

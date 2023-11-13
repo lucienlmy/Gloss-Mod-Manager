@@ -3,22 +3,25 @@ import { spawn } from 'child_process'
 import { FileHandler } from '@src/model/FileHandler'
 import * as path from 'path'
 import { IAria2Request } from "@src/model/Interfaces";
-import { Subject, Observable } from 'rxjs';
-import { filter, map, pluck } from 'rxjs/operators';
+
+import axios from 'axios'
+import { Subject } from 'rxjs';
+
 
 export class APIAria2 {
-    public aria2: any
-    socket: WebSocket;
-    listener: Subject<any>;
+    // public aria2: any
+    // socket: WebSocket;
+    // listener: Subject<any>;
 
 
     constructor() {
-        this.socket = new WebSocket('ws://localhost:6800/jsonrpc')
+        // this.socket = new WebSocket('ws://localhost:6800/jsonrpc')
 
-        this.listener = new Subject();
-        this.socket.addEventListener('message', (event: any) => {
-            this.listener.next(JSON.parse(event.data))
-        })
+        // this.listener = new Subject();
+
+        // this.socket.onmessage = (event: any) => {
+        //     this.listener.next(JSON.parse(event.data))
+        // }
 
     }
 
@@ -57,18 +60,32 @@ export class APIAria2 {
 
     // 发送消息
     public send(request: IAria2Request): Promise<any> {
-        return new Promise((resolve, reject) => {
-            if (!request.id) request.id = APIAria2.uuid()
+        // return new Promise((resolve, reject) => {
+        if (!request.id) request.id = APIAria2.uuid()
 
-            request.params = [`token:${APIAria2.Token()}`, ...request.params]
+        request.params = [`token:${APIAria2.Token()}`, ...request.params]
 
-            this.socket.send(JSON.stringify(request))
-            this.listener.pipe(
-                filter((msg: any) => msg.id === request.id),
-                // pluck('result'),
-                // map(x => x?.result)
-            ).subscribe(resolve);
+        return axios.post(`http://localhost:6800/jsonrpc`, request).then(({ data }) => {
+            return data
+        }).catch(err => {
+            return err
         })
+
+        // if (this.socket.readyState == 1) {
+        //     request.params = [`token:${APIAria2.Token()}`, ...request.params]
+        //     this.socket.send(JSON.stringify(request))
+        //     this.listener.pipe(
+        //         filter((msg: any) => msg.id === request.id),
+        //         // pluck('result'),
+        //         // map(x => x?.result)
+        //     ).subscribe(resolve);
+        // } else {
+        //     console.log("readyState", this.socket.readyState);
+
+        //     reject('aria2c 连接错误!')
+        // }
+
+        // })
     }
 
     // 创建下载
@@ -139,4 +156,5 @@ export class APIAria2 {
     //         params: [gid, ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir"]],
     //     })
     // }
+
 }

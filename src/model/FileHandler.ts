@@ -216,12 +216,14 @@ export class FileHandler {
      * @param filePath 
      * @returns 
      */
-    public static readFile(filePath: string) {
+    public static readFile(filePath: string, defaultValue?: string): string {
         if (this.fileExists(filePath)) {
             let data = fs.readFileSync(filePath, 'utf-8')
             return data
         } else {
-            return null
+            // 不存在则创建文件
+            this.ensureDirectoryExistence(filePath, defaultValue)
+            return this.readFile(filePath)
         }
     }
 
@@ -454,7 +456,11 @@ export class FileHandler {
      * @returns 
      */
     public static pathToArray(filePath: string) {
-        return filePath.split(path.sep)
+
+        // 将 / 替换为 path.sep
+        // filePath = filePath.replace(/\//g, path.sep)
+        // 通过 path.sep 或 / 分割路径
+        return filePath.split(/\/|\\/)
     }
 
     /**
@@ -506,7 +512,7 @@ export class FileHandler {
         let documents = path.join(homedir(), 'My Documents')
         if (this.fileExists(documents)) return documents     // 如果能直接找到则直接返回
 
-        const edge = require('electron-edge-js')
+        const edge = require('electron-edge-js-v26-only')
         let assemblyFile = path.join(this.getResourcesPath(), "dll", "GetSpecialFolder.dll")
         let Invoke = edge.func({
             assemblyFile: assemblyFile,
@@ -541,13 +547,32 @@ export class FileHandler {
         return dirs[0].join(path.sep);
     }
 
-    // 获取路径下所有的文件
-    public static getAllFilesInFolder(folderPath: string) {
-        let files: string[] = []
-        if (this.fileExists(folderPath)) {
-            files = fs.readdirSync(folderPath)
-        }
-        return files
+    /**
+     * 获取路径下所有的文件
+     * @param folderPat 路径
+     * @param includepath 是否包含路径
+     * @param subdirectory 是否包含子文件夹
+     * @returns 
+     */
+    public static getAllFilesInFolder(folderPath: string, includepath: boolean = false, subdirectory: boolean = false) {
+        let res: string[] = [];
+        const files = fs.readdirSync(folderPath);
+        files.forEach((file) => {
+            const filePath = path.join(folderPath, file);
+            const stat = fs.statSync(filePath);
+            if (stat.isFile()) {
+                if (includepath) {
+                    res.push(filePath);
+                } else {
+                    res.push(file);
+                }
+            } else if (stat.isDirectory()) {
+                if (subdirectory) {
+                    res = res.concat(this.getAllFilesInFolder(filePath, includepath, subdirectory));
+                }
+            }
+        });
+        return res;
     }
 
     // 判断程序是否已经启动

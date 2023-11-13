@@ -1,20 +1,40 @@
 <script lang='ts' setup>
 import SelectGame from '@src/components/Manager/SelectGame.vue'
 import { useSettings } from '@src/stores/useSettings';
+import { computed } from "vue";
 
 const settings = useSettings()
 
+
+let uploadMod = computed(() => {
+
+    if (settings.settings.exploreType == "GlossMod") {
+        return `https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.gameID}`
+    } else {
+        return `https://www.nexusmods.com/${settings.settings.managerGame?.NexusMods?.game_domain_name}/mods/add`
+    }
+})
+
 </script>
 <template>
-    <v-row>
-        <v-col cols="12" class="header">
-            <SelectGame></SelectGame>
-            <v-chip label variant="text" append-icon="mdi-arrow-expand-up" color="#4FC3F7"
-                :href="`https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.gameID}`">
-                {{ $t('Upload a Mod') }}
-            </v-chip>
-        </v-col>
-    </v-row>
+    <v-app-bar :elevation="0">
+        <v-row>
+            <v-col cols="12" class="header">
+                <div class="left">
+                    <SelectGame></SelectGame>
+                    <v-chip label variant="text" append-icon="mdi-arrow-expand-up" color="#4FC3F7" :href="uploadMod">
+                        {{ $t('Upload a Mod') }}
+                    </v-chip>
+                </div>
+                <div class="right">
+                    <v-chip-group v-model="settings.settings.exploreType">
+                        <v-chip label variant="text" value="GlossMod">{{ $t('3DM Mods') }} </v-chip>
+                        <!-- <v-chip label variant="text" value="NexusMods">{{ $t('Nexus Mods') }} </v-chip> -->
+                    </v-chip-group>
+                </div>
+            </v-col>
+        </v-row>
+    </v-app-bar>
 </template>
 <script lang='ts'>
 

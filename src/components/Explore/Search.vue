@@ -1,18 +1,12 @@
 <script lang='ts' setup>
-import { useExplore } from '@src/stores/useExplore';
-
-
-const explore = useExplore()
 
 </script>
 <template>
     <div class="search">
         <div class="search-title">{{ $t('Search') }}</div>
         <div class="search-wrap">
-            <v-text-field v-model="explore.searchText" class="search-input "
-                :placeholder="$t('You can search for what you want here')" variant="underlined"
-                @keydown.enter="explore.search" append-inner-icon="mdi-magnify" @click:append-inner="explore.search">
-            </v-text-field>
+            <!-- 插槽 -->
+            <slot></slot>
         </div>
     </div>
 </template>

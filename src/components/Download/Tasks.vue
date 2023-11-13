@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 // import { Download } from '@src/model/Download';
 import { FileHandler } from '@src/model/FileHandler';
-import type { IDownloadTask } from '@src/model/Interfaces';
+import type { IDownloadTask, IMod } from '@src/model/Interfaces';
 // import { DownloadStatus } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { useMain } from '@src/stores/useMain';
@@ -12,6 +12,7 @@ import { h, ref } from 'vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
 import { useManager } from '@src/stores/useManager';
 import { useI18n } from "vue-i18n"
+import { useNexusMods } from '@src/stores/useNexusMods';
 
 const props = defineProps<{
     task: IDownloadTask,
@@ -23,7 +24,10 @@ const download = useDownload()
 const manager = useManager()
 const { t } = useI18n()
 
-const modStorage = computed(() => join(settings.settings.modStorageLocation, 'cache', `${props.task.id}${extname(props.task.link)}`))
+const modStorage = computed(() => join(settings.settings.modStorageLocation,
+    'cache',
+    props.task.type == "GlossMod" ? `${props.task.id}${extname(props.task.link)}` : `${props.task.nexus_id}.${props.task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
+))
 const progress = computed(() => {
     return Math.floor(props.task.downloadedSize / props.task.totalSize * 10000) / 100; // 计算下载进度
 })
@@ -32,33 +36,33 @@ const progress = computed(() => {
 // if (props.task.gid) {
 console.log(props.task.gid);
 // 每秒获取一次进度
-let timer = setInterval(onProgress, 100)
+let timer = setInterval(onProgress, 200)
 
 // 下载进度
 async function onProgress() {
-    let { result } = await download.aria2.onProgress(props.task.gid!)
-    // console.log(props.task.gid, result.status);
-
-    if (!result) {
-        clearInterval(timer)
-        return
-    }
-
-    if (result.gid == props.task.gid) {
-        if (props.task.status != "complete" && result.status == "complete") {
-            ElMessage.success(`${props.task.name} 下载完成`)
-            if (settings.settings.autoInstall && !props.isUpdate) {
-                install()
-            }
+    if (props.task.gid) {
+        let { result } = await download.aria2.onProgress(props.task.gid)
+        if (!result) {
+            clearInterval(timer)
+            return
         }
 
-        props.task.status = result.status
-        props.task.speed = result.downloadSpeed
-        props.task.totalSize = result.totalLength
-        props.task.downloadedSize = result.completedLength
+        if (result.gid == props.task.gid) {
+            if (props.task.status != "complete" && result.status == "complete") {
+                ElMessage.success(`${props.task.name} 下载完成`)
+                if (settings.settings.autoInstall && !props.isUpdate) {
+                    install()
+                }
+            }
 
-        if (result.status == "paused" || result.status == "error" || result.status == "removed") {
-            clearInterval(timer)
+            props.task.status = result.status
+            props.task.speed = result.downloadSpeed
+            props.task.totalSize = result.totalLength
+            props.task.downloadedSize = result.completedLength
+
+            if (result.status == "paused" || result.status == "error" || result.status == "removed", result.status == "complete") {
+                clearInterval(timer)
+            }
         }
     }
 }
@@ -103,7 +107,7 @@ async function start() {
         }
 
         // 继续 timer
-        timer = setInterval(onProgress, 100)
+        timer = setInterval(onProgress, 200)
     }
 }
 
@@ -116,9 +120,19 @@ async function pause() {
 }
 
 // 重新下载
-function restart() {
+async function restart() {
     FileHandler.deleteFile(modStorage.value)
-    download.addDownloadById(props.task.id)
+    if (props.task.type == "GlossMod") {
+        download.addDownloadById(props.task.id)
+    } else {
+        if (props.task.nexus_id) {
+            // props.task.nexus_id = starfield_6487 | game_domain_name id
+            let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
+
+            download.addDownloadByNuxusId(id, game_domain_name)
+
+        }
+    }
 }
 function openWeb() {
     window.open(`https://mod.3dmgame.com/mod/${props.task.id}`)
@@ -132,7 +146,7 @@ function install() {
         manager.addModByGmm(file)
     } else {
         // console.log('downloadProcess', downloadProcess);
-        manager.addModByTask(props.task)
+        manager.addModByTask(props.task, modStorage.value)
     }
 }
 </script>

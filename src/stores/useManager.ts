@@ -143,7 +143,7 @@ export const useManager = defineStore('Manager', {
          * 通过下载任务添加Mod
          * @param task 
          */
-        async addModByTask(task: IDownloadTask) {
+        async addModByTask(task: IDownloadTask, modStorage?: string) {
 
             FileHandler.writeLog(`添加: ${task.name}`)
 
@@ -154,7 +154,10 @@ export const useManager = defineStore('Manager', {
                 ElMessage.error('请先选择Mod存放位置')
                 return
             }
-            const modStorage = `${settings.settings.modStorageLocation}\\cache\\${task.id}${path.extname(task.link)}`
+            if (!modStorage) {
+                // modStorage = `${settings.settings.modStorageLocation}\\cache\\${task.id}${path.extname(task.link)}`
+                modStorage = path.join(settings.settings.modStorageLocation, 'cache', `${task.id}${path.extname(task.link)}`)
+            }
             let md5 = await FileHandler.getFileMd5(modStorage).catch(err => {
                 return ''
             })
@@ -181,7 +184,8 @@ export const useManager = defineStore('Manager', {
             });
             let mod: IModInfo = {
                 id: parseInt(id),
-                webId: task.id,
+                webId: task.type == "GlossMod" ? task.id : undefined,
+                nexus_id: task.type == "NexusMods" ? task.nexus_id : undefined,
                 modName: task.name,
                 md5: md5,
                 modVersion: task.version,

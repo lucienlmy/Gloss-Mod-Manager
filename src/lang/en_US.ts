@@ -104,6 +104,8 @@ const ExploreFilter = {
     "Search": "Search Works",
     "You can search for what you want here": "You can search for what you want here",
     "Game Type": "Game Type",
+    "3DM Mods": "3DM Mods",
+    "Nexus Mods": "Nexus Mods",
 }
 
 const Welcome = {
@@ -234,6 +236,7 @@ const Games = {
     "7 Days to Die": "7 Days to Die",
     "Planet Zoo": "Planet Zoo",
     "GTA San Andreas Definitive Edition": "GTA San Andreas Definitive Edition",
+    "Red Dead Redemption 2": "Red Dead Redemption 2",
 }
 
 const Other = {

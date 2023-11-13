@@ -40,6 +40,14 @@ let Website = computed({
     get: () => {
         if (props.mod.modWebsite) return props.mod.modWebsite
         if (props.mod.webId) return `https://mod.3dmgame.com/mod/${props.mod.webId}`
+        if (props.mod.nexus_id) {
+            // nomanssky_1750
+            // https://www.nexusmods.com/nomanssky/mods/1750
+            if (props.mod.nexus_id.match(/(.+)_(\d+)/)) {
+                let [, game, id] = props.mod.nexus_id.match(/(.+)_(\d+)/) ?? []
+                return `https://www.nexusmods.com/${game}/mods/${id}`
+            }
+        }
         else return undefined
     },
     set: (value) => {

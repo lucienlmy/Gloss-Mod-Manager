@@ -1,5 +1,7 @@
 <script lang='ts' setup>
 
+import NexusMods from '@src/components/home/logo/NexusMods.vue'
+
 </script>
 <template>
     <v-card>
@@ -11,6 +13,11 @@
                         <v-img src="imgs/3DMGAME.webp" alt="3DMGAME"></v-img>
                     </a>
                 </v-col>
+                <!-- <v-col cols="4">
+                    <a href="https://www.nexusmods.com/">
+                        <NexusMods height="84px" width="100%"></NexusMods>
+                    </a>
+                </v-col> -->
             </v-row>
 
         </v-card-text>

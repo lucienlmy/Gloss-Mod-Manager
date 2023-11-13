@@ -10,6 +10,7 @@ import { ElMessage } from 'element-plus';
 import { FileHandler } from '@src/model/FileHandler'
 import { Unzipper } from "@src/model/Unzipper"
 import { dirname, join } from "node:path"
+import { IDownloadTask } from '@src/model/Interfaces';
 // import { spawn } from 'child_process';
 
 const settings = useSettings()
@@ -17,8 +18,9 @@ const download = useDownload()
 const main = useMain()
 
 let begin = ref(false)
-let task = reactive({
+let task = reactive<IDownloadTask>({
     id: 197445,
+    type: "GlossMod",
     name: "Gloss Mod Manager",
     version: main.webVersion.mods_version,
     status: "waiting" as "active" | "waiting" | "paused" | "error" | "complete" | "removed",

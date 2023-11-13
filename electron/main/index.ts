@@ -2,11 +2,15 @@ import { app, BrowserWindow, shell, ipcMain, ipcRenderer, nativeTheme, } from 'e
 import { release } from 'node:os'
 import { join, dirname, resolve } from 'node:path'
 import { dialog } from 'electron'
-import { GetData } from '../model/GetData'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
 import { existsSync, readdirSync } from 'fs'
 import dotenv from 'dotenv'
+
+import { GetData } from '../model/GetData'
+import { NexusMods } from '../model/NexusMods'
+import { async } from 'rxjs'
+
 
 dotenv.config();
 
@@ -301,7 +305,18 @@ ipcMain.handle('get-system-language', async (event, arg) => {
     return locale
 })
 
-// 打印程序目录下的所有文件列表
-readdirSync(__dirname).forEach(file => {
-    console.log(file);
+// NexusMods 
+ipcMain.handle('nexus-mods-get-mod-list', async (event, arg) => {
+    let res = await NexusMods.GetModList(arg)
+    return res
+})
+
+ipcMain.handle('nexus-mods-get-download-url', async (event, arg) => {
+    let res = await NexusMods.GetDownloadUrl(arg)
+    return res
+})
+
+ipcMain.handle('nexus-mods-get-mod-data', async (event, arg) => {
+    let res = await NexusMods.GetModData(arg)
+    return res
 })

@@ -44,6 +44,7 @@ export class Config {
             language: settings.language,
             theme: settings.theme,
             fold: settings.fold,
+            exploreType: settings.exploreType,
         }
     }
     // 保存配置文件
@@ -79,6 +80,7 @@ export class Config {
             theme: data.theme ?? 'system',
             managerGameList: data.managerGameList ?? [],
             fold: data.fold ?? false,
+            exploreType: data.exploreType ?? "GlossMod",
         }
 
         // 初始化游戏

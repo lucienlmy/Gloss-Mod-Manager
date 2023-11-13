@@ -104,6 +104,8 @@ const ExploreFilter = {
     "Search": "搜索作品",
     "You can search for what you want here": "在这里可以搜索到你想要的东西哦",
     "Game Type": "游戏类型",
+    "3DM Mods": "3DM Mods",
+    "Nexus Mods": "Nexus Mods",
 }
 
 const Welcome = {
@@ -233,6 +235,7 @@ const Games = {
     "7 Days to Die": "七日杀",
     "Planet Zoo": "动物园之星",
     "GTA San Andreas Definitive Edition": "GTA 圣安地列斯 最终版",
+    "Red Dead Redemption 2": "荒野大镖客2",
 }
 
 const Other = {

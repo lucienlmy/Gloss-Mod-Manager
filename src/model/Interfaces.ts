@@ -3,6 +3,7 @@
 
 export interface IMod {
     id: number
+    nexus_id?: string
     mods_author: string
     mods_content: string
     mods_createTime: string
@@ -83,6 +84,7 @@ export interface IUser {
 export interface IModInfo {
     id: number
     webId?: number
+    nexus_id?: string
     modName: string
     gameID?: number
     md5: string
@@ -115,10 +117,14 @@ export interface IGameInfo {
     installdir?: string
     gameName: string
     gameExe: string | IGameExe[]
-    startExe?: string | IStartExe[],
+    startExe?: string | IStartExe[]
     gamePath?: string
     gameVersion?: string
     gameCoverImg?: string
+    NexusMods?: {
+        game_id: number
+        game_domain_name: string
+    }
 }
 
 export interface IPlugins {
@@ -165,10 +171,13 @@ export interface ISettings {
     language: string
     theme: 'light' | 'dark' | 'system'
     fold: boolean,
+    exploreType: "GlossMod" | "NexusMods"
 }
 
 export interface IDownloadTask {
     id: number
+    nexus_id?: string
+    type: "GlossMod" | "NexusMods"
     gid?: string
     name: string
     version: string

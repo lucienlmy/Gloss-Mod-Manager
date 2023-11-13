@@ -112,7 +112,7 @@ function dragend(e: any) {
                     <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
                         v-model="mod.modName"></el-input>
                 </el-col>
-                <el-col :span="2">{{ mod.modVersion }}</el-col>
+                <el-col :span="2" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</el-col>
                 <el-col :span="4">
                     <el-select v-model="modType" :disabled="mod.isInstalled">
                         <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id" :label="item.name"
@@ -136,19 +136,17 @@ function dragend(e: any) {
                     <!-- 名称 -->
                     <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
                         {{ mod.modName }}
-                        <!-- <v-btn variant="text" class="exit-btn" @click="exit_name = true" icon="mdi-circle-edit-outline"></v-btn> -->
                     </p>
                     <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"
                         variant="solo-filled" :hide-details="true"></v-text-field>
                 </v-col>
-                <v-col cols="1">{{ mod.modVersion }}</v-col>
+                <v-col cols="1" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</v-col>
                 <v-col cols="2">
                     <!-- 类型 -->
                     <v-select v-model="modType" variant="solo" :items="settings.settings.managerGame?.modType"
                         :hide-details="true" item-title="name" item-value="id" :disabled="mod.isInstalled">
                         <template v-slot:item="{ props, item }">
                             <v-list-item v-bind="props" :title="$t(item.title)"></v-list-item>
-                            <!-- <v-chip label variant="text" v-bind="props">{{ $t(item.title) }}</v-chip> -->
                         </template>
                     </v-select>
                 </v-col>

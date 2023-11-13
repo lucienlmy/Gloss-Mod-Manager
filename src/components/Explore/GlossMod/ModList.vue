@@ -4,7 +4,7 @@ import type { IMod } from "@src/model/Interfaces";
 import { useMain } from "@src/stores/useMain";
 import { useExplore } from "@src/stores/useExplore";
 
-import ExploreDownloadBtn from "@src/components/Explore/DownloadBtn.vue"
+import DownloadBtn from "@src/components/Explore/GlossMod/DownloadBtn.vue"
 
 const props = defineProps<{
     mod: IMod
@@ -65,7 +65,7 @@ let mod_img = computed(() => {
             </v-row>
         </v-card-subtitle>
         <v-card-actions class="flex-row-reverse">
-            <ExploreDownloadBtn :id="mod.id" :size="mod.mods_resource_size"></ExploreDownloadBtn>
+            <DownloadBtn :id="mod.id" :size="mod.mods_resource_size"></DownloadBtn>
         </v-card-actions>
     </v-card>
 </template>
