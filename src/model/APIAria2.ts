@@ -5,7 +5,7 @@ import * as path from 'path'
 import { IAria2Request } from "@src/model/Interfaces";
 
 import axios from 'axios'
-import { Subject } from 'rxjs';
+import { Subject, filter } from 'rxjs';
 
 
 export class APIAria2 {
@@ -35,13 +35,22 @@ export class APIAria2 {
 
         // 启动 aria2
         let aria2Path = path.join(FileHandler.getResourcesPath(), 'aria2')
-        let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf')])
+        let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf')], {
+            windowsHide: false,
+            stdio: 'pipe',
+        })
         aria2c.on('error', (err) => {
             console.log(`aria2c error: ${err}`);
         })
-        aria2c.stderr.on('data', (data) => {
-            console.log(`aria2c data: ${data}`);
+        aria2c.stdout.on('data', (data) => {
+            let str = data.toString()
+            // 移除空格
+            str = str.replace(/\s+/g, "")
+            if (str != "") {
+                console.log(`aria2c stdout===>: ${data}`);
+            }
         })
+
         aria2c.on('close', (code) => {
             console.log(`aria2c close: ${code}`);
         })
@@ -62,34 +71,31 @@ export class APIAria2 {
     public send(request: IAria2Request): Promise<any> {
         // return new Promise((resolve, reject) => {
         if (!request.id) request.id = APIAria2.uuid()
-
         request.params = [`token:${APIAria2.Token()}`, ...request.params]
-
         return axios.post(`http://localhost:6800/jsonrpc`, request).then(({ data }) => {
             return data
         }).catch(err => {
             return err
         })
 
-        // if (this.socket.readyState == 1) {
-        //     request.params = [`token:${APIAria2.Token()}`, ...request.params]
-        //     this.socket.send(JSON.stringify(request))
-        //     this.listener.pipe(
-        //         filter((msg: any) => msg.id === request.id),
-        //         // pluck('result'),
-        //         // map(x => x?.result)
-        //     ).subscribe(resolve);
-        // } else {
-        //     console.log("readyState", this.socket.readyState);
-
-        //     reject('aria2c 连接错误!')
-        // }
-
+        //     if (this.socket.readyState == 1) {
+        //         request.params = [`token:${APIAria2.Token()}`, ...request.params]
+        //         this.socket.send(JSON.stringify(request))
+        //         this.listener.pipe(
+        //             filter((msg: any) => msg.id === request.id),
+        //             // pluck('result'),
+        //             // map(x => x?.result)
+        //         ).subscribe(resolve);
+        //     } else {
+        //         console.log("readyState", this.socket.readyState);
+        //         reject(`错误: ${this.socket.}`)
+        //     }
         // })
     }
 
     // 创建下载
     public async addUri(uri: string, name: string, dir: string) {
+        APIAria2.init();
         return this.send({
             jsonrpc: '2.0',
             method: 'aria2.addUri',

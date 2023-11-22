@@ -106,6 +106,7 @@ const ExploreFilter = {
     "Game Type": "Game Type",
     "3DM Mods": "3DM Mods",
     "Nexus Mods": "Nexus Mods",
+    "Please select a game first": "Please select a game first.",
 }
 
 const Welcome = {
@@ -237,6 +238,7 @@ const Games = {
     "Planet Zoo": "Planet Zoo",
     "GTA San Andreas Definitive Edition": "GTA San Andreas Definitive Edition",
     "Red Dead Redemption 2": "Red Dead Redemption 2",
+    "Nioh 2": "Nioh 2",
 }
 
 const Other = {

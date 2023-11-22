@@ -582,7 +582,7 @@ export class FileHandler {
             try {
                 let cmd = `tasklist | findstr ${path.basename(name)}`
                 exec(cmd, (err, stdout, stderr) => {
-                    console.log(stdout);
+                    // console.log(stdout);
                     if (stdout != '') {
                         resolve(true)
                     } else {

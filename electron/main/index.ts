@@ -1,16 +1,18 @@
-import { app, BrowserWindow, shell, ipcMain, ipcRenderer, nativeTheme, } from 'electron'
+import { app, BrowserWindow, shell, ipcMain } from 'electron'
 import { release } from 'node:os'
 import { join, dirname, resolve } from 'node:path'
 import { dialog } from 'electron'
 import { path7za } from '7z-win'
 import AutoLaunch from 'auto-launch'
-import { existsSync, readdirSync } from 'fs'
+import { existsSync } from 'fs'
 import dotenv from 'dotenv'
+import { autoUpdater } from "electron-updater"
+import logger from "electron-log"
 
 import { GetData } from '../model/GetData'
 import { NexusMods } from '../model/NexusMods'
-import { async } from 'rxjs'
 
+autoUpdater.logger = logger
 
 dotenv.config();
 
@@ -320,3 +322,28 @@ ipcMain.handle('nexus-mods-get-mod-data', async (event, arg) => {
     let res = await NexusMods.GetModData(arg)
     return res
 })
+
+
+
+// 自动更新
+ipcMain.handle('check-for-updates', (event, arg) => {
+    autoUpdater.checkForUpdates();
+})
+autoUpdater.on('checking-for-update', () => {
+    win.webContents.send('checking-for-update')
+})
+autoUpdater.on('update-available', (info) => {
+    win.webContents.send('update-available', info);
+})
+autoUpdater.on('update-not-available', (info) => {
+    win.webContents.send('update-not-available', info);
+})
+autoUpdater.on('error', (err) => {
+    win.webContents.send('update-error', err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    win.webContents.send("download-progress", progressObj);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    win.webContents.send('update-downloaded', info);
+});

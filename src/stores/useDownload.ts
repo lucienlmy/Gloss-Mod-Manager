@@ -70,15 +70,15 @@ export const useDownload = defineStore('Download', {
             FileHandler.deleteFile(join(dest, `${task.id}${fileExt}`))
 
             let gid = await this.aria2.addUri(task.link,
-                type == "GlossMod" ?
-                    `${task.id}${fileExt}` :
-                    `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`,
-                dest)
+                type == "GlossMod" ? `${task.id}${fileExt}` : `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`,
+                dest).catch(err => {
+                    ElMessage.error(`下载错误: ${err}`)
+                })
             console.log(gid);
 
-            if (!gid.result) {
-                ElMessage.error(`下载错误: ${JSON.stringify(gid)}`)
-            }
+            // if (!gid.result) {
+            //     ElMessage.error(`下载错误: ${JSON.stringify(gid)}`)
+            // }
 
             task.gid = gid.result
 

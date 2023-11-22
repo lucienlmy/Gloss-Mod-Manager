@@ -106,6 +106,7 @@ const ExploreFilter = {
     "Game Type": "游戏类型",
     "3DM Mods": "3DM Mods",
     "Nexus Mods": "Nexus Mods",
+    "Please select a game first": "请先选择游戏",
 }
 
 const Welcome = {
@@ -236,6 +237,7 @@ const Games = {
     "Planet Zoo": "动物园之星",
     "GTA San Andreas Definitive Edition": "GTA 圣安地列斯 最终版",
     "Red Dead Redemption 2": "荒野大镖客2",
+    "Nioh 2": "仁王2",
 }
 
 const Other = {

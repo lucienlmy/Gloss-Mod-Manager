@@ -46,6 +46,9 @@ async function exportLang() {
     FileHandler.openFolder(LocalLang.langFolder)
 }
 
+function checkUpdates() {
+    ipcRenderer.invoke('check-for-updates')
+}
 
 
 </script>
@@ -66,7 +69,7 @@ async function exportLang() {
                 @click="openGameFolder">{{ $t('Open Game Folder') }}</v-chip>
             <v-chip label variant="text" append-icon="mdi-export-variant"
                 @click="exportLang">{{ $t('Export Language') }}</v-chip>
-            <v-chip label variant="text">{{ `${$t('Current version')}: v${main.version}` }}</v-chip>
+            <v-chip label variant="text" @click="checkUpdates">{{ `${$t('Current version')}: v${main.version}` }}</v-chip>
         </v-col>
         <v-col cols="12">
             <h3>{{ $t('Feedback') }}</h3>

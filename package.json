@@ -1,9 +1,9 @@
 {
   "name": "gmm",
-  "version": "1.20.0",
+  "version": "1.21.1",
   "main": "dist-electron/main/index.js",
   "description": "Gloss Mod Manager",
-  "author": "3DMGAME <mod@3dmgame.com>",
+  "author": "小莫 <mod@3dmgame.com>",
   "license": "LGPL-3.0-or-later",
   "private": true,
   "files": [
@@ -41,6 +41,7 @@
     "axios": "^1.4.0",
     "electron": "^26.2.0",
     "electron-builder": "^23.6.0",
+    "electron-updater": "^6.1.4",
     "element-plus": "^2.2.30",
     "github-markdown-css": "^5.2.0",
     "ini": "^4.1.1",
@@ -68,6 +69,7 @@
     "dotenv": "^16.3.1",
     "dotenv-expand": "^10.0.0",
     "electron-edge-js-v26-only": "^26.0.0",
+    "electron-log": "^5.0.0",
     "rxjs": "^7.8.1",
     "xml2js": "^0.6.2"
   }

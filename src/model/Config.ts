@@ -36,6 +36,7 @@ export class Config {
             modStorageLocation: settings.modStorageLocation,
             managerGame: settings.managerGame,
             managerGameList: settings.managerGameList,
+            tourGameList: settings.tourGameList,
             proxy: settings.proxy,
             // UnzipPath: settings.UnzipPath,
             autoInstall: settings.autoInstall,
@@ -71,6 +72,7 @@ export class Config {
         settings.settings = {
             managerGame: data.managerGame,
             modStorageLocation: data.modStorageLocation ?? join(this.configFolder(), 'mods'),
+            tourGameList: data.tourGameList ?? [],
             proxy: data.proxy ?? "",
             // UnzipPath: data.UnzipPath ?? "",
             autoInstall: data.autoInstall ?? true,

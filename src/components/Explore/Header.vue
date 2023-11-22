@@ -3,6 +3,8 @@ import SelectGame from '@src/components/Manager/SelectGame.vue'
 import { useSettings } from '@src/stores/useSettings';
 import { computed } from "vue";
 
+import GlossModSelectGame from "@src/components/Explore/SelectGame.vue";
+
 const settings = useSettings()
 
 
@@ -25,9 +27,10 @@ let uploadMod = computed(() => {
                     <v-chip label variant="text" append-icon="mdi-arrow-expand-up" color="#4FC3F7" :href="uploadMod">
                         {{ $t('Upload a Mod') }}
                     </v-chip>
+                    <GlossModSelectGame v-if="!settings.settings.managerGame"></GlossModSelectGame>
                 </div>
                 <div class="right">
-                    <v-chip-group v-model="settings.settings.exploreType">
+                    <v-chip-group v-model="settings.settings.exploreType" mandatory>
                         <v-chip label variant="text" value="GlossMod">{{ $t('3DM Mods') }} </v-chip>
                         <!-- <v-chip label variant="text" value="NexusMods">{{ $t('Nexus Mods') }} </v-chip> -->
                     </v-chip-group>

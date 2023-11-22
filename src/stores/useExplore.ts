@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import type { IGameInfo, IMod } from "@src/model/Interfaces";
+import type { IGameInfo, IMod, ISupportedGames } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useUser } from "@src/stores/useUser";
 
@@ -15,18 +15,38 @@ export const useExplore = defineStore('Explore', {
         key: 0,
         gameType: 0,
         mods: [] as IMod[],
-        game: [] as IGameInfo[],
+        gameList: [] as ISupportedGames[],
+        showTourGameListDialog: false,
         gameTypeList: [] as any[],
         count: 1,
+        // gameId: 0 as number | string
 
     }),
     getters: {
         pageLength: (state) => Math.ceil(state.count / state.pageSize),
+        gameId: () => {
+            const settings = useSettings()
+            let id = 0 as number | string
+            if (settings.settings.managerGame?.gameID) id = settings.settings.managerGame?.gameID
+            else {
+                id = settings.settings.tourGameList.join(',')
+            }
+            return id
+        }
     },
     actions: {
         GetModList() {
-            const settings = useSettings()
+            // const settings = useSettings()
             const user = useUser()
+
+            // if (settings.settings.managerGame?.gameID) {
+            //     this.gameId = settings.settings.managerGame?.gameID
+            // } else {
+            //     let _gameId = settings.settings.tourGameList.map(item => item.gameID)
+            //     this.gameId = _gameId.join(',')
+            // }
+
+
             ipcRenderer.send("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
@@ -35,7 +55,7 @@ export const useExplore = defineStore('Explore', {
                 time: this.time,
                 order: this.order,
                 key: this.key,
-                gameId: settings.settings.managerGame?.gameID ?? null,
+                gameId: this.gameId,
                 gameType: this.gameType,
                 show_adult: user.user?.user_p_show_adult == 1 ?? null,
                 show_charge: user.user?.user_p_show_charge == 1 ?? null,

@@ -12,7 +12,6 @@ import Filter from '@src/components/Explore/GlossMod/Filter.vue'
 import TurnPage from "@src/components/Explore/GlossMod/TurnPage.vue";
 
 
-
 const explore = useExplore()
 if (explore.mods.length == 0) {
     explore.GetModList()
@@ -20,13 +19,15 @@ if (explore.mods.length == 0) {
 
 
 const settings = useSettings()
-const manager = useManager()
+
+console.log(settings.settings.tourGameList.length);
+
 
 ipcRenderer.on("get-mod-list-reply", (event, arg) => {
     // console.log(arg) // 打印获取到的数据
     if (arg.code == "00") {
         explore.mods = arg.data.mod
-        explore.game = arg.data.game
+        // explore.game = arg.data.game
         explore.count = arg.data.count
     } else {
         ElMessage.error(arg)
@@ -41,7 +42,8 @@ watch([
     () => explore.original,
     () => explore.time,
     () => settings.settings.managerGame?.gameID,
-    () => explore.gameType
+    () => explore.gameType,
+    () => explore.gameId,
 ], () => {
     explore.page = 1
     explore.GetModList()
@@ -60,9 +62,9 @@ watch(() => explore.page, () => {
         </v-text-field>
     </Search>
     <Filter></Filter>
-    <v-row v-if="!settings.settings.managerGame" class="empty">
-        <div @click="manager.selectGameDialog = true" class="empty-hint">
-            {{ $t('You have not selected a game yet. Please select a game first') }} <v-icon>mdi-plus</v-icon>
+    <v-row v-if="!settings.settings.managerGame && settings.settings.tourGameList.length == 0" class="empty">
+        <div @click="explore.showTourGameListDialog = true" class="empty-hint">
+            {{ $t('Please select a game first') }} <v-icon>mdi-plus</v-icon>
         </div>
     </v-row>
     <v-row class="mod-wrap" v-else-if="explore.mods.length > 0">

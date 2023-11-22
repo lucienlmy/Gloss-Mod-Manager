@@ -163,6 +163,7 @@ export interface ISettings {
     managerGame?: ISupportedGames
     managerGameList: ISupportedGames[]
     modStorageLocation: string
+    tourGameList: number[]
     proxy: string
     // UnzipPath: string
     autoInstall: boolean

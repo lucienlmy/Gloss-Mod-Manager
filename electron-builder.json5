@@ -6,6 +6,7 @@
     "asar": true,
     "icon": "public/favicon.ico",
     "productName": "Gloss Mod Manager",
+    "copyright": "Copyright © ${author}",
     "directories": {
         "output": "release/${version}"
     },
@@ -13,12 +14,12 @@
         "dist-electron",
         "dist"
     ],
-    "mac": {
-        "artifactName": "${productName}_${version}.${ext}",
-        "target": [
-            "dmg"
-        ]
-    },
+    // "mac": {
+    //     "artifactName": "${productName}_${version}.${ext}",
+    //     "target": [
+    //         "dmg"
+    //     ]
+    // },
     "win": {
         "target": [
             {
@@ -28,16 +29,23 @@
                 ]
             }
         ],
-        "artifactName": "${productName}_${version}.${ext}",
-        "certificateFile": "./.key/gmm.pfx",
-        "certificatePassword": "MUGqwPYqBD7QY2c3p7hWqhsB8cg8cSNPNNS3dr3gJ9a2H3stI1",
-        "publisherName": "aoe.top"
+        "publish": {
+            "provider": "generic",
+            "url": "https://dmod.3dmgame.com/updates/windows/"
+        },
+        // "artifactName": "${productName}_${version}.${ext}",
+        // "certificateFile": "./.key/gmm.pfx",
+        // "certificatePassword": "MUGqwPYqBD7QY2c3p7hWqhsB8cg8cSNPNNS3dr3gJ9a2H3stI1",
+        // "publisherName": "aoe.top"
     },
     "nsis": {
         "oneClick": false,
         "perMachine": false,
         "allowToChangeInstallationDirectory": true,
-        "deleteAppDataOnUninstall": false
+        "deleteAppDataOnUninstall": false,
+        "uninstallDisplayName": "${productName} ${version}",
+        "artifactName": "${productName}_${version}.${ext}",
+        "shortcutName": "${productName}"
     },
     "fileAssociations": {
         "ext": "gmm",
