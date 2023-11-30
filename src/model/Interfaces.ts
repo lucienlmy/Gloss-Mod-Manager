@@ -89,6 +89,7 @@ export interface IModInfo {
     gameID?: number
     md5: string
     modVersion: string
+    tags?: ITag[]
     isUpdate?: boolean
     modType?: number
     isInstalled: boolean
@@ -211,4 +212,10 @@ export interface IAria2Request {
     id?: string;
     method: string;
     params: any[];
+}
+
+
+export interface ITag {
+    name: string
+    color: string
 }

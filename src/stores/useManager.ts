@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import path from 'path'
 import { getAllExpands } from "@src/Expands";
-import type { ISupportedGames, IModInfo, IDownloadTask, IInfo } from "@src/model/Interfaces";
+import type { ISupportedGames, IModInfo, IDownloadTask, IInfo, ITag } from "@src/model/Interfaces";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { useSettings } from '@src/stores/useSettings';
@@ -14,6 +14,8 @@ export const useManager = defineStore('Manager', {
     state: () => ({
         supportedGames: getAllExpands() as ISupportedGames[],
         managerModList: [] as IModInfo[],
+        tags: [] as ITag[],
+        filterTags: [] as ITag[],
         selectGameDialog: false,
         maxID: 0,
         filterType: 0 as number,
@@ -40,8 +42,30 @@ export const useManager = defineStore('Manager', {
             return settings.settings.managerGame?.gamePath ?? ""
         },
         filterModList(state) {
-            if (state.filterType == 0) return state.managerModList.filter((item) => item?.modName.indexOf(state.search) != -1)
-            return state.managerModList.filter(item => item?.modType == state.filterType && item?.modName.indexOf(state.search) != -1)
+            // state.filterTags
+
+            let list = state.managerModList.filter((item) => item?.modName.toLowerCase().indexOf(state.search.toLowerCase()) != -1)
+            if (state.filterType != 0) {
+                list = list.filter(item => item?.modType == state.filterType)
+            }
+
+            if (state.filterTags.length > 0) {
+                // 通过 tag.name 过滤
+                list = list.filter(item => {
+                    let is = false
+                    item.tags?.forEach(tag => {
+                        if (state.filterTags.findIndex(t => t.name == tag.name) != -1) {
+                            is = true
+                        }
+                    })
+                    return is
+                })
+            }
+
+            return list
+
+            // if (state.filterType == 0) return state.managerModList.filter((item) => item?.modName.indexOf(state.search) != -1)
+            // return state.managerModList.filter(item => item?.modType == state.filterType && item?.modName.indexOf(state.search) != -1)
         }
     },
     actions: {
@@ -228,8 +252,7 @@ export const useManager = defineStore('Manager', {
         async getModInfo() {
             let settings = useSettings()
             let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
-            this.managerModList = await Manager.getModInfo(savePath)
-
+            this.managerModList = await Manager.getModInfo(savePath) as IModInfo[]
         },
         // 删除Mod
         deleteMod(mod: IModInfo) {
@@ -237,10 +260,20 @@ export const useManager = defineStore('Manager', {
             let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id.toString())
             let modIndex = this.managerModList.findIndex(item => item.id == mod.id)
             // console.log(savePath);
-
             Manager.deleteMod(savePath)
             this.managerModList.splice(modIndex, 1)
-
+        },
+        // 获取标签列表
+        async getTagsList() {
+            let settings = useSettings()
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
+            this.tags = await Manager.getModInfo(savePath, "tags.json") as ITag[]
+        },
+        // 保存标签列表
+        async savaTagsList() {
+            let settings = useSettings()
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "")
+            Manager.saveModInfo(this.tags, savePath, "tags.json")
         },
         // 通过md5获取Mod信息
         getModInfoByMd5(md5: string) {

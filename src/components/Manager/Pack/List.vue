@@ -35,7 +35,12 @@ function select(all: boolean) {
         </v-list-subheader>
         <div class="list-wrap">
             <v-item v-for="item in modList" v-slot="{ isSelected, toggle }" :value="item">
-                <v-list-item :title="item.modName" @click="toggle">
+                <v-list-item @click="toggle">
+                    <template #title>
+                        <v-chip v-for="item2 in item.tags" label :key="item2.name" :color="item2.color">
+                            {{ item2.name }}</v-chip>
+                        {{ item.modName }}
+                    </template>
                     <template v-slot:prepend>
                         <v-list-item-action start>
                             <v-checkbox-btn :model-value="isSelected"></v-checkbox-btn>

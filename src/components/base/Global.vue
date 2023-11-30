@@ -21,7 +21,8 @@ download.initialization()
 AppAnalytics.sendEvent("start")
 
 console.log(`正在初始化.`);
-console.log(`当前配置目录: ${Config.configFolder()}`);
+console.log("当前配置目录:", Config.configFolder());
+console.log("我的文档位置:", FileHandler.getMyDocuments());
 
 
 //#region  初始化设置
@@ -59,6 +60,10 @@ watch(() => manager.managerModList, () => {
     manager.saveModInfo()
 }, { deep: true })
 
+watch(() => manager.tags, () => {
+    manager.savaTagsList()
+}, { deep: true })
+
 function GetModInfo() {
     // manager.managerModList.length == 0 && settings.settings.managerGame
     if (settings.settings.managerGame) {
@@ -75,6 +80,7 @@ function GetModInfo() {
             // 检查Mod更新
             manager.checkAllModUpdate()
         })
+        manager.getTagsList()
     }
 }
 

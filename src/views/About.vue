@@ -1,17 +1,8 @@
 <script lang='ts' setup>
 import { ref, computed, watch } from "vue";
-import marked from '@src/plugins/marked';
 import { useI18n } from "vue-i18n";
-import { useTheme } from 'vuetify'
 
-const theme = useTheme()
-
-
-if (theme.name.value == 'dark') {
-    import('github-markdown-css/github-markdown-dark.css');
-} else {
-    import('github-markdown-css/github-markdown-light.css');
-}
+import Markdown from '@src/components/Model/Markdown.vue'
 
 let readme = ref('')
 const { locale } = useI18n()
@@ -28,7 +19,7 @@ function getReadme() {
     fetch(readmeFile.value)
         .then(res => res.text())
         .then(text => {
-            readme.value = marked(text)
+            readme.value = text
         })
 }
 
@@ -44,7 +35,7 @@ getReadme()
     <v-container fluid>
         <v-row>
             <v-col cols="12" class="about">
-                <div class="markdown-body" v-html="readme"></div>
+                <Markdown :text="readme"></Markdown>
             </v-col>
         </v-row>
     </v-container>
@@ -61,8 +52,5 @@ export default {
     overflow: auto;
     max-height: calc(100vh - 100px);
 
-    .markdown-body {
-        background-color: transparent;
-    }
 }
 </style>

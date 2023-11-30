@@ -9,7 +9,7 @@ import { homedir } from "os";
 import { Config } from "@src/model/Config";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 
 
 export class FileHandler {
@@ -438,10 +438,17 @@ export class FileHandler {
      * @param linkPath 软连接路径
      * @returns 
      */
-    public static removeLink(linkPath: string) {
+    public static removeLink(linkPath: string, backup: boolean = false) {
         try {
             // this.createDirectory(path.join(linkPath, '..'))
             fs.unlinkSync(linkPath)
+            if (backup) {
+                // 判断是否有备份 有则还原
+                let backFile = linkPath + '_back'
+                if (this.fileExists(backFile)) {
+                    this.renameFile(backFile, linkPath)
+                }
+            }
             return true
         } catch (error) {
             ElMessage.error(`移除软连接失败：${error}`)
@@ -507,25 +514,43 @@ export class FileHandler {
      * 获取我的文档路径
      * @returns 
      */
-    public static async getMyDocuments() {
+    public static getMyDocuments() {
 
-        let documents = path.join(homedir(), 'My Documents')
-        if (this.fileExists(documents)) return documents     // 如果能直接找到则直接返回
+        try {
+            // 从注册表 获取 我的文档位置
+            const regQueryCommand = 'reg query "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders" /v Personal';
+            const output = execSync(regQueryCommand).toString();
+            const matches = output.match(/Personal\s+REG_SZ\s+(.*)/i);
+            if (matches && matches[1]) {
+                return matches[1];
+            } else {
+                return path.join(homedir(), 'Documents')
+            }
+        } catch (error) {
+            return path.join(homedir(), 'Documents')
+        }
 
-        const edge = require('electron-edge-js-v26-only')
-        let assemblyFile = path.join(this.getResourcesPath(), "dll", "GetSpecialFolder.dll")
-        let Invoke = edge.func({
-            assemblyFile: assemblyFile,
-            typeName: 'GetSpecialFolder.Program',
-            methodName: 'GetMyDocuments'
-        })
-        return new Promise<string>((resolve, reject) => {
-            Invoke(null, async (error: any, result: any) => {
-                if (error) reject(error);
-                console.log(result);
-                resolve(result);
-            })
-        })
+
+
+
+
+        // let documents = path.join(homedir(), 'My Documents')
+        // if (this.fileExists(documents)) return documents     // 如果能直接找到则直接返回
+
+        // const edge = require('electron-edge-js-v26-only')
+        // let assemblyFile = path.join(this.getResourcesPath(), "dll", "GetSpecialFolder.dll")
+        // let Invoke = edge.func({
+        //     assemblyFile: assemblyFile,
+        //     typeName: 'GetSpecialFolder.Program',
+        //     methodName: 'GetMyDocuments'
+        // })
+        // return new Promise<string>((resolve, reject) => {
+        //     Invoke(null, async (error: any, result: any) => {
+        //         if (error) reject(error);
+        //         console.log(result);
+        //         resolve(result);
+        //     })
+        // })
     }
 
     /**

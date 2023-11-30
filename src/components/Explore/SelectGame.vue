@@ -92,21 +92,6 @@ export default {
 }
 </script>
 <style lang='less' scoped>
-.top {
-    display: flex;
-    align-items: center;
-
-    .title {
-        flex: 1 1 auto;
-        display: flex;
-        align-items: center;
-
-        small {
-            opacity: .8;
-        }
-    }
-}
-
 .content {
     min-height: 300px;
     max-height: 400px;

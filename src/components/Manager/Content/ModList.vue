@@ -107,6 +107,8 @@ function dragend(e: any) {
                 @dragend="dragend" @dragover="dragover">
                 <el-col :span="12">
                     <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                            {{ item.name }}</v-chip>
                         {{ mod.modName }}
                     </p>
                     <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
@@ -135,6 +137,8 @@ function dragend(e: any) {
                 <v-col cols="6" class="mod-name">
                     <!-- 名称 -->
                     <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        <v-chip v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                            {{ item.name }}</v-chip>
                         {{ mod.modName }}
                     </p>
                     <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"

@@ -7,7 +7,6 @@ import { useSettings } from "./useSettings";
 import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
-import { useManager } from "@src/stores/useManager";
 import { APIAria2 } from "@src/model/APIAria2";
 import { useNexusMods } from "./useNexusMods";
 
@@ -17,7 +16,16 @@ export const useDownload = defineStore('Download', {
         downloadTaskList: [] as IDownloadTask[],    // 下载任务列表
         // downloadProcessList: [] as Download[],      // 下载进程列表 进程列表会在重启软件后清空
         searchName: "",
-        aria2: new APIAria2()
+        aria2: new APIAria2(),
+        showAddTaskDialog: false,
+        addTaskTab: 0,
+        form: {
+            url: '',
+            id: '',
+            name: '',
+            link: '',
+        },
+        autoInstall: true,
     }),
     getters: {
         configPath(): string {

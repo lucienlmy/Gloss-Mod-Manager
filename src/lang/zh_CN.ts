@@ -75,6 +75,7 @@ const DownloadTasks = {
     "error": "错误",
     "complete": "完成",
     "removed": "已删除",
+    "Customize": "自定义",
 }
 const ExploreDownloadBtn = {
     "Please manage the game first.": "请先选择游戏",
@@ -141,6 +142,10 @@ const ManagerContent = {
     "Desc": "描述",
     "Requirements": "依赖ID (WebId)",
     "Requirements Name": "依赖名称",
+
+    "Add": "添加",
+    "Color": "颜色",
+    "Tag": "标签",
 }
 
 const ManagerHeader = {
@@ -238,6 +243,10 @@ const Games = {
     "GTA San Andreas Definitive Edition": "GTA 圣安地列斯 最终版",
     "Red Dead Redemption 2": "荒野大镖客2",
     "Nioh 2": "仁王2",
+    "Resident Evil 3": "生化危机3重制版",
+    "State of Decay 2": "腐烂国度2",
+    "Subnautica": "深海迷航",
+    "Grim Dawn": "恐怖黎明",
 }
 
 const Other = {

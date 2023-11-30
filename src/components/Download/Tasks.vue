@@ -50,7 +50,7 @@ async function onProgress() {
         if (result.gid == props.task.gid) {
             if (props.task.status != "complete" && result.status == "complete") {
                 ElMessage.success(`${props.task.name} 下载完成`)
-                if (settings.settings.autoInstall && !props.isUpdate) {
+                if (settings.settings.autoInstall && download.autoInstall) {
                     install()
                 }
             }
@@ -171,7 +171,7 @@ function install() {
                         <v-btn variant="text" :title="t('Delete')" @click="del">
                             <v-icon>mdi-trash-can-outline</v-icon>
                         </v-btn>
-                        <v-btn variant="text" :itle="t('Install')" @click="install"
+                        <v-btn variant="text" :title="t('Install')" @click="install"
                             v-if="task.status == 'complete'"><v-icon>mdi-download</v-icon></v-btn>
                     </template>
                     <v-menu open-on-hover>

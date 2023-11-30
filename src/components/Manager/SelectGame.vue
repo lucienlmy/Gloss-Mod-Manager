@@ -180,20 +180,6 @@ export default {
 .select-game {
     padding: 1rem;
 
-    .top {
-        display: flex;
-        align-items: center;
-
-        .title {
-            flex: 1 1 auto;
-            display: flex;
-            align-items: center;
-
-            small {
-                opacity: .8;
-            }
-        }
-    }
 
 
     .content {

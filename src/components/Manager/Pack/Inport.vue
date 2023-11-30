@@ -94,19 +94,4 @@ export default {
     name: 'PackInport',
 }
 </script>
-<style lang='less' scoped>
-.pack {
-    // padding: 1rem;
-
-    .top {
-        display: flex;
-        align-items: center;
-
-        .title {
-            flex: 1 1 auto;
-            display: flex;
-            align-items: center;
-        }
-    }
-}
-</style>
+<style lang='less' scoped></style>

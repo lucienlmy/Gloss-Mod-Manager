@@ -1,37 +1,89 @@
 <script lang='ts' setup>
 import { useDownload } from '@src/stores/useDownload';
-// import { APIAria2 } from '@src/model/APIAria2'
-// import { useSettings } from '@src/stores/useSettings';
-// import { join } from 'node:path'
+
+import { ElMessageBox, ElSwitch } from 'element-plus';
+import { h, ref } from 'vue'
+import { useSettings } from '@src/stores/useSettings';
+import { FileHandler } from '@src/model/FileHandler'
+import { useManager } from '@src/stores/useManager';
+
+import DownloadAddTask from '@src/components/Download/AddTask.vue'
 
 const download = useDownload()
-// const settings = useSettings()
+const settings = useSettings()
+const manager = useManager()
 
 
-// let status = ''
+let delFile = ref(false)
 
-// async function test() {
-//     let url = "https://mod.3dmgame.com/static/upload/resource2/202310/9688990_20231017152110_69661.zip"
-//     // download.aria2.addUri(url, '测试.zip', join(settings.settings.modStorageLocation, 'cache')).then((gid: any) => {
-//     //     console.log(`Added download task: ${gid.result}`);
-//     //     download.aria2.onProgress(gid.result).then((result: any) => {
-//     //         console.log(result)
-//     //     })
-//     // })
-//     let gid = await download.aria2.addUri(url, '测试.zip', join(settings.settings.modStorageLocation, 'cache'))
+function allDel() {
+    ElMessageBox({
+        title: '删除任务?',
+        // Should pass a function if VNode contains dynamic props
+        message: () => h(ElSwitch, {
+            modelValue: delFile.value,
+            'onUpdate:modelValue': (val: boolean | string | number) => {
+                delFile.value = val as boolean
+            },
+            'inactive-text': '同时删除本地文件'
+        }),
+    }).then(() => {
+        if (delFile.value) {
+            const modStorage = `${settings.settings.modStorageLocation}\\cache`
+            FileHandler.deleteFolder(modStorage)
+        }
+        download.downloadTaskList = []
+    }).catch(() => { })
+}
 
-//     // 每秒获取一次进度
-//     let timer = setInterval(async () => {
-//         let result = await download.aria2.onProgress(gid.result)
-//         console.log(result)
-//         if (result.result.status != "active") {
-//             clearInterval(timer)
-//         }
-//     }, 1000)
-// }
+function openFolder() {
+    const modStorage = `${settings.settings.modStorageLocation}\\cache`
+    FileHandler.openFolder(modStorage)
+}
+
+function allInstell() {
+    download.downloadTaskList.forEach(item => {
+        manager.addModByTask(item)
+    })
+}
 
 </script>
 <template>
+    <v-app-bar :elevation="0">
+        <v-container fluid>
+            <v-row>
+                <v-col cols="12" class="top">
+                    <div class="left">
+                        <h1>
+                            {{ $t('Download Manager') }}
+                            <small>({{ $t('{0} tasks', [download.downloadTaskList.length]) }})</small>
+                        </h1>
+                    </div>
+                    <div class="right">
+                        <v-text-field density="compact" variant="solo" :label="$t('Search task')"
+                            append-inner-icon="mdi-magnify" single-line hide-details
+                            v-model="download.searchName"></v-text-field>
+                        <DownloadAddTask></DownloadAddTask>
+                        <v-menu open-on-hover>
+                            <template v-slot:activator="{ props }">
+                                <v-btn variant="text" v-bind="props">
+                                    <v-icon>mdi-menu</v-icon>
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item append-icon="mdi-folder-open-outline" @click="openFolder"
+                                    :title="$t('Open Folder')"></v-list-item>
+                                <v-list-item append-icon="mdi-download" @click="allInstell"
+                                    :title="$t('Add All')"></v-list-item>
+                                <v-list-item append-icon="mdi-trash-can-outline" @click="allDel"
+                                    :title="$t('Delete All')"></v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </div>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-app-bar>
     <v-app-bar :elevation="0">
         <v-container fluid>
             <v-row class="header">
@@ -55,4 +107,27 @@ export default {
     name: 'DownloadHeader',
 }
 </script>
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .left {
+        h1 {
+            font-size: 1.2rem;
+
+            small {
+                opacity: 0.7;
+            }
+        }
+    }
+
+    .right {
+        display: flex;
+        flex: 1 1 auto;
+        align-items: center;
+    }
+
+}
+</style>

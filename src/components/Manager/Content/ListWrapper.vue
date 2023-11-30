@@ -71,6 +71,7 @@ export default {
 .list-wrap {
     .mod-list {
         padding: 1rem;
+        padding-top: 0;
     }
 }
 

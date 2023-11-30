@@ -73,7 +73,7 @@ const DownloadTasks = {
     "error": "error",
     "complete": "complete",
     "removed": "removed",
-
+    "Customize": "Customize",
 }
 
 const ExploreDownloadBtn = {
@@ -176,6 +176,9 @@ const ManagerHeader = {
     "Import completed, you can now enable these mods in the manager and enter the game...": "Import completed, you can now enable these mods in the manager and enter the game...",
 
     "Fold": "Fold",
+    "Add": "Add",
+    "Tag": "Tags",
+    "Color": "Color",
 }
 
 const Settings = {
@@ -239,6 +242,11 @@ const Games = {
     "GTA San Andreas Definitive Edition": "GTA San Andreas Definitive Edition",
     "Red Dead Redemption 2": "Red Dead Redemption 2",
     "Nioh 2": "Nioh 2",
+    "Resident Evil 3": "Resident Evil 3",
+    "State of Decay 2": "State of Decay 2",
+    "Subnautica": "Subnautica",
+    "Grim Dawn": "Grim Dawn",
+
 }
 
 const Other = {

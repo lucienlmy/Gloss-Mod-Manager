@@ -4,6 +4,8 @@ import ContentList from '@src/components/Manager/Content/ListWrapper.vue'
 import { useSettings } from '@src/stores/useSettings';
 import { computed } from "vue";
 
+import ManagerContentTags from '@src/components/Manager/Content/Tags.vue'
+
 const manager = useManager()
 const settings = useSettings()
 
@@ -35,6 +37,7 @@ let types = computed(() => {
                         single-line hide-details v-model="manager.search"></v-text-field>
                 </div>
             </div>
+            <ManagerContentTags></ManagerContentTags>
             <ContentList></ContentList>
         </div>
     </div>

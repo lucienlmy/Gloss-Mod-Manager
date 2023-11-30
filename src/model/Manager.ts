@@ -3,8 +3,8 @@
  */
 
 import { existsSync, statSync } from 'node:fs'
-import type { IModInfo, IState } from "@src/model/Interfaces";
-import { join, dirname, basename } from 'node:path'
+import type { IModInfo, IState, ITag } from "@src/model/Interfaces";
+import { join, dirname, basename, extname } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
 import { useManager } from '@src/stores/useManager';
 import { useDownload } from '@src/stores/useDownload';
@@ -13,17 +13,23 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 
 export class Manager {
 
-    // 保存Mod信息
-    public static saveModInfo(modList: IModInfo[], savePath: string) {
-        let configPath = join(savePath, 'mod.json')
+    /**
+     * 保存Mod信息
+     * @param modList 列表数据
+     * @param savePath 储存目录
+     * @param fileName 文件名称
+     */
+    public static saveModInfo(modList: IModInfo[] | ITag[], savePath: string, fileName: string = "mod.json") {
+        let configPath = join(savePath, fileName)
+        // console.log(fileName, configPath);
         let config = JSON.stringify(JSON.parse(JSON.stringify(modList)))    // 移除它的响应式
 
         FileHandler.writeFile(configPath, config)
 
     }
     // 获取Mod信息
-    public static async getModInfo(savePath: string): Promise<IModInfo[]> {
-        let configPath = join(savePath, 'mod.json')
+    public static async getModInfo(savePath: string, fileName = "mod.json"): Promise<IModInfo[] | ITag[]> {
+        let configPath = join(savePath, fileName)
         FileHandler.createDirectory(savePath)   // 创建目录
         let config = await FileHandler.readFileSync(configPath, "[]")  // 读取文件
         let modList: IModInfo[] = JSON.parse(config)    // 转换为对象
@@ -160,7 +166,7 @@ export class Manager {
     }
 
     /**
-     * 以某个文件为基础, 软链安装/卸载 文件
+     * 以某个文件为基础, 安装/卸载 Mod
      * @param mod mod
      * @param installPath 安装路径
      * @param fileName 文件名称
@@ -172,7 +178,7 @@ export class Manager {
         let gameStorage = join(manager.gameStorage ?? "", installPath)
         let folder: string[] = []
         mod.modFiles.forEach(item => {
-            if (basename(item).toLowerCase() == fileName) {
+            if (basename(item).toLowerCase() == fileName.toLowerCase()) {
                 folder.push(dirname(join(modStorage, item)))
             }
         })
@@ -183,9 +189,70 @@ export class Manager {
                 if (isInstall) {
                     FileHandler.createLink(item, target, true)
                 } else {
-                    FileHandler.removeLink(target)
+                    FileHandler.removeLink(target, true)
                 }
             })
+
+        }
+        return true
+    }
+
+    /**
+     * 以某个文件为基础, 将改文件同级的所有文件安装/卸载 Mod 
+     * @param mod mod
+     * @param installPath 安装路径
+     * @param fileName 文件名 | 拓展名
+     * @param isInstall 是否是安装
+     * @param isExtname 是否按拓展名匹配
+     * @returns 
+     */
+    public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false) {
+        const manager = useManager()
+        let modStorage = join(manager.modStorage, mod.id.toString())
+        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let folders = [] as {
+            folder: string
+            files: string[]
+        }[]
+        mod.modFiles.forEach(item => {
+            if (isExtname ?
+                (extname(item) === fileName) :
+                (basename(item).toLowerCase() == fileName.toLowerCase())
+            ) {
+                // 获取所在文件夹
+                let folder = join(modStorage, item)
+                folder = join(folder, '..')
+                folders.push({
+                    folder: folder,
+                    files: FileHandler.getAllFilesInFolder(folder, true, true)
+                })
+            }
+        })
+
+        // files 去重
+        folders = [...new Set(folders)]
+        if (folders.length > 0) {
+            // 复制 folder 下的所有文件和文件夹到 gameStorage
+            folders.forEach(item => {
+                if (isInstall) {
+                    item.files.forEach(file => {
+                        // 从 file 中移除 item.folder
+                        let source = file;
+                        file = file.replace(item.folder, '')
+                        let target = join(gameStorage, file)
+                        FileHandler.copyFile(source, target)
+                    })
+                } else {
+                    item.files.forEach(file => {
+                        // 从 file 中移除 item.folder
+                        file = file.replace(item.folder, '')
+                        let target = join(gameStorage, file)
+                        FileHandler.deleteFile(target)
+                    })
+                }
+            })
+        } else {
+            ElMessage.error(`未找到文件: ${fileName}, 请不要随意修改MOD类型!`)
         }
         return true
     }
