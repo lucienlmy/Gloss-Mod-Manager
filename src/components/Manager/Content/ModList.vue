@@ -117,8 +117,8 @@ function dragend(e: any) {
                 <el-col :span="2" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</el-col>
                 <el-col :span="4">
                     <el-select v-model="modType" :disabled="mod.isInstalled">
-                        <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id" :label="item.name"
-                            :value="item.id" />
+                        <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id"
+                            :label="$t(item.name)" :value="item.id" />
                     </el-select>
                 </el-col>
                 <el-col :span="4" class="small-install">

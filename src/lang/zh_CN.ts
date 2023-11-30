@@ -247,6 +247,7 @@ const Games = {
     "State of Decay 2": "腐烂国度2",
     "Subnautica": "深海迷航",
     "Grim Dawn": "恐怖黎明",
+    "Cities Skylines II": "城市天际线2",
 }
 
 const Other = {

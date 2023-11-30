@@ -329,6 +329,12 @@ ipcMain.handle('nexus-mods-get-mod-data', async (event, arg) => {
 ipcMain.handle('check-for-updates', (event, arg) => {
     autoUpdater.checkForUpdates();
 })
+// 安装并重启
+ipcMain.handle('install-update-and-restart', (event, arg) => {
+    // autoUpdater.quitAndInstall();
+    autoUpdater.quitAndInstall(false)
+})
+
 autoUpdater.on('checking-for-update', () => {
     win.webContents.send('checking-for-update')
 })

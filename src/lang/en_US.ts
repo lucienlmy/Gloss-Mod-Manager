@@ -246,6 +246,7 @@ const Games = {
     "State of Decay 2": "State of Decay 2",
     "Subnautica": "Subnautica",
     "Grim Dawn": "Grim Dawn",
+    "Cities Skylines II": "Cities Skylines 2",
 
 }
 

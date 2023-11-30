@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 
 ipcRenderer.invoke('check-for-updates')
 
@@ -18,8 +18,19 @@ ipcRenderer.on('update-error', (event, data) => {
 })
 ipcRenderer.on('update-downloaded', (event, data) => {
     console.log(`更新下载完成, 请重启应用`, data.version)
-    ElMessage.success(`${data.version} 版本已下载完成, 将在退出后自动更新.`)
+    // ElMessage.success(`${data.version} 版本已下载完成, 将在退出后自动更新.`)
+    ElNotification.success({
+        title: '新版本可用',
+        message: `${data.version} 版本已下载完成, 点击开始更新, 或稍后自动更新.`,
+        // message: `新版本已下载完成, 点击开始更新, 或稍后自动更新.`,
+        offset: 60,
+        duration: 0,
+        onClick: () => {
+            ipcRenderer.invoke('install-update-and-restart')
+        }
+    })
 })
+
 
 </script>
 <template></template>
