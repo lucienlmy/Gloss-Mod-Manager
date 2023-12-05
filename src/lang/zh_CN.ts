@@ -96,6 +96,7 @@ const ExploreFilter = {
     "Default": "默认",
     "Views": "最多游览",
     "Downloads": "最多下载",
+    "Lastupdate": "最新更新",
     "Likes": "最多点赞",
     "Favorites": "最多收藏",
     "Newest": "最新发布",
@@ -108,6 +109,11 @@ const ExploreFilter = {
     "3DM Mods": "3DM Mods",
     "Nexus Mods": "Nexus Mods",
     "Please select a game first": "请先选择游戏",
+    "Download count": "下载量",
+    "Mark count": "点赞",
+    "Open in browser": "在浏览器中打开",
+    "Thunderstore": "Thunderstore",
+    "Categories": "分类",
 }
 
 const Welcome = {
@@ -248,6 +254,11 @@ const Games = {
     "Subnautica": "深海迷航",
     "Grim Dawn": "恐怖黎明",
     "Cities Skylines II": "城市天际线2",
+    "Dyson Sphere Program": "戴森球计划",
+    "WulinSH": "大侠立志传",
+    "Wandering Sword": "逸剑风云决",
+    "Risk of Rain 2": "雨中冒险2",
+    "Sons Of The Forest": "森林之子",
 }
 
 const Other = {
@@ -277,6 +288,11 @@ const Other = {
     "启用 Mod 并启动游戏": "启用 Mod 并启动游戏",
     "禁用 Mod 并启动游戏": "禁用 Mod 并启动游戏",
     "Steam 启动 (无Mod)": "Steam 启动 (无Mod)",
+
+    "BepInEx": "BepInEx",
+    "plugins": "插件",
+    "mods": "mods",
+    "Map": "地图",
 }
 
 const lang = {

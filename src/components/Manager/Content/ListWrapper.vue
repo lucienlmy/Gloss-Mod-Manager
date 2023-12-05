@@ -72,6 +72,7 @@ export default {
     .mod-list {
         padding: 1rem;
         padding-top: 0;
+        min-height: 400px;
     }
 }
 

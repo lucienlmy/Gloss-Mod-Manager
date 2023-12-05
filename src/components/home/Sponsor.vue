@@ -1,6 +1,7 @@
 <script lang='ts' setup>
 
 import NexusMods from '@src/components/home/logo/NexusMods.vue'
+import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
 
 </script>
 <template>
@@ -18,6 +19,11 @@ import NexusMods from '@src/components/home/logo/NexusMods.vue'
                         <NexusMods height="84px" width="100%"></NexusMods>
                     </a>
                 </v-col> -->
+                <v-col cols="4" class="partner">
+                    <a href="https://thunderstore.io/">
+                        <Thunderstore width="100%"></Thunderstore>
+                    </a>
+                </v-col>
             </v-row>
 
         </v-card-text>
@@ -36,5 +42,11 @@ a {
     :hover {
         opacity: .8;
     }
+}
+
+.partner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>

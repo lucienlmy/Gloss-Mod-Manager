@@ -117,16 +117,10 @@ export const useManager = defineStore('Manager', {
 
             FileHandler.writeLog(`添加: ${file}`)
 
+            const settings = useSettings()
+
             if (path.extname(file) == '.gmm') {
                 return this.addModByGmm(file)
-            }
-
-            const settings = useSettings()
-            const allowedExtensions = ['.zip', '.rar', '.7z', '.gmm'];
-
-            if (!allowedExtensions.some(ext => file.endsWith(ext))) {
-                ElMessage.error('不支持的文件类型')
-                return
             }
 
             if (settings.settings.modStorageLocation == '') {
@@ -134,34 +128,63 @@ export const useManager = defineStore('Manager', {
                 return
             }
 
-            this.maxID++
-            let id = this.maxID.toString()
-            console.log(id);
+            const allowedExtensions = ['.zip', '.rar', '.7z', '.gmm'];
 
-            let md5 = await FileHandler.getFileMd5(file).catch(err => {
-                return ''
-            })
+            if (allowedExtensions.some(ext => file.endsWith(ext))) {
+                this.maxID++
+                let id = this.maxID.toString()
+                console.log(id);
 
-            // 检查是否已经添加
-            if (this.isAdded(md5)) {
-                ElMessage.error(`您已经添加过『${path.basename(file)}』这款Mod了!`)
-                return
-            }
+                let md5 = await FileHandler.getFileMd5(file).catch(err => {
+                    return ''
+                })
 
-            let target = path.join(
-                settings.settings.modStorageLocation,
-                settings.settings.managerGame?.gameName ?? "",
-                id
-            )
-
-            let res = await Unzipper.unzip(file, target)
-            let files: string[] = []
-            res.forEach((item) => {
-                if (item.status == 'extracted') {
-                    files.push(item.file)
+                // 检查是否已经添加
+                if (this.isAdded(md5)) {
+                    ElMessage.error(`您已经添加过『${path.basename(file)}』这款Mod了!`)
+                    return
                 }
-            });
-            await this.addModInfo(file, parseInt(id), files, md5);
+
+                let target = path.join(
+                    settings.settings.modStorageLocation,
+                    settings.settings.managerGame?.gameName ?? "",
+                    id
+                )
+
+                let res = await Unzipper.unzip(file, target)
+                let files: string[] = []
+                res.forEach((item) => {
+                    if (item.status == 'extracted') {
+                        files.push(item.file)
+                    }
+                });
+                await this.addModInfo(file, parseInt(id), files, md5);
+            } else if (FileHandler.isDir(file)) {
+                this.maxID++
+                let id = this.maxID.toString()
+                console.log(id);
+
+
+
+                let Folder = file;
+                let files = FileHandler.getAllFilesInFolder(Folder, true, true)
+                // 将 Folder 从 files 的路径中删除
+                files = files.map(item => item.replace(Folder, ''))
+
+                let md5 = await FileHandler.getFolderHMd5(Folder)
+                // 检查是否已经添加
+                if (this.isAdded(md5)) {
+                    ElMessage.error(`您已经添加过『${path.basename(Folder)}』这款Mod了!`)
+                    return
+                }
+                let target = path.join(
+                    settings.settings.modStorageLocation,
+                    settings.settings.managerGame?.gameName ?? "",
+                    id
+                )
+                await FileHandler.copyFolder(Folder, target)
+                this.addModInfo(file, parseInt(id), files, md5);
+            }
         },
         /**
          * 通过下载任务添加Mod
@@ -180,8 +203,27 @@ export const useManager = defineStore('Manager', {
             }
             if (!modStorage) {
                 // modStorage = `${settings.settings.modStorageLocation}\\cache\\${task.id}${path.extname(task.link)}`
-                modStorage = path.join(settings.settings.modStorageLocation, 'cache', `${task.id}${path.extname(task.link)}`)
+                // modStorage = path.join(settings.settings.modStorageLocation, 'cache', `${task.id}${path.extname(task.link)}`)
+                modStorage = (() => {
+                    let name = '';
+                    if (task.type == "GlossMod") {
+                        name = `${task.id}${path.extname(task.link)}`
+                    }
+                    if (task.type == "NexusMods") {
+                        name = `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
+                    }
+                    if (task.type == "Thunderstore") {
+                        name = task.name + '.zip'
+                    }
+                    return path.join(settings.settings.modStorageLocation, 'cache', name)
+                })()
             }
+
+            if (!modStorage) {
+                ElMessage.error(`${modStorage} 文件不存在`)
+                return
+            }
+
             let md5 = await FileHandler.getFileMd5(modStorage).catch(err => {
                 return ''
             })
@@ -208,7 +250,7 @@ export const useManager = defineStore('Manager', {
             });
             let mod: IModInfo = {
                 id: parseInt(id),
-                webId: task.type == "GlossMod" ? task.id : undefined,
+                webId: task.type == "GlossMod" ? task.id as number : undefined,
                 nexus_id: task.type == "NexusMods" ? task.nexus_id : undefined,
                 modName: task.name,
                 md5: md5,
@@ -216,7 +258,8 @@ export const useManager = defineStore('Manager', {
                 isInstalled: false,
                 weight: 500,
                 modFiles: files,
-                modAuthor: task.modAuthor
+                modAuthor: task.modAuthor,
+                modWebsite: task.website,
             }
             mod.modType = settings.settings.managerGame?.checkModType(mod)
 
@@ -233,7 +276,7 @@ export const useManager = defineStore('Manager', {
                 md5: md5,
                 modVersion: '1.0.0',
                 isInstalled: false,
-                weight: 0,
+                weight: 500,
                 modFiles: files,
             }
             mod.modType = settings.settings.managerGame?.checkModType(mod)

@@ -15,8 +15,15 @@ const router = createRouter({
         },
         {
             path: "/Explore",
-            name: "Explore",
+            name: "ExploreHome",
             component: () => import("@src/views/Explore.vue"),
+            children: [
+                {
+                    path: ":modId",
+                    name: "ExploreContent",
+                    component: () => import("@src/views/Explore/Content.vue"),
+                }
+            ]
         },
         {
             path: "/Download",
@@ -34,6 +41,11 @@ const router = createRouter({
             component: () => import("@src/views/About.vue"),
         },
     ]
+});
+
+// 切换路由时，滚动到顶部
+router.afterEach(() => {
+    window.scrollTo(0, 0);
 });
 
 

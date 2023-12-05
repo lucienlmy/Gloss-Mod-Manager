@@ -95,6 +95,7 @@ const ExploreFilter = {
     "Default": "Default",
     "Views": "Most Viewed",
     "Downloads": "Most Downloaded",
+    "Lastupdate": "Lastupdate",
     "Likes": "Most Liked",
     "Favorites": "Most Favorited",
     "Newest": "Newest",
@@ -107,6 +108,11 @@ const ExploreFilter = {
     "3DM Mods": "3DM Mods",
     "Nexus Mods": "Nexus Mods",
     "Please select a game first": "Please select a game first.",
+    "Download count": "Download count",
+    "Mark count": "Mark count",
+    "Open in browser": "Open in browser",
+    "Thunderstore": "Thunderstore",
+    "Categories": "Categories",
 }
 
 const Welcome = {
@@ -247,7 +253,11 @@ const Games = {
     "Subnautica": "Subnautica",
     "Grim Dawn": "Grim Dawn",
     "Cities Skylines II": "Cities Skylines 2",
-
+    "Dyson Sphere Program": "Dyson Sphere Program",
+    "WulinSH": "WulinSH",
+    "Wandering Sword": "Wandering Sword",
+    "Risk of Rain 2": "Risk of Rain 2",
+    "Sons Of The Forest": "Sons Of The Forest",
 }
 
 const Other = {
@@ -278,6 +288,10 @@ const Other = {
     "禁用 Mod 并启动游戏": "Disable Mod and Start Game",
     "Steam 启动 (无Mod)": "Steam Start (No Mod)",
 
+    "BepInEx": "BepInEx",
+    "plugins": "plugins",
+    "mods": "mods",
+    "Map": "Map",
 }
 
 const lang = {

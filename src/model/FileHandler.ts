@@ -303,6 +303,35 @@ export class FileHandler {
         });
     }
 
+    public static async getFolderHMd5(folderPath: string) {
+        // 获取文件夹中的所有文件
+        const files = fs.readdirSync(folderPath);
+
+        // 创建一个 MD5 哈希实例
+        // const hash = crypto.createHash('md5');
+        const hash = createHash('md5');
+
+        // 对文件夹中的每个文件进行处理
+        files.forEach(file => {
+            const filePath = path.join(folderPath, file);
+
+            // 检查文件是否为正常的文件（而非目录或链接）
+            if (fs.statSync(filePath).isFile()) {
+                // 读取文件内容
+                const data = fs.readFileSync(filePath);
+
+                // 更新 MD5 哈希
+                hash.update(data);
+            }
+        });
+
+        // 计算 MD5 哈希值
+        const md5 = hash.digest('hex');
+
+        return md5;
+    }
+
+
     /**
      * 打开文件夹
      * @param folderPath 打开文件夹
@@ -515,42 +544,23 @@ export class FileHandler {
      * @returns 
      */
     public static getMyDocuments() {
-
         try {
             // 从注册表 获取 我的文档位置
             const regQueryCommand = 'reg query "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders" /v Personal';
-            const output = execSync(regQueryCommand).toString();
+            const output = execSync(regQueryCommand, { encoding: 'utf8' }).toString();
             const matches = output.match(/Personal\s+REG_SZ\s+(.*)/i);
             if (matches && matches[1]) {
-                return matches[1];
+                let folder = matches[1];
+                // 判断文件夹是否存在
+                if (this.fileExists(folder)) return folder
+                else return path.join(homedir(), 'Documents')
+
             } else {
                 return path.join(homedir(), 'Documents')
             }
         } catch (error) {
             return path.join(homedir(), 'Documents')
         }
-
-
-
-
-
-        // let documents = path.join(homedir(), 'My Documents')
-        // if (this.fileExists(documents)) return documents     // 如果能直接找到则直接返回
-
-        // const edge = require('electron-edge-js-v26-only')
-        // let assemblyFile = path.join(this.getResourcesPath(), "dll", "GetSpecialFolder.dll")
-        // let Invoke = edge.func({
-        //     assemblyFile: assemblyFile,
-        //     typeName: 'GetSpecialFolder.Program',
-        //     methodName: 'GetMyDocuments'
-        // })
-        // return new Promise<string>((resolve, reject) => {
-        //     Invoke(null, async (error: any, result: any) => {
-        //         if (error) reject(error);
-        //         console.log(result);
-        //         resolve(result);
-        //     })
-        // })
     }
 
     /**
@@ -619,5 +629,14 @@ export class FileHandler {
             }
 
         })
+    }
+
+    /**
+     * 判断是否是文件夹
+     * @param path 路径
+     * @returns 
+     */
+    public static isDir(path: string) {
+        return fs.statSync(path).isDirectory()
     }
 }

@@ -1,5 +1,7 @@
 // import { Download } from "@src/model/Download"
 
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore"
+
 
 export interface IMod {
     id: number
@@ -125,6 +127,9 @@ export interface IGameInfo {
     NexusMods?: {
         game_id: number
         game_domain_name: string
+    },
+    Thunderstore?: {
+        community_identifier: string
     }
 }
 
@@ -173,13 +178,16 @@ export interface ISettings {
     language: string
     theme: 'light' | 'dark' | 'system'
     fold: boolean,
-    exploreType: "GlossMod" | "NexusMods"
+    exploreType: sourceType
 }
 
 export interface IDownloadTask {
-    id: number
+    id: number | string
     nexus_id?: string
-    type: "GlossMod" | "NexusMods"
+    Thunderstore?: {
+        full_name?: string
+    }
+    type: sourceType
     gid?: string
     name: string
     version: string
@@ -189,6 +197,7 @@ export interface IDownloadTask {
     downloadedSize: number
     link: string
     modAuthor: string
+    website?: string
 }
 
 export interface IFileTreeNode {
@@ -219,3 +228,36 @@ export interface ITag {
     name: string
     color: string
 }
+
+export interface IThunderstoreModVersions {
+    name: string,
+    full_name: string,
+    description: string,
+    icon: string,
+    version_number: string,
+    dependencies: string[],
+    download_url: string,
+    downloads: number,
+    date_created: string,
+    website_url: string,
+    is_active: boolean,
+    uuid4: string,
+    file_size: number
+}
+
+export interface IThunderstoreMod {
+    name: string;
+    full_name: string;
+    owner: string;
+    package_url: string;
+    date_created: string;
+    date_updated: string;
+    uuid4: string;
+    rating_score: number;
+    is_pinned: boolean;
+    is_deprecated: boolean;
+    has_nsfw_content: boolean;
+    categories: string[];
+    versions: IThunderstoreModVersions[]
+}
+

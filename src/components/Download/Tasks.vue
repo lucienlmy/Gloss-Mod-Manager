@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 // import { Download } from '@src/model/Download';
 import { FileHandler } from '@src/model/FileHandler';
-import type { IDownloadTask, IMod } from '@src/model/Interfaces';
+import type { IDownloadTask, IMod, IThunderstoreMod, IThunderstoreModVersions } from '@src/model/Interfaces';
 // import { DownloadStatus } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { useMain } from '@src/stores/useMain';
@@ -12,7 +12,6 @@ import { h, ref } from 'vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
 import { useManager } from '@src/stores/useManager';
 import { useI18n } from "vue-i18n"
-import { useNexusMods } from '@src/stores/useNexusMods';
 
 const props = defineProps<{
     task: IDownloadTask,
@@ -24,10 +23,19 @@ const download = useDownload()
 const manager = useManager()
 const { t } = useI18n()
 
-const modStorage = computed(() => join(settings.settings.modStorageLocation,
-    'cache',
-    props.task.type == "GlossMod" ? `${props.task.id}${extname(props.task.link)}` : `${props.task.nexus_id}.${props.task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
-))
+const modStorage = computed(() => {
+    let name = '';
+    if (props.task.type == "GlossMod") {
+        name = `${props.task.id}${extname(props.task.link)}`
+    }
+    if (props.task.type == "NexusMods") {
+        name = `${props.task.nexus_id}.${props.task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
+    }
+    if (props.task.type == "Thunderstore") {
+        name = props.task.name + '.zip'
+    }
+    return join(settings.settings.modStorageLocation, 'cache', name)
+})
 const progress = computed(() => {
     return Math.floor(props.task.downloadedSize / props.task.totalSize * 10000) / 100; // 计算下载进度
 })
@@ -60,7 +68,7 @@ async function onProgress() {
             props.task.totalSize = result.totalLength
             props.task.downloadedSize = result.completedLength
 
-            if (result.status == "paused" || result.status == "error" || result.status == "removed", result.status == "complete") {
+            if (result.status == "paused" || result.status == "error" || result.status == "removed" || result.status == "complete") {
                 clearInterval(timer)
             }
         }
@@ -123,19 +131,40 @@ async function pause() {
 async function restart() {
     FileHandler.deleteFile(modStorage.value)
     if (props.task.type == "GlossMod") {
-        download.addDownloadById(props.task.id)
-    } else {
+        download.addDownloadById(props.task.id as number)
+    } else if (props.task.type == "NexusMods") {
         if (props.task.nexus_id) {
-            // props.task.nexus_id = starfield_6487 | game_domain_name id
             let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
-
             download.addDownloadByNuxusId(id, game_domain_name)
-
         }
+    } else if (props.task.type == "Thunderstore") {
+        let { task } = props
+        let mod: IThunderstoreMod = {
+            name: task.name,
+            full_name: '',
+            owner: task.modAuthor,
+            package_url: task.website || '',
+            date_created: '',
+            date_updated: '',
+            uuid4: task.id as string,
+            rating_score: 0,
+            is_pinned: false,
+            is_deprecated: false,
+            has_nsfw_content: false,
+            categories: [],
+            versions: [{
+                version_number: task.version,
+                download_url: task.link,
+            } as IThunderstoreModVersions]
+        }
+        download.addDownloadByThunderstore(mod)
     }
 }
 function openWeb() {
-    window.open(`https://mod.3dmgame.com/mod/${props.task.id}`)
+    let url = ''
+    if (props.task.website) url = props.task.website
+    else url = `https://mod.3dmgame.com/mod/${props.task.id}`
+    window.open(url)
 }
 function openFile() {
     FileHandler.openFolder(modStorage.value)

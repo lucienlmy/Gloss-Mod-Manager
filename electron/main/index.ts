@@ -126,6 +126,7 @@ async function createWindow() {
 
 app.whenReady().then(createWindow)
 
+//#region 窗口相关
 
 app.on('window-all-closed', () => {
     win = null
@@ -192,6 +193,11 @@ ipcMain.on('window-close', function () {
     }
 })
 
+//#endregion
+
+
+//#region 3DM Mod
+
 // 获取Mod列表数据
 ipcMain.on('get-mod-list', async (event, arg) => {
     let data = {
@@ -228,6 +234,74 @@ ipcMain.handle('get-types', async (event, arg) => {
     return res.data
 })
 
+
+// 用户登录
+ipcMain.handle('user-login', async (event, arg) => {
+    let res = await GetData.login(arg.username, arg.password)
+    return res
+})
+
+//#endregion
+
+//#region NexusMods
+
+ipcMain.handle('nexus-mods-get-mod-list', async (event, arg) => {
+    let res = await NexusMods.GetModList(arg)
+    return res
+})
+
+ipcMain.handle('nexus-mods-get-download-url', async (event, arg) => {
+    let res = await NexusMods.GetDownloadUrl(arg)
+    return res
+})
+
+ipcMain.handle('nexus-mods-get-mod-data', async (event, arg) => {
+    let res = await NexusMods.GetModData(arg)
+    return res
+})
+
+//#endregion
+
+//#region 更新相关
+
+// 检查Mod更新
+ipcMain.handle('check-mod-update', async (event, arg) => {
+    let res = await GetData.checkAllModUpdate(arg)
+    return res
+})
+
+// 自动更新
+ipcMain.handle('check-for-updates', (event, arg) => {
+    autoUpdater.checkForUpdates();
+})
+// 安装并重启
+ipcMain.handle('install-update-and-restart', (event, arg) => {
+    // autoUpdater.quitAndInstall();
+    autoUpdater.quitAndInstall(false)
+})
+
+autoUpdater.on('checking-for-update', () => {
+    win.webContents.send('checking-for-update')
+})
+autoUpdater.on('update-available', (info) => {
+    win.webContents.send('update-available', info);
+})
+autoUpdater.on('update-not-available', (info) => {
+    win.webContents.send('update-not-available', info);
+})
+autoUpdater.on('error', (err) => {
+    win.webContents.send('update-error', err);
+})
+autoUpdater.on('download-progress', (progressObj) => {
+    win.webContents.send("download-progress", progressObj);
+})
+autoUpdater.on('update-downloaded', (info) => {
+    win.webContents.send('update-downloaded', info);
+});
+
+//#endregion
+
+//#region 其他
 
 // 选择文件
 ipcMain.handle('select-file', async (event, arg) => {
@@ -283,17 +357,7 @@ ipcMain.handle('set-auto-launch', async (event, arg) => {
     console.log(`Auto Launch:${arg}`);
 })
 
-// 用户登录
-ipcMain.handle('user-login', async (event, arg) => {
-    let res = await GetData.login(arg.username, arg.password)
-    return res
-})
 
-// 检查Mod更新
-ipcMain.handle('check-mod-update', async (event, arg) => {
-    let res = await GetData.checkAllModUpdate(arg)
-    return res
-})
 
 ipcMain.on('open-gmm-file', (event, arg) => {
     win.webContents.send('open-gmm-file', arg)
@@ -307,49 +371,4 @@ ipcMain.handle('get-system-language', async (event, arg) => {
     return locale
 })
 
-// NexusMods 
-ipcMain.handle('nexus-mods-get-mod-list', async (event, arg) => {
-    let res = await NexusMods.GetModList(arg)
-    return res
-})
-
-ipcMain.handle('nexus-mods-get-download-url', async (event, arg) => {
-    let res = await NexusMods.GetDownloadUrl(arg)
-    return res
-})
-
-ipcMain.handle('nexus-mods-get-mod-data', async (event, arg) => {
-    let res = await NexusMods.GetModData(arg)
-    return res
-})
-
-
-
-// 自动更新
-ipcMain.handle('check-for-updates', (event, arg) => {
-    autoUpdater.checkForUpdates();
-})
-// 安装并重启
-ipcMain.handle('install-update-and-restart', (event, arg) => {
-    // autoUpdater.quitAndInstall();
-    autoUpdater.quitAndInstall(false)
-})
-
-autoUpdater.on('checking-for-update', () => {
-    win.webContents.send('checking-for-update')
-})
-autoUpdater.on('update-available', (info) => {
-    win.webContents.send('update-available', info);
-})
-autoUpdater.on('update-not-available', (info) => {
-    win.webContents.send('update-not-available', info);
-})
-autoUpdater.on('error', (err) => {
-    win.webContents.send('update-error', err);
-})
-autoUpdater.on('download-progress', (progressObj) => {
-    win.webContents.send("download-progress", progressObj);
-})
-autoUpdater.on('update-downloaded', (info) => {
-    win.webContents.send('update-downloaded', info);
-});
+//#endregion

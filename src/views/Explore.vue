@@ -2,6 +2,7 @@
 import Header from "@src/components/Explore/Header.vue";
 import GlossMod from "@src/components/Explore/GlossMod/GlossMod.vue";
 import NexusMods from "@src/components/Explore/NexusMods/NexusMods.vue";
+import Thunderstore from "@src/components/Explore/Thunderstore/Thunderstore.vue"
 
 import { useSettings } from "@src/stores/useSettings";
 
@@ -12,8 +13,12 @@ const settings = useSettings()
 <template>
     <v-container fluid>
         <Header></Header>
-        <GlossMod v-if="settings.settings.exploreType == 'GlossMod'"> </GlossMod>
-        <NexusMods v-if="settings.settings.exploreType == 'NexusMods'"> </NexusMods>
+        <template v-if="$route.name == 'ExploreHome'">
+            <GlossMod v-if="settings.settings.exploreType == 'GlossMod'"> </GlossMod>
+            <NexusMods v-if="settings.settings.exploreType == 'NexusMods'"> </NexusMods>
+            <Thunderstore v-if="settings.settings.exploreType == 'Thunderstore'"> </Thunderstore>
+        </template>
+        <router-view></router-view>
     </v-container>
 </template>
 <script lang='ts'>

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask, IMod, IModInfo } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -48,7 +48,7 @@ export const useDownload = defineStore('Download', {
          * 添加下载任务
          * @param modData 
          */
-        async addDownloadTask(modData: IMod, type: "GlossMod" | "NexusMods" = "GlossMod") {
+        async addDownloadTask(modData: IMod, type: sourceType = "GlossMod") {
 
             // 判断是否已经存在
             if (this.getTaskById(modData.id)) {
@@ -116,9 +116,10 @@ export const useDownload = defineStore('Download', {
          * @param id 任务ID
          * @returns 
          */
-        getTaskById(id: number): IDownloadTask | undefined {
+        getTaskById(id: number | string): IDownloadTask | undefined {
             return this.downloadTaskList.find(item => item.id == id) as IDownloadTask
         },
+
         /**
          * 保存任务配置
          */
@@ -190,6 +191,47 @@ export const useDownload = defineStore('Download', {
             }
 
             this.addDownloadByNexus(mod, url, game_domain_name)
+
+        },
+
+        async addDownloadByThunderstore(mod: IThunderstoreMod) {
+
+            // 判断是否已经存在
+            if (this.getTaskById(mod.uuid4)) {
+                // 如果已存在则移除
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.uuid4)
+            }
+
+            this.downloadTaskList.unshift({
+                id: mod.uuid4,
+                type: "Thunderstore",
+                name: mod.name,
+                version: mod.versions[0].version_number,
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: mod.versions[0].download_url,
+                modAuthor: mod.owner,
+                status: "waiting",
+                website: mod.package_url,
+            })
+
+            let task = this.getTaskById(mod.uuid4) as IDownloadTask
+
+            const settings = useSettings()
+            let fileExt = '.zip'
+            // let dest = `${settings.settings.modStorageLocation}\\cache\\`
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+            FileHandler.deleteFile(join(dest, `${task.name}${fileExt}`))
+
+            let gid = await this.aria2.addUri(task.link, task.name + fileExt, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+            console.log(gid);
+
+            task.gid = gid.result
+
+            ElMessage.success(`${task.name} 已添加到下载列表`)
 
         }
 

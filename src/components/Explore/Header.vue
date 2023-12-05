@@ -32,7 +32,8 @@ let uploadMod = computed(() => {
                 <div class="right">
                     <v-chip-group v-model="settings.settings.exploreType" mandatory>
                         <v-chip label variant="text" value="GlossMod">{{ $t('3DM Mods') }} </v-chip>
-                        <!-- <v-chip label variant="text" value="NexusMods">{{ $t('Nexus Mods') }} </v-chip> -->
+                        <v-chip label v-if="settings.settings.managerGame?.Thunderstore" variant="text"
+                            value="Thunderstore">{{ $t('Thunderstore') }} </v-chip>
                     </v-chip-group>
                 </div>
             </v-col>

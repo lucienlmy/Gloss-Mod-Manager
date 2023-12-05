@@ -70,12 +70,13 @@ let exit_name = ref(false)
 
 function dragstart(e: any, index: number) {
     e.stopPropagation()
+
     manager.dragIndex = index
     setTimeout(() => {
         e.target.classList.add('moveing')
     }, 0)
 }
-function dragenter(e: any, index: number) {
+function dragenter(e: any, index: number, mod: IModInfo) {
     e.preventDefault()
     // 拖拽到原位置时不触发
     if (manager.dragIndex !== index) {
@@ -98,15 +99,39 @@ function dragend(e: any) {
 }
 
 
+function list_dragover(e: any) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+}
+
+function list_drop(e: any) {
+    e.preventDefault()
+    let name = e.dataTransfer.getData('name');
+    let color = e.dataTransfer.getData('color');
+
+    if (!props.mod.tags) {
+        props.mod.tags = []
+    }
+
+    if (props.mod.tags?.findIndex(item => item.name == name) == -1) {
+        props.mod.tags.push({
+            name: name,
+            color: color
+        })
+    }
+}
+
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
         <el-col :span="24" v-if="settings.settings.fold">
             <!-- 小列表 -->
-            <el-row draggable="true" @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index)"
-                @dragend="dragend" @dragover="dragover">
-                <el-col :span="12">
+            <el-row class="mod-list">
+                <el-col :span="12" @dragover="list_dragover" @drop="list_drop">
                     <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                            @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
+                            @dragend="dragend" @dragover="dragover"></v-icon>
                         <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
                             {{ item.name }}</v-chip>
                         {{ mod.modName }}
@@ -132,11 +157,13 @@ function dragend(e: any) {
         </el-col>
         <v-col cols="12" v-else>
             <!-- :no-gutters="manager.fold" -->
-            <v-row class="mod-list" draggable="true" @dragstart="dragstart($event, index)"
-                @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
-                <v-col cols="6" class="mod-name">
+            <v-row class="mod-list">
+                <v-col cols="6" class="mod-name" @dragover="list_dragover" @drop="list_drop">
                     <!-- 名称 -->
                     <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                            @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
+                            @dragend="dragend" @dragover="dragover"></v-icon>
                         <v-chip v-for="item in mod.tags" label :key="item.name" :color="item.color">
                             {{ item.name }}</v-chip>
                         {{ mod.modName }}
@@ -174,41 +201,24 @@ export default {
 </script>
 <style lang='less' scoped>
 .wrap {
-    // height: 80px;
-
-    // &.new-version {
-    //     background-color: rgb(119 39 39 / 39%);
-    // }
-
-    .fold {
-        padding-top: 0.1rem;
-        padding-bottom: 0.1rem;
-    }
-
     .mod-list {
         display: flex;
         align-items: center;
         transition: all 0.3s;
 
+        .list-sort {
+            // 移动的手势
+            cursor: move;
 
+            &:hover {
+                color: rgb(var(--v-theme-primary));
+            }
+        }
 
         &:hover {
             // 底部阴影
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
-
-        .mod-name {
-            .exit-btn {
-                display: none;
-            }
-
-            &:hover {
-                .exit-btn {
-                    display: inline-grid;
-                }
-            }
-        }
-
 
     }
 

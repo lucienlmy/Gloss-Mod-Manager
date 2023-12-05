@@ -34,8 +34,10 @@ function del(item: ITag) {
 
 // 标签 拖拽排序
 
-function dragstart(e: any, index: number) {
+function dragstart(e: any, index: number, item: ITag) {
     e.stopPropagation()
+    e.dataTransfer.setData('name', item.name)
+    e.dataTransfer.setData('color', item.color)
     manager.dragIndex = index
     setTimeout(() => {
         e.target.classList.add('moveing')
@@ -62,7 +64,7 @@ function dragend(e: any) {
     <div class="tags">
         <v-chip-group class="group" v-model="manager.filterTags" multiple>
             <v-chip v-for="(item, index) in manager.tags" :key="item.name" label variant="text" :value="item"
-                :draggable="true" @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index)"
+                :draggable="true" @dragstart="dragstart($event, index, item)" @dragenter="dragenter($event, index)"
                 @dragend="dragend" @dragover="dragover">
                 <!-- <v-chip label variant="text" :color="item.color"> </v-chip> -->
                 <div :style="{ color: item.color }">{{ item.name }}</div>

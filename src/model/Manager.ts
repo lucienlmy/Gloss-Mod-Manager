@@ -13,6 +13,8 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 
 export class Manager {
 
+    public static passFiles = ['README.md', 'manifest.json', 'icon.png']
+
     /**
      * 保存Mod信息
      * @param modList 列表数据
@@ -135,6 +137,8 @@ export class Manager {
         let res: IState[] = []
         mod.modFiles.forEach(async item => {
             try {
+                if (this.passFiles.includes(basename(item))) return
+
                 let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
                 if (statSync(modStorage).isFile()) {
                     let path = FileHandler.getFolderFromPath(modStorage, folderName, include)
@@ -206,10 +210,10 @@ export class Manager {
      * @param isExtname 是否按拓展名匹配
      * @returns 
      */
-    public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false) {
+    public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
-        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let folders = [] as {
             folder: string
             files: string[]
@@ -229,27 +233,30 @@ export class Manager {
             }
         })
 
-        // files 去重
-        folders = [...new Set(folders)]
+        // 通过 files 去重
+        folders = folders.filter((item, index) => {
+            let indexs = folders.findIndex(i => i.files.toString() == item.files.toString())
+            return indexs == index
+        })
+        console.log(folders);
+
         if (folders.length > 0) {
             // 复制 folder 下的所有文件和文件夹到 gameStorage
             folders.forEach(item => {
-                if (isInstall) {
-                    item.files.forEach(file => {
-                        // 从 file 中移除 item.folder
-                        let source = file;
-                        file = file.replace(item.folder, '')
-                        let target = join(gameStorage, file)
+
+                item.files.forEach(file => {
+                    if (this.passFiles.includes(basename(file))) return
+
+                    // 从 file 中移除 item.folder
+                    let source = file;
+                    file = file.replace(item.folder, '')
+                    let target = join(gameStorage, file)
+                    if (isInstall) {
                         FileHandler.copyFile(source, target)
-                    })
-                } else {
-                    item.files.forEach(file => {
-                        // 从 file 中移除 item.folder
-                        file = file.replace(item.folder, '')
-                        let target = join(gameStorage, file)
+                    } else {
                         FileHandler.deleteFile(target)
-                    })
-                }
+                    }
+                })
             })
         } else {
             ElMessage.error(`未找到文件: ${fileName}, 请不要随意修改MOD类型!`)
