@@ -33,13 +33,24 @@ let list = computed<ISupportedGames[]>(() => {
 
 // =========== 让用户选择指定游戏 ===========
 function select(item: ISupportedGames) {
-    ipcRenderer.invoke("select-file", {
-        properties: ['openDirectory'],
+
+    let arg = {
+        properties: ['openFile'],
         filters: [{ name: '游戏主程序', extensions: ['exe'] }],
         defaultPath: Steam.getSteamGamePath(item.steamAppID, item.installdir)
-    }).then((arg: string[]) => {
+    }
+
+    if (settings.settings.selectGameByFolder) {
+        arg.properties = ['openDirectory']
+    }
+
+    ipcRenderer.invoke("select-file", arg).then((arg: string[]) => {
         if (arg.length > 0) {
-            let files = FileHandler.getAllFilesInFolder(arg[0])
+            let folder = settings.settings.selectGameByFolder ? arg[0] : dirname(arg[0])
+
+            let files = FileHandler.getAllFilesInFolder(folder)
+
+
             if (typeof (item.gameExe) == 'string') {
                 // 判断 item.gameExe 是否存在于 files 中
                 if (files.includes(item.gameExe)) {

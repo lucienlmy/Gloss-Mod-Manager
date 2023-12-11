@@ -175,11 +175,12 @@ export class Manager {
      * @param installPath 安装路径
      * @param fileName 文件名称
      * @param isInstall 是否是安装
+     * @param inGameStorage 是否在游戏目录
      */
-    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean) {
+    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, inGameStorage: boolean = true) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
-        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let folder: string[] = []
         mod.modFiles.forEach(item => {
             if (basename(item).toLowerCase() == fileName.toLowerCase()) {
@@ -208,6 +209,7 @@ export class Manager {
      * @param fileName 文件名 | 拓展名
      * @param isInstall 是否是安装
      * @param isExtname 是否按拓展名匹配
+     * @param inGameStorage 是否在游戏目录
      * @returns 
      */
     public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {

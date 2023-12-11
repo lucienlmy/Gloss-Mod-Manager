@@ -80,7 +80,12 @@ function GetModInfo() {
             // 检查Mod更新
             manager.checkAllModUpdate()
         })
-        manager.getTagsList()
+        manager.getTagsList().then(() => {
+            // 移除 manager.tags 中为 null 的值
+            manager.tags = manager.tags.filter((item) => {
+                return item != null
+            })
+        })
     }
 }
 

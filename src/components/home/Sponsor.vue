@@ -47,6 +47,6 @@ a {
 .partner {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-end;
 }
 </style>

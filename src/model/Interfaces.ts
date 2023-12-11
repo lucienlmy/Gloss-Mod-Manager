@@ -179,6 +179,7 @@ export interface ISettings {
     theme: 'light' | 'dark' | 'system'
     fold: boolean,
     exploreType: sourceType
+    selectGameByFolder: boolean
 }
 
 export interface IDownloadTask {

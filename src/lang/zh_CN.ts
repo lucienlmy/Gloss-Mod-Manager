@@ -207,6 +207,7 @@ const Settings = {
     "Dark": "深色",
     "Auto": "自动",
     "Mod Folder Tip": "你可以将它设置为任何目录, 但不要设置为游戏目录，以免出现未知错误",
+    "Select Game By folder": "通过目录选择游戏",
 }
 
 const Games = {
@@ -259,6 +260,9 @@ const Games = {
     "Wandering Sword": "逸剑风云决",
     "Risk of Rain 2": "雨中冒险2",
     "Sons Of The Forest": "森林之子",
+    "WarmSnow": "暖雪",
+    "Euro Truck Simulator 2": "欧洲卡车模拟2",
+    "American Truck Simulator": "美国卡车模拟器",
 }
 
 const Other = {

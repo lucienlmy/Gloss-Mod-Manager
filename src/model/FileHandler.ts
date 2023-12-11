@@ -303,32 +303,23 @@ export class FileHandler {
         });
     }
 
+    /**
+     * 获取文件夹MD45
+     * @param folderPath 路径
+     * @returns 
+     */
     public static async getFolderHMd5(folderPath: string) {
-        // 获取文件夹中的所有文件
-        const files = fs.readdirSync(folderPath);
-
-        // 创建一个 MD5 哈希实例
-        // const hash = crypto.createHash('md5');
-        const hash = createHash('md5');
-
-        // 对文件夹中的每个文件进行处理
-        files.forEach(file => {
-            const filePath = path.join(folderPath, file);
-
-            // 检查文件是否为正常的文件（而非目录或链接）
+        const files = this.getFolderFiles(folderPath, true, true);
+        let combinedHash = '';
+        files.forEach(filePath => {
             if (fs.statSync(filePath).isFile()) {
-                // 读取文件内容
                 const data = fs.readFileSync(filePath);
-
-                // 更新 MD5 哈希
-                hash.update(data);
+                const hash = createHash('md5').update(data).digest('hex');
+                combinedHash += hash;
             }
-        });
-
-        // 计算 MD5 哈希值
-        const md5 = hash.digest('hex');
-
-        return md5;
+        })
+        const folderHash = createHash('md5').update(combinedHash).digest('hex');
+        return folderHash;
     }
 
 
@@ -504,13 +495,24 @@ export class FileHandler {
      * @param folderPath 路径
      * @returns 
      */
-    public static getFolderFiles(folderPath: string) {
+    public static getFolderFiles(folderPath: string, includepath?: boolean, child: boolean = false) {
 
-        // 判断目录是否存在
-        if (this.fileExists(folderPath)) {
-            return fs.readdirSync(folderPath)
-        }
-        return []
+        return FileHandler.getAllFilesInFolder(folderPath, includepath, child)
+
+        // let result: string[] = [];
+        // if (this.fileExists(folderPath)) {
+        //     const files = fs.readdirSync(folderPath);
+        //     for (const file of files) {
+        //         const fullPath = path.join(folderPath, file);
+        //         const isDirectory = fs.statSync(fullPath).isDirectory();
+        //         if (isDirectory && child) {
+        //             result = result.concat(this.getFolderFiles(fullPath, child));
+        //         } else if (!isDirectory) {
+        //             result.push(fullPath);
+        //         }
+        //     }
+        // }
+        // return result;
     }
 
     /**

@@ -207,6 +207,7 @@ const Settings = {
     "Dark": "Dark",
     "Auto": "Auto",
     "Mod Folder Tip": "You can set it to any directory, but don't set it to the game directory to avoid unknown errors",
+    "Select Game By folder": "Select Game By folder",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",
@@ -258,6 +259,9 @@ const Games = {
     "Wandering Sword": "Wandering Sword",
     "Risk of Rain 2": "Risk of Rain 2",
     "Sons Of The Forest": "Sons Of The Forest",
+    "WarmSnow": "WarmSnow",
+    "Euro Truck Simulator 2": "Euro Truck Simulator 2",
+    "American Truck Simulator": "American Truck Simulator",
 }
 
 const Other = {

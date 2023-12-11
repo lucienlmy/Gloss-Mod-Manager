@@ -57,6 +57,10 @@ watch(() => settings.settings.autoLaunch, () => {
                 v-model="settings.settings.autoInstall"></v-switch>
         </v-col>
         <v-col cols="12" sm="6" md="4">
+            <v-switch :label="$t('Select Game By folder')" color="#039BE5"
+                v-model="settings.settings.selectGameByFolder"></v-switch>
+        </v-col>
+        <v-col cols="12" sm="6" md="4">
             <v-switch :label="$t('Auto start for windows')" color="#039BE5"
                 v-model="settings.settings.autoLaunch"></v-switch>
         </v-col>

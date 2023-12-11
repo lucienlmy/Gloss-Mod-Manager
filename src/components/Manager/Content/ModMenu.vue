@@ -127,7 +127,7 @@ function reinstall() {
             <el-form-item :label="t('Version')">
                 <el-input v-model="mod.modVersion"></el-input>
             </el-form-item>
-            <el-form-item :label="t('Tags')">
+            <el-form-item :label="t('Tag')">
                 <el-select multiple style="width: 100%" v-model="mod.tags" value-key="name">
                     <el-option v-for="item in manager.tags" :key="item.name" :label="item.name" :value="item"
                         class="option">

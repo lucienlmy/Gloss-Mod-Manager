@@ -108,16 +108,16 @@ function list_drop(e: any) {
     e.preventDefault()
     let name = e.dataTransfer.getData('name');
     let color = e.dataTransfer.getData('color');
-
-    if (!props.mod.tags) {
-        props.mod.tags = []
-    }
-
-    if (props.mod.tags?.findIndex(item => item.name == name) == -1) {
-        props.mod.tags.push({
-            name: name,
-            color: color
-        })
+    if (name && color) {
+        if (!props.mod.tags) {
+            props.mod.tags = []
+        }
+        if (props.mod.tags?.findIndex(item => item.name == name) == -1) {
+            props.mod.tags.push({
+                name: name,
+                color: color
+            })
+        }
     }
 }
 
