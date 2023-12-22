@@ -47,7 +47,7 @@ export const useExplore = defineStore('Explore', {
             // }
 
 
-            ipcRenderer.send("get-mod-list", {
+            ipcRenderer.invoke("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
                 title: this.searchText,
@@ -59,7 +59,13 @@ export const useExplore = defineStore('Explore', {
                 gameType: this.gameType,
                 show_adult: user.user?.user_p_show_adult == 1 ?? null,
                 show_charge: user.user?.user_p_show_charge == 1 ?? null,
+            }).then(data => {
+                this.mods = data.data.mod
+                this.count = data.data.count
+                document.documentElement.scrollTop = 0
+
             })
+
         },
         getGameType() {
             const settings = useSettings()

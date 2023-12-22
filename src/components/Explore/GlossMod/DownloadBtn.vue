@@ -48,7 +48,7 @@ async function toDownload() {
         data.mods_resource_url = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
         link.value = data.mods_resource_url
 
-        AppAnalytics.sendEvent("download")
+        // AppAnalytics.sendEvent("download")
 
         if (!link.value.includes("https://mod.3dmgame.com")) {
             window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)

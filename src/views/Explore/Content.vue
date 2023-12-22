@@ -14,9 +14,6 @@ if (parseInt(route.params.modId as string) != content.modData?.id) {
 
 </script>
 <template>
-    <template>
-
-    </template>
     <v-card v-if="content.modData" :loading="content.loading">
         <v-card-text>
             <ExploreContentHeader></ExploreContentHeader>
@@ -25,6 +22,9 @@ if (parseInt(route.params.modId as string) != content.modData?.id) {
                     <Markdown :text="content.modData.mods_content"></Markdown>
                 </v-col>
             </v-row>
+            <div class="back-btn">
+                <v-btn icon="mdi-arrow-u-left-top-bold" @click="$router.back"></v-btn>
+            </div>
         </v-card-text>
     </v-card>
 </template>
@@ -34,4 +34,11 @@ export default {
     name: 'ExploreContent',
 }
 </script>
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+.back-btn {
+    position: fixed;
+    // 右下角
+    right: 1rem;
+    bottom: 1rem;
+}
+</style>

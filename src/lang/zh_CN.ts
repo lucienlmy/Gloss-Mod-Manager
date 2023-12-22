@@ -263,6 +263,7 @@ const Games = {
     "WarmSnow": "暖雪",
     "Euro Truck Simulator 2": "欧洲卡车模拟2",
     "American Truck Simulator": "美国卡车模拟器",
+    "Grand Theft Auto V": "侠盗猎车手系列 (GTA)",
 }
 
 const Other = {
@@ -297,6 +298,10 @@ const Other = {
     "plugins": "插件",
     "mods": "mods",
     "Map": "地图",
+    "dlc": "添加式",
+    "tyf": "载具(替换式)",
+    "ydd": "人物",
+    "tools": "工具",
 }
 
 const lang = {

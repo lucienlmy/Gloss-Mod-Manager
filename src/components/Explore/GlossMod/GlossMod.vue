@@ -23,19 +23,6 @@ const settings = useSettings()
 console.log(settings.settings.tourGameList.length);
 
 
-ipcRenderer.on("get-mod-list-reply", (event, arg) => {
-    // console.log(arg) // 打印获取到的数据
-    if (arg.code == "00") {
-        explore.mods = arg.data.mod
-        // explore.game = arg.data.game
-        explore.count = arg.data.count
-    } else {
-        ElMessage.error(arg)
-    }
-
-    // 滚动到顶部
-    document.documentElement.scrollTop = 0
-})
 
 watch([
     () => explore.order,

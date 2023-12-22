@@ -55,7 +55,7 @@ function select(item: ISupportedGames) {
                 // 判断 item.gameExe 是否存在于 files 中
                 if (files.includes(item.gameExe)) {
                     settings.settings.managerGame = item
-                    settings.settings.managerGame.gamePath = arg[0]
+                    settings.settings.managerGame.gamePath = folder
 
                 } else {
                     ElMessage.error(`请选择 ${item.gameExe} 所在目录.`)
@@ -67,7 +67,7 @@ function select(item: ISupportedGames) {
                 if (exe) {
                     console.log(exe);
                     settings.settings.managerGame = item
-                    settings.settings.managerGame.gamePath = join(arg[0], exe.rootPath)
+                    settings.settings.managerGame.gamePath = join(folder, exe.rootPath)
                 } else {
                     let exename = item.gameExe.map(item => item.name).join(' 或 ')
                     ElMessage.error(`请选择 ${exename} 所在目录.`)

@@ -1,14 +1,18 @@
 <script lang='ts' setup>
 import { ISupportedGames } from '@src/model/Interfaces';
 import { useExplore } from '@src/stores/useExplore';
+import { useMain } from '@src/stores/useMain';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import GlossModSelectedGames from '@src/components/Explore/SelectedGames.vue'
+
 const explore = useExplore()
 const manager = useManager()
 const settings = useSettings()
+const { lazy_img } = useMain()
 const { t } = useI18n()
 
 let searchText = ref("")
@@ -65,18 +69,30 @@ function isOk() {
                 </v-col>
             </v-card-title>
             <v-card-text class="content">
+                <v-card v-if="settings.settings.tourGameList.length > 0">
+                    <v-card-title>已选游戏</v-card-title>
+                    <v-card-text>
+                        <v-row class="selected-games">
+                            <v-col cols="2" v-for="item in settings.settings.tourGameList" :key="item">
+                                <GlossModSelectedGames :id="item"></GlossModSelectedGames>
+                            </v-col>
+                        </v-row>
+                    </v-card-text>
+                </v-card>
                 <v-item-group multiple v-model="settings.settings.tourGameList">
-                    <div class="list-wrap">
+                    <v-row class="list-wrap">
                         <v-item v-for="item in list" v-slot="{ isSelected, toggle }" :value="item.gameID">
-                            <v-list-item :title="$t(item.gameName)" @click="toggle">
-                                <template v-slot:prepend>
-                                    <v-list-item-action start>
-                                        <v-checkbox-btn :model-value="isSelected"></v-checkbox-btn>
-                                    </v-list-item-action>
-                                </template>
-                            </v-list-item>
+                            <v-col class="game-list" cols="2" @click="toggle" :class="isSelected ? 'primary' : ''">
+                                <v-row no-gutters>
+                                    <v-col cols="12">
+                                        <v-img :lazy-src="lazy_img" :aspect-ratio="247 / 139" :src="item.gameCoverImg"
+                                            :alt="item.gameName" min-height="90px" />
+                                    </v-col>
+                                    <v-col class="game-name" cols="12">{{ $t(item.gameName) }}</v-col>
+                                </v-row>
+                            </v-col>
                         </v-item>
-                    </div>
+                    </v-row>
                 </v-item-group>
             </v-card-text>
             <v-card-actions class="flex-row-reverse">
@@ -96,5 +112,29 @@ export default {
     min-height: 300px;
     max-height: 400px;
     overflow: auto;
+
+    .selected-games {
+        margin-bottom: 10px;
+        // 横向滚动条
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap;
+    }
+
+    .list-wrap {
+
+        .game-list {
+            cursor: pointer;
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        .primary {
+            background-color: rgba(0, 0, 0, 0.6);
+
+        }
+    }
 }
 </style>

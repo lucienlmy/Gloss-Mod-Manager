@@ -3,6 +3,7 @@
  */
 import { ElectronStore } from '@src/model/ElectronStore'
 import { useMain } from '@src/stores/useMain';
+import { useSettings } from '@src/stores/useSettings';
 import { useUser } from '@src/stores/useUser';
 
 
@@ -32,14 +33,12 @@ export class AppAnalytics {
         const user_id = await this.getInstanceId()
         const gmm_login = useUser().user?.id
         const version = (await useMain().getVersion())[0]
-
-        // console.log(`version:${version}`);
-
+        const language = useSettings().settings.language
 
         fetch(`https://mod.3dmgame.com/gmm/send`, {
             method: "POST",
             body: JSON.stringify({
-                event_name, event_value, user_id, gmm_login, version
+                event_name, event_value, user_id, gmm_login, version, language
             })
         })
     }

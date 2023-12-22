@@ -17,6 +17,7 @@ const props = defineProps<{
 const manager = useManager()
 const settings = useSettings()
 
+let loading = ref(false)
 
 if (!props.mod.modType) {
     // console.log(settings.settings.managerGame);
@@ -30,14 +31,18 @@ let type = computed<IType | undefined>(() => {
 })
 
 watch(() => props.mod.isInstalled, () => {
+
+    loading.value = true
+
     if (props.mod.isInstalled) {
         FileHandler.writeLog(`安装: ${props.mod.modName}`)
-        AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
+        // AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
         // 安装
         type.value?.install(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {
                 props.mod.isInstalled = false
             }
+            loading.value = false
         })
     } else {
         FileHandler.writeLog(`卸载: ${props.mod.modName}`)
@@ -46,6 +51,7 @@ watch(() => props.mod.isInstalled, () => {
             if (typeof (res) == 'boolean' && res == false) {
                 props.mod.isInstalled = false
             }
+            loading.value = false
         })
     }
 })
@@ -147,7 +153,7 @@ function list_drop(e: any) {
                     </el-select>
                 </el-col>
                 <el-col :span="4" class="small-install">
-                    <el-switch v-model="mod.isInstalled" size="small"
+                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading"
                         :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
                 </el-col>
                 <el-col :span="2">
@@ -184,7 +190,7 @@ function list_drop(e: any) {
                 <v-col cols="2">
                     <!-- 安装 -->
                     <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                        :hide-details="true" color="#0288D1"></v-switch>
+                        :loading="loading" :disabled="loading" :hide-details="true" color="#0288D1"></v-switch>
                 </v-col>
                 <v-col cols="1">
                     <ContentModMenu :mod="mod"></ContentModMenu>

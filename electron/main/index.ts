@@ -199,7 +199,7 @@ ipcMain.on('window-close', function () {
 //#region 3DM Mod
 
 // 获取Mod列表数据
-ipcMain.on('get-mod-list', async (event, arg) => {
+ipcMain.handle('get-mod-list', async (event, arg) => {
     let data = {
         page: arg.page ?? 1,
         pageSize: arg.pageSize ?? 24,
@@ -214,11 +214,7 @@ ipcMain.on('get-mod-list', async (event, arg) => {
         show_charge: arg.show_charge ?? null,
     }
 
-    GetData.getModList(data).then((res) => {
-        event.reply('get-mod-list-reply', res)
-    }).catch((err) => {
-        console.log(`err: ${err}`);
-    })
+    return await GetData.getModList(data)
 })
 
 // 获取Mod数据

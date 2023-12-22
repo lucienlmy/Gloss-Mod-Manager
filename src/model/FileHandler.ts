@@ -554,8 +554,11 @@ export class FileHandler {
             if (matches && matches[1]) {
                 let folder = matches[1];
                 // 判断文件夹是否存在
-                if (this.fileExists(folder)) return folder
-                else return path.join(homedir(), 'Documents')
+                if (this.fileExists(folder)) {
+                    return folder
+                } else {
+                    return path.join(homedir(), 'Documents')
+                }
 
             } else {
                 return path.join(homedir(), 'Documents')

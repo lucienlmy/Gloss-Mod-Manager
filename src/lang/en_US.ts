@@ -262,6 +262,7 @@ const Games = {
     "WarmSnow": "WarmSnow",
     "Euro Truck Simulator 2": "Euro Truck Simulator 2",
     "American Truck Simulator": "American Truck Simulator",
+    "Grand Theft Auto V": "Grand Theft Auto V(GTA5)",
 }
 
 const Other = {
