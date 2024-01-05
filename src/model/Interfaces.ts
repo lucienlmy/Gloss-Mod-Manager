@@ -100,9 +100,10 @@ export interface IModInfo {
     modDesc?: string
     modAuthor?: string
     modWebsite?: string
-    corePlugins?: [
-        { id: number, name: string }
-    ]
+    advanced?: {
+        enabled: boolean
+        data: any
+    }
 }
 
 export interface IGameExe {
@@ -149,10 +150,24 @@ export interface IState {
     state: boolean
 }
 
+
+interface IAdvancedItem {
+    type: "input" | "selects" | "switch"
+    label: string
+    key: string
+    selectItem?: { name: string, value: string }[]
+    defaultValue?: string | boolean
+}
+
 export interface IType {
-    id: number | "plugin"
+    id: number
     name: string
     installPath?: string
+    advanced?: {
+        name: string
+        icon: string
+        item: IAdvancedItem[]
+    }
     corePlugins?: IPlugins[]
     install: (mod: IModInfo) => Promise<IState[] | boolean>
     uninstall: (mod: IModInfo) => Promise<IState[] | boolean>

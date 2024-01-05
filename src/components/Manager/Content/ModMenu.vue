@@ -8,6 +8,7 @@ import { computed, ref, watch } from 'vue';
 import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
 import { join } from 'path'
+import ContentAdvanced from '@src/components/Manager/Content/Advanced.vue'
 
 
 const props = defineProps<{
@@ -20,6 +21,7 @@ const download = useDownload()
 const { t } = useI18n()
 
 let showEdit = ref(false)
+let showAdvanced = ref(false)
 
 let type = computed<IType | undefined>(() => {
     return settings.settings.managerGame?.modType.find((item) => {
@@ -27,6 +29,11 @@ let type = computed<IType | undefined>(() => {
     })
 })
 
+const advanced = computed(() => {
+    return settings.settings.managerGame?.modType.find((item) => {
+        return item.id == props.mod.modType
+    })?.advanced
+})
 
 let modStorage = computed({
     get: () => join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", props.mod.id.toString()),
@@ -106,6 +113,8 @@ function reinstall() {
         <v-list>
             <v-list-item append-icon="mdi-square-edit-outline" :title="t('Edit')" @click="showEdit = true">
             </v-list-item>
+            <v-list-item v-if="advanced" :append-icon="advanced.icon" :title="advanced.name"
+                @click="showAdvanced = true"></v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
             <v-list-item v-if="Website" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
             <v-list-item v-if="mod.webId" :title="t('Update')" @click="reinstall">
@@ -149,6 +158,8 @@ function reinstall() {
             </el-form-item>
         </el-form>
     </el-dialog>
+    <ContentAdvanced :mod="mod" :showAdvanced="showAdvanced" @changeAdvanced="(value) => showAdvanced = value">
+    </ContentAdvanced>
 </template>
 <script lang='ts'>
 

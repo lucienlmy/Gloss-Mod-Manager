@@ -152,6 +152,7 @@ const ManagerContent = {
     "Add": "添加",
     "Color": "颜色",
     "Tag": "标签",
+    "Advanced": "高级",
 }
 
 const ManagerHeader = {
@@ -206,7 +207,7 @@ const Settings = {
     "Light": "浅色",
     "Dark": "深色",
     "Auto": "自动",
-    "Mod Folder Tip": "你可以将它设置为任何目录, 但不要设置为游戏目录，以免出现未知错误",
+    "Mod Folder Tip": "你可以将它设置为任何目录, 但不要设置为游戏目录，以免出现未知错误.\n也不要跟设置到管理器的安装目录里面去,会导致更新后你的所有Mod丢失!",
     "Select Game By folder": "通过目录选择游戏",
 }
 

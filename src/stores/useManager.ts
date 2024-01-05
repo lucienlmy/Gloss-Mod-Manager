@@ -22,7 +22,7 @@ export const useManager = defineStore('Manager', {
         search: "",
         dragIndex: 0,
         installLoading: false,
-
+        // showAdvanced: false
     }),
     getters: {
         /**

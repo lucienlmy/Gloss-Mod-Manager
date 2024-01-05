@@ -2,6 +2,8 @@
 import { ipcRenderer } from "electron";
 import { useSettings } from '@src/stores/useSettings';
 import { watch } from "vue";
+import { FileHandler } from "@src/model/FileHandler";
+import { ElMessage } from "element-plus";
 
 
 const settings = useSettings()
@@ -13,7 +15,20 @@ function selectModStorageLocation() {
         filters: []
     }).then((res: string[]) => {
         if (res.length > 0) {
-            settings.settings.modStorageLocation = res[0]
+            try {
+
+                // 防呆提示
+                let files = FileHandler.getAllFilesInFolder(res[0], false, true)
+                if (files.length > 0 && !(files.includes('mod.json'))) {
+                    ElMessage.warning(`${res[0]}目录不为空, 请重新选择`)
+                    return
+                }
+
+                settings.settings.modStorageLocation = res[0]
+            } catch (error) {
+                ElMessage.error(`错误: ${error}`)
+            }
+
         }
     })
 }

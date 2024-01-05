@@ -148,6 +148,7 @@ const ManagerContent = {
     "Desc": "Desc",
     "Requirements": "Requirements ID (WebId)",
     "Requirements Name": "Requirements Name",
+    "Advanced": "Advanced",
 
 }
 

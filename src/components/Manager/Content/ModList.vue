@@ -3,11 +3,11 @@ import type { IModInfo, IType } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 import { computed, watch, ref } from "vue";
-import { AppAnalytics } from "@src/model/Analytics"
 
-import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
 import { FileHandler } from '@src/model/FileHandler';
 import { ElMessageBox } from 'element-plus';
+import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
+import ContentAdvanced from '@src/components/Manager/Content/Advanced.vue'
 
 const props = defineProps<{
     mod: IModInfo,
@@ -156,7 +156,8 @@ function list_drop(e: any) {
                     <el-switch v-model="mod.isInstalled" size="small" :loading="loading"
                         :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
                 </el-col>
-                <el-col :span="2">
+                <el-col :span="2" class="advanced">
+                    <!-- <ContentAdvanced :mod="mod"></ContentAdvanced> -->
                     <ContentModMenu :mod="mod"></ContentModMenu>
                 </el-col>
             </el-row>
@@ -185,6 +186,9 @@ function list_drop(e: any) {
                         <template v-slot:item="{ props, item }">
                             <v-list-item v-bind="props" :title="$t(item.title)"></v-list-item>
                         </template>
+                        <template v-slot:selection="{ item, index }">
+                            {{ $t(item.title) }}
+                        </template>
                     </v-select>
                 </v-col>
                 <v-col cols="2">
@@ -192,7 +196,8 @@ function list_drop(e: any) {
                     <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
                         :loading="loading" :disabled="loading" :hide-details="true" color="#0288D1"></v-switch>
                 </v-col>
-                <v-col cols="1">
+                <v-col cols="1" class="advanced">
+                    <!-- <ContentAdvanced :mod="mod"></ContentAdvanced> -->
                     <ContentModMenu :mod="mod"></ContentModMenu>
                 </v-col>
             </v-row>
@@ -224,6 +229,13 @@ export default {
         &:hover {
             // 底部阴影
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .advanced {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
         }
 
     }
