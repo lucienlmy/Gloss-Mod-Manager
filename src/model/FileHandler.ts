@@ -592,9 +592,10 @@ export class FileHandler {
      * @param folderPat 路径
      * @param includepath 是否包含路径
      * @param subdirectory 是否包含子文件夹
+     * @param getFolderPath 是否获取文件夹路径
      * @returns 
      */
-    public static getAllFilesInFolder(folderPath: string, includepath: boolean = false, subdirectory: boolean = false) {
+    public static getAllFilesInFolder(folderPath: string, includepath: boolean = false, subdirectory: boolean = false, getFolder = false) {
         let res: string[] = [];
         const files = fs.readdirSync(folderPath);
         files.forEach((file) => {
@@ -607,8 +608,11 @@ export class FileHandler {
                     res.push(file);
                 }
             } else if (stat.isDirectory()) {
+                if (getFolder) {
+                    res.push(filePath);
+                }
                 if (subdirectory) {
-                    res = res.concat(this.getAllFilesInFolder(filePath, includepath, subdirectory));
+                    res = res.concat(this.getAllFilesInFolder(filePath, includepath, subdirectory, getFolder));
                 }
             }
         });
