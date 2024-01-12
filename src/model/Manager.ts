@@ -13,7 +13,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 
 export class Manager {
 
-    public static passFiles = ['README.md', 'manifest.json', 'icon.png']
+    public static passFiles = ['README.md', 'manifest.json', 'icon.png', 'CHANGELOG.md', 'LICENSE']
 
     /**
      * 保存Mod信息

@@ -113,6 +113,7 @@ const ExploreFilter = {
     "Open in browser": "Open in browser",
     "Thunderstore": "Thunderstore",
     "Categories": "Categories",
+    "No content yet~": "No content yet~",
 }
 
 const Welcome = {
@@ -209,6 +210,7 @@ const Settings = {
     "Auto": "Auto",
     "Mod Folder Tip": "You can set it to any directory, but don't set it to the game directory to avoid unknown errors",
     "Select Game By folder": "Select Game By folder",
+    "Document": "Document",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",
@@ -264,6 +266,7 @@ const Games = {
     "Euro Truck Simulator 2": "Euro Truck Simulator 2",
     "American Truck Simulator": "American Truck Simulator",
     "Grand Theft Auto V": "Grand Theft Auto V(GTA5)",
+    "Lethal Company": "Lethal Company",
 }
 
 const Other = {

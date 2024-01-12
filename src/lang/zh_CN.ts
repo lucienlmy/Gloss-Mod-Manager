@@ -114,6 +114,7 @@ const ExploreFilter = {
     "Open in browser": "在浏览器中打开",
     "Thunderstore": "Thunderstore",
     "Categories": "分类",
+    "No content yet~": "暂无内容~",
 }
 
 const Welcome = {
@@ -201,7 +202,7 @@ const Settings = {
     "Auto start for windows": "开机自启",
     "Export Language": "导出语言包",
     // "Feed Xiaom": "投喂小莫",
-    "Feedback": "反馈",
+    "Feedback": "帮助",
     "QQChat": "QQ群: 825182128",
     "Theme": "主题",
     "Light": "浅色",
@@ -209,6 +210,7 @@ const Settings = {
     "Auto": "自动",
     "Mod Folder Tip": "你可以将它设置为任何目录, 但不要设置为游戏目录，以免出现未知错误.\n也不要跟设置到管理器的安装目录里面去,会导致更新后你的所有Mod丢失!",
     "Select Game By folder": "通过目录选择游戏",
+    "Document": "食用教程",
 }
 
 const Games = {
@@ -265,6 +267,7 @@ const Games = {
     "Euro Truck Simulator 2": "欧洲卡车模拟2",
     "American Truck Simulator": "美国卡车模拟器",
     "Grand Theft Auto V": "侠盗猎车手系列 (GTA)",
+    "Lethal Company": "致命公司",
 }
 
 const Other = {

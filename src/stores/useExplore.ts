@@ -35,19 +35,10 @@ export const useExplore = defineStore('Explore', {
         }
     },
     actions: {
-        GetModList() {
-            // const settings = useSettings()
+        async GetModList() {
             const user = useUser()
 
-            // if (settings.settings.managerGame?.gameID) {
-            //     this.gameId = settings.settings.managerGame?.gameID
-            // } else {
-            //     let _gameId = settings.settings.tourGameList.map(item => item.gameID)
-            //     this.gameId = _gameId.join(',')
-            // }
-
-
-            ipcRenderer.invoke("get-mod-list", {
+            let data = await ipcRenderer.invoke("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
                 title: this.searchText,
@@ -59,12 +50,11 @@ export const useExplore = defineStore('Explore', {
                 gameType: this.gameType,
                 show_adult: user.user?.user_p_show_adult == 1 ?? null,
                 show_charge: user.user?.user_p_show_charge == 1 ?? null,
-            }).then(data => {
-                this.mods = data.data.mod
-                this.count = data.data.count
-                document.documentElement.scrollTop = 0
-
             })
+
+            this.mods = data.data.mod
+            this.count = data.data.count
+            document.documentElement.scrollTop = 0
 
         },
         getGameType() {

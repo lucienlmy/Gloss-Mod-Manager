@@ -75,9 +75,17 @@ function checkUpdates() {
             <h3>{{ $t('Feedback') }}</h3>
         </v-col>
         <v-col cols="12">
+            <v-chip variant="text" label append-icon="mdi-text-box-search-outline"
+                href="https://wiki.aoe.top/GMM/README.html">
+                {{ $t('Document') }}
+            </v-chip>
             <v-chip variant="text" label append-icon="mdi-qqchat"
                 href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PHA9FOcayzFlxe0iU8QPWcHOy_NbBOdW&authKey=fgJvklKDg%2FeWXpG6rNDsPON7ls2omDWGJNZGGRT06QEcEDVjL%2BRLNLB7QFFPvBDL&noverify=0&group_code=825182128">
                 {{ $t('QQChat') }}
+            </v-chip>
+            <v-chip variant="text" label append-icon="mdi-github"
+                href="https://github.com/GlossMod/Gloss-Mod-Manager-info/issues">
+                Github
             </v-chip>
             <v-chip v-if="!langIsCn" variant="text" label href="https://discord.gg/TF46tu7Upw">
                 <template v-slot:append>

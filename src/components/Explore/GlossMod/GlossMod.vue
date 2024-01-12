@@ -2,7 +2,7 @@
 import { useExplore } from "@src/stores/useExplore";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
-import { watch } from "vue";
+import { ref, watch } from "vue";
 import { useSettings } from "@src/stores/useSettings";
 import { useManager } from "@src/stores/useManager";
 
@@ -13,8 +13,14 @@ import TurnPage from "@src/components/Explore/GlossMod/TurnPage.vue";
 
 
 const explore = useExplore()
+
+let loading = ref(false)
+
 if (explore.mods.length == 0) {
-    explore.GetModList()
+    loading.value = true
+    explore.GetModList().then(() => {
+        loading.value = false
+    })
 }
 
 
@@ -60,6 +66,9 @@ watch(() => explore.page, () => {
         </v-col>
         <TurnPage></TurnPage>
     </v-row>
+    <v-col cols="12" v-else-if="!loading">
+        <el-empty :description="$t('No content yet~')" />
+    </v-col>
 </template>
 <script lang='ts'>
 
