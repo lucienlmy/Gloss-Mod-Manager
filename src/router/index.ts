@@ -19,9 +19,14 @@ const router = createRouter({
             component: () => import("@src/views/Explore.vue"),
             children: [
                 {
-                    path: ":modId",
-                    name: "ExploreContent",
-                    component: () => import("@src/views/Explore/Content.vue"),
+                    path: "GlossMod/:modId",
+                    name: "GlossModContent",
+                    component: () => import("@src/components/Explore/GlossMod/Content/Content.vue"),
+                },
+                {
+                    path: "ModIo/:modId",
+                    name: "ModIoModsContent",
+                    component: () => import("@src/components/Explore/ModIo/Content/Content.vue")
                 }
             ]
         },

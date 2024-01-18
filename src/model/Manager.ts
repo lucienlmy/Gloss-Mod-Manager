@@ -170,23 +170,30 @@ export class Manager {
     }
 
     /**
-     * 以某个文件为基础, 安装/卸载 Mod
+     * 以某个文件为基础 将其父级目录软链 进行 安装/卸载
      * @param mod mod
      * @param installPath 安装路径
      * @param fileName 文件名称
      * @param isInstall 是否是安装
+     * @param isExtname 是否按拓展名匹配
      * @param inGameStorage 是否在游戏目录
      */
-    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, inGameStorage: boolean = true) {
+    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let folder: string[] = []
         mod.modFiles.forEach(item => {
-            if (basename(item).toLowerCase() == fileName.toLowerCase()) {
+            if (isExtname ?
+                (extname(item) === fileName) :
+                (basename(item).toLowerCase() == fileName.toLowerCase())
+            ) {
                 folder.push(dirname(join(modStorage, item)))
             }
         })
+
+        // folder 去重
+        folder = [...new Set(folder)]
 
         if (folder.length > 0) {
             folder.forEach(item => {
@@ -262,6 +269,43 @@ export class Manager {
             })
         } else {
             ElMessage.error(`未找到文件: ${fileName}, 请不要随意修改MOD类型!`)
+        }
+        return true
+    }
+
+    /**
+     * 以某个文件夹为基础，将其父级目录软链 进行 安装/卸载
+     * @param mod mod
+     * @param installPath 安装路径 
+     * @param folderName  文件夹名称
+     * @param isInstall  是否安装
+     * @param inGameStorage 是否在游戏目录
+     * @returns 
+     */
+    public static async installByFolderParent(mod: IModInfo, installPath: string, folderName: string, isInstall: boolean, inGameStorage: boolean = true) {
+        const manager = useManager()
+        let modStorage = join(manager.modStorage, mod.id.toString())
+        let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
+        let folder: string[] = []
+        mod.modFiles.forEach(item => {
+            if (basename(item).toLowerCase() == folderName.toLowerCase()) {
+                folder.push(dirname(join(modStorage, item)))
+            }
+        })
+
+        // folder 去重
+        folder = [...new Set(folder)]
+
+        if (folder.length > 0) {
+            folder.forEach(item => {
+                let target = join(gameStorage, basename(item))
+                if (isInstall) {
+                    FileHandler.createLink(item, target, true)
+                } else {
+                    FileHandler.removeLink(target, true)
+                }
+            })
+
         }
         return true
     }

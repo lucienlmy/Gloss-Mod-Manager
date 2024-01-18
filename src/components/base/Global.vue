@@ -10,6 +10,7 @@ import { ipcRenderer } from 'electron'
 import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
 import { APIAria2 } from "@src/model/APIAria2";
+// import { Expands } from "@src/model/Expands"
 
 const settings = useSettings()
 const download = useDownload()
@@ -171,6 +172,10 @@ function setLightTheme() {
 
 // 初始化 Aria2
 APIAria2.init()
+
+// 初始化扩展
+// Expands.init()
+
 
 </script>
 <template></template>

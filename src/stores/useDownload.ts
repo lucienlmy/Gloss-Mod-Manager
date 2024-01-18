@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -232,6 +232,51 @@ export const useDownload = defineStore('Download', {
             task.gid = gid.result
 
             ElMessage.success(`${task.name} 已添加到下载列表`)
+
+        },
+
+        async addDownloadByModIo(mod: IModIo) {
+            console.log(mod.id);
+
+            // 判断是否已经存在
+            if (this.getTaskById(mod.id)) {
+                // 如果已存在则移除
+
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
+            }
+
+            this.downloadTaskList.unshift({
+                id: mod.id,
+                type: "ModIo",
+                name: mod.name,
+                version: mod.modfile.version ?? "1.0.0",
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: mod.modfile.download.binary_url,
+                modAuthor: mod.submitted_by.username,
+                status: "waiting",
+                website: mod.profile_url,
+            })
+
+            let task = this.getTaskById(mod.id) as IDownloadTask
+
+            const settings = useSettings()
+
+            let fileExt = '.zip'
+            // let dest = `${settings.settings.modStorageLocation}\\cache\\`
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+            FileHandler.deleteFile(join(dest, `${mod.id}${fileExt}`))   // 删除旧文件
+
+            let gid = await this.aria2.addUri(task.link, mod.id + fileExt, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+            console.log(gid);
+
+            task.gid = gid.result
+
+            ElMessage.success(`${task.name} 已添加到下载列表`)
+
 
         }
 

@@ -1,6 +1,6 @@
 // import { Download } from "@src/model/Download"
 
-export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore"
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo"
 
 
 export interface IMod {
@@ -85,8 +85,10 @@ export interface IUser {
 
 export interface IModInfo {
     id: number
+    from?: sourceType
     webId?: number
     nexus_id?: string
+    modIo_id?: number
     modName: string
     gameID?: number
     md5: string
@@ -131,6 +133,9 @@ export interface IGameInfo {
     },
     Thunderstore?: {
         community_identifier: string
+    },
+    mod_io?: {
+        game_id: number
     }
 }
 
@@ -195,6 +200,7 @@ export interface ISettings {
     fold: boolean,
     exploreType: sourceType
     selectGameByFolder: boolean
+    showPakeMessage: boolean
 }
 
 export interface IDownloadTask {
@@ -277,3 +283,126 @@ export interface IThunderstoreMod {
     versions: IThunderstoreModVersions[]
 }
 
+export interface IModIo {
+    id: number;
+    game_id: number;
+    status: number;
+    visible: number;
+    submitted_by: IModIoSubmittedBy;
+    date_added: number;
+    date_updated: number;
+    date_live: number;
+    maturity_option: number;
+    community_options: number;
+    monetization_options: number;
+    price: number;
+    tax: number;
+    logo: IModIoLogo;
+    homepage_url: string;
+    name: string;
+    name_id: string;
+    summary: string;
+    description: string;
+    description_plaintext: string;
+    metadata_blob: null;
+    profile_url: string;
+    media: IModIoMedia;
+    modfile: IModIoModfile;
+    dependencies: boolean;
+    platforms: any[];
+    metadata_kvp: any[];
+    tags: IModIoTag[];
+    stats: IModIoStats;
+}
+
+
+export interface IModIoStats {
+    mod_id: number;
+    popularity_rank_position: number;
+    popularity_rank_total_mods: number;
+    downloads_today: number;
+    downloads_total: number;
+    subscribers_total: number;
+    ratings_total: number;
+    ratings_positive: number;
+    ratings_negative: number;
+    ratings_percentage_positive: number;
+    ratings_weighted_aggregate: number;
+    ratings_display_text: string;
+    date_expires: number;
+}
+
+export interface IModIoTag {
+    name: string;
+    date_added: number;
+}
+
+export interface IModIoModfile {
+    id: number;
+    mod_id: number;
+    date_added: number;
+    date_updated: number;
+    date_scanned: number;
+    virus_status: number;
+    virus_positive: number;
+    virustotal_hash: null;
+    filesize: number;
+    filesize_uncompressed: number;
+    filehash: IModIoFilehash;
+    filename: string;
+    version: string;
+    changelog: null;
+    metadata_blob: null;
+    download: IModIoDownload;
+    platforms: any[];
+}
+
+export interface IModIoDownload {
+    binary_url: string;
+    date_expires: number;
+}
+
+export interface IModIoFilehash {
+    md5: string;
+}
+
+export interface IModIoMedia {
+    youtube: any[];
+    sketchfab: any[];
+    images: IModIoImage[];
+}
+
+export interface IModIoImage {
+    filename: string;
+    original: string;
+    thumb_320x180: string;
+    thumb_1280x720: string;
+}
+
+export interface IModIoLogo {
+    filename: string;
+    original: string;
+    thumb_320x180: string;
+    thumb_640x360: string;
+    thumb_1280x720: string;
+}
+
+export interface IModIoSubmittedBy {
+    id: number;
+    name_id: string;
+    username: string;
+    display_name_portal: null;
+    date_online: number;
+    date_joined: number;
+    avatar: IModIoAvatar;
+    timezone: string;
+    language: string;
+    profile_url: string;
+}
+
+export interface IModIoAvatar {
+    filename: string;
+    original: string;
+    thumb_50x50: string;
+    thumb_100x100: string;
+}

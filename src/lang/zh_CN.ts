@@ -115,6 +115,8 @@ const ExploreFilter = {
     "Thunderstore": "Thunderstore",
     "Categories": "分类",
     "No content yet~": "暂无内容~",
+    "Subscribers": "订阅",
+    "Rating": "评分",
 }
 
 const Welcome = {
@@ -154,6 +156,8 @@ const ManagerContent = {
     "Color": "颜色",
     "Tag": "标签",
     "Advanced": "高级",
+
+    "Help": "帮助",
 }
 
 const ManagerHeader = {
@@ -268,6 +272,10 @@ const Games = {
     "American Truck Simulator": "美国卡车模拟器",
     "Grand Theft Auto V": "侠盗猎车手系列 (GTA)",
     "Lethal Company": "致命公司",
+    "Anno 1800": "纪元1800",
+    "Humankind": "人类",
+    "Two Point Campus": "双点校园",
+    "Sid Meier's Civilization VI": "文明6",
 }
 
 const Other = {

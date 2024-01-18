@@ -1,12 +1,10 @@
 <script lang='ts' setup>
+import { useModIo } from '@src/stores/useModIo';
+import { computed } from 'vue';
 
-import { useContent } from "@src/stores/useContent";
-import { computed } from "vue";
+import ContentInfo from "@src/components/Explore/ModIo/Content/ContentInfo.vue"
 
-import ExploreContentCarousel from "@src/components/Explore/GlossMod/Content/Carousel.vue";
-import ExploreContentInfo from "@src/components/Explore/GlossMod/Content/Info.vue";
-
-const content = useContent()
+const modio = useModIo()
 
 let items = computed(() => [
     {
@@ -18,11 +16,19 @@ let items = computed(() => [
         href: '/explore',
     },
     {
-        text: content.modData?.mods_title || "",
-        href: { name: 'GlossModContent', params: { modId: content.modData?.id } },
+        text: modio.selected.data?.name || "",
+        href: { name: 'ModIoModsContent', params: { modId: modio.selected.data?.id || 0 } },
         disabled: true
     },
 ])
+
+let images = computed(() => {
+    let images = modio.selected.data?.media.images
+
+    let logo = modio.selected.data?.logo
+
+    return images ? [logo, ...images] : [logo]
+})
 
 </script>
 <template>
@@ -38,20 +44,23 @@ let items = computed(() => [
             </ul>
         </v-col>
         <v-col cols="12" class="title">
-            <h1>{{ content.modData?.mods_title }}</h1>
+            <h1>{{ modio.selected.data?.name }}</h1>
         </v-col>
         <v-col cols="12" md="6">
-            <ExploreContentCarousel></ExploreContentCarousel>
+            <v-carousel cycle height="290" hide-delimiter-background show-arrows="hover" interval="2000">
+                <v-carousel-item v-for="item in images" :key="item?.filename" cover
+                    :src="item?.thumb_1280x720"></v-carousel-item>
+            </v-carousel>
         </v-col>
         <v-col cols="12" md="6">
-            <ExploreContentInfo></ExploreContentInfo>
+            <ContentInfo></ContentInfo>
         </v-col>
     </v-row>
 </template>
 <script lang='ts'>
 
 export default {
-    name: 'ExploreContentHeader',
+    name: 'ContentHeader',
 }
 </script>
 <style lang='less' scoped>

@@ -30,14 +30,14 @@ let mod_img = computed(() => {
 </script>
 <template>
     <v-card class="mod">
-        <router-link :to="{ name: 'ExploreContent', params: { modId: mod.id } }" :title="mod.mods_desc">
+        <router-link :to="{ name: 'GlossModContent', params: { modId: mod.id } }" :title="mod.mods_desc">
             <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
         </router-link>
         <!-- <a :href="`https://mod.3dmgame.com/mod/${mod.id}`" :title="mod.mods_desc">
             <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
         </a> -->
         <v-card-title :title="mod.mods_title">
-            <router-link :to="{ name: 'ExploreContent', params: { modId: mod.id } }" :title="mod.mods_desc">
+            <router-link :to="{ name: 'GlossModContent', params: { modId: mod.id } }" :title="mod.mods_desc">
                 {{ mod.mods_title }}
             </router-link>
             <!-- <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a> -->

@@ -206,14 +206,22 @@ export const useManager = defineStore('Manager', {
                 // modStorage = path.join(settings.settings.modStorageLocation, 'cache', `${task.id}${path.extname(task.link)}`)
                 modStorage = (() => {
                     let name = '';
-                    if (task.type == "GlossMod") {
-                        name = `${task.id}${path.extname(task.link)}`
-                    }
-                    if (task.type == "NexusMods") {
-                        name = `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
-                    }
-                    if (task.type == "Thunderstore") {
-                        name = task.name + '.zip'
+
+                    switch (task.type) {
+                        case "GlossMod":
+                            name = `${task.id}${path.extname(task.link)}`
+                            break;
+                        case "NexusMods":
+                            name = `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
+                            break;
+                        case "Thunderstore":
+                            name = task.name + '.zip'
+                            break;
+                        case "ModIo":
+                            name = `${task.id}.zip`
+                            break;
+                        default:
+                            break;
                     }
                     return path.join(settings.settings.modStorageLocation, 'cache', name)
                 })()
@@ -250,8 +258,10 @@ export const useManager = defineStore('Manager', {
             });
             let mod: IModInfo = {
                 id: parseInt(id),
+                from: task.type,
                 webId: task.type == "GlossMod" ? task.id as number : undefined,
                 nexus_id: task.type == "NexusMods" ? task.nexus_id : undefined,
+                modIo_id: task.type == "ModIo" ? task.id as number : undefined,
                 modName: task.name,
                 md5: md5,
                 modVersion: task.version,

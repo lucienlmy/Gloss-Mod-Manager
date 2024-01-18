@@ -47,6 +47,7 @@ export class Config {
             fold: settings.fold,
             exploreType: settings.exploreType,
             selectGameByFolder: settings.selectGameByFolder,
+            showPakeMessage: settings.showPakeMessage,
         }
     }
     // 保存配置文件
@@ -85,6 +86,7 @@ export class Config {
             fold: data.fold ?? false,
             exploreType: data.exploreType ?? "GlossMod",
             selectGameByFolder: data.selectGameByFolder ?? false,
+            showPakeMessage: data.showPakeMessage ?? true,
         }
 
         // 初始化游戏

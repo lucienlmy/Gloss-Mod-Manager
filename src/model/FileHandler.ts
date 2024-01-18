@@ -619,6 +619,29 @@ export class FileHandler {
         return res;
     }
 
+    /**
+     * 获取路径下所有文件夹
+     * @param folderPath 路径
+     *  @param subdirectory 是否递归获取子目录
+     * @returns 
+     */
+    public static getAllFolderInFolder(folderPath: string, subdirectory: boolean = false) {
+        let res: string[] = [];
+        const files = fs.readdirSync(folderPath);
+        files.forEach((file) => {
+            const filePath = path.join(folderPath, file);
+            const stat = fs.statSync(filePath);
+            if (stat.isDirectory()) {
+                res.push(filePath);
+                if (subdirectory) {
+                    const subFolders = this.getAllFolderInFolder(filePath, true);
+                    res = res.concat(subFolders);
+                }
+            }
+        });
+        return res;
+    }
+
     // 判断程序是否已经启动
     public static async existsSync(name: string) {
 

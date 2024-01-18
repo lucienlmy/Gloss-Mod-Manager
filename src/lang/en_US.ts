@@ -114,6 +114,8 @@ const ExploreFilter = {
     "Thunderstore": "Thunderstore",
     "Categories": "Categories",
     "No content yet~": "No content yet~",
+    "Subscribers": "Subscribers",
+    "Rating": "Rating",
 }
 
 const Welcome = {
@@ -150,6 +152,8 @@ const ManagerContent = {
     "Requirements": "Requirements ID (WebId)",
     "Requirements Name": "Requirements Name",
     "Advanced": "Advanced",
+
+    "Help": "Help",
 
 }
 
@@ -267,6 +271,10 @@ const Games = {
     "American Truck Simulator": "American Truck Simulator",
     "Grand Theft Auto V": "Grand Theft Auto V(GTA5)",
     "Lethal Company": "Lethal Company",
+    "Anno 1800": "Anno 1800",
+    "Humankind": "Humankind",
+    "Two Point Campus": "Two Point Campus",
+    "Sid Meier's Civilization VI": "Sid Meier's Civilization VI",
 }
 
 const Other = {

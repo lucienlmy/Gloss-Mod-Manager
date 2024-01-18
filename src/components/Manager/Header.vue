@@ -86,6 +86,10 @@ function openGameFolder() {
                         </v-list>
                     </v-menu>
                 </template>
+                <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html">
+                    <v-icon>mdi-help</v-icon>
+                    <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
+                </v-btn>
             </div>
             <div class="select-game">
                 {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}

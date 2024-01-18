@@ -12,6 +12,7 @@ import { h, ref } from 'vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
 import { useManager } from '@src/stores/useManager';
 import { useI18n } from "vue-i18n"
+import { useModIo } from '@src/stores/useModIo';
 
 const props = defineProps<{
     task: IDownloadTask,
@@ -34,6 +35,10 @@ const modStorage = computed(() => {
     if (props.task.type == "Thunderstore") {
         name = props.task.name + '.zip'
     }
+    if (props.task.type == "ModIo") {
+        name = props.task.id + '.zip'
+    }
+
     return join(settings.settings.modStorageLocation, 'cache', name)
 })
 const progress = computed(() => {
@@ -130,35 +135,86 @@ async function pause() {
 // 重新下载
 async function restart() {
     FileHandler.deleteFile(modStorage.value)
-    if (props.task.type == "GlossMod") {
-        download.addDownloadById(props.task.id as number)
-    } else if (props.task.type == "NexusMods") {
-        if (props.task.nexus_id) {
-            let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
-            download.addDownloadByNuxusId(id, game_domain_name)
-        }
-    } else if (props.task.type == "Thunderstore") {
-        let { task } = props
-        let mod: IThunderstoreMod = {
-            name: task.name,
-            full_name: '',
-            owner: task.modAuthor,
-            package_url: task.website || '',
-            date_created: '',
-            date_updated: '',
-            uuid4: task.id as string,
-            rating_score: 0,
-            is_pinned: false,
-            is_deprecated: false,
-            has_nsfw_content: false,
-            categories: [],
-            versions: [{
-                version_number: task.version,
-                download_url: task.link,
-            } as IThunderstoreModVersions]
-        }
-        download.addDownloadByThunderstore(mod)
+
+    switch (props.task.type) {
+        case "GlossMod":
+            download.addDownloadById(props.task.id as number)
+            break;
+        case "NexusMods":
+            if (props.task.nexus_id) {
+                let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
+                download.addDownloadByNuxusId(id, game_domain_name)
+            }
+            break;
+        case "Thunderstore":
+            let { task } = props
+            let mod: IThunderstoreMod = {
+                name: task.name,
+                full_name: '',
+                owner: task.modAuthor,
+                package_url: task.website || '',
+                date_created: '',
+                date_updated: '',
+                uuid4: task.id as string,
+                rating_score: 0,
+                is_pinned: false,
+                is_deprecated: false,
+                has_nsfw_content: false,
+                categories: [],
+                versions: [{
+                    version_number: task.version,
+                    download_url: task.link,
+                } as IThunderstoreModVersions]
+            }
+            download.addDownloadByThunderstore(mod)
+            break;
+        case 'ModIo':
+
+            const modio = useModIo()
+
+            let modData = await modio.getModDataById(props.task.id as number)
+
+            console.log(modData);
+
+
+            if (modData) {
+                download.addDownloadByModIo(modData)
+            }
+
+            break
+        default:
+            break;
     }
+
+    // if (props.task.type == "GlossMod") {
+    //     download.addDownloadById(props.task.id as number)
+    // } else if (props.task.type == "NexusMods") {
+    //     if (props.task.nexus_id) {
+    //         let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
+    //         download.addDownloadByNuxusId(id, game_domain_name)
+    //     }
+    // } else if (props.task.type == "Thunderstore") {
+    //     let { task } = props
+    //     let mod: IThunderstoreMod = {
+    //         name: task.name,
+    //         full_name: '',
+    //         owner: task.modAuthor,
+    //         package_url: task.website || '',
+    //         date_created: '',
+    //         date_updated: '',
+    //         uuid4: task.id as string,
+    //         rating_score: 0,
+    //         is_pinned: false,
+    //         is_deprecated: false,
+    //         has_nsfw_content: false,
+    //         categories: [],
+    //         versions: [{
+    //             version_number: task.version,
+    //             download_url: task.link,
+    //         } as IThunderstoreModVersions]
+    //     }
+    //     download.addDownloadByThunderstore(mod)
+    // }
 }
 function openWeb() {
     let url = ''

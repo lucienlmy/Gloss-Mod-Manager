@@ -36,6 +36,8 @@ export default {
     name: 'Thunderstore',
 }
 </script>
-<style lang='less' scoped>.theme-secondary {
+<style lang='less' scoped>
+.theme-secondary {
     fill: rgb(var(--v-theme-on-surface));
-}</style>
+}
+</style>

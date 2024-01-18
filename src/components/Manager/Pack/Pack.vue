@@ -2,11 +2,12 @@
 import { usePacks } from '@src/stores/usePacks';
 import { useManager } from '@src/stores/useManager';
 import { ipcRenderer } from 'electron';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import PackInfo from '@src/components/Manager/Pack/Info.vue'
 import PackList from '@src/components/Manager/Pack/List.vue'
 import PackLogs from '@src/components/Manager/Pack/Logs.vue'
 import PackFinish from '@src/components/Manager/Pack/Finish.vue'
+import PackMessage from '@src/components/Manager/Pack/Message.vue'
 
 const packs = usePacks()
 const manager = useManager()
@@ -51,6 +52,8 @@ function selectExportPath() {
     })
 }
 
+
+
 </script>
 <template>
     <v-dialog v-model="packs.dialog" persistent width="900px">
@@ -76,6 +79,7 @@ function selectExportPath() {
                     <v-window-item :value="1">
                         <!-- 信息 -->
                         <PackInfo />
+                        <PackMessage></PackMessage>
                     </v-window-item>
                     <v-window-item :value="2">
                         <!-- 列表 -->

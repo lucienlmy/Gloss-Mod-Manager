@@ -34,6 +34,8 @@ let uploadMod = computed(() => {
                         <v-chip label variant="text" value="GlossMod">{{ $t('3DM Mods') }} </v-chip>
                         <v-chip label v-if="settings.settings.managerGame?.Thunderstore" variant="text"
                             value="Thunderstore">{{ $t('Thunderstore') }} </v-chip>
+                        <v-chip label v-if="settings.settings.managerGame?.mod_io" variant="text"
+                            value="ModIo">{{ $t('mod.io') }}</v-chip>
                     </v-chip-group>
                 </div>
             </v-col>

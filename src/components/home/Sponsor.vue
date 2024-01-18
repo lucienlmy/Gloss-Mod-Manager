@@ -1,6 +1,6 @@
 <script lang='ts' setup>
 
-import NexusMods from '@src/components/home/logo/NexusMods.vue'
+import ModIo from '@src/components/home/logo/ModIo.vue'
 import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
 
 </script>
@@ -8,10 +8,10 @@ import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
     <v-card>
         <v-card-title>{{ $t('Partner') }}</v-card-title>
         <v-card-text>
-            <v-row>
-                <v-col cols="4">
+            <v-row class="sponsor">
+                <v-col cols="4" class="partner">
                     <a href="https://mod.3dmgame.com/">
-                        <v-img src="imgs/3DMGAME.webp" alt="3DMGAME"></v-img>
+                        <v-img src="imgs/3DMGAME.webp" alt="3DMGAME" class="gloss-logo"></v-img>
                     </a>
                 </v-col>
                 <!-- <v-col cols="4">
@@ -24,8 +24,12 @@ import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
                         <Thunderstore width="100%"></Thunderstore>
                     </a>
                 </v-col>
+                <v-col cols="4" class="partner">
+                    <a href="https://mod.io/">
+                        <ModIo width="100%"></ModIo>
+                    </a>
+                </v-col>
             </v-row>
-
         </v-card-text>
     </v-card>
 </template>
@@ -44,9 +48,19 @@ a {
     }
 }
 
-.partner {
+.sponsor {
     display: flex;
-    justify-content: center;
-    align-items: flex-end;
+    align-items: center;
+
+
+    .gloss-logo {
+        width: 300px;
+    }
+
+    .partner {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
 }
 </style>

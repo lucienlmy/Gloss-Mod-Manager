@@ -9,6 +9,7 @@ import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
 import { join } from 'path'
 import ContentAdvanced from '@src/components/Manager/Content/Advanced.vue'
+import { useModIo } from '@src/stores/useModIo';
 
 
 const props = defineProps<{
@@ -90,13 +91,43 @@ function del() {
         .catch(() => { })
 }
 
-function reinstall() {
-    if (props.mod.webId) {
-        FileHandler.writeLog(`更新: ${props.mod.modName}`)
-        toDel()
-        download.addDownloadById(props.mod.webId)
+async function reinstall() {
+    switch (props.mod.from) {
+        case "GlossMod":
+            if (props.mod.webId) {
+                FileHandler.writeLog(`更新: ${props.mod.modName}`)
+                toDel()
+                download.addDownloadById(props.mod.webId)
+            }
+            else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
+            break;
+
+        case "ModIo":
+            if (props.mod.modIo_id) {
+                FileHandler.writeLog(`更新: ${props.mod.modName}`)
+                toDel()
+
+                const modio = useModIo()
+
+                let modData = await modio.getModDataById(props.mod.modIo_id)
+
+                if (modData) {
+                    download.addDownloadByModIo(modData)
+                }
+            }
+            else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
+
+            break;
+
+        default:
+            if (props.mod.webId) {
+                FileHandler.writeLog(`更新: ${props.mod.modName}`)
+                toDel()
+                download.addDownloadById(props.mod.webId)
+            }
+            else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
+            break;
     }
-    else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
 }
 
 </script>
@@ -117,7 +148,7 @@ function reinstall() {
                 @click="showAdvanced = true"></v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
             <v-list-item v-if="Website" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
-            <v-list-item v-if="mod.webId" :title="t('Update')" @click="reinstall">
+            <v-list-item v-if="(props.mod.webId || mod.from)" :title="t('Update')" @click="reinstall">
                 <template v-slot:append>
                     <v-badge v-if="mod.isUpdate" dot floating color="success">
                         <v-icon>mdi-refresh</v-icon>
