@@ -15,7 +15,7 @@ if (thunderstore.modList?.length == 0) {
     thunderstore.getModList()
 }
 
-watch(() => settings.settings.managerGame?.gameID, () => {
+watch(() => settings.settings.managerGame?.gameName, () => {
     thunderstore.getModList()
 
 })

@@ -1,6 +1,7 @@
 <script lang='ts' setup>
 import type { IThunderstoreMod } from '@src/model/Interfaces';
 import { useMain } from '@src/stores/useMain';
+import { computed } from "vue";
 
 import ThunderstoreDownloadBtn from '@src/components/Explore/Thunderstore/DownloadBtn.vue'
 
@@ -14,16 +15,27 @@ const { lazy_img } = useMain()
 // 格式化 为 2023-09-14 06:59:03
 let time = props.mod.date_updated.split('T')[0] + ' ' + props.mod.date_updated.split('T')[1].split('.')[0]
 
+const to = computed(() => {
+    return {
+        name: 'ThunderstoreModsContent',
+        params: {
+            namespace: props.mod.owner,
+            name: props.mod.name,
+            version: props.mod.versions[0].version_number
+        }
+    }
+})
+
 </script>
 <template>
-    <v-card class="mod">
-        <a :href="mod.package_url" :title="mod.name">
+    <v-card class="mod" v-if="mod">
+        <RouterLink :to="to">
             <v-img cover :lazy-src="lazy_img" :aspect-ratio="1 / 1" :src="mod.versions[0].icon"></v-img>
-        </a>
+        </RouterLink>
         <v-card-title :title="mod.name">
-            <a :href="mod.package_url">
+            <RouterLink :to="to">
                 {{ mod.name }}
-            </a>
+            </RouterLink>
         </v-card-title>
         <v-card-subtitle>
             <v-row>

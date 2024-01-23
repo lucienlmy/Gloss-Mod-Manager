@@ -19,7 +19,7 @@ if (nexusMods.mods.length == 0) {
 watch([
     () => nexusMods.sort_by,
     () => nexusMods.time,
-    () => settings.settings.managerGame?.gameID,
+    () => settings.settings.managerGame?.gameName,
 ], () => {
     nexusMods.page = 1
     nexusMods.GetModList()

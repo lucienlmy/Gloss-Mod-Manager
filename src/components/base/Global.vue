@@ -10,15 +10,19 @@ import { ipcRenderer } from 'electron'
 import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
 import { APIAria2 } from "@src/model/APIAria2";
-// import { Expands } from "@src/model/Expands"
+import { Expands } from "@src/model/Expands"
 
 const settings = useSettings()
 const download = useDownload()
 const manager = useManager()
 const { locale } = useI18n()
 
-Config.initialization()
-download.initialization()
+
+
+APIAria2.init()             // 初始化 Aria2
+Expands.init()              // 初始化扩展
+Config.initialization()     // 初始化配置
+download.initialization()   // 初始化下载
 AppAnalytics.sendEvent("start")
 
 console.log(`正在初始化.`);
@@ -170,11 +174,6 @@ function setLightTheme() {
 //#endregion
 
 
-// 初始化 Aria2
-APIAria2.init()
-
-// 初始化扩展
-// Expands.init()
 
 
 </script>

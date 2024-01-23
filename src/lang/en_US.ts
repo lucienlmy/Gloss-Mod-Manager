@@ -101,6 +101,7 @@ const ExploreFilter = {
     "Newest": "Newest",
     "Type of creation": "Type of Creation",
     "Update time": "Update Time",
+    "Release time": "Release time",
     "Sort": "Sort",
     "Search": "Search Works",
     "You can search for what you want here": "You can search for what you want here",
@@ -116,6 +117,7 @@ const ExploreFilter = {
     "No content yet~": "No content yet~",
     "Subscribers": "Subscribers",
     "Rating": "Rating",
+    "Readme": "Readme",
 }
 
 const Welcome = {
@@ -154,7 +156,7 @@ const ManagerContent = {
     "Advanced": "Advanced",
 
     "Help": "Help",
-
+    "Add Game": "Add Game",
 }
 
 const ManagerHeader = {
@@ -275,6 +277,8 @@ const Games = {
     "Humankind": "Humankind",
     "Two Point Campus": "Two Point Campus",
     "Sid Meier's Civilization VI": "Sid Meier's Civilization VI",
+    "Titanfall 2": "Titanfall 2",
+    "Palworld": "Palworld",
 }
 
 const Other = {

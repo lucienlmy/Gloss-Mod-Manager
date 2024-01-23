@@ -115,7 +115,7 @@ export const useManager = defineStore('Manager', {
         // 将选中的Mod文件添加到管理器
         async addModFile(file: string) {
 
-            FileHandler.writeLog(`添加: ${file}`)
+            FileHandler.writeLog(`Add File: ${file}`)
 
             const settings = useSettings()
 
@@ -192,7 +192,7 @@ export const useManager = defineStore('Manager', {
          */
         async addModByTask(task: IDownloadTask, modStorage?: string) {
 
-            FileHandler.writeLog(`添加: ${task.name}`)
+            FileHandler.writeLog(`Add Task: ${task.name}`)
 
             this.maxID++
             let id = this.maxID.toString()
@@ -353,7 +353,7 @@ export const useManager = defineStore('Manager', {
             let info: any = JSON.parse(await Unzipper.readZipFile(file, 'info.json'))
             this.installLoading = false
 
-            if (info.gameID != settings.settings.managerGame?.gameID) {
+            if (info.gameID != settings.settings.managerGame?.GlossGameId) {
                 ElMessage.error(`该 .GMM 包并不属于${settings.settings.managerGame?.gameName}, 请先选择正确的游戏.`)
                 return
             }

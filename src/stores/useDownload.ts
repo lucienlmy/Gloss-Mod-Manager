@@ -146,7 +146,7 @@ export const useDownload = defineStore('Download', {
                 return
             }
 
-            if (game != (settings.settings.managerGame.gameID).toString()) {
+            if (game != (settings.settings.managerGame.GlossGameId).toString()) {
                 ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)
                 return
             }
@@ -206,11 +206,11 @@ export const useDownload = defineStore('Download', {
                 id: mod.uuid4,
                 type: "Thunderstore",
                 name: mod.name,
-                version: mod.versions[0].version_number,
+                version: mod.latest.version_number,
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
-                link: mod.versions[0].download_url,
+                link: mod.latest.download_url,
                 modAuthor: mod.owner,
                 status: "waiting",
                 website: mod.package_url,

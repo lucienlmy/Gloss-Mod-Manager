@@ -6,15 +6,17 @@ import * as fs from 'fs';
 // import fs from 'fs/promises';
 import * as path from 'path';
 import { homedir } from "os";
-import { Config } from "@src/model/Config";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
 import { exec, execSync } from 'child_process';
 
+import { info, error } from 'electron-log/renderer';
+
+
 
 export class FileHandler {
 
-    public static logFile = () => path.join(Config.configFolder(), 'log.txt')
+    // public static logFile = () => path.join(Config.configFolder(), 'log.txt')
 
     /**
      * 判断文件是否存在
@@ -260,24 +262,13 @@ export class FileHandler {
      * @param isErr 是否为错误日志
      * @returns 
      */
-    public static writeLog(msg: string, isErr: boolean = false): boolean {
-        try {
-            // console.log(this.logFile);
-            this.createDirectory(path.dirname(this.logFile()));
-            let time = new Date().toLocaleString();
-            let log = `[${time}]: ${msg}\n`
-            console.log(log);
-            fs.appendFileSync(this.logFile(), log);
+    public static writeLog(msg: string, isErr: boolean = false) {
+        // let time = new Date().toLocaleString();
+        // let log = `[${time}]: ${msg}\n`
+        if (isErr) error(msg)
+        else info(msg)
 
-            if (isErr) {
-                ElMessage.error(log)
-            }
-
-            return true
-        } catch (err) {
-            console.log(err);
-            return false
-        }
+        return true
     }
 
     /**
@@ -670,5 +661,15 @@ export class FileHandler {
      */
     public static isDir(path: string) {
         return fs.statSync(path).isDirectory()
+    }
+
+    /**
+     * 比较两个文件名是否相同
+     * @param name1 
+     * @param name2 
+     * @returns 
+     */
+    public static compareFileName(name1: string, name2: string) {
+        return path.basename(name1).toLowerCase() == path.basename(name2).toLowerCase()
     }
 }

@@ -102,6 +102,7 @@ const ExploreFilter = {
     "Newest": "最新发布",
     "Type of creation": "创作类型",
     "Update time": "更新时间",
+    "Release time": "发布时间",
     "Sort": "排序方式",
     "Search": "搜索作品",
     "You can search for what you want here": "在这里可以搜索到你想要的东西哦",
@@ -117,6 +118,7 @@ const ExploreFilter = {
     "No content yet~": "暂无内容~",
     "Subscribers": "订阅",
     "Rating": "评分",
+    "Readme": "介绍",
 }
 
 const Welcome = {
@@ -158,6 +160,7 @@ const ManagerContent = {
     "Advanced": "高级",
 
     "Help": "帮助",
+    "Add Game": "添加游戏",
 }
 
 const ManagerHeader = {
@@ -276,6 +279,8 @@ const Games = {
     "Humankind": "人类",
     "Two Point Campus": "双点校园",
     "Sid Meier's Civilization VI": "文明6",
+    "Titanfall 2": "泰坦陨落2",
+    "Palworld": "幻兽帕鲁",
 }
 
 const Other = {

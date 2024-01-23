@@ -118,7 +118,7 @@ export interface IStartExe {
 }
 
 export interface IGameInfo {
-    gameID: number
+    GlossGameId: number
     steamAppID: number
     installdir?: string
     gameName: string
@@ -139,22 +139,10 @@ export interface IGameInfo {
     }
 }
 
-export interface IPlugins {
-    id: number
-    name: string
-    version: string
-    website: string
-    modAuthor?: string
-    installPath: string
-    md5?: string[]
-}
-
-
 export interface IState {
     file: string,
     state: boolean
 }
-
 
 interface IAdvancedItem {
     type: "input" | "selects" | "switch"
@@ -173,7 +161,6 @@ export interface IType {
         icon: string
         item: IAdvancedItem[]
     }
-    corePlugins?: IPlugins[]
     install: (mod: IModInfo) => Promise<IState[] | boolean>
     uninstall: (mod: IModInfo) => Promise<IState[] | boolean>
     checkPlugin?: (plugin: IModInfo) => boolean
@@ -181,7 +168,6 @@ export interface IType {
 
 export interface ISupportedGames extends IGameInfo {
     modType: IType[]
-    // corePlugins?: IPlugins[]
     checkModType: (mod: IModInfo) => number
 }
 
@@ -252,35 +238,36 @@ export interface ITag {
 }
 
 export interface IThunderstoreModVersions {
-    name: string,
-    full_name: string,
-    description: string,
-    icon: string,
-    version_number: string,
-    dependencies: string[],
-    download_url: string,
-    downloads: number,
-    date_created: string,
-    website_url: string,
-    is_active: boolean,
-    uuid4: string,
+    name: string
+    full_name: string
+    description: string
+    icon: string
+    version_number: string
+    dependencies: string[]
+    download_url: string
+    downloads: number
+    date_created: string
+    website_url: string
+    is_active: boolean
+    uuid4: string
     file_size: number
 }
 
 export interface IThunderstoreMod {
-    name: string;
-    full_name: string;
-    owner: string;
-    package_url: string;
-    date_created: string;
-    date_updated: string;
-    uuid4: string;
-    rating_score: number;
-    is_pinned: boolean;
-    is_deprecated: boolean;
-    has_nsfw_content: boolean;
-    categories: string[];
+    name: string
+    full_name: string
+    owner: string
+    package_url: string
+    date_created: string
+    date_updated: string
+    uuid4: string
+    rating_score: number
+    is_pinned: boolean
+    is_deprecated: boolean
+    has_nsfw_content: boolean
+    categories: string[]
     versions: IThunderstoreModVersions[]
+    latest: IThunderstoreModVersions
 }
 
 export interface IModIo {

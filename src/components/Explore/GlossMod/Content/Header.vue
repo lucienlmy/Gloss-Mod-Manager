@@ -6,6 +6,8 @@ import { computed } from "vue";
 import ExploreContentCarousel from "@src/components/Explore/GlossMod/Content/Carousel.vue";
 import ExploreContentInfo from "@src/components/Explore/GlossMod/Content/Info.vue";
 
+import Breadcrumbs from "@src/components/Model/Breadcrumbs.vue"
+
 const content = useContent()
 
 let items = computed(() => [
@@ -27,16 +29,7 @@ let items = computed(() => [
 </script>
 <template>
     <v-row>
-        <v-col cols="12">
-            <ul class="breadcrumbs">
-                <v-icon icon="mdi-home"></v-icon>
-                <li v-for=" (item, index) in items" :key="index">
-                    <RouterLink :to="item.href" class="link" :class="{ 'disabled': item.disabled }">
-                        {{ $t(item.text as string) }}
-                    </RouterLink>
-                </li>
-            </ul>
-        </v-col>
+        <Breadcrumbs :items="items"></Breadcrumbs>
         <v-col cols="12" class="title">
             <h1>{{ content.modData?.mods_title }}</h1>
         </v-col>
@@ -55,48 +48,6 @@ export default {
 }
 </script>
 <style lang='less' scoped>
-.breadcrumbs {
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    font-size: 0.8rem;
-
-    .link {
-        color: unset;
-        text-decoration: none;
-        transition: all .5s;
-
-        &:hover {
-            opacity: .7;
-        }
-    }
-
-    li {
-        list-style: none;
-        display: flex;
-        align-items: center;
-        margin-left: 8px;
-
-        &::after {
-            content: '/';
-            display: inline-block;
-            padding: 0 8px;
-            vertical-align: middle;
-        }
-
-        &:last-child::after {
-            content: ''
-        }
-
-        .disabled {
-            opacity: .7;
-            cursor: context-menu;
-        }
-
-    }
-}
-
 .title {
     h1 {
         font-size: 1.4rem;

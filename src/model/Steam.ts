@@ -22,7 +22,7 @@ export class Steam {
 
     public static getSteamGamePath(steamAppID: number, installdir: string = '') {
         let steamPath = this.getSteamInstallPath()
-        if (!steamPath) return undefined
+        if (!steamPath) return ""
         // console.log(steamPath);
         // C:\Program Files (x86)\Steam\steamapps\libraryfolders.vdf
         let fileData = FileHandler.readFile(path.join(steamPath, 'steamapps', 'libraryfolders.vdf'))
@@ -44,6 +44,6 @@ export class Steam {
             }
         }
 
-        return undefined
+        return ""
     }
 }

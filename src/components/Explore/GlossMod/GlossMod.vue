@@ -34,7 +34,7 @@ watch([
     () => explore.order,
     () => explore.original,
     () => explore.time,
-    () => settings.settings.managerGame?.gameID,
+    () => settings.settings.managerGame?.gameName,
     () => explore.gameType,
     () => explore.gameId,
 ], () => {

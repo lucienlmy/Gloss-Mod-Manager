@@ -3,7 +3,7 @@ import { useDownload } from "@src/stores/useDownload";
 import type { IDownloadTask, IThunderstoreMod } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import { useThunderstore } from "@src/stores/useThunderstore";
 import { useMain } from "@src/stores/useMain";
 
@@ -16,6 +16,11 @@ const settings = useSettings()
 const Thunderstore = useThunderstore()
 const { formatSiez } = useMain()
 const { t } = useI18n()
+
+
+if (!props.mod.latest) {
+    props.mod.latest = props.mod.versions[0]
+}
 
 
 let task = computed<IDownloadTask | undefined>(() => {
@@ -31,7 +36,7 @@ let text = computed(() => {
     if (task.value && task.value.totalSize == task.value.downloadedSize) return t('Downloaded')
     if (isDownloading.value) return `${downloaded.value} %`
 
-    return `${t('Download')} | ${formatSiez(props.mod.versions[0].file_size)}`
+    return `${t('Download')} | ${formatSiez(props.mod.latest.file_size)}`
 })
 let disabled = computed(() => {
     if (!settings.settings.managerGame) return true

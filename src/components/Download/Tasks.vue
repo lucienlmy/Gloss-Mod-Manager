@@ -161,10 +161,11 @@ async function restart() {
                 is_deprecated: false,
                 has_nsfw_content: false,
                 categories: [],
-                versions: [{
+                versions: [],
+                latest: {
                     version_number: task.version,
                     download_url: task.link,
-                } as IThunderstoreModVersions]
+                } as IThunderstoreModVersions,
             }
             download.addDownloadByThunderstore(mod)
             break;
@@ -185,36 +186,6 @@ async function restart() {
         default:
             break;
     }
-
-    // if (props.task.type == "GlossMod") {
-    //     download.addDownloadById(props.task.id as number)
-    // } else if (props.task.type == "NexusMods") {
-    //     if (props.task.nexus_id) {
-    //         let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
-    //         download.addDownloadByNuxusId(id, game_domain_name)
-    //     }
-    // } else if (props.task.type == "Thunderstore") {
-    //     let { task } = props
-    //     let mod: IThunderstoreMod = {
-    //         name: task.name,
-    //         full_name: '',
-    //         owner: task.modAuthor,
-    //         package_url: task.website || '',
-    //         date_created: '',
-    //         date_updated: '',
-    //         uuid4: task.id as string,
-    //         rating_score: 0,
-    //         is_pinned: false,
-    //         is_deprecated: false,
-    //         has_nsfw_content: false,
-    //         categories: [],
-    //         versions: [{
-    //             version_number: task.version,
-    //             download_url: task.link,
-    //         } as IThunderstoreModVersions]
-    //     }
-    //     download.addDownloadByThunderstore(mod)
-    // }
 }
 function openWeb() {
     let url = ''

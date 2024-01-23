@@ -27,6 +27,11 @@ const router = createRouter({
                     path: "ModIo/:modId",
                     name: "ModIoModsContent",
                     component: () => import("@src/components/Explore/ModIo/Content/Content.vue")
+                },
+                {
+                    path: "Thunderstore/:namespace/:name/:version",
+                    name: "ThunderstoreModsContent",
+                    component: () => import("@src/components/Explore/Thunderstore/Content/Content.vue")
                 }
             ]
         },

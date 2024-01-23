@@ -14,7 +14,7 @@ const settings = useSettings()
 const { lazy_img } = useMain()
 
 const data = computed(() => {
-    return manager.supportedGames.find(item => item.gameID === props.id)
+    return manager.supportedGames.find(item => item.GlossGameId === props.id)
 })
 
 function del() {

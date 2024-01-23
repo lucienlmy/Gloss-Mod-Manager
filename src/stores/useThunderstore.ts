@@ -13,6 +13,10 @@ export const useThunderstore = defineStore('Thunderstore', {
             sort_by: "Default" as "Default" | "lastupdate" | "downloads" | "Likes",
             categories: "All",
             searchText: "",
+        },
+        selected: {
+            data: null as IThunderstoreMod | null,
+            readme: "",
         }
     }),
     getters: {
@@ -116,29 +120,43 @@ export const useThunderstore = defineStore('Thunderstore', {
     },
     actions: {
         async getModList() {
-
             const settings = useSettings()
             let community_identifier = settings.settings.managerGame?.Thunderstore?.community_identifier
             if (community_identifier) {
-                // get-mod-data
                 this.loading = true
-                // let ModList = await ipcRenderer.invoke('thunderstore-get-mod-list', { community_identifier })
-
                 let response = await fetch(`https://thunderstore.io/c/${community_identifier}/api/v1/package/`, {
                     headers: {
                         'Accept-Encoding': 'gzip',
                     }
                 })
-
                 this.modList = await response.json()
-
-                // console.log(this.modList);
-
                 this.page = 1
                 this.loading = false
             }
-
+        },
+        async getModData(namespace: string, name: string, version: string) {
+            if (namespace && name && version) {
+                let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/`, {
+                    headers: {
+                        'Accept-Encoding': 'gzip',
+                    }
+                })
+                let modData = await response.json()
+                this.selected.data = modData
+            }
+            return this.selected.data
+        },
+        async getReadme(namespace: string, name: string, version: string) {
+            // /api/experimental/package/{namespace}/{name}/{version}/readme/
+            if (namespace && name && version) {
+                let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/${version}/readme/`, {
+                    headers: {
+                        'Accept-Encoding': 'gzip',
+                    }
+                })
+                let readme = await response.json()
+                this.selected.readme = readme.markdown
+            }
         }
     },
-
 })

@@ -11,7 +11,7 @@ const settings = useSettings()
 let uploadMod = computed(() => {
 
     if (settings.settings.exploreType == "GlossMod") {
-        return `https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.gameID}`
+        return `https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.GlossGameId}`
     } else {
         return `https://www.nexusmods.com/${settings.settings.managerGame?.NexusMods?.game_domain_name}/mods/add`
     }

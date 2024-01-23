@@ -50,7 +50,6 @@ function select(item: ISupportedGames) {
 
             let files = FileHandler.getAllFilesInFolder(folder)
 
-
             if (typeof (item.gameExe) == 'string') {
                 // 判断 item.gameExe 是否存在于 files 中
                 if (files.includes(item.gameExe)) {
@@ -104,7 +103,7 @@ function switchGame(game: ISupportedGames) {
     // console.log(game);
     // manager.supportedGames
 
-    let sGame = manager.supportedGames.find(item => item.gameID == game.gameID)
+    let sGame = manager.supportedGames.find(item => item.GlossGameId == game.GlossGameId)
 
 
     settings.settings.managerGame = {
@@ -118,7 +117,7 @@ function switchGame(game: ISupportedGames) {
 }
 
 function delSwitchGame(game: ISupportedGames) {
-    settings.settings.managerGameList = settings.settings.managerGameList.filter(item => item.gameID !== game.gameID)
+    settings.settings.managerGameList = settings.settings.managerGameList.filter(item => item.gameName !== game.gameName)
 }
 
 </script>
@@ -133,7 +132,7 @@ function delSwitchGame(game: ISupportedGames) {
                     <v-list>
                         <v-list-item :title="$t('select game')" append-icon="mdi-plus"
                             @click="manager.selectGameDialog = true"></v-list-item>
-                        <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameID"
+                        <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameName"
                             @click.pointer="switchGame(item)" :title="$t(item.gameName)">
                             <template v-slot:append>
                                 <v-btn icon="mdi-delete-outline" @click="delSwitchGame(item)" variant="text"></v-btn>
@@ -154,6 +153,10 @@ function delSwitchGame(game: ISupportedGames) {
                             {{ $t('select game') }}
                             <small>({{ $t('{0} games', [list.length]) }})</small>
                         </div>
+                        <v-btn variant="text" href="https://wiki.aoe.top/GMM/Expands/README.html" target="_blank">
+                            <v-icon>mdi-plus</v-icon>
+                            <v-tooltip activator="parent" location="top">{{ $t('Add Game') }}</v-tooltip>
+                        </v-btn>
                         <v-text-field density="compact" variant="solo" :label="$t('Search Game')"
                             append-inner-icon="mdi-magnify" single-line hide-details v-model="searchText"></v-text-field>
                     </div>

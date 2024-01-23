@@ -12,6 +12,8 @@ import logger from "electron-log"
 import { GetData } from '../model/GetData'
 import { NexusMods } from '../model/NexusMods'
 
+logger.initialize()
+
 autoUpdater.logger = logger
 
 dotenv.config();
@@ -52,12 +54,17 @@ const preload = join(__dirname, '../preload/index.js')
 const url = process.env.VITE_DEV_SERVER_URL
 const indexHtml = join(process.env.DIST, 'index.html')
 
+
+let isDev = (() => {
+    return process.env.NODE_ENV === 'development' || (existsSync(join(dirname(app.getPath('exe')), 'DEV')))
+})()
+
 async function createWindow() {
     let width = 1280
     let height = 720
 
     // 判断环境是否是开发环境 或调试环境
-    if (process.env.NODE_ENV === 'development' || (existsSync(join(dirname(app.getPath('exe')), 'DEV')))) {
+    if (isDev) {
         width += 550
     }
 
@@ -71,6 +78,7 @@ async function createWindow() {
             // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
             nodeIntegration: true,
             contextIsolation: false,
+            webSecurity: false
         },
         minWidth: width,
         minHeight: height,
@@ -86,11 +94,9 @@ async function createWindow() {
     }
 
     // 在生成环境打开开发者工具
-    if (existsSync(join(dirname(app.getPath('exe')), 'DEV'))) {
+    if (isDev) {
         win.webContents.openDevTools()  // 打开Dev工具
     }
-
-
 
     // Test actively push message to the Electron-Renderer
     win.webContents.on('did-finish-load', () => {
@@ -98,10 +104,13 @@ async function createWindow() {
     })
 
     // Make all links open with the browser, not with the application
-    win.webContents.on('will-navigate', (event, url) => {
-        event.preventDefault()
-        shell.openExternal(url)
-    })
+    if (!isDev) {
+        win.webContents.on('will-navigate', (event, url) => {
+            event.preventDefault()
+            shell.openExternal(url)
+        })
+    }
+
     // Make all links open with the browser, not with the application
     // 新窗口打开链接
     win.webContents.setWindowOpenHandler(({ url }) => {

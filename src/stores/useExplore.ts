@@ -27,7 +27,7 @@ export const useExplore = defineStore('Explore', {
         gameId: () => {
             const settings = useSettings()
             let id = 0 as number | string
-            if (settings.settings.managerGame?.gameID) id = settings.settings.managerGame?.gameID
+            if (settings.settings.managerGame?.GlossGameId) id = settings.settings.managerGame?.GlossGameId
             else {
                 id = settings.settings.tourGameList.join(',')
             }
@@ -59,7 +59,7 @@ export const useExplore = defineStore('Explore', {
         },
         getGameType() {
             const settings = useSettings()
-            ipcRenderer.invoke("get-types", { gameId: settings.settings.managerGame?.gameID }).then(data => {
+            ipcRenderer.invoke("get-types", { gameId: settings.settings.managerGame?.GlossGameId }).then(data => {
                 // console.log(data);
                 data.forEach((item: any) => {
                     this.gameTypeList.push({

@@ -31,10 +31,10 @@ let list = computed<ISupportedGames[]>(() => {
 
 function select(all: boolean) {
     if (all) {
-        settings.settings.tourGameList = list.value.map(item => item.gameID)
+        settings.settings.tourGameList = list.value.map(item => item.GlossGameId)
     } else {
         // 反选
-        settings.settings.tourGameList = list.value.filter(item => !settings.settings.tourGameList.includes(item.gameID)).map(item => item.gameID)
+        settings.settings.tourGameList = list.value.filter(item => !settings.settings.tourGameList.includes(item.GlossGameId)).map(item => item.GlossGameId)
     }
 }
 
@@ -81,7 +81,7 @@ function isOk() {
                 </v-card>
                 <v-item-group multiple v-model="settings.settings.tourGameList">
                     <v-row class="list-wrap">
-                        <v-item v-for="item in list" v-slot="{ isSelected, toggle }" :value="item.gameID">
+                        <v-item v-for="item in list" v-slot="{ isSelected, toggle }" :value="item.GlossGameId">
                             <v-col class="game-list" cols="2" @click="toggle" :class="isSelected ? 'primary' : ''">
                                 <v-row no-gutters>
                                     <v-col cols="12">

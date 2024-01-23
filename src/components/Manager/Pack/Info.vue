@@ -16,12 +16,12 @@ const user = useUser()
 let gameList = computed(() => {
     const list = manager.supportedGames.map((item) => ({
         name: t(item.gameName),
-        id: item.gameID,
+        id: item.gameName,
     }));
     return list
 })
 
-packs.Info.gameID = settings.settings.managerGame?.gameID
+packs.Info.gameID = settings.settings.managerGame?.GlossGameId
 packs.Info.author = user.user?.user_nickName
 
 
