@@ -10,7 +10,6 @@ import ContentPack from '@src/components/Manager/Pack/Pack.vue'
 import { useUser } from '@src/stores/useUser';
 import ManagerSort from '@src/components/Manager/Sort.vue'
 import StartGame from '@src/components/Manager/StartGame.vue'
-import PackInport from '@src/components/Manager/Pack/Inport.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -56,7 +55,6 @@ function openGameFolder() {
     <v-app-bar :elevation="0">
         <div class="header">
             <div class="header-btn">
-                <PackInport></PackInport>
                 <SelectGame></SelectGame>
                 <template v-if="settings.settings.managerGame">
                     <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"

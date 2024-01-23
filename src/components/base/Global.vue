@@ -11,6 +11,8 @@ import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
 import { APIAria2 } from "@src/model/APIAria2";
 import { Expands } from "@src/model/Expands"
+import PackInport from '@src/components/Manager/Pack/Inport.vue'
+
 
 const settings = useSettings()
 const download = useDownload()
@@ -177,7 +179,9 @@ function setLightTheme() {
 
 
 </script>
-<template></template>
+<template>
+    <PackInport></PackInport>
+</template>
 <script lang='ts'>
 
 export default {

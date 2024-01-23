@@ -16,7 +16,7 @@ const user = useUser()
 let gameList = computed(() => {
     const list = manager.supportedGames.map((item) => ({
         name: t(item.gameName),
-        id: item.gameName,
+        id: item.GlossGameId,
     }));
     return list
 })
