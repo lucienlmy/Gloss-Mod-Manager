@@ -91,9 +91,9 @@ export class Config {
 
         // 初始化游戏
         if (settings.settings.managerGame?.gameName) {
-            let gameID = settings.settings.managerGame?.GlossGameId
+            let gameName = settings.settings.managerGame?.gameName
             Manager.supportedGames.forEach(item => {
-                if (item.GlossGameId === gameID) {
+                if (item.gameName === gameName) {
                     settings.settings.managerGame = Object.assign({}, settings.settings.managerGame, item)
                     // console.log(settings.settings.managerGame);
                 }

@@ -35,6 +35,7 @@ export class Expands {
             // 判断文件是否存在
             if (FileHandler.fileExists(index)) {
                 let { supportedGames } = require(index)
+                // console.log(supportedGames);
                 manager.supportedGames.push(supportedGames)
             }
         }

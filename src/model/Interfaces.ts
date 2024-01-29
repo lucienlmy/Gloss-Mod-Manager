@@ -169,6 +169,7 @@ export interface IType {
 export interface ISupportedGames extends IGameInfo {
     modType: IType[]
     checkModType: (mod: IModInfo) => number
+    sortMod?: (list: IModInfo[]) => boolean
 }
 
 export interface ISettings {

@@ -157,6 +157,7 @@ const ManagerContent = {
 
     "Help": "Help",
     "Add Game": "Add Game",
+    "Mod Sort": "Mod Sort",
 }
 
 const ManagerHeader = {

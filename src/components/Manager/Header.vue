@@ -8,8 +8,10 @@ import { useSettings } from '@src/stores/useSettings';
 import { ElMessage } from 'element-plus';
 import ContentPack from '@src/components/Manager/Pack/Pack.vue'
 import { useUser } from '@src/stores/useUser';
+
 import ManagerSort from '@src/components/Manager/Sort.vue'
 import StartGame from '@src/components/Manager/StartGame.vue'
+import SortMod from '@src/components/Manager/SortMod/SortMod.vue'
 
 const settings = useSettings()
 const manager = useManager()
@@ -64,6 +66,11 @@ function openGameFolder() {
                         <v-icon
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
                     </v-btn>
+                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html">
+                        <v-icon>mdi-help</v-icon>
+                        <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
+                    </v-btn>
+                    <SortMod v-if="settings.settings.managerGame?.sortMod"></SortMod>
                     <v-menu open-on-hover>
                         <template v-slot:activator="{ props }">
                             <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
@@ -84,10 +91,6 @@ function openGameFolder() {
                         </v-list>
                     </v-menu>
                 </template>
-                <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html">
-                    <v-icon>mdi-help</v-icon>
-                    <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
-                </v-btn>
             </div>
             <div class="select-game">
                 {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}

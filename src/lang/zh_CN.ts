@@ -161,6 +161,7 @@ const ManagerContent = {
 
     "Help": "帮助",
     "Add Game": "添加游戏",
+    "Mod Sort": "排序管理",
 }
 
 const ManagerHeader = {

@@ -74,6 +74,7 @@ let modType = computed({
 
 let exit_name = ref(false)
 
+//#region 拖拽
 function dragstart(e: any, index: number) {
     e.stopPropagation()
 
@@ -126,7 +127,7 @@ function list_drop(e: any) {
         }
     }
 }
-
+//#endregion
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
