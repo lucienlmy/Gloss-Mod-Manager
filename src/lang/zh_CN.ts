@@ -282,6 +282,9 @@ const Games = {
     "Sid Meier's Civilization VI": "文明6",
     "Titanfall 2": "泰坦陨落2",
     "Palworld": "幻兽帕鲁",
+    "LikeADragon8": "如龙8",
+    "Tekken 8": "铁拳8",
+    "Granblue Fantasy Relink": "蔚蓝幻想 Relink",
 }
 
 const Other = {

@@ -280,6 +280,9 @@ const Games = {
     "Sid Meier's Civilization VI": "Sid Meier's Civilization VI",
     "Titanfall 2": "Titanfall 2",
     "Palworld": "Palworld",
+    "LikeADragon8": "Like A Dragon 8",
+    "Tekken 8": "Tekken 8",
+    "Granblue Fantasy Relink": "Granblue Fantasy Relink",
 }
 
 const Other = {

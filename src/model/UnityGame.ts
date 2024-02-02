@@ -1,3 +1,7 @@
+/**
+ * Unity 引擎 通用安装
+ */
+
 import { join, basename, extname } from "path";
 import { Manager } from "@src/model/Manager";
 import type { ISupportedGames, IModInfo } from "@src/model/Interfaces";

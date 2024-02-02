@@ -35,7 +35,7 @@ watch(() => props.mod.isInstalled, () => {
     loading.value = true
 
     if (props.mod.isInstalled) {
-        FileHandler.writeLog(`安装: ${props.mod.modName}`)
+        FileHandler.writeLog(`Install: ${props.mod.modName}`)
         // AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
         // 安装
         type.value?.install(props.mod).then(res => {
@@ -45,7 +45,7 @@ watch(() => props.mod.isInstalled, () => {
             loading.value = false
         })
     } else {
-        FileHandler.writeLog(`卸载: ${props.mod.modName}`)
+        FileHandler.writeLog(`Uninstall: ${props.mod.modName}`)
         // 卸载
         type.value?.uninstall(props.mod).then(res => {
             if (typeof (res) == 'boolean' && res == false) {
