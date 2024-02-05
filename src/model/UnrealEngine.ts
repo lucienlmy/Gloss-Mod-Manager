@@ -33,10 +33,10 @@ export class UnrealEngine {
                 async install(mod) {
                     for (let index in mod.modFiles) {
                         const item = mod.modFiles[index];
-                        if (basename(item) == 'ue4ss.dll') {
+                        if (FileHandler.compareFileName(item, 'ue4ss.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "ue4ss.dll", true)
                         }
-                        if (basename(item) == 'xinput1_3.dll') {
+                        if (FileHandler.compareFileName(item, 'xinput1_3.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "xinput1_3.dll", true)
                         }
                     }
@@ -48,10 +48,10 @@ export class UnrealEngine {
                 async uninstall(mod) {
                     for (let index in mod.modFiles) {
                         const item = mod.modFiles[index];
-                        if (basename(item) == 'ue4ss.dll') {
+                        if (FileHandler.compareFileName(item, 'ue4ss.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "ue4ss.dll", false)
                         }
-                        if (basename(item) == 'xinput1_3.dll') {
+                        if (FileHandler.compareFileName(item, 'xinput1_3.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "xinput1_3.dll", false)
                         }
                     }

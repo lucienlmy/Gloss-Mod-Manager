@@ -285,6 +285,7 @@ const Games = {
     "LikeADragon8": "如龙8",
     "Tekken 8": "铁拳8",
     "Granblue Fantasy Relink": "蔚蓝幻想 Relink",
+    "GuLong": "古龙风云录",
 }
 
 const Other = {
