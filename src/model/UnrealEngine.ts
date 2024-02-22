@@ -19,7 +19,7 @@ export class UnrealEngine {
                 name: 'pak',
                 installPath: join(bassPath, 'Content', 'Paks', 'LogicMods'),
                 async install(mod) {
-                    if (useUE4SS) UnrealEngine.setBPModLoaderMod()
+                    if (useUE4SS) UnrealEngine.setBPModLoaderMod(bassPath)
                     return Manager.generalInstall(mod, this.installPath ?? "")
                 },
                 async uninstall(mod) {
@@ -78,7 +78,7 @@ export class UnrealEngine {
                 name: "LogicMods",
                 installPath: join(bassPath, "Content", "Paks", "LogicMods"),
                 async install(mod) {
-                    UnrealEngine.setBPModLoaderMod()
+                    UnrealEngine.setBPModLoaderMod(bassPath)
                     return Manager.generalInstall(mod, this.installPath ?? "")
                 },
                 async uninstall(mod) {
@@ -157,11 +157,11 @@ export class UnrealEngine {
         return 99
     }
 
-    public static setBPModLoaderMod() {
+    public static setBPModLoaderMod(bassPath: string) {
 
         const manager = useManager()
 
-        let filepath = join(manager.gameStorage, "Pal", "Binaries", "Win64", "Mods", "mods.txt")
+        let filepath = join(manager.gameStorage, bassPath, "Binaries", "Win64", "Mods", "mods.txt")
 
         // 判断文件是否存在
         if (!FileHandler.fileExists(filepath)) {

@@ -159,36 +159,38 @@ async function reinstall() {
             <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
         </v-list>
     </v-menu>
-    <el-dialog v-model="showEdit" :close-on-click-modal="false" width="600" align-center :title="$t('Edit')">
-        <el-form label-width="80px">
-            <el-form-item :label="t('Name')">
-                <el-input v-model="mod.modName"></el-input>
-            </el-form-item>
-            <el-form-item :label="t('Version')">
-                <el-input v-model="mod.modVersion"></el-input>
-            </el-form-item>
-            <el-form-item :label="t('Tag')">
-                <el-select multiple style="width: 100%" v-model="mod.tags" value-key="name">
-                    <el-option v-for="item in manager.tags" :key="item.name" :label="item.name" :value="item"
-                        class="option">
-                        <div :style="{ color: item.color }">{{ item.name }}</div>
-                    </el-option>
-                </el-select>
-            </el-form-item>
-            <el-form-item :label="t('MD5')">
-                <el-input v-model="MD5" disabled></el-input>
-            </el-form-item>
-            <el-form-item :label="t('Storage Location')">
-                <el-input v-model="modStorage" disabled></el-input>
-            </el-form-item>
-            <el-form-item :label="t('Website')">
-                <el-input v-model="Website"></el-input>
-            </el-form-item>
-            <el-form-item :label="t('Author')">
-                <el-input v-model="mod.modAuthor"></el-input>
-            </el-form-item>
-        </el-form>
-    </el-dialog>
+    <Teleport to="body">
+        <el-dialog v-model="showEdit" :close-on-click-modal="false" width="600" align-center :title="$t('Edit')">
+            <el-form label-width="80px">
+                <el-form-item :label="t('Name')">
+                    <el-input v-model="mod.modName"></el-input>
+                </el-form-item>
+                <el-form-item :label="t('Version')">
+                    <el-input v-model="mod.modVersion"></el-input>
+                </el-form-item>
+                <el-form-item :label="t('Tag')">
+                    <el-select multiple style="width: 100%" v-model="mod.tags" value-key="name">
+                        <el-option v-for="item in manager.tags" :key="item.name" :label="item.name" :value="item"
+                            class="option">
+                            <div :style="{ color: item.color }">{{ item.name }}</div>
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item :label="t('MD5')">
+                    <el-input v-model="MD5" disabled></el-input>
+                </el-form-item>
+                <el-form-item :label="t('Storage Location')">
+                    <el-input v-model="modStorage" disabled></el-input>
+                </el-form-item>
+                <el-form-item :label="t('Website')">
+                    <el-input v-model="Website"></el-input>
+                </el-form-item>
+                <el-form-item :label="t('Author')">
+                    <el-input v-model="mod.modAuthor"></el-input>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </Teleport>
     <ContentAdvanced :mod="mod" :showAdvanced="showAdvanced" @changeAdvanced="(value) => showAdvanced = value">
     </ContentAdvanced>
 </template>

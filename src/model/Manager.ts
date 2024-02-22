@@ -210,7 +210,7 @@ export class Manager {
     }
 
     /**
-     * 以某个文件为基础, 将改文件同级的所有文件安装/卸载 Mod 
+     * 以某个文件为基础, 将该文件同级的所有文件安装/卸载 Mod 
      * @param mod mod
      * @param installPath 安装路径
      * @param fileName 文件名 | 拓展名

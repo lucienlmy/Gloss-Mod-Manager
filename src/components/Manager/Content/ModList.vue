@@ -135,16 +135,25 @@ function list_drop(e: any) {
             <!-- 小列表 -->
             <el-row class="mod-list">
                 <el-col :span="12" @dragover="list_dragover" @drop="list_drop">
-                    <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
-                        <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
-                            @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
-                            @dragend="dragend" @dragover="dragover"></v-icon>
-                        <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                            {{ item.name }}</v-chip>
-                        {{ mod.modName }}
-                    </p>
-                    <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
-                        v-model="mod.modName"></el-input>
+                    <el-checkbox v-if="manager.selectionMode" v-model="manager.selectionList" :label="mod">
+                        <template v-slot:default>
+                            <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                                {{ item.name }}</v-chip>
+                            {{ mod.modName }}
+                        </template>
+                    </el-checkbox>
+                    <template v-else>
+                        <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                            <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                                @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
+                                @dragend="dragend" @dragover="dragover"></v-icon>
+                            <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                                {{ item.name }}</v-chip>
+                            {{ mod.modName }}
+                        </p>
+                        <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
+                            v-model="mod.modName"></el-input>
+                    </template>
                 </el-col>
                 <el-col :span="2" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</el-col>
                 <el-col :span="4">
@@ -168,16 +177,25 @@ function list_drop(e: any) {
             <v-row class="mod-list">
                 <v-col cols="6" class="mod-name" @dragover="list_dragover" @drop="list_drop">
                     <!-- 名称 -->
-                    <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
-                        <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
-                            @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
-                            @dragend="dragend" @dragover="dragover"></v-icon>
-                        <v-chip v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                            {{ item.name }}</v-chip>
-                        {{ mod.modName }}
-                    </p>
-                    <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false" v-model="mod.modName"
-                        variant="solo-filled" :hide-details="true"></v-text-field>
+                    <v-checkbox v-if="manager.selectionMode" v-model="manager.selectionList" :value="mod">
+                        <template v-slot:label>
+                            <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                                {{ item.name }}</v-chip>
+                            {{ mod.modName }}
+                        </template>
+                    </v-checkbox>
+                    <template v-else>
+                        <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                            <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                                @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
+                                @dragend="dragend" @dragover="dragover"></v-icon>
+                            <v-chip v-for="item in mod.tags" label :key="item.name" :color="item.color">
+                                {{ item.name }}</v-chip>
+                            {{ mod.modName }}
+                        </p>
+                        <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
+                            v-model="mod.modName" variant="solo-filled" :hide-details="true"></v-text-field>
+                    </template>
                 </v-col>
                 <v-col cols="1" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</v-col>
                 <v-col cols="2">
@@ -229,16 +247,14 @@ export default {
 
         &:hover {
             // 底部阴影
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(var(--v-theme-on-surface), 0.3);
         }
 
         .advanced {
             display: flex;
             align-items: center;
             justify-content: center;
-
         }
-
     }
 
     .small-install {

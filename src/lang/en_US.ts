@@ -59,6 +59,7 @@ const DownloadTasks = {
     "Redownload": "Redownload",
     "Delete": "Delete",
     "Install": "Install",
+    "Uninstall": "Uninstall",
     "Open website": "Open Website",
     "Open file": "Open File",
     "Delete task?": "Delete Task?",
@@ -158,6 +159,11 @@ const ManagerContent = {
     "Help": "Help",
     "Add Game": "Add Game",
     "Mod Sort": "Mod Sort",
+
+    "Selection Mode": "Selection Mode",
+    "Select All": "Select All",
+    "Unselect All": "Unselect All",
+    "Invert Select": "Invert Select",
 }
 
 const ManagerHeader = {

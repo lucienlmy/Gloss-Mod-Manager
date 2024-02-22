@@ -83,7 +83,7 @@ export class Config {
             language: data.language ?? await ipcRenderer.invoke('get-system-language'),
             theme: data.theme ?? 'system',
             managerGameList: data.managerGameList ?? [],
-            fold: data.fold ?? false,
+            fold: data.fold ?? true,
             exploreType: data.exploreType ?? "GlossMod",
             selectGameByFolder: data.selectGameByFolder ?? false,
             showPakeMessage: data.showPakeMessage ?? true,

@@ -58,6 +58,7 @@ const DownloadTasks = {
     "Redownload": "重新下载",
     "Delete": "删除",
     "Install": "安装",
+    "Uninstall": "卸载",
     "Open website": "打开网站",
     "Open file": "打开文件",
     "Delete task?": "删除任务?",
@@ -162,6 +163,11 @@ const ManagerContent = {
     "Help": "帮助",
     "Add Game": "添加游戏",
     "Mod Sort": "排序管理",
+
+    "Selection Mode": "多选模式",
+    "Select All": "全选",
+    "Unselect All": "取消全选",
+    "Invert Select": "反选",
 }
 
 const ManagerHeader = {

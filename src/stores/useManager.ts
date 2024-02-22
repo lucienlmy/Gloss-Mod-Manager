@@ -1,14 +1,14 @@
 import { defineStore } from "pinia";
 import path from 'path'
 import { getAllExpands } from "@src/Expands";
-import type { ISupportedGames, IModInfo, IDownloadTask, IInfo, ITag } from "@src/model/Interfaces";
+import type { ISupportedGames, IModInfo, IDownloadTask, ITag } from "@src/model/Interfaces";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { useSettings } from '@src/stores/useSettings';
 import { Manager } from "@src/model/Manager";
 import { FileHandler } from "@src/model/FileHandler"
 import { Unzipper } from '@src/model/Unzipper'
-import { usePacks } from "./usePacks";
+import { usePacks } from "@src/stores/usePacks";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -22,7 +22,8 @@ export const useManager = defineStore('Manager', {
         search: "",
         dragIndex: 0,
         installLoading: false,
-        // showAdvanced: false
+        selectionMode: false,
+        selectionList: [] as IModInfo[],
     }),
     getters: {
         /**

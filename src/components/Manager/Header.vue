@@ -13,6 +13,8 @@ import ManagerSort from '@src/components/Manager/Sort.vue'
 import StartGame from '@src/components/Manager/StartGame.vue'
 import SortMod from '@src/components/Manager/SortMod/SortMod.vue'
 
+import SelectionMode from '@src/components/Manager/SelectionMode.vue'
+
 const settings = useSettings()
 const manager = useManager()
 const user = useUser()
@@ -54,7 +56,7 @@ function openGameFolder() {
 
 </script>
 <template>
-    <v-app-bar :elevation="0">
+    <v-app-bar :elevation="0" density="compact">
         <div class="header">
             <div class="header-btn">
                 <SelectGame></SelectGame>
@@ -62,14 +64,15 @@ function openGameFolder() {
                     <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
                         @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
                     <StartGame></StartGame>
-                    <v-btn variant="text" @click="settings.settings.fold = !settings.settings.fold" :title="$t('Fold')">
+                    <el-button text @click="settings.settings.fold = !settings.settings.fold">
                         <v-icon
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
-                    </v-btn>
-                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html">
+                        <v-tooltip activator="parent" location="top">{{ $t('Fold') }}</v-tooltip>
+                    </el-button>
+                    <el-button text href="https://wiki.aoe.top/GMM/README.html">
                         <v-icon>mdi-help</v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
-                    </v-btn>
+                    </el-button>
                     <SortMod v-if="settings.settings.managerGame?.sortMod"></SortMod>
                     <v-menu open-on-hover>
                         <template v-slot:activator="{ props }">
@@ -96,6 +99,11 @@ function openGameFolder() {
                 {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}
             </div>
         </div>
+    </v-app-bar>
+    <v-app-bar :elevation="0" density="compact">
+        <v-col cols="12">
+            <SelectionMode></SelectionMode>
+        </v-col>
     </v-app-bar>
 </template>
 <script lang='ts'>
