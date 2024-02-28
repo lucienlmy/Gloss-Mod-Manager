@@ -63,7 +63,7 @@ function dragend(e: any) {
 <template>
     <div class="tags">
         <v-chip-group class="group" v-model="manager.filterTags" multiple>
-            <v-chip v-for="(item, index) in manager.tags" :key="item.name" label variant="text" :value="item"
+            <v-chip class="chip" v-for="(item, index) in manager.tags" :key="item.name" label variant="text" :value="item"
                 :draggable="true" @dragstart="dragstart($event, index, item)" @dragenter="dragenter($event, index)"
                 @dragend="dragend" @dragover="dragover">
                 <!-- <v-chip label variant="text" :color="item.color"> </v-chip> -->
@@ -107,6 +107,13 @@ export default {
     .group {
         display: flex;
         align-items: center;
+        // 滚动条
+        overflow: auto;
+        flex-wrap: nowrap;
+
+        .chip {
+            min-width: 80px;
+        }
     }
 }
 </style>

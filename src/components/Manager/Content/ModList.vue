@@ -43,6 +43,10 @@ watch(() => props.mod.isInstalled, () => {
                 props.mod.isInstalled = false
             }
             loading.value = false
+        }).catch(err => {
+            console.log(err);
+            loading.value = false
+
         })
     } else {
         FileHandler.writeLog(`Uninstall: ${props.mod.modName}`)
@@ -52,6 +56,10 @@ watch(() => props.mod.isInstalled, () => {
                 props.mod.isInstalled = false
             }
             loading.value = false
+        }).catch(err => {
+            console.log(err);
+            loading.value = false
+
         })
     }
 })

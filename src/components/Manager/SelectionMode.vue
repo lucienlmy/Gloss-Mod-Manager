@@ -5,8 +5,10 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { IModInfo, ITag } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
 import { FileHandler } from "@src/model/FileHandler";
+import { useSettings } from "@src/stores/useSettings";
 
 const manager = useManager()
+const settings = useSettings()
 const { t } = useI18n()
 
 //#region 变量
@@ -16,6 +18,7 @@ let modDetails = ref({
     tags: [] as ITag[],
     modWebsite: "",
     modAuthor: "",
+    modType: 0,
 })
 //#endregion
 
@@ -40,6 +43,14 @@ watch(() => modDetails.value.modAuthor, (newVal) => {
         mod.modAuthor = newVal;
     }
 });
+watch(() => modDetails.value.modType, (newVal) => {
+    if (newVal) {
+        for (const mod of manager.selectionList) {
+            mod.modType = newVal;
+        }
+    }
+})
+
 //#endregion
 
 //#region 方法
@@ -61,9 +72,10 @@ function edit() {
     if (manager.selectionList.length > 0) {
         modDetails.value = {
             modVersion: getCommonValue(manager.selectionList, 'modVersion') as string,
-            tags: getCommonValue(manager.selectionList, 'tags') as ITag[],
+            tags: getTags(manager.selectionList) as ITag[],
             modWebsite: getCommonValue(manager.selectionList, 'modWebsite') as string,
             modAuthor: getCommonValue(manager.selectionList, 'modAuthor') as string,
+            modType: getCommonValue(manager.selectionList, 'modType') as number,
         }
         showEdit.value = true
     } else {
@@ -74,6 +86,16 @@ function edit() {
 function getCommonValue(list: IModInfo[], key: keyof IModInfo) {
     const firstValue = list[0][key] || '';
     return list.every(item => item[key] === firstValue) ? firstValue : '';
+}
+
+function getTags(list: IModInfo[]) {
+    const tags = list.map(item => item.tags).flat()
+
+    // 深度 去重
+    let arr = Array.from(new Set(tags.map(item => JSON.stringify(item)))).map(item => JSON.parse(item))
+    console.log(arr);
+
+    return arr
 }
 
 // 全部安装
@@ -153,6 +175,12 @@ function toDel() {
                             class="option">
                             <div :style="{ color: item.color }">{{ item.name }}</div>
                         </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item :label="$t('Type')">
+                    <el-select v-model="modDetails.modType" style="width: 100%">
+                        <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id"
+                            :label="$t(item.name)" :value="item.id" />
                     </el-select>
                 </el-form-item>
                 <el-form-item :label="$t('Website')">
