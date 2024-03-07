@@ -69,10 +69,10 @@ function openGameFolder() {
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Fold') }}</v-tooltip>
                     </el-button>
-                    <el-button text href="https://wiki.aoe.top/GMM/README.html">
+                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html" target="_blank" >
                         <v-icon>mdi-help</v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
-                    </el-button>
+                    </v-btn>
                     <SortMod v-if="settings.settings.managerGame?.sortMod"></SortMod>
                     <v-menu open-on-hover>
                         <template v-slot:activator="{ props }">

@@ -80,7 +80,7 @@ function checkUpdates() {
                 {{ $t('Document') }}
             </v-chip>
             <v-chip variant="text" label append-icon="mdi-qqchat"
-                href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=PHA9FOcayzFlxe0iU8QPWcHOy_NbBOdW&authKey=fgJvklKDg%2FeWXpG6rNDsPON7ls2omDWGJNZGGRT06QEcEDVjL%2BRLNLB7QFFPvBDL&noverify=0&group_code=825182128">
+                href="https://qm.qq.com/q/cA8Asd8kCI">
                 {{ $t('QQChat') }}
             </v-chip>
             <v-chip variant="text" label append-icon="mdi-github"

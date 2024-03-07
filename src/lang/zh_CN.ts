@@ -217,7 +217,7 @@ const Settings = {
     "Export Language": "导出语言包",
     // "Feed Xiaom": "投喂小莫",
     "Feedback": "帮助",
-    "QQChat": "QQ群: 825182128",
+    "QQChat": "QQ群: 492849207",
     "Theme": "主题",
     "Light": "浅色",
     "Dark": "深色",

@@ -6,6 +6,7 @@ import type { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics";
+import { ElMessageBox } from "element-plus";
 
 const props = defineProps<{
     id: number,
@@ -51,7 +52,11 @@ async function toDownload() {
         // AppAnalytics.sendEvent("download")
 
         if (!link.value.includes("https://mod.3dmgame.com")) {
-            window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)
+
+            ElMessageBox.confirm("该Mod需要网盘下载, 是否跳转?").then(()=>{
+                window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)
+            }).catch(()=>{})
+
             return
         }
         // axios.post('https://mod.3dmgame.com/mod/modDownload', { id: props.id })

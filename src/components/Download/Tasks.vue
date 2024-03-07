@@ -221,7 +221,7 @@ function install() {
                     </v-btn>
                     <template v-if="!isUpdate">
                         <v-btn variant="text" :title="t('Redownload')"
-                            v-if="['complete', 'error'].includes(task.status) || !task.gid" @click="restart">
+                            v-if="['complete', 'error','waiting'].includes(task.status) || !task.gid" @click="restart">
                             <v-icon>mdi-restart</v-icon>
                         </v-btn>
                         <v-btn variant="text" :title="t('Delete')" @click="del">
