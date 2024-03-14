@@ -290,6 +290,11 @@ const Games = {
     "Tekken 8": "Tekken 8",
     "Granblue Fantasy Relink": "Granblue Fantasy Relink",
     "GuLong": "GuLong",
+    "Kenshi": "Kenshi",
+    "Contraband Police": "Contraband Police",
+    "Valheim": "Valheim",
+    "Street Fighter 6": "Street Fighter 6",
+    "ACE COMBAT 7": "ACE COMBAT 7",
 }
 
 const Other = {

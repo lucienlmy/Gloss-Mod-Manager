@@ -12,8 +12,13 @@ let uploadMod = computed(() => {
 
     if (settings.settings.exploreType == "GlossMod") {
         return `https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.GlossGameId}`
-    } else {
+    } else if(settings.settings.exploreType == "NexusMods") {
         return `https://www.nexusmods.com/${settings.settings.managerGame?.NexusMods?.game_domain_name}/mods/add`
+    } else if(settings.settings.exploreType == "Thunderstore"){
+        return `https://thunderstore.io/c/${settings.settings.managerGame?.Thunderstore?.community_identifier}/create/`
+    } else if(settings.settings.exploreType == "ModIo"){
+        return `https://mod.io/games/${settings.settings.managerGame?.mod_io?.game_id}/add/mod`
+    
     }
 })
 
@@ -24,7 +29,7 @@ let uploadMod = computed(() => {
             <v-col cols="12" class="header">
                 <div class="left">
                     <SelectGame></SelectGame>
-                    <v-chip label variant="text" append-icon="mdi-arrow-expand-up" color="#4FC3F7" :href="uploadMod">
+                    <v-chip label variant="text" append-icon="mdi-arrow-expand-up" target="_blank"  color="#4FC3F7" :href="uploadMod">
                         {{ $t('Upload a Mod') }}
                     </v-chip>
                     <GlossModSelectGame v-if="!settings.settings.managerGame"></GlossModSelectGame>

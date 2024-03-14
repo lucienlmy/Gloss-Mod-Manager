@@ -17,7 +17,7 @@ export class UnrealEngine {
             {
                 id: 1,
                 name: 'pak',
-                installPath: join(bassPath, 'Content', 'Paks', 'LogicMods'),
+                installPath: join(bassPath, 'Content', 'Paks', useUE4SS ? 'LogicMods' : '~mods'),
                 async install(mod) {
                     if (useUE4SS) UnrealEngine.setBPModLoaderMod(bassPath)
                     return Manager.generalInstall(mod, this.installPath ?? "")

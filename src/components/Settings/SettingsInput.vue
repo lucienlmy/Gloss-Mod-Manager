@@ -3,7 +3,7 @@ import { ipcRenderer } from "electron";
 import { useSettings } from '@src/stores/useSettings';
 import { watch } from "vue";
 import { FileHandler } from "@src/model/FileHandler";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 
 const settings = useSettings()
@@ -23,6 +23,21 @@ function selectModStorageLocation() {
                     ElMessage.warning(`${res[0]}目录不为空, 请重新选择`)
                     return
                 }
+
+                // 判断选择的目录是否包含 "Gloss Mod Manager"
+                if (res[0].includes("Gloss Mod Manager")) {
+                    ElMessageBox.confirm(`储存目录不能在软件安装目录里面，不然软件更新后Mod会被清空.
+                    尽管如此, 您是否还依然要继续?<br/>`, '警告', {
+                        confirmButtonText: '继续',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                        dangerouslyUseHTMLString: true
+                    }).then(() => {
+                        settings.settings.modStorageLocation = res[0]
+                    }).catch(() => { })
+                    return
+                }
+                
 
                 settings.settings.modStorageLocation = res[0]
             } catch (error) {
