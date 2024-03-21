@@ -175,8 +175,8 @@ export class Manager {
      * @param installPath 安装路径
      * @param fileName 文件名称
      * @param isInstall 是否是安装
-     * @param isExtname 是否按拓展名匹配
-     * @param inGameStorage 是否在游戏目录
+     * @param isExtname 是否按拓展名匹配 = false
+     * @param inGameStorage 是否在游戏目录 = true
      */
     public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {
         const manager = useManager()
@@ -217,9 +217,10 @@ export class Manager {
      * @param isInstall 是否是安装
      * @param isExtname 是否按拓展名匹配
      * @param inGameStorage 是否在游戏目录
+     * @param pass 跳过的文件列表 (小写)
      * @returns 
      */
-    public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {
+    public static async installByFileSibling(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true, pass: string[] = []) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
@@ -232,6 +233,9 @@ export class Manager {
                 (extname(item) === fileName) :
                 (basename(item).toLowerCase() == fileName.toLowerCase())
             ) {
+                // 判断是否在 pass 里面
+                if (pass.includes(basename(item).toLowerCase())) return
+
                 // 获取所在文件夹
                 let folder = join(modStorage, item)
                 folder = join(folder, '..')

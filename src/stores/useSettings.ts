@@ -11,6 +11,7 @@ export const useSettings = defineStore('Settings', {
             { text: "繁体中文", value: "zh_TW" },
             { text: "English", value: 'en_US' },
             { text: "Turkish by:sinnerclown", value: 'tr' },
+            { text: "Vietnamese by:TQ34", value: 'vi_VN' },
         ],
     }),
     getters: {

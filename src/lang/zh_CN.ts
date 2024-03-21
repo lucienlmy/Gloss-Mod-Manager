@@ -297,6 +297,8 @@ const Games = {
     "Valheim": "英灵神殿",
     "Street Fighter 6": "街头霸王6",
     "ACE COMBAT 7": "皇牌空战7",
+    "Cult Of The Lamb": "咩咩启示录",
+    "Stellaris": "群星",
 }
 
 const Other = {

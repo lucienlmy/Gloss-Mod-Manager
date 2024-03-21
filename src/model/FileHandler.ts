@@ -396,11 +396,13 @@ export class FileHandler {
     public static runExe(exe: string) {
         let { root, dir: folder, base: name } = path.parse(exe)
         // 去除 root 中的 \
-        root = root.replace(/\\/g, '')
+        // root = root.replace(/\\/g, '')
 
-        let cmd = `${root} && cd "${folder}" && "${name}" `;
-        console.log(cmd);
-        exec(cmd)
+        // let cmd = `${root} && cd "${folder}" && "${name}" `;
+        // console.log(cmd);
+        exec(name, {
+            cwd: folder,
+        })
     }
 
     /**
