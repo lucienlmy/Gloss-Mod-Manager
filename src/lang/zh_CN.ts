@@ -299,6 +299,8 @@ const Games = {
     "ACE COMBAT 7": "皇牌空战7",
     "Cult Of The Lamb": "咩咩启示录",
     "Stellaris": "群星",
+    "Pal7": "仙剑奇侠传7",
+    "Dragons Dogma 2": "龙之信条2",
 }
 
 const Other = {

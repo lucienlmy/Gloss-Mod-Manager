@@ -297,6 +297,8 @@ const Games = {
     "ACE COMBAT 7": "ACE COMBAT 7",
     "Cult Of The Lamb": "Cult Of The Lamb",
     "Stellaris": "Stellaris",
+    "Pal7": "Pal7",
+    "Dragons Dogma 2": "Dragons Dogma 2",
 }
 
 const Other = {
