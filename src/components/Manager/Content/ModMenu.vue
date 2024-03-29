@@ -79,7 +79,9 @@ function openWeb() {
 
 function toDel() {
     if (props.mod.isInstalled) {
-        type.value?.uninstall(props.mod)
+        if (typeof (type.value?.uninstall) == 'function') {
+            type.value?.uninstall(props.mod)
+        }
     }
     FileHandler.writeLog(`删除: ${props.mod.modName}`)
     manager.deleteMod(props.mod)

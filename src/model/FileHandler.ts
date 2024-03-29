@@ -583,9 +583,9 @@ export class FileHandler {
     /**
      * 获取路径下所有的文件
      * @param folderPat 路径
-     * @param includepath 是否包含路径
-     * @param subdirectory 是否包含子文件夹
-     * @param getFolderPath 是否获取文件夹路径
+     * @param includepath 是否包含路径 false
+     * @param subdirectory 是否包含子文件夹 false
+     * @param getFolderPath 是否获取文件夹路径 false
      * @returns 
      */
     public static getAllFilesInFolder(folderPath: string, includepath: boolean = false, subdirectory: boolean = false, getFolder = false) {

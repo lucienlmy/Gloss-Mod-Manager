@@ -1,6 +1,7 @@
 // import { Download } from "@src/model/Download"
 
 export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo"
+export type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
 
 
 export interface IMod {
@@ -152,6 +153,25 @@ interface IAdvancedItem {
     defaultValue?: string | boolean
 }
 
+export interface ITypeInstall {
+    UseFunction: InstallUseFunction
+    folderName?: string
+    isInstall?: boolean
+    fileName?: string
+    include?: boolean
+    spare?: boolean
+    keepPath?: boolean
+    isExtname?: boolean
+    inGameStorage: boolean
+    pass?: string[]
+}
+
+export interface ICheckModType {
+    UseFunction: "extname" | "basename" | "inPath"
+    Keyword: string[]
+    TypeId: number
+}
+
 export interface IType {
     id: number
     name: string
@@ -161,14 +181,14 @@ export interface IType {
         icon: string
         item: IAdvancedItem[]
     }
-    install: (mod: IModInfo) => Promise<IState[] | boolean>
-    uninstall: (mod: IModInfo) => Promise<IState[] | boolean>
+    install: ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
+    uninstall: ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
     checkPlugin?: (plugin: IModInfo) => boolean
 }
 
 export interface ISupportedGames extends IGameInfo {
     modType: IType[]
-    checkModType: (mod: IModInfo) => number
+    checkModType: ((mod: IModInfo) => number) | ICheckModType[]
     sortMod?: (list: IModInfo[]) => boolean
 }
 

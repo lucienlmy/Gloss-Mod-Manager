@@ -299,6 +299,9 @@ const Games = {
     "Stellaris": "Stellaris",
     "Pal7": "Pal7",
     "Dragons Dogma 2": "Dragons Dogma 2",
+    "Atomic Heart": "Atomic Heart",
+    "Watch Dogs 2": "Watch Dogs 2",
+    "The Callisto Protocol": "The Callisto Protocol",
 }
 
 const Other = {

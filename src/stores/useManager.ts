@@ -272,7 +272,9 @@ export const useManager = defineStore('Manager', {
                 modAuthor: task.modAuthor,
                 modWebsite: task.website,
             }
-            mod.modType = settings.settings.managerGame?.checkModType(mod)
+            if (typeof (settings.settings.managerGame?.checkModType) == "function") {
+                mod.modType = settings.settings.managerGame?.checkModType(mod)
+            }
 
             this.managerModList.push(mod)
             ElMessage.success(`『${task.name}』已添加到管理列表`)
@@ -290,7 +292,9 @@ export const useManager = defineStore('Manager', {
                 weight: 500,
                 modFiles: files,
             }
-            mod.modType = settings.settings.managerGame?.checkModType(mod)
+            if (typeof (settings.settings.managerGame?.checkModType) == "function") {
+                mod.modType = settings.settings.managerGame?.checkModType(mod)
+            }
 
             this.managerModList.push(mod)
             // this.saveModInfo()

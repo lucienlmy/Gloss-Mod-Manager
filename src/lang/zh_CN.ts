@@ -301,6 +301,9 @@ const Games = {
     "Stellaris": "群星",
     "Pal7": "仙剑奇侠传7",
     "Dragons Dogma 2": "龙之信条2",
+    "Atomic Heart": "原子之心",
+    "Watch Dogs 2": '看门狗2',
+    "The Callisto Protocol": "木卫四协议",
 }
 
 const Other = {

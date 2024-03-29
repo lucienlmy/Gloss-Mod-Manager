@@ -20,8 +20,8 @@ const settings = useSettings()
 let loading = ref(false)
 
 if (!props.mod.modType) {
-    // console.log(settings.settings.managerGame);
-    props.mod.modType = settings.settings.managerGame?.checkModType(props.mod)
+    if (typeof (settings.settings.managerGame?.checkModType) == "function")
+        props.mod.modType = settings.settings.managerGame?.checkModType(props.mod)
 }
 
 let type = computed<IType | undefined>(() => {
@@ -38,29 +38,31 @@ watch(() => props.mod.isInstalled, () => {
         FileHandler.writeLog(`Install: ${props.mod.modName}`)
         // AppAnalytics.sendEvent("install", `webid: ${props.mod.webId}`)
         // 安装
-        type.value?.install(props.mod).then(res => {
-            if (typeof (res) == 'boolean' && res == false) {
-                props.mod.isInstalled = false
-            }
-            loading.value = false
-        }).catch(err => {
-            console.log(err);
-            loading.value = false
-
-        })
+        if (typeof (type.value?.install) == 'function') {
+            type.value?.install(props.mod).then(res => {
+                if (typeof (res) == 'boolean' && res == false) {
+                    props.mod.isInstalled = false
+                }
+                loading.value = false
+            }).catch(err => {
+                console.log(err);
+                loading.value = false
+            })
+        }
     } else {
         FileHandler.writeLog(`Uninstall: ${props.mod.modName}`)
         // 卸载
-        type.value?.uninstall(props.mod).then(res => {
-            if (typeof (res) == 'boolean' && res == false) {
-                props.mod.isInstalled = false
-            }
-            loading.value = false
-        }).catch(err => {
-            console.log(err);
-            loading.value = false
-
-        })
+        if (typeof (type.value?.uninstall) == 'function') {
+            type.value?.uninstall(props.mod).then(res => {
+                if (typeof (res) == 'boolean' && res == false) {
+                    props.mod.isInstalled = false
+                }
+                loading.value = false
+            }).catch(err => {
+                console.log(err);
+                loading.value = false
+            })
+        }
     }
 })
 
