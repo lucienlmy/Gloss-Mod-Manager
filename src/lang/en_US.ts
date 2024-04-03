@@ -302,6 +302,12 @@ const Games = {
     "Atomic Heart": "Atomic Heart",
     "Watch Dogs 2": "Watch Dogs 2",
     "The Callisto Protocol": "The Callisto Protocol",
+    "JUMP FORCE": "JUMP FORCE",
+    "Warriors Orochi 4": "Warriors Orochi 4",
+    "The Long Dark": "The Long Dark",
+    "Crusader Kings 3": "Crusader Kings 3",
+    "The Hunter CotW": "TheHunter: Call of the Wild",
+    "Kingdom Come Deliverance": "Kingdom Come Deliverance",
 }
 
 const Other = {
