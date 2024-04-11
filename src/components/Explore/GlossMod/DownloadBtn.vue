@@ -5,7 +5,7 @@ import { useDownload } from "@src/stores/useDownload";
 import type { IDownloadTask } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { useI18n } from "vue-i18n";
-import { AppAnalytics } from "@src/model/Analytics";
+import axios from 'axios'
 import { ElMessageBox } from "element-plus";
 
 const props = defineProps<{
@@ -53,16 +53,15 @@ async function toDownload() {
 
         if (!link.value.includes("https://mod.3dmgame.com")) {
 
-            ElMessageBox.confirm("该Mod需要网盘下载, 是否跳转?").then(()=>{
+            ElMessageBox.confirm("该Mod需要网盘下载, 是否跳转?").then(() => {
                 window.open(`https://mod.3dmgame.com/mod/${props.id}?for=download`)
-            }).catch(()=>{})
+            }).catch(() => { })
 
             return
         }
-        // axios.post('https://mod.3dmgame.com/mod/modDownload', { id: props.id })
+        axios.post('https://mod.3dmgame.com/mod/modDownload', { id: props.id })
         download.addDownloadTask(data)
-    } catch (error) {
-    }
+    } catch (error) { }
 }
 
 let text = computed(() => {

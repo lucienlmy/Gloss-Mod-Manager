@@ -150,7 +150,8 @@ async function reinstall() {
                 @click="showAdvanced = true"></v-list-item>
             <v-list-item append-icon="mdi-folder-open-outline" :title="t('Open')" @click="open"></v-list-item>
             <v-list-item v-if="Website" append-icon="mdi-web" :title="t('Website')" @click="openWeb"></v-list-item>
-            <v-list-item v-if="(props.mod.webId || mod.from)" :title="t('Update')" @click="reinstall">
+            <v-list-item v-if="(props.mod.webId || mod.from)" :title="t('Update')" @click="reinstall"
+                :disabled="manager.runing">
                 <template v-slot:append>
                     <v-badge v-if="mod.isUpdate" dot floating color="success">
                         <v-icon>mdi-refresh</v-icon>
@@ -158,7 +159,9 @@ async function reinstall() {
                     <v-icon v-else>mdi-refresh</v-icon>
                 </template>
             </v-list-item>
-            <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"> </v-list-item>
+            <v-list-item append-icon="mdi-trash-can-outline" :title="t('Delete')" @click="del"
+                :disabled="manager.runing">
+            </v-list-item>
         </v-list>
     </v-menu>
     <Teleport to="body">

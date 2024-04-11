@@ -17,13 +17,33 @@ export class UnrealEngine {
             {
                 id: 1,
                 name: 'pak',
-                installPath: join(bassPath, 'Content', 'Paks', useUE4SS ? 'LogicMods' : '~mods'),
+                installPath: join(bassPath, 'Content', 'Paks'),
+                advanced: {
+                    name: '配置',
+                    icon: 'mdi-align-horizontal-center',
+                    item: [
+                        {
+                            type: 'input',
+                            label: '安装位置',
+                            key: 'installPath',
+                            defaultValue: useUE4SS ? 'LogicMods' : '~mods'
+                        }
+                    ]
+                },
                 async install(mod) {
                     if (useUE4SS) UnrealEngine.setBPModLoaderMod(bassPath)
-                    return Manager.generalInstall(mod, this.installPath ?? "")
+                    let installPath = join(
+                        this.installPath ?? "",
+                        mod.advanced?.enabled ? mod.advanced?.data.installPath : this.advanced?.item[0].defaultValue
+                    )
+                    return Manager.generalInstall(mod, installPath)
                 },
                 async uninstall(mod) {
-                    return Manager.generalUninstall(mod, this.installPath ?? "")
+                    let installPath = join(
+                        this.installPath ?? "",
+                        mod.advanced?.enabled ? mod.advanced?.data.installPath : this.advanced?.item[0].defaultValue
+                    )
+                    return Manager.generalUninstall(mod, installPath)
                 }
             },
             {

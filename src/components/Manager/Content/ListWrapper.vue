@@ -54,7 +54,7 @@ async function drop(event: DragEvent) {
             <div class="empty" v-else>
                 <div class="empty-hint" @click="manager.selectMoeFiles">
                     <p>{{ $t('Drag and drop the Mod compressed package here for management') }}</p>
-                    <p>{{ $t('Supports zpi, rar, 7z file types') }}</p>
+                    <p>{{ $t('Supports zip, rar, 7z file types') }}</p>
                 </div>
             </div>
         </v-card>

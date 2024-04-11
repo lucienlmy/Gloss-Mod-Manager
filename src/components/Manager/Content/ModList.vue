@@ -7,7 +7,6 @@ import { computed, watch, ref } from "vue";
 import { FileHandler } from '@src/model/FileHandler';
 import { ElMessageBox } from 'element-plus';
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
-import ContentAdvanced from '@src/components/Manager/Content/Advanced.vue'
 
 const props = defineProps<{
     mod: IModInfo,
@@ -138,6 +137,8 @@ function list_drop(e: any) {
     }
 }
 //#endregion
+
+
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
@@ -173,7 +174,7 @@ function list_drop(e: any) {
                     </el-select>
                 </el-col>
                 <el-col :span="4" class="small-install">
-                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading"
+                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading" :disabled="manager.runing"
                         :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
                 </el-col>
                 <el-col :span="2" class="advanced">
@@ -223,7 +224,8 @@ function list_drop(e: any) {
                 <v-col cols="2">
                     <!-- 安装 -->
                     <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                        :loading="loading" :disabled="loading" :hide-details="true" color="#0288D1"></v-switch>
+                        :loading="loading" :disabled="loading || manager.runing" :hide-details="true"
+                        color="#0288D1"></v-switch>
                 </v-col>
                 <v-col cols="1" class="advanced">
                     <!-- <ContentAdvanced :mod="mod"></ContentAdvanced> -->

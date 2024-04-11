@@ -54,6 +54,12 @@ function openGameFolder() {
     FileHandler.openFolder(settings.settings.managerGame?.gamePath ?? "")
 }
 
+// 每秒检查游戏是否在运行中
+setInterval(() => {
+    manager.checkRuning()
+}, 1000)
+
+
 </script>
 <template>
     <v-app-bar :elevation="0" density="compact">
@@ -69,7 +75,7 @@ function openGameFolder() {
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Fold') }}</v-tooltip>
                     </el-button>
-                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html" target="_blank" >
+                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html" target="_blank">
                         <v-icon>mdi-help</v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
                     </v-btn>
@@ -96,6 +102,7 @@ function openGameFolder() {
                 </template>
             </div>
             <div class="select-game">
+                <v-chip color="#00C853" variant="text" v-if="manager.runing">{{ $t("Game is running...") }}</v-chip>
                 {{ $t('Current Game', [settings.settings.managerGame?.gameName ? $t(settings.settings.managerGame.gameName) : $t('Not Selected')]) }}
             </div>
         </div>
@@ -118,5 +125,10 @@ export default {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+}
+
+.select-game {
+    display: flex;
+    align-items: center;
 }
 </style>

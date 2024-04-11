@@ -134,7 +134,7 @@ const ManagerContent = {
     "Status": "状态",
     "Action": "操作",
     "Drag and drop the Mod compressed package here for management": "将Mod压缩包拖拽到这里进行管理",
-    "Supports zpi, rar, 7z file types": "支持zpi、rar、7z类型文件",
+    "Supports zip, rar, 7z file types": "支持zip、rar、7z类型文件",
     "Installed": "已安装",
     "Uninstalled": "未安装",
     "MD5": "MD5",
@@ -201,6 +201,7 @@ const ManagerHeader = {
     "Import completed, you can now enable these mods in the manager and enter the game...": "导入完成, 接下来你可以在管理器中启用这些模组并进入游戏了...",
 
     "Fold": "折展",
+    "Game is running...": "游戏正在运行...",
 }
 
 const Settings = {
@@ -310,6 +311,7 @@ const Games = {
     "Crusader Kings 3": "十字军之王3",
     "The Hunter CotW": "猎人: 荒野的召唤",
     "Kingdom Come Deliverance": "天国拯救",
+    "Dying Light 2": "消逝的光芒2",
 }
 
 const Other = {

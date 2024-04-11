@@ -24,6 +24,7 @@ export const useManager = defineStore('Manager', {
         installLoading: false,
         selectionMode: false,
         selectionList: [] as IModInfo[],
+        runing: false,
     }),
     getters: {
         /**
@@ -67,7 +68,7 @@ export const useManager = defineStore('Manager', {
 
             // if (state.filterType == 0) return state.managerModList.filter((item) => item?.modName.indexOf(state.search) != -1)
             // return state.managerModList.filter(item => item?.modType == state.filterType && item?.modName.indexOf(state.search) != -1)
-        }
+        },
     },
     actions: {
         // 选择Mod文件
@@ -390,6 +391,30 @@ export const useManager = defineStore('Manager', {
                     })
                 })
             }
+        },
+        // 检查游戏是否在运行
+        async checkRuning() {
+            let settings = useSettings()
+            let gameExe = settings.settings.managerGame?.gameExe
+            if (gameExe) {
+                if (typeof (gameExe) == 'string') {
+                    let res = await FileHandler.existsSync(gameExe)
+                    this.runing = res
+                } else {
+                    let runing = false
+                    for (let i in gameExe) {
+                        const item = gameExe[i];
+                        let res = await FileHandler.existsSync(item.name)
+                        if (res) {
+                            runing = true
+                            break
+                        }
+                    }
+                    this.runing = runing
+                }
+            }
+            // console.log(this.runing);
+
         }
     }
 })

@@ -640,7 +640,11 @@ export class FileHandler {
 
         return new Promise<boolean>((resolve, reject) => {
             try {
-                let cmd = `tasklist | findstr ${path.basename(name)}`
+                let taskName = path.basename(name)
+                // 截断 最多25个字符
+                taskName = taskName.length > 25 ? taskName.substring(0, 25) : taskName
+
+                let cmd = `tasklist | findstr "${taskName}"`
                 exec(cmd, (err, stdout, stderr) => {
                     // console.log(stdout);
                     if (stdout != '') {

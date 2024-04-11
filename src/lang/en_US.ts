@@ -140,7 +140,7 @@ const ManagerContent = {
     "Status": "Status",
     "Action": "Action",
     "Drag and drop the Mod compressed package here for management": "Drag and drop the Mod compressed package here for management",
-    "Supports zpi, rar, 7z file types": "Supports file types in zpi, rar, 7z",
+    "Supports zip, rar, 7z file types": "Supports file types in zip, rar, 7z",
     "Installed": "Installed",
     "Uninstalled": "Uninstalled",
     "MD5": "MD5",
@@ -200,6 +200,8 @@ const ManagerHeader = {
     "Add": "Add",
     "Tag": "Tags",
     "Color": "Color",
+
+    "Game is running...": "Game is running...",
 }
 
 const Settings = {
@@ -308,6 +310,7 @@ const Games = {
     "Crusader Kings 3": "Crusader Kings 3",
     "The Hunter CotW": "TheHunter: Call of the Wild",
     "Kingdom Come Deliverance": "Kingdom Come Deliverance",
+    "Dying Light 2": "Dying Light 2",
 }
 
 const Other = {
