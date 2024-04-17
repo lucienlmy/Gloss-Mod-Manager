@@ -37,7 +37,7 @@ function selectModStorageLocation() {
                     }).catch(() => { })
                     return
                 }
-                
+
 
                 settings.settings.modStorageLocation = res[0]
             } catch (error) {
@@ -71,8 +71,8 @@ watch(() => settings.settings.autoLaunch, () => {
         </v-col>
         <v-col cols="12" md="4">
             <!-- 设置语言 -->
-            <v-select variant="solo" :label="$t('Language')" v-model="settings.settings.language" :items="settings.langList"
-                item-title="text" item-value="value"></v-select>
+            <v-select variant="solo" :label="$t('Language')" v-model="settings.settings.language"
+                :items="settings.langList" item-title="text" item-value="value"></v-select>
         </v-col>
         <v-col cols="12" md="4">
             <!-- 设置主题 -->
@@ -82,17 +82,21 @@ watch(() => settings.settings.autoLaunch, () => {
                 { text: $t('Dark'), value: 'dark' },
             ]" item-title="text" item-value="value"></v-select>
         </v-col>
-        <v-col cols="12" sm="6" md="4">
+        <v-col cols="12" sm="6" md="3">
             <v-switch :label="$t('Auto install for download')" color="#039BE5"
                 v-model="settings.settings.autoInstall"></v-switch>
         </v-col>
-        <v-col cols="12" sm="6" md="4">
+        <v-col cols="12" sm="6" md="3">
             <v-switch :label="$t('Select Game By folder')" color="#039BE5"
                 v-model="settings.settings.selectGameByFolder"></v-switch>
         </v-col>
-        <v-col cols="12" sm="6" md="4">
+        <v-col cols="12" sm="6" md="3">
             <v-switch :label="$t('Auto start for windows')" color="#039BE5"
                 v-model="settings.settings.autoLaunch"></v-switch>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+            <v-switch :label="$t('Change in Game run')" color="#039BE5"
+                v-model="settings.settings.changeInRun"></v-switch>
         </v-col>
     </v-row>
 </template>

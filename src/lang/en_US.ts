@@ -226,6 +226,7 @@ const Settings = {
     "Mod Folder Tip": "You can set it to any directory, but don't set it to the game directory to avoid unknown errors",
     "Select Game By folder": "Select Game By folder",
     "Document": "Document",
+    "Change in Game run": "Change in Game run",
 }
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",

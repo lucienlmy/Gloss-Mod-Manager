@@ -69,6 +69,10 @@ export const useManager = defineStore('Manager', {
             // if (state.filterType == 0) return state.managerModList.filter((item) => item?.modName.indexOf(state.search) != -1)
             // return state.managerModList.filter(item => item?.modType == state.filterType && item?.modName.indexOf(state.search) != -1)
         },
+        canChange(state) {
+            let settings = useSettings()
+            return state.runing && (!settings.settings.changeInRun)
+        }
     },
     actions: {
         // 选择Mod文件

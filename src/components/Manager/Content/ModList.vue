@@ -174,7 +174,7 @@ function list_drop(e: any) {
                     </el-select>
                 </el-col>
                 <el-col :span="4" class="small-install">
-                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading" :disabled="manager.runing"
+                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading" :disabled="manager.canChange"
                         :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
                 </el-col>
                 <el-col :span="2" class="advanced">
@@ -224,7 +224,7 @@ function list_drop(e: any) {
                 <v-col cols="2">
                     <!-- 安装 -->
                     <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                        :loading="loading" :disabled="loading || manager.runing" :hide-details="true"
+                        :loading="loading" :disabled="loading || manager.canChange" :hide-details="true"
                         color="#0288D1"></v-switch>
                 </v-col>
                 <v-col cols="1" class="advanced">

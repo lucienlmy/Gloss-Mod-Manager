@@ -208,6 +208,7 @@ export interface ISettings {
     exploreType: sourceType
     selectGameByFolder: boolean
     showPakeMessage: boolean
+    changeInRun: boolean
 }
 
 export interface IDownloadTask {
