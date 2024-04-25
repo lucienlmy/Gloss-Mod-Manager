@@ -82,6 +82,7 @@ const ExploreDownloadBtn = {
     "Please manage the game first.": "请先选择游戏",
     "Downloaded": "已下载",
     "Upload a Mod": "上传作品",
+    "Netdisk download": "网盘下载",
 }
 
 const ExploreFilter = {
@@ -313,6 +314,8 @@ const Games = {
     "The Hunter CotW": "猎人: 荒野的召唤",
     "Kingdom Come Deliverance": "天国拯救",
     "Dying Light 2": "消逝的光芒2",
+    "Next Jianghu 2": "下一站江湖2",
+    "The Lost Village": "山门与幻境",
 }
 
 const Other = {

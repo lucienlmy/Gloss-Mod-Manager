@@ -81,6 +81,7 @@ const ExploreDownloadBtn = {
     "Please manage the game first.": "Please manage the game first.",
     "Downloaded": "Downloaded",
     "Upload a Mod": "Upload a Mod",
+    "Netdisk download": "Netdisk download",
 }
 
 const ExploreFilter = {
@@ -312,6 +313,8 @@ const Games = {
     "The Hunter CotW": "TheHunter: Call of the Wild",
     "Kingdom Come Deliverance": "Kingdom Come Deliverance",
     "Dying Light 2": "Dying Light 2",
+    "Next Jianghu 2": "Next Jianghu 2",
+    "The Lost Village": "The Lost Village",
 }
 
 const Other = {
