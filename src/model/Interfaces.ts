@@ -187,6 +187,7 @@ export interface IType {
 }
 
 export interface ISupportedGames extends IGameInfo {
+    // | "UnityGame" | "UnityGameILCPP2" | "UnrealEngine"
     modType: IType[]
     checkModType: ((mod: IModInfo) => number) | ICheckModType[]
     sortMod?: (list: IModInfo[]) => boolean
