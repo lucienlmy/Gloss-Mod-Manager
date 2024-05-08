@@ -316,6 +316,7 @@ const Games = {
     "Next Jianghu 2": "Next Jianghu 2",
     "The Lost Village": "The Lost Village",
     "Manor Lords": "Manor Lords",
+    "Hades2": "Hades2",
 }
 
 const Other = {

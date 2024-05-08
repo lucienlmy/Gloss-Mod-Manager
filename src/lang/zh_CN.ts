@@ -317,6 +317,7 @@ const Games = {
     "Next Jianghu 2": "下一站江湖2",
     "The Lost Village": "山门与幻境",
     "Manor Lords": "庄园领主",
+    "Hades2": "哈迪斯2",
 }
 
 const Other = {

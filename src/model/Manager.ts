@@ -177,8 +177,9 @@ export class Manager {
      * @param isInstall 是否是安装
      * @param isExtname 是否按拓展名匹配 = false
      * @param inGameStorage 是否在游戏目录 = true
+     * @param isLink 是否是软链 = true
      */
-    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true) {
+    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true, isLink: boolean = true) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
@@ -199,9 +200,11 @@ export class Manager {
             folder.forEach(item => {
                 let target = join(gameStorage, basename(item))
                 if (isInstall) {
-                    FileHandler.createLink(item, target, true)
+                    if (isLink) FileHandler.createLink(item, target, true)
+                    else FileHandler.copyFolder(item, target)
                 } else {
-                    FileHandler.removeLink(target, true)
+                    if (isLink) FileHandler.removeLink(target, true)
+                    else FileHandler.deleteFolder(target)
                 }
             })
 
