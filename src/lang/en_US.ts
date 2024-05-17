@@ -317,6 +317,9 @@ const Games = {
     "The Lost Village": "The Lost Village",
     "Manor Lords": "Manor Lords",
     "Hades2": "Hades2",
+    "Homeworld 3": "Homeworld 3",
+    "DaoYanJue": "DaoYanJue",
+    "VRising": "V Rising",
 }
 
 const Other = {

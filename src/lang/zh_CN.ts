@@ -318,6 +318,9 @@ const Games = {
     "The Lost Village": "山门与幻境",
     "Manor Lords": "庄园领主",
     "Hades2": "哈迪斯2",
+    "Homeworld 3": "家园3",
+    "DaoYanJue": "道衍诀",
+    "VRising": "夜族崛起",
 }
 
 const Other = {

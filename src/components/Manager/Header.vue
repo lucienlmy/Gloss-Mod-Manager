@@ -75,7 +75,7 @@ setInterval(() => {
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Fold') }}</v-tooltip>
                     </el-button>
-                    <v-btn variant="text" href="https://wiki.aoe.top/GMM/README.html" target="_blank">
+                    <v-btn variant="text" href="https://gmm.aoe.top/" target="_blank">
                         <v-icon>mdi-help</v-icon>
                         <v-tooltip activator="parent" location="top">{{ $t('Help') }}</v-tooltip>
                     </v-btn>
