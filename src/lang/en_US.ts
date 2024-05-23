@@ -320,6 +320,8 @@ const Games = {
     "Homeworld 3": "Homeworld 3",
     "DaoYanJue": "DaoYanJue",
     "VRising": "V Rising",
+    "Ghost of Tsushima": "Ghost of Tsushima",
+    "Lords of the Fallen": "Lords of the Fallen",
 }
 
 const Other = {

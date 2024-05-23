@@ -321,6 +321,8 @@ const Games = {
     "Homeworld 3": "家园3",
     "DaoYanJue": "道衍诀",
     "VRising": "夜族崛起",
+    "Ghost of Tsushima": "对马岛之魂",
+    "Lords of the Fallen": "堕落之主",
 }
 
 const Other = {
