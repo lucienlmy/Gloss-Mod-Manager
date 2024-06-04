@@ -232,6 +232,7 @@ ipcMain.handle('get-mod-data', async (event, arg) => {
     let res = await GetData.getMod(id)
     return res.data
 })
+
 // 获取游戏类型
 ipcMain.handle('get-types', async (event, arg) => {
     let gameId = arg.gameId;
@@ -244,6 +245,11 @@ ipcMain.handle('get-types', async (event, arg) => {
 ipcMain.handle('user-login', async (event, arg) => {
     let res = await GetData.login(arg.username, arg.password)
     return res
+})
+
+// 获取收藏列表
+ipcMain.handle('get-favorite-list', async (event, arg) => {
+    return await GetData.getFavoriteList(arg)
 })
 
 //#endregion

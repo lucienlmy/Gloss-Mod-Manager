@@ -57,25 +57,23 @@ export class FileHandler {
      * @param target 目标文件
      * @returns 
      */
-    public static copyFile(source: string, target: string): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
-            try {
-                this.createDirectory(path.dirname(target));
+    public static async copyFile(source: string, target: string) {
+        try {
+            this.createDirectory(path.dirname(target));
 
-                // 判断文件是否存在 如果存在则备份文件 名称为 *.gmmback
-                if (this.fileExists(target)) {
-                    console.log(`${target} 文件存在, 进行备份`);
-                    let backFile = target + '.gmmback'
-                    await this.copyFile(target, backFile)
-                }
-                fs.copyFileSync(source, target);
-                resolve(true)
-            } catch (err) {
-                ElMessage.error(`复制文件失败：${err}`)
-                this.writeLog(err as string)
-                reject(false)
+            // 判断文件是否存在 如果存在则备份文件 名称为 *.gmmback
+            if (this.fileExists(target)) {
+                console.log(`${target} 文件存在, 进行备份`);
+                let backFile = target + '.gmmback'
+                await this.copyFile(target, backFile)
             }
-        })
+            fs.copyFileSync(source, target);
+            return true
+        } catch (err) {
+            ElMessage.error(`复制文件失败：${err}`)
+            this.writeLog(err as string)
+            return false
+        }
     }
 
     /**
@@ -347,7 +345,6 @@ export class FileHandler {
                 ElMessage.error(`错误: ${error}`)
                 reject(error)
             }
-
         })
     }
 

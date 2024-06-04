@@ -7,6 +7,7 @@ const router = useRouter()
 const { t } = useI18n()
 
 let list = computed(() => [
+    { title: t('Games'), icon: 'mdi-gamepad-variant', to: '/Games' },
     { title: t('Manager'), icon: 'mdi-select-group', to: '/Manager' },
     { title: t('Tour'), icon: 'mdi-gamepad-circle', to: '/Explore' },
     { title: t('Settings'), icon: 'mdi-cog', to: '/Settings' },
@@ -21,8 +22,9 @@ function to(path: string) {
         <v-col cols="12">
             <v-card :title="t('Welcome to use {0}, where you can', [t('Gloss Mod Manager')])">
                 <v-row>
-                    <v-col cols="12" sm="4" v-for="item in list" :key="item.title">
-                        <div class="list" @click="to(item.to)"> <v-icon :icon="item.icon"></v-icon> {{ item.title }}</div>
+                    <v-col cols="12" sm="3" v-for="item in list" :key="item.title">
+                        <div class="list" @click="to(item.to)"> <v-icon :icon="item.icon"></v-icon> {{ item.title }}
+                        </div>
                     </v-col>
                 </v-row>
             </v-card>

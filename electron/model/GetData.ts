@@ -32,4 +32,8 @@ export class GetData {
     public static async checkAllModUpdate(modId: number[]) {
         return callApi("/gmm/checkAllModUpdate", { modId });
     }
+
+    public static async getFavoriteList(data: any) {
+        return callApi("/render/GetUserCollectModList", data);
+    }
 }

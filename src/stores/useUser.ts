@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import type { IUser } from "@src/model/Interfaces";
+import type { IMod, IModInfo, IUser } from "@src/model/Interfaces";
 import { ElectronStore } from '@src/model/ElectronStore'
 import { ElMessage } from "element-plus";
 import QRCode from 'qrcode'
@@ -16,10 +16,28 @@ export const useUser = defineStore('User', {
         password: '',
         remember: true,
         code: null as string | null,
-        timer: null as NodeJS.Timeout | null
+        timer: null as NodeJS.Timeout | null,
+        collect: {
+            list: [] as IMod[],
+            page: 1,
+            count: 1,
+        }
     }),
     getters: {
-
+        getUserAvatar(state) {
+            if (state.user?.user_avatar) {
+                // 判断是否包含 my.3dmgame.com
+                if (state.user.user_avatar.indexOf('my.3dmgame.com') != -1) {
+                    return state.user.user_avatar
+                } else {
+                    return `https://mod.3dmgame.com${state.user.user_avatar}`
+                }
+            }
+        },
+        collectLength(state) {
+            // 计算页数
+            return Math.ceil(state.collect.count / 10)
+        }
     },
     actions: {
         async login(username: string, password: string) {
@@ -98,13 +116,24 @@ export const useUser = defineStore('User', {
                 body: JSON.stringify({ code })
             }).then(async (res) => {
                 let text = JSON.parse(await res.text())
-                // console.log(text);
                 if (text.code == '00') {
                     this.saveUser(text.user)
                     this.loginBox = false
                     this.code = null
                     clearInterval(this.timer!)
                 }
+            })
+        },
+        getCollectList() {
+            ipcRenderer.invoke("get-favorite-list", { page: this.collect.page, pageSize: 10, userId: this.user?.id }).then((data) => {
+                console.log(data);
+                if (data.code == '00') {
+                    this.collect.list = data.data.mod
+                    this.collect.count = data.data.count
+                } else {
+                    ElMessage.warning(data.msg)
+                }
+
             })
         }
     }

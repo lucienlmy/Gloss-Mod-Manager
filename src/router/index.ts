@@ -14,6 +14,11 @@ const router = createRouter({
             component: () => import("@src/views/Manager.vue"),
         },
         {
+            path: "/Games",
+            name: "Games",
+            component: () => import("@src/views/Games.vue"),
+        },
+        {
             path: "/Explore",
             name: "ExploreHome",
             component: () => import("@src/views/Explore.vue"),
@@ -32,6 +37,11 @@ const router = createRouter({
                     path: "Thunderstore/:namespace/:name/:version",
                     name: "ThunderstoreModsContent",
                     component: () => import("@src/components/Explore/Thunderstore/Content/Content.vue")
+                },
+                {
+                    path: "SteamWorkshop/:workshopId",
+                    name: "SteamWorkshop",
+                    component: () => import("@src/components/Explore/SteamWorkshop/Content/Content.vue")
                 }
             ]
         },
@@ -50,6 +60,11 @@ const router = createRouter({
             name: "About",
             component: () => import("@src/views/About.vue"),
         },
+        {
+            path: "/User",
+            name: "User",
+            component: () => import("@src/views/User.vue"),
+        }
     ]
 });
 

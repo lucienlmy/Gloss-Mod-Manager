@@ -11,7 +11,9 @@ import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
 import { APIAria2 } from "@src/model/APIAria2";
 import { Expands } from "@src/model/Expands"
+
 import PackInport from '@src/components/Manager/Pack/Inport.vue'
+import SelectGameWindows from '@src/components/Manager/SelectGameWindows.vue'
 
 
 const settings = useSettings()
@@ -181,6 +183,7 @@ function setLightTheme() {
 </script>
 <template>
     <PackInport></PackInport>
+    <SelectGameWindows></SelectGameWindows>
 </template>
 <script lang='ts'>
 

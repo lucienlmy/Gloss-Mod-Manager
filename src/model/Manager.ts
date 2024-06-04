@@ -54,12 +54,12 @@ export class Manager {
      * @param keepPath 是否保留路径
      * @returns 
      */
-    public static generalInstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
+    public static generalInstall(mod: IModInfo, installPath: string, keepPath: boolean = false, inGameStorage: boolean = true): IState[] {
         // FileHandler.writeLog(`安装mod: ${mod.modName}`)
         const manager = useManager()
 
         let modStorage = join(manager.modStorage, mod.id.toString())
-        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let res: IState[] = []
         mod.modFiles.forEach(async item => {
             try {
@@ -78,10 +78,10 @@ export class Manager {
     }
 
     // 一般卸载
-    public static generalUninstall(mod: IModInfo, installPath: string, keepPath: boolean = false): IState[] {
+    public static generalUninstall(mod: IModInfo, installPath: string, keepPath: boolean = false, inGameStorage: boolean = true): IState[] {
         // FileHandler.writeLog(`卸载mod: ${mod.modName}`);
         const manager = useManager()
-        let gameStorage = join(manager.gameStorage ?? "", installPath)
+        let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let modStorage = join(manager.modStorage, mod.id.toString())
 
         let res: IState[] = []

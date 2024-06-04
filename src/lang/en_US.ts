@@ -6,6 +6,7 @@ const AppHeader = {
 }
 const LeftMenu = {
     "Home": "Home",
+    "Games": "Games",
     "Manager": "Manager",
     "Tour": "Tour",
     "Download": "Download",
@@ -176,7 +177,7 @@ const ManagerHeader = {
     "Not Selected": "Not Selected",
     "select game": "Select Game",
     "Search Game": "Search Game",
-    "Open Mod Folder": "Open Folder",
+    "Open Mod Folder": "Open Mod Folder",
     "Launch Game": "Launch Game",
     "Search Mod": "Search Mod",
     "sort by": "Sort by",
@@ -322,6 +323,9 @@ const Games = {
     "VRising": "V Rising",
     "Ghost of Tsushima": "Ghost of Tsushima",
     "Lords of the Fallen": "Lords of the Fallen",
+    "Darkest Dungeon 2": "Darkest Dungeon 2",
+    "Senua's Saga Hellblade 2": "Senua's Saga Hellblade 2",
+    "Terraria": "Terraria",
 }
 
 const Other = {

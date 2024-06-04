@@ -1,6 +1,6 @@
 // import { Download } from "@src/model/Download"
 
-export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo"
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop"
 export type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
 
 
@@ -121,6 +121,7 @@ export interface IStartExe {
 export interface IGameInfo {
     GlossGameId: number
     steamAppID: number
+    SteamWorkshop?: boolean
     installdir?: string
     gameName: string
     gameExe: string | IGameExe[]
@@ -415,4 +416,61 @@ export interface IModIoAvatar {
     original: string;
     thumb_50x50: string;
     thumb_100x100: string;
+}
+
+export interface ISteamWorkshopTag {
+    tag: string;
+    display_name: string;
+    adminonly?: boolean;
+}
+
+export interface ISteamWorkshopItem {
+    result: number;
+    publishedfileid: string;
+    creator: string;
+    creator_appid: number;
+    consumer_appid: number;
+    consumer_shortcutid: number;
+    filename: string;
+    file_size: string;
+    preview_file_size: string;
+    preview_url: string;
+    url: string;
+    hcontent_file: string;
+    hcontent_preview: string;
+    title: string;
+    file_description: string;
+    time_created: number;
+    time_updated: number;
+    visibility: number;
+    flags: number;
+    workshop_file: boolean;
+    workshop_accepted: boolean;
+    show_subscribe_all: boolean;
+    num_comments_public: number;
+    banned: boolean;
+    ban_reason: string;
+    banner: string;
+    can_be_deleted: boolean;
+    app_name: string;
+    file_type: number;
+    can_subscribe: boolean;
+    subscriptions: number;
+    favorited: number;
+    followers: number;
+    lifetime_subscriptions: number;
+    lifetime_favorited: number;
+    lifetime_followers: number;
+    lifetime_playtime: string;
+    lifetime_playtime_sessions: string;
+    views: number;
+    num_children: number;
+    num_reports: number;
+    tags: ISteamWorkshopTag[];
+    language: number;
+    maybe_inappropriate_sex: boolean;
+    maybe_inappropriate_violence: boolean;
+    revision_change_number: string;
+    revision: number;
+    ban_text_check_result: number;
 }

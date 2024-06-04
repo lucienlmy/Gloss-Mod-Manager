@@ -6,6 +6,7 @@ const AppHeader = {
 }
 const LeftMenu = {
     "Home": "首页",
+    "Games": "游戏",
     "Manager": "管理",
     "Tour": "游览",
     "Download": "下载",
@@ -180,7 +181,7 @@ const ManagerHeader = {
     "Not Selected": "未选择",
     "select game": "选择游戏",
     "Search Game": "搜索游戏",
-    "Open Mod Folder": "打开文件夹",
+    "Open Mod Folder": "打开Mod目录",
     "Launch Game": "启动游戏",
     "Search Mod": "搜索Mod",
     "sort by": "排序方式",
@@ -323,6 +324,9 @@ const Games = {
     "VRising": "夜族崛起",
     "Ghost of Tsushima": "对马岛之魂",
     "Lords of the Fallen": "堕落之主",
+    "Darkest Dungeon 2": "黑暗地牢2",
+    "Senua's Saga Hellblade 2": "地狱之刃2",
+    "Terraria": "泰拉瑞亚",
 }
 
 const Other = {

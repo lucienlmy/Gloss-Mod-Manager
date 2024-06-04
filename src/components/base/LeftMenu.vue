@@ -15,6 +15,11 @@ let lists = computed(() => [
         path: '/'
     },
     {
+        title: t("Games"),
+        icon: "mdi-gamepad-variant",
+        path: '/Games'
+    },
+    {
         title: t("Manager"),
         icon: "mdi-select-group",
         path: '/Manager'
@@ -63,7 +68,8 @@ function toBottom() {
 
 </script>
 <template>
-    <v-navigation-drawer v-model="main.leftMenu" :rail="settings.settings.leftMenuRail" permanent width="200">
+    <v-navigation-drawer v-model="main.leftMenu" :rail="settings.settings.leftMenuRail" permanent width="200"
+        class="list">
         <v-list>
             <v-list-item v-for="item in lists" :key="item.path" :to="item.path" :prepend-icon="item.icon"
                 :title="item.title">
@@ -89,7 +95,7 @@ export default {
 }
 </script>
 <style lang='less' scoped>
-.left-menu {
-    height: calc(100vh - 50px);
+.list {
+    overflow: hidden;
 }
 </style>

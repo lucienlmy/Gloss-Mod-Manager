@@ -69,7 +69,7 @@ setInterval(() => {
                 <template v-if="settings.settings.managerGame">
                     <v-chip label variant="text" append-icon="mdi-arrow-bottom-left-thick"
                         @click="manager.selectMoeFiles">{{ $t('Import Mod') }}</v-chip>
-                    <StartGame></StartGame>
+                    <StartGame :game="settings.settings.managerGame"></StartGame>
                     <el-button text @click="settings.settings.fold = !settings.settings.fold">
                         <v-icon
                             :icon="settings.settings.fold ? 'mdi-unfold-more-horizontal' : 'mdi-unfold-less-horizontal'"></v-icon>

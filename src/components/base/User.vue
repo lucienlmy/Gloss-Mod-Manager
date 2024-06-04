@@ -7,17 +7,6 @@ import { computed } from "vue";
 const user = useUser()
 const settings = useSettings()
 
-// console.log(user.user);
-let user_avatar = computed(() => {
-    if (user.user?.user_avatar) {
-        // 判断是否包含 my.3dmgame.com
-        if (user.user.user_avatar.indexOf('my.3dmgame.com') != -1) {
-            return user.user.user_avatar
-        } else {
-            return `https://mod.3dmgame.com${user.user.user_avatar}`
-        }
-    }
-})
 
 if (!user.user) {
     user.getUser()
@@ -35,9 +24,11 @@ if (!user.user) {
             <BaseLogin v-if="user.loginBox"></BaseLogin>
         </v-col>
         <v-col cols="12" class="user-data" v-else>
-            <v-avatar size="35">
-                <v-img :src="user_avatar" :alt="user.user.user_nickName" />
-            </v-avatar>
+            <router-link to="/User">
+                <v-avatar size="35">
+                    <v-img :src="user.getUserAvatar" :alt="user.user.user_nickName" />
+                </v-avatar>
+            </router-link>
             <div v-if="!settings.settings.leftMenuRail" class="user-operate">
                 <div class="user-name">{{ user.user.user_nickName }}</div>
                 <v-chip label variant="text" @click="user.logout">{{ $t('Logout') }}</v-chip>
