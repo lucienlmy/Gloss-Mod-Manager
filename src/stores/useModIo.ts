@@ -1,4 +1,4 @@
-import { IModIo } from "@src/model/Interfaces";
+import type { IModIo, IModIoModfile } from "@src/model/Interfaces";
 import { defineStore } from "pinia";
 import { useSettings } from "@src/stores/useSettings";
 
@@ -28,7 +28,7 @@ export const useModIo = defineStore('ModIo', {
         async getModList() {
             this.loading = true
             const settings = useSettings()
-            let game_id = settings.settings.managerGame?.mod_io?.game_id
+            let game_id = settings.settings.managerGame?.mod_io
 
             if (game_id) {
 
@@ -70,35 +70,37 @@ export const useModIo = defineStore('ModIo', {
             if (data) {
                 this.selected.data = data
             } else {
-
                 const settings = useSettings()
-                let game_id = settings.settings.managerGame?.mod_io?.game_id
+                let game_id = settings.settings.managerGame?.mod_io
 
-                console.log(game_id, id);
+                if (game_id) {
+                    // console.log(game_id, id);
+                    let params = new URLSearchParams({
+                        api_key: '10356e364c5af111af2e4a956a1506df',
+                    })
+                    let response = await fetch(`https://u-24301997.modapi.io/v1/games/${game_id}/mods/${id}?${params}`, {
+                        headers: {
+                            'Accept-Encoding': 'gzip',
+                            'Accept': 'application/json',
+                        }
+                    })
 
+                    data = await response.json()
 
-                let params = new URLSearchParams({
-                    api_key: '10356e364c5af111af2e4a956a1506df',
-                })
+                    let file = await this.getModFile(game_id, id)
 
-                let response = await fetch(`https://u-24301997.modapi.io/v1/games/${game_id}/mods/${id}?${params}`, {
-                    headers: {
-                        'Accept-Encoding': 'gzip',
-                        'Accept': 'application/json',
-                    }
-                })
+                    console.log(file);
 
-                data = await response.json()
-
-                this.selected.data = data
+                    data!.modfile = file[0]
+                    this.selected.data = data
+                }
             }
 
             return data
         },
-
         async getGameTags() {
             const settings = useSettings()
-            let game_id = settings.settings.managerGame?.mod_io?.game_id
+            let game_id = settings.settings.managerGame?.mod_io
 
             if (game_id) {
                 let params = new URLSearchParams({
@@ -116,7 +118,21 @@ export const useModIo = defineStore('ModIo', {
 
                 this.gameTags = data.tag_options[0].tags
             }
+        },
+        async getModFile(game_id: number, id: number) {
+            let params = new URLSearchParams({
+                api_key: '10356e364c5af111af2e4a956a1506df',
+            })
+            let response = await fetch(`https://u-24301997.modapi.io/v1/games/${game_id}/mods/${id}/files?${params}`, {
+                headers: {
+                    'Accept-Encoding': 'gzip',
+                    'Accept': 'application/json',
+                }
+            })
 
+            let data = await response.json()
+
+            return data.data as IModIoModfile[]
         }
     }
 })

@@ -26,7 +26,7 @@ let time = computed(() => new Date((modio.selected.data?.date_updated || 0) * 10
             </el-descriptions>
         </v-col>
         <v-col cols="12" class="download-btn">
-            <v-chip label variant="text" :href="modio.selected.data?.profile_url"
+            <v-chip label variant="text" :href="modio.selected.data?.profile_url" target="_blank"
                 append-icon="mdi-open-in-new">{{ $t('Open in browser') }}</v-chip>
             <ModIoDownloadBtn v-if="modio.selected.data" :mod="modio.selected.data"></ModIoDownloadBtn>
         </v-col>

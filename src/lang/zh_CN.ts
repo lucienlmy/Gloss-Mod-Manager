@@ -84,6 +84,7 @@ const ExploreDownloadBtn = {
     "Downloaded": "已下载",
     "Upload a Mod": "上传作品",
     "Netdisk download": "网盘下载",
+    "Dependencies": "依赖"
 }
 
 const ExploreFilter = {
@@ -122,6 +123,14 @@ const ExploreFilter = {
     "Subscribers": "订阅",
     "Rating": "评分",
     "Readme": "介绍",
+    "Summary": "简介",
+    "Description": "描述",
+    "Featured": "精选",
+    "Popularity": "热门",
+    "Category": "分类",
+    "GameVersion": "游戏版本",
+    "EarlyAccess": "抢先体验",
+    "FeaturedReleased": "精选发布",
 }
 
 const Welcome = {
@@ -327,6 +336,9 @@ const Games = {
     "Darkest Dungeon 2": "黑暗地牢2",
     "Senua's Saga Hellblade 2": "地狱之刃2",
     "Terraria": "泰拉瑞亚",
+    "Kerbal Space Program": "坎巴拉太空计划",
+    "Expeditions A MudRunner Game": "远征: 泥泞奔驰游戏",
+    "Legend Of Mortal": "活侠传",
 }
 
 const Other = {

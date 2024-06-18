@@ -1,8 +1,11 @@
 // import { Download } from "@src/model/Download"
 
-export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop"
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge"
 export type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
+export type TaskStatus = "active" | "waiting" | "paused" | "error" | "complete" | "removed"
 
+
+//#region 基础Mod
 
 export interface IMod {
     id: number
@@ -59,6 +62,40 @@ export interface IMod {
     mods_API?: number
 }
 
+
+export interface IModInfo {
+    id: number
+    from?: sourceType
+    webId?: string | number
+    nexus_id?: string
+    modIo_id?: number
+    Thunderstore?: {
+        namespace: string
+        name: string
+    }
+    modName: string
+    fileName: string
+    gameID?: number
+    md5: string
+    modVersion: string
+    tags?: ITag[]
+    isUpdate?: boolean
+    modType?: number
+    isInstalled: boolean
+    weight: number
+    modFiles: string[]
+    modDesc?: string
+    modAuthor?: string
+    modWebsite?: string
+    advanced?: {
+        enabled: boolean
+        data: any
+    }
+    key?: string
+}
+
+//#endregion
+
 export interface IUser {
     id: number
     user_Intr?: string
@@ -84,30 +121,7 @@ export interface IUser {
     timeout?: number
 }
 
-export interface IModInfo {
-    id: number
-    from?: sourceType
-    webId?: number
-    nexus_id?: string
-    modIo_id?: number
-    modName: string
-    gameID?: number
-    md5: string
-    modVersion: string
-    tags?: ITag[]
-    isUpdate?: boolean
-    modType?: number
-    isInstalled: boolean
-    weight: number
-    modFiles: string[]
-    modDesc?: string
-    modAuthor?: string
-    modWebsite?: string
-    advanced?: {
-        enabled: boolean
-        data: any
-    }
-}
+//#region 游戏
 
 export interface IGameExe {
     name: string
@@ -136,9 +150,8 @@ export interface IGameInfo {
     Thunderstore?: {
         community_identifier: string
     },
-    mod_io?: {
-        game_id: number
-    }
+    mod_io?: number,
+    curseforge?: number
 }
 
 export interface IState {
@@ -194,6 +207,8 @@ export interface ISupportedGames extends IGameInfo {
     sortMod?: (list: IModInfo[]) => boolean
 }
 
+//#endregion
+
 export interface ISettings {
     managerGame?: ISupportedGames
     managerGameList: ISupportedGames[]
@@ -215,15 +230,17 @@ export interface ISettings {
 
 export interface IDownloadTask {
     id: number | string
-    nexus_id?: string
     Thunderstore?: {
-        full_name?: string
+        namespace: string
+        name: string
     }
     type: sourceType
     gid?: string
+    key?: string
     name: string
+    fileName: string
     version: string
-    status: "active" | "waiting" | "paused" | "error" | "complete" | "removed"
+    status: TaskStatus
     speed: number
     totalSize: number
     downloadedSize: number
@@ -261,6 +278,8 @@ export interface ITag {
     color: string
 }
 
+//#region Thunderstore
+
 export interface IThunderstoreModVersions {
     name: string
     full_name: string
@@ -293,6 +312,11 @@ export interface IThunderstoreMod {
     versions: IThunderstoreModVersions[]
     latest: IThunderstoreModVersions
 }
+
+//#endregion
+
+
+//#region ModIo
 
 export interface IModIo {
     id: number;
@@ -418,6 +442,10 @@ export interface IModIoAvatar {
     thumb_100x100: string;
 }
 
+//#endregion
+
+//#region SteamWorkshop
+
 export interface ISteamWorkshopTag {
     tag: string;
     display_name: string;
@@ -474,3 +502,127 @@ export interface ISteamWorkshopItem {
     revision: number;
     ban_text_check_result: number;
 }
+
+//#endregion
+
+
+//#region CurseForge
+
+
+interface ICurseForgeLink {
+    websiteUrl: string;
+    wikiUrl: string | null;
+    issuesUrl: string | null;
+    sourceUrl: string | null;
+}
+
+interface ICurseForgeCategory {
+    id: number;
+    gameId: number;
+    name: string;
+    slug: string;
+    url: string;
+    iconUrl: string;
+    dateModified: string;
+    isClass: boolean;
+    classId: number;
+    parentCategoryId: number;
+}
+
+interface ICurseForgeAuthor {
+    id: number;
+    name: string;
+    url: string;
+}
+
+interface ICurseForgeLogo {
+    id: number;
+    modId: number;
+    title: string;
+    description: string;
+    thumbnailUrl: string;
+    url: string;
+}
+
+interface ICurseForgeHash {
+    value: string;
+    algo: number;
+}
+
+interface ICurseForgeSortableGameVersion {
+    gameVersionName: string;
+    gameVersionPadded: string;
+    gameVersion: string;
+    gameVersionReleaseDate: string;
+    gameVersionTypeId: number;
+}
+
+interface ICurseForgeModule {
+    name: string;
+    fingerprint: number;
+}
+
+interface ICurseForgeLatestFile {
+    id: number;
+    gameId: number;
+    modId: number;
+    isAvailable: boolean;
+    displayName: string;
+    fileName: string;
+    releaseType: number;
+    fileStatus: number;
+    hashes: ICurseForgeHash[];
+    fileDate: string;
+    fileLength: number;
+    downloadCount: number;
+    downloadUrl: string;
+    gameVersions: string[];
+    sortableGameVersions: ICurseForgeSortableGameVersion[];
+    dependencies: any[];
+    alternateFileId: number;
+    isServerPack: boolean;
+    fileFingerprint: number;
+    modules: ICurseForgeModule[];
+}
+
+interface ICurseForgeLatestFilesIndex {
+    gameVersion: string;
+    fileId: number;
+    filename: string;
+    releaseType: number;
+    gameVersionTypeId: number;
+}
+
+export interface ICurseForgeMod {
+    id: number;
+    gameId: number;
+    name: string;
+    slug: string;
+    links: ICurseForgeLink;
+    summary: string;
+    status: number;
+    downloadCount: number;
+    isFeatured: boolean;
+    primaryCategoryId: number;
+    categories: ICurseForgeCategory[];
+    classId: number;
+    authors: ICurseForgeAuthor[];
+    logo: ICurseForgeLogo;
+    screenshots: ICurseForgeLogo[];
+    mainFileId: number;
+    latestFiles: ICurseForgeLatestFile[];
+    latestFilesIndexes: ICurseForgeLatestFilesIndex[];
+    latestEarlyAccessFilesIndexes: any[];
+    dateCreated: string;
+    dateModified: string;
+    dateReleased: string;
+    allowModDistribution: boolean;
+    gamePopularityRank: number;
+    isAvailable: boolean;
+    thumbsUpCount: number;
+}
+
+
+
+
+//#endregion

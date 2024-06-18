@@ -3,11 +3,11 @@
 import UserInfo from '@src/components/User/UserInfo.vue'
 import UserCollect from '@src/components/User/UserCollect.vue'
 
-import { Steam } from '@src/model/Steam';
+// import { Steam } from '@src/model/Steam';
 
-function test() {
-    Steam.getWorkshopList(292030, 1)
-}
+// function test() {
+//     Steam.getWorkshopList(292030, 1)
+// }
 
 </script>
 <template>
@@ -15,7 +15,7 @@ function test() {
         <v-row>
             <v-col cols="12" md="6">
                 <UserInfo></UserInfo>
-                <v-btn @click="test">测试</v-btn>
+                <!-- <v-btn @click="test">测试</v-btn> -->
             </v-col>
             <v-col cols="12" md="6">
                 <UserCollect></UserCollect>

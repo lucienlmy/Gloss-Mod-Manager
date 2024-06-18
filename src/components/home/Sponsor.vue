@@ -2,6 +2,8 @@
 
 import ModIo from '@src/components/home/logo/ModIo.vue'
 import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
+import CurseForge from '@src/components/home/logo/CurseForge.vue'
+import NexusMods from '@src/components/home/logo/NexusMods.vue'
 
 </script>
 <template>
@@ -10,8 +12,23 @@ import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
         <v-card-text>
             <v-row class="sponsor">
                 <v-col cols="4" class="partner">
-                    <a href="https://mod.3dmgame.com/">
+                    <a href="https://mod.3dmgame.com/" target="_blank">
                         <v-img src="imgs/3DMGAME.webp" alt="3DMGAME" class="gloss-logo"></v-img>
+                    </a>
+                </v-col>
+                <v-col cols="4" class="partner">
+                    <a href="https://thunderstore.io/" target="_blank">
+                        <Thunderstore width="100%"></Thunderstore>
+                    </a>
+                </v-col>
+                <v-col cols="4" class="partner">
+                    <a href="https://mod.io/" target="_blank">
+                        <ModIo width="100%"></ModIo>
+                    </a>
+                </v-col>
+                <v-col cols="4" class="partner">
+                    <a href="https://www.curseforge.com/" target="_blank">
+                        <CurseForge width="100%"></CurseForge>
                     </a>
                 </v-col>
                 <!-- <v-col cols="4">
@@ -19,16 +36,6 @@ import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
                         <NexusMods height="84px" width="100%"></NexusMods>
                     </a>
                 </v-col> -->
-                <v-col cols="4" class="partner">
-                    <a href="https://thunderstore.io/">
-                        <Thunderstore width="100%"></Thunderstore>
-                    </a>
-                </v-col>
-                <v-col cols="4" class="partner">
-                    <a href="https://mod.io/">
-                        <ModIo width="100%"></ModIo>
-                    </a>
-                </v-col>
             </v-row>
         </v-card-text>
     </v-card>

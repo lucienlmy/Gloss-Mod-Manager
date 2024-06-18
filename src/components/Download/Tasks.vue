@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 // import { Download } from '@src/model/Download';
 import { FileHandler } from '@src/model/FileHandler';
-import type { IDownloadTask, IMod, IThunderstoreMod, IThunderstoreModVersions } from '@src/model/Interfaces';
+import type { IDownloadTask } from '@src/model/Interfaces';
 // import { DownloadStatus } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { useMain } from '@src/stores/useMain';
@@ -12,7 +12,7 @@ import { h, ref } from 'vue'
 import { ElMessage, ElMessageBox, ElSwitch } from 'element-plus'
 import { useManager } from '@src/stores/useManager';
 import { useI18n } from "vue-i18n"
-import { useModIo } from '@src/stores/useModIo';
+
 
 const props = defineProps<{
     task: IDownloadTask,
@@ -25,21 +25,7 @@ const manager = useManager()
 const { t } = useI18n()
 
 const modStorage = computed(() => {
-    let name = '';
-    if (props.task.type == "GlossMod") {
-        name = `${props.task.id}${extname(props.task.link)}`
-    }
-    if (props.task.type == "NexusMods") {
-        name = `${props.task.nexus_id}.${props.task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
-    }
-    if (props.task.type == "Thunderstore") {
-        name = props.task.name + '.zip'
-    }
-    if (props.task.type == "ModIo") {
-        name = props.task.id + '.zip'
-    }
-
-    return join(settings.settings.modStorageLocation, 'cache', name)
+    return join(settings.settings.modStorageLocation, 'cache', props.task.fileName)
 })
 const progress = computed(() => {
     return Math.floor(props.task.downloadedSize / props.task.totalSize * 10000) / 100; // 计算下载进度
@@ -47,7 +33,7 @@ const progress = computed(() => {
 
 
 // if (props.task.gid) {
-console.log(props.task.gid);
+// console.log(props.task.gid);
 // 每秒获取一次进度
 let timer = setInterval(onProgress, 200)
 
@@ -66,6 +52,12 @@ async function onProgress() {
                 if (settings.settings.autoInstall && download.autoInstall) {
                     install()
                 }
+            }
+
+            if (result.status == "error") {
+                ElMessage.error(`${props.task.name} 下载失败, msg:${result.errorMessage}`)
+                console.log(result);
+
             }
 
             props.task.status = result.status
@@ -134,58 +126,46 @@ async function pause() {
 
 // 重新下载
 async function restart() {
-    FileHandler.deleteFile(modStorage.value)
+    // FileHandler.deleteFile(modStorage.value)
+    download.ReStart(props.task, modStorage.value)
 
-    switch (props.task.type) {
-        case "GlossMod":
-            download.addDownloadById(props.task.id as number)
-            break;
-        case "NexusMods":
-            if (props.task.nexus_id) {
-                let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
-                download.addDownloadByNuxusId(id, game_domain_name)
-            }
-            break;
-        case "Thunderstore":
-            let { task } = props
-            let mod: IThunderstoreMod = {
-                name: task.name,
-                full_name: '',
-                owner: task.modAuthor,
-                package_url: task.website || '',
-                date_created: '',
-                date_updated: '',
-                uuid4: task.id as string,
-                rating_score: 0,
-                is_pinned: false,
-                is_deprecated: false,
-                has_nsfw_content: false,
-                categories: [],
-                versions: [],
-                latest: {
-                    version_number: task.version,
-                    download_url: task.link,
-                } as IThunderstoreModVersions,
-            }
-            download.addDownloadByThunderstore(mod)
-            break;
-        case 'ModIo':
+    // switch (props.task.type) {
+    //     case "GlossMod":
+    //         download.addDownloadById(props.task.id as number)
+    //         break;
+    //     // case "NexusMods":
+    //     //     if (props.task.nexus_id) {
+    //     //         let { id, game_domain_name } = props.task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
+    //     //         download.addDownloadByNuxusId(id, game_domain_name)
+    //     //     }
+    //     //     break;
+    //     case "Thunderstore":
+    //         let { task } = props
+    //         const thunderstore = useThunderstore()
+    //         let t_mod = await thunderstore.getModData(task.Thunderstore?.namespace, task.Thunderstore?.name)
+    //         t_mod.uuid4 = task.id as string
+    //         download.addDownloadByThunderstore(t_mod)
+    //         break;
+    //     case 'ModIo':
+    //         const modio = useModIo()
+    //         let modio_data = await modio.getModDataById(props.task.id as number)
+    //         console.log(modio_data);
+    //         if (modio_data) {
+    //             download.addDownloadByModIo(modio_data)
+    //         }
+    //         break
+    //     case 'CurseForge':
+    //         const curseforge = useCurseForge()
+    //         let cf_mod = await curseforge.GetModDataById(props.task.id as number)
+    //         console.log(cf_mod);
+    //         if (cf_mod) {
+    //             download.addDownloadByCurseForge(cf_mod)
+    //         }
 
-            const modio = useModIo()
-
-            let modData = await modio.getModDataById(props.task.id as number)
-
-            console.log(modData);
-
-
-            if (modData) {
-                download.addDownloadByModIo(modData)
-            }
-
-            break
-        default:
-            break;
-    }
+    //         break
+    //     default:
+    //         break;
+    // }
 }
 function openWeb() {
     let url = ''
@@ -221,7 +201,7 @@ function install() {
                     </v-btn>
                     <template v-if="!isUpdate">
                         <v-btn variant="text" :title="t('Redownload')"
-                            v-if="['complete', 'error','waiting'].includes(task.status) || !task.gid" @click="restart">
+                            v-if="['complete', 'error', 'waiting'].includes(task.status) || !task.gid" @click="restart">
                             <v-icon>mdi-restart</v-icon>
                         </v-btn>
                         <v-btn variant="text" :title="t('Delete')" @click="del">
@@ -235,7 +215,8 @@ function install() {
                             <v-btn variant="text" v-bind="props"><v-icon>mdi-menu</v-icon></v-btn>
                         </template>
                         <v-list>
-                            <v-list-item append-icon="mdi-web" :title="t('Open website')" @click="openWeb"> </v-list-item>
+                            <v-list-item append-icon="mdi-web" :title="t('Open website')" @click="openWeb">
+                            </v-list-item>
                             <v-list-item append-icon="mdi-zip-box-outline" :title="t('Open file')" @click="openFile"
                                 :disabled="task.status !== 'complete'">
                             </v-list-item>

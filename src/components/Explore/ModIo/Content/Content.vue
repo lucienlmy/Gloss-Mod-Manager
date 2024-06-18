@@ -49,11 +49,4 @@ export default {
     name: 'Content',
 }
 </script>
-<style lang='less' scoped>
-.back-btn {
-    position: fixed;
-    // 右下角
-    right: 1rem;
-    bottom: 1rem;
-}
-</style>
+<style lang='less' scoped></style>

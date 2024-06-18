@@ -42,6 +42,11 @@ const router = createRouter({
                     path: "SteamWorkshop/:workshopId",
                     name: "SteamWorkshop",
                     component: () => import("@src/components/Explore/SteamWorkshop/Content/Content.vue")
+                },
+                {
+                    path: "CurseForge/:CurseForgeModId",
+                    name: "CurseForgeContent",
+                    component: () => import("@src/components/Explore/CurseForge/Content/Content.vue")
                 }
             ]
         },

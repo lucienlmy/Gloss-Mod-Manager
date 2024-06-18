@@ -208,28 +208,8 @@ export const useManager = defineStore('Manager', {
                 return
             }
             if (!modStorage) {
-                // modStorage = `${settings.settings.modStorageLocation}\\cache\\${task.id}${path.extname(task.link)}`
-                // modStorage = path.join(settings.settings.modStorageLocation, 'cache', `${task.id}${path.extname(task.link)}`)
                 modStorage = (() => {
-                    let name = '';
-
-                    switch (task.type) {
-                        case "GlossMod":
-                            name = `${task.id}${path.extname(task.link)}`
-                            break;
-                        case "NexusMods":
-                            name = `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`
-                            break;
-                        case "Thunderstore":
-                            name = task.name + '.zip'
-                            break;
-                        case "ModIo":
-                            name = `${task.id}.zip`
-                            break;
-                        default:
-                            break;
-                    }
-                    return path.join(settings.settings.modStorageLocation, 'cache', name)
+                    return path.join(settings.settings.modStorageLocation, 'cache', task.fileName)
                 })()
             }
 
@@ -265,9 +245,7 @@ export const useManager = defineStore('Manager', {
             let mod: IModInfo = {
                 id: parseInt(id),
                 from: task.type,
-                webId: task.type == "GlossMod" ? task.id as number : undefined,
-                nexus_id: task.type == "NexusMods" ? task.nexus_id : undefined,
-                modIo_id: task.type == "ModIo" ? task.id as number : undefined,
+                webId: task.id,
                 modName: task.name,
                 md5: md5,
                 modVersion: task.version,
@@ -276,6 +254,12 @@ export const useManager = defineStore('Manager', {
                 modFiles: files,
                 modAuthor: task.modAuthor,
                 modWebsite: task.website,
+                fileName: task.fileName,
+                Thunderstore: {
+                    namespace: task.Thunderstore?.namespace || '',
+                    name: task.Thunderstore?.name || '',
+                },
+                key: task.key,
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
                 mod.modType = settings.settings.managerGame?.checkModType(mod)
@@ -296,6 +280,7 @@ export const useManager = defineStore('Manager', {
                 isInstalled: false,
                 weight: 500,
                 modFiles: files,
+                fileName: path.basename(file),
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
                 mod.modType = settings.settings.managerGame?.checkModType(mod)
@@ -379,7 +364,7 @@ export const useManager = defineStore('Manager', {
         async checkAllModUpdate() {
             let modId = [] as number[]
             this.managerModList.forEach(item => {
-                if (item.webId) modId.push(item.webId)
+                if (item.webId) modId.push(item.webId as number)
             })
 
             if (modId.length > 0) {

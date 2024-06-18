@@ -83,6 +83,7 @@ const ExploreDownloadBtn = {
     "Downloaded": "Downloaded",
     "Upload a Mod": "Upload a Mod",
     "Netdisk download": "Netdisk download",
+    "Dependencies": "Dependencies"
 }
 
 const ExploreFilter = {
@@ -121,6 +122,8 @@ const ExploreFilter = {
     "Subscribers": "Subscribers",
     "Rating": "Rating",
     "Readme": "Readme",
+    "Summary": "Summary",
+    "Description": "Description",
 }
 
 const Welcome = {
@@ -326,6 +329,9 @@ const Games = {
     "Darkest Dungeon 2": "Darkest Dungeon 2",
     "Senua's Saga Hellblade 2": "Senua's Saga Hellblade 2",
     "Terraria": "Terraria",
+    "Kerbal Space Program": "Kerbal Space Program",
+    "Expeditions A MudRunner Game": "Expeditions A MudRunner Game",
+    "Legend Of Mortal": "Legend Of Mortal",
 }
 
 const Other = {

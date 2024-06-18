@@ -26,7 +26,7 @@ let items = computed(() => [
             params: {
                 namespace: thunderstore.selected.data?.owner ?? "",
                 name: thunderstore.selected.data?.name ?? "",
-                version: thunderstore.selected.data?.latest.version_number ?? ""
+                version: thunderstore.selected.data?.latest?.version_number ?? "1.0"
             }
         },
         disabled: true
@@ -41,7 +41,7 @@ let items = computed(() => [
             <h1>{{ thunderstore.selected.data.name }}</h1>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-            <v-img :lazy-src="lazy_img" :src="thunderstore.selected.data.latest.icon"></v-img>
+            <v-img :lazy-src="lazy_img" :src="thunderstore.selected.data.latest?.icon"></v-img>
         </v-col>
         <v-col cols="12" sm="6" md="9">
             <ContentInfo></ContentInfo>

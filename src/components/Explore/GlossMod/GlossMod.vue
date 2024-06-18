@@ -14,13 +14,9 @@ import TurnPage from "@src/components/Explore/GlossMod/TurnPage.vue";
 
 const explore = useExplore()
 
-let loading = ref(false)
 
 if (explore.mods.length == 0) {
-    loading.value = true
-    explore.GetModList().then(() => {
-        loading.value = false
-    })
+    explore.GetModList()
 }
 
 
@@ -50,25 +46,30 @@ watch(() => explore.page, () => {
 <template>
     <Search>
         <v-text-field v-model="explore.searchText" class="search-input "
-            :placeholder="$t('You can search for what you want here')" variant="underlined" @keydown.enter="explore.search"
-            append-inner-icon="mdi-magnify" @click:append-inner="explore.search">
+            :placeholder="$t('You can search for what you want here')" variant="underlined"
+            @keydown.enter="explore.search" append-inner-icon="mdi-magnify" @click:append-inner="explore.search">
         </v-text-field>
     </Search>
     <Filter></Filter>
-    <v-row v-if="!settings.settings.managerGame && settings.settings.tourGameList.length == 0" class="empty">
-        <div @click="explore.showTourGameListDialog = true" class="empty-hint">
-            {{ $t('Please select a game first') }} <v-icon>mdi-plus</v-icon>
-        </div>
-    </v-row>
-    <v-row class="mod-wrap" v-else-if="explore.mods.length > 0">
-        <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in explore.mods" :key="item.id">
-            <ModList :mod="item"></ModList>
-        </v-col>
-        <TurnPage></TurnPage>
-    </v-row>
-    <v-col cols="12" v-else-if="!loading">
-        <el-empty :description="$t('No content yet~')" />
-    </v-col>
+    <v-card :loading="explore.loading">
+        <v-card-text>
+            <v-row v-if="!settings.settings.managerGame && settings.settings.tourGameList.length == 0" class="empty">
+                <div @click="explore.showTourGameListDialog = true" class="empty-hint">
+                    {{ $t('Please select a game first') }} <v-icon>mdi-plus</v-icon>
+                </div>
+            </v-row>
+            <v-row class="mod-wrap" v-else-if="explore.mods.length > 0 && !explore.loading">
+                <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in explore.mods" :key="item.id">
+                    <ModList :mod="item"></ModList>
+                </v-col>
+                <TurnPage></TurnPage>
+            </v-row>
+            <v-col cols="12" v-else-if="!explore.loading">
+                <el-empty :description="$t('No content yet~')" />
+            </v-col>
+        </v-card-text>
+    </v-card>
+
 </template>
 <script lang='ts'>
 

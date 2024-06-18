@@ -33,27 +33,29 @@ function delSwitchGame(game: ISupportedGames) {
 
 </script>
 <template>
-    <template v-if="settings.settings.managerGameList?.length > 0">
+    <!-- <template v-if="settings.settings.managerGameList?.length > 0">
         <v-menu open-on-hover>
             <template v-slot:activator="{ props }">
                 <v-btn variant="text" append-icon="mdi-menu-down" v-bind="props">{{ $t('select game') }}</v-btn>
             </template>
-            <v-list>
-                <v-list-item :title="$t('select game')" append-icon="mdi-plus"
-                    @click="manager.selectGameDialog = true"></v-list-item>
-                <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameName"
-                    @click.pointer="switchGame(item)" :title="$t(item.gameName)">
-                    <template v-slot:append>
+<v-list>
+    <v-list-item :title="$t('select game')" append-icon="mdi-plus"
+        @click="manager.selectGameDialog = true"></v-list-item>
+    <v-list-item v-for="item in settings.settings.managerGameList" :key="item.gameName"
+        @click.pointer="switchGame(item)" :title="$t(item.gameName)">
+        <template v-slot:append>
                         <v-btn icon="mdi-delete-outline" @click="delSwitchGame(item)" variant="text"></v-btn>
                     </template>
-                </v-list-item>
-            </v-list>
-        </v-menu>
-    </template>
-    <template v-else>
+    </v-list-item>
+</v-list>
+</v-menu>
+</template>
+<template v-else>
         <v-chip label variant="text" append-icon="mdi-plus"
             @click="manager.selectGameDialog = true">{{ $t('select game') }}</v-chip>
-    </template>
+    </template> -->
+    <v-chip label variant="text" append-icon="mdi-plus"
+        @click="manager.selectGameDialog = true">{{ $t('select game') }}</v-chip>
 </template>
 <script lang='ts'>
 

@@ -1,7 +1,7 @@
 <script lang='ts' setup>
 import type { ISteamWorkshopItem } from '@src/model/Interfaces';
 import { useMain } from "@src/stores/useMain";
-import { useSteamWorkshop } from '@src/stores/useSteamWorkshop';
+// import { useSteamWorkshop } from '@src/stores/useSteamWorkshop';
 import { computed } from 'vue';
 
 
@@ -10,21 +10,31 @@ const prop = defineProps<{
 }>()
 
 const { lazy_img, getNumber } = useMain()
-const steamWorkshop = useSteamWorkshop()
+// const steamWorkshop = useSteamWorkshop()
 
 const time = computed(() => {
     // 时间戳 time_updated: 1710596138 转换为 2024-11-14 06:55:38
     return new Date(prop.mod.time_updated * 1000).toLocaleString()
 })
 
+function open() {
+    window.open(`https://steamcommunity.com/sharedfiles/filedetails/?id=${prop.mod.publishedfileid}`)
+}
+
 </script>
 <template>
     <v-card class="mod">
 
-        <router-link :to="{ name: 'SteamWorkshop', params: { workshopId: mod.publishedfileid } }" :title="mod.title">
+        <!-- <router-link :to="{ name: 'SteamWorkshop', params: { workshopId: mod.publishedfileid } }" :title="mod.title">
             <v-img cover :lazy-src="lazy_img" :aspect-ratio="16 / 9"
                 :src="`${mod.preview_url}?imw=200&imh=200&ima=fit&impolicy=Letterbox`"></v-img>
-        </router-link>
+        </router-link> -->
+
+        <a :href="`https://steamcommunity.com/sharedfiles/filedetails/?id=${mod.publishedfileid}`" target="_blank">
+            <v-img cover :lazy-src="lazy_img" :aspect-ratio="16 / 9"
+                :src="`${mod.preview_url}?imw=200&imh=200&ima=fit&impolicy=Letterbox`"></v-img>
+        </a>
+
         <v-card-title :title="mod.title">
             <router-link :to="{ name: 'SteamWorkshop', params: { workshopId: mod.publishedfileid } }"
                 :title="mod.title">
@@ -49,7 +59,7 @@ const time = computed(() => {
         </v-card-subtitle>
         <v-card-actions class="flex-row-reverse">
             <!-- <ModIoDownloadBtn :mod="mod"></ModIoDownloadBtn> -->
-            <v-btn @click="steamWorkshop.downloadFile(mod.consumer_appid, mod.publishedfileid)">下载</v-btn>
+            <v-btn @click="open">打开</v-btn>
         </v-card-actions>
     </v-card>
 </template>

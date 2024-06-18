@@ -134,17 +134,20 @@ export const useThunderstore = defineStore('Thunderstore', {
                 this.loading = false
             }
         },
-        async getModData(namespace: string, name: string, version: string) {
-            if (namespace && name && version) {
-                let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/`, {
-                    headers: {
-                        'Accept-Encoding': 'gzip',
-                    }
-                })
-                let modData = await response.json()
-                this.selected.data = modData
-            }
-            return this.selected.data
+        async getModData(namespace?: string, name?: string) {
+
+            let data = this.modList.find(item => item.owner == namespace && item.name == name)
+            // console.log(data);
+
+
+            let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/`, {
+                headers: {
+                    'Accept-Encoding': 'gzip',
+                }
+            })
+            let modData = await response.json()
+            return { ...modData, ...data } as IThunderstoreMod
+
         },
         async getReadme(namespace: string, name: string, version: string) {
             // /api/experimental/package/{namespace}/{name}/{version}/readme/
@@ -157,6 +160,15 @@ export const useThunderstore = defineStore('Thunderstore', {
                 let readme = await response.json()
                 this.selected.readme = readme.markdown
             }
+        },
+        async getModVersionData(namespace: string, name: string, version: string) {
+            let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/${version}/`, {
+                headers: {
+                    'Accept-Encoding': 'gzip',
+                }
+            })
+
+            return await response.json()
         }
     },
 })

@@ -17,7 +17,7 @@ let uploadMod = computed(() => {
     } else if (settings.settings.exploreType == "Thunderstore") {
         return `https://thunderstore.io/c/${settings.settings.managerGame?.Thunderstore?.community_identifier}/create/`
     } else if (settings.settings.exploreType == "ModIo") {
-        return `https://mod.io/games/${settings.settings.managerGame?.mod_io?.game_id}/add/mod`
+        return `https://mod.io/games/${settings.settings.managerGame?.mod_io}/add/mod`
 
     }
 })
@@ -44,6 +44,8 @@ let uploadMod = computed(() => {
                             value="ModIo">{{ $t('mod.io') }}</v-chip>
                         <v-chip label v-if="settings.settings.managerGame?.SteamWorkshop" variant="text"
                             value="SteamWorkshop"> {{ $t('SteamWorkshop') }}</v-chip>
+                        <v-chip label v-if="settings.settings.managerGame?.curseforge" variant="text"
+                            value="CurseForge">{{ $t('CurseForge') }}</v-chip>
                     </v-chip-group>
                 </div>
             </v-col>

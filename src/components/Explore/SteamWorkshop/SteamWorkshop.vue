@@ -36,7 +36,8 @@ if (steamWorkshop.modList.length == 0) {
             <ModList :mod="item"></ModList>
         </v-col>
         <v-col cols="12" class="turn-page">
-            <v-pagination v-model="steamWorkshop.page" :length="steamWorkshop.pageLength"></v-pagination>
+            <v-pagination v-model="steamWorkshop.page" :length="steamWorkshop.pageLength"
+                @update:modelValue="steamWorkshop.getModList()"></v-pagination>
         </v-col>
     </v-row>
 </template>

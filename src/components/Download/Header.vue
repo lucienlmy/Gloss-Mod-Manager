@@ -14,7 +14,7 @@ const settings = useSettings()
 const manager = useManager()
 
 
-let delFile = ref(false)
+let delFile = ref(true)
 
 function allDel() {
     ElMessageBox({

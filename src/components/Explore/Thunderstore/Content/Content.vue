@@ -12,10 +12,14 @@ const thunderstore = useThunderstore()
 
 let { namespace, name, version } = route.params
 
-// 获取数据
-thunderstore.getModData(namespace as string, name as string, version as string)
-// 获取说明
-thunderstore.getReadme(namespace as string, name as string, version as string)
+
+async function GetData() {
+    // 获取数据
+    thunderstore.selected.data = await thunderstore.getModData(namespace as string, name as string)
+    // 获取说明
+    thunderstore.getReadme(namespace as string, name as string, version as string)
+}
+GetData()
 
 </script>
 <template>
@@ -40,11 +44,4 @@ export default {
     name: 'Content',
 }
 </script>
-<style lang='less' scoped>
-.back-btn {
-    position: fixed;
-    // 右下角
-    right: 1rem;
-    bottom: 1rem;
-}
-</style>
+<style lang='less' scoped></style>

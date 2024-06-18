@@ -35,7 +35,7 @@ const webUrl = computed(() => {
                     :label="$t('Author')">{{ thunderstore.selected.data.owner }}</el-descriptions-item>
                 <!-- <el-descriptions-item :label="$t('Update time')">{{ time }}</el-descriptions-item> -->
                 <el-descriptions-item
-                    :label="$t('Download count')">{{ thunderstore.selected.data.latest.downloads }}</el-descriptions-item>
+                    :label="$t('Download count')">{{ thunderstore.selected.data.latest?.downloads }}</el-descriptions-item>
                 <el-descriptions-item
                     :label="$t('Release time')">{{ time(thunderstore.selected.data.date_created) }}</el-descriptions-item>
                 <el-descriptions-item
@@ -44,7 +44,8 @@ const webUrl = computed(() => {
             </el-descriptions>
         </v-col>
         <v-col cols="12" class="download-btn">
-            <v-chip label variant="text" :href="webUrl" append-icon="mdi-open-in-new">{{ $t('Open in browser') }}</v-chip>
+            <v-chip label variant="text" :href="webUrl" target="_blank"
+                append-icon="mdi-open-in-new">{{ $t('Open in browser') }}</v-chip>
             <ThunderstoreDownloadBtn :mod="thunderstore.selected.data"></ThunderstoreDownloadBtn>
         </v-col>
     </v-row>

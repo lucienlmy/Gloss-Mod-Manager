@@ -68,29 +68,17 @@ export class APIAria2 {
     }
 
     // 发送消息
-    public send(request: IAria2Request): Promise<any> {
+    public async send(request: IAria2Request) {
         // return new Promise((resolve, reject) => {
         if (!request.id) request.id = APIAria2.uuid()
         request.params = [`token:${APIAria2.Token()}`, ...request.params]
-        return axios.post(`http://localhost:6800/jsonrpc`, request).then(({ data }) => {
-            return data
-        }).catch(err => {
-            return err
-        })
-
-        //     if (this.socket.readyState == 1) {
-        //         request.params = [`token:${APIAria2.Token()}`, ...request.params]
-        //         this.socket.send(JSON.stringify(request))
-        //         this.listener.pipe(
-        //             filter((msg: any) => msg.id === request.id),
-        //             // pluck('result'),
-        //             // map(x => x?.result)
-        //         ).subscribe(resolve);
-        //     } else {
-        //         console.log("readyState", this.socket.readyState);
-        //         reject(`错误: ${this.socket.}`)
-        //     }
-        // })
+        try {
+            const { data } = await axios.post(`http://localhost:6800/jsonrpc`, request);
+            return data;
+        } catch (err) {
+            console.log(err);
+            return err;
+        }
     }
 
     // 创建下载
@@ -103,7 +91,8 @@ export class APIAria2 {
                 [uri],
                 {
                     dir: dir,
-                    out: name
+                    out: name,
+                    'follow-metalink': 'mem',
                 }
             ]
         });
@@ -136,7 +125,8 @@ export class APIAria2 {
             jsonrpc: '2.0',
             id: 'progress',
             method: 'aria2.tellStatus',
-            params: [gid, ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir"]],
+            // ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir", "errorMessage"]
+            params: [gid],
         })
         // return this.listener.pipe(
         //     filter((msg: any) => msg.result?.gid === gid),

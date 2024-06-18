@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo, ICurseForgeMod } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -8,7 +8,10 @@ import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
 import { APIAria2 } from "@src/model/APIAria2";
-import { useNexusMods } from "./useNexusMods";
+import { useNexusMods } from "@src/stores/useNexusMods";
+import { useModIo } from '@src/stores/useModIo';
+import { useThunderstore } from '@src/stores/useThunderstore';
+import { useCurseForge } from '@src/stores/useCurseForge';
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -37,51 +40,43 @@ export const useDownload = defineStore('Download', {
         async initialization() {
             let config = await FileHandler.readFileSync(this.configPath, "[]")  // 读取文件
             this.downloadTaskList = JSON.parse(config)    // 转换为对象
-
-            // this.downloadTaskList.forEach(item => {
-            //     if (item.state == DownloadStatus.DOWNLOADING) {
-            //         item.state = DownloadStatus.PAUSED
-            //     }
-            // })
         },
         /**
          * 添加下载任务
-         * @param modData 
+         * @param mod 
          */
-        async addDownloadTask(modData: IMod, type: sourceType = "GlossMod") {
+        async addDownloadTask(mod: IMod, type: sourceType = "GlossMod") {
 
             // 判断是否已经存在
-            if (this.getTaskById(modData.id)) {
+            if (this.getTaskById(mod.id)) {
                 // 如果已存在则移除
-                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != modData.id)
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
             }
-
+            let fileExt = extname(mod.mods_resource_url)
+            let fileName = mod.id + fileExt
             this.downloadTaskList.unshift({
-                id: modData.id,
+                id: mod.id,
                 type: type,
-                nexus_id: modData.nexus_id,
-                name: modData.mods_title,
-                version: modData.mods_version ?? "1.0.0",
+                name: mod.mods_title,
+                version: mod.mods_version ?? "1.0.0",
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
-                link: modData.mods_resource_url,
-                modAuthor: modData.mods_author,
-                status: "waiting"
+                link: mod.mods_resource_url,
+                modAuthor: mod.mods_author,
+                status: "waiting",
+                fileName: fileName
             })
 
-            let task = this.getTaskById(modData.id) as IDownloadTask
+            let task = this.getTaskById(mod.id) as IDownloadTask
             const settings = useSettings()
-            let fileExt = extname(task.link)
             // let dest = `${settings.settings.modStorageLocation}\\cache\\`
             let dest = join(settings.settings.modStorageLocation, 'cache')
-            FileHandler.deleteFile(join(dest, `${task.id}${fileExt}`))
+            FileHandler.deleteFile(join(dest, fileName))
 
-            let gid = await this.aria2.addUri(task.link,
-                type == "GlossMod" ? `${task.id}${fileExt}` : `${task.nexus_id}.${task.link.match(/\.(\w+)(\?.*)?$/)?.[1]}`,
-                dest).catch(err => {
-                    ElMessage.error(`下载错误: ${err}`)
-                })
+            let gid = await this.aria2.addUri(task.link, fileName, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
             console.log(gid);
 
             // if (!gid.result) {
@@ -116,8 +111,8 @@ export const useDownload = defineStore('Download', {
          * @param id 任务ID
          * @returns 
          */
-        getTaskById(id: number | string): IDownloadTask | undefined {
-            return this.downloadTaskList.find(item => item.id == id) as IDownloadTask
+        getTaskById(id: number | string) {
+            return this.downloadTaskList.find(item => item.id == id)
         },
 
         /**
@@ -127,6 +122,8 @@ export const useDownload = defineStore('Download', {
             let tasks: IDownloadTask[] = JSON.parse(JSON.stringify(this.downloadTaskList))
             FileHandler.writeFile(this.configPath, JSON.stringify(tasks))
         },
+
+        //#region 添加下载到任务
 
         /**
          * 通过网页添加下载任务
@@ -158,21 +155,21 @@ export const useDownload = defineStore('Download', {
          * 通过 N网 添加下载任务
          */
         async addDownloadByNexus(mod: IMod, url: string, game_domain_name: string) {
-            console.log(mod);
-            console.log(url);
-            // https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88
-            // 正则获取文件后缀 .zip
-            let fileExt = url.match(/\.(\w+)(\?.*)?$/)?.[1]
-            // 正则匹配 https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88 中的  1-0-0 为 1.0.0
-            let version = url.match(/-(\d+-\d+-\d+-\d+)-/)?.[1]?.replace(/-/g, '.')
-            version = version?.replace(`${mod.id}.`, '')
-            console.log(fileExt);
+            // console.log(mod);
+            // console.log(url);
+            // // https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88
+            // // 正则获取文件后缀 .zip
+            // let fileExt = url.match(/\.(\w+)(\?.*)?$/)?.[1]
+            // // 正则匹配 https://cf-files.nexusmods.com/cdn/3333/10721/volhitka's Set of Materials-10721-1-0-0-1699248348.zip?md5=SlNeaPS0_CY_wvWg5QdOkw&expires=1699268500&user_id=193204934&rip=46.232.121.88 中的  1-0-0 为 1.0.0
+            // let version = url.match(/-(\d+-\d+-\d+-\d+)-/)?.[1]?.replace(/-/g, '.')
+            // version = version?.replace(`${mod.id}.`, '')
+            // console.log(fileExt);
 
-            mod.mods_version = version
-            mod.mods_resource_url = url
-            mod.nexus_id = `${game_domain_name}_${mod.id}`;
+            // mod.mods_version = version
+            // mod.mods_resource_url = url
+            // mod.nexus_id = `${game_domain_name}_${mod.id}`;
 
-            this.addDownloadTask(mod, "NexusMods")
+            // this.addDownloadTask(mod, "NexusMods")
         },
 
         async addDownloadByNuxusId(id: number, game_domain_name: string) {
@@ -194,16 +191,18 @@ export const useDownload = defineStore('Download', {
 
         },
 
-        async addDownloadByThunderstore(mod: IThunderstoreMod) {
+        async addDownloadByThunderstore(mod: IThunderstoreMod, key?: string) {
 
             // 判断是否已经存在
             if (this.getTaskById(mod.uuid4)) {
                 // 如果已存在则移除
                 this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.uuid4)
             }
+            let fileExt = '.zip'
 
+            let fileName = mod.name + fileExt
             this.downloadTaskList.unshift({
-                id: mod.uuid4,
+                id: mod.package_url,
                 type: "Thunderstore",
                 name: mod.name,
                 version: mod.latest.version_number,
@@ -214,17 +213,22 @@ export const useDownload = defineStore('Download', {
                 modAuthor: mod.owner,
                 status: "waiting",
                 website: mod.package_url,
+                fileName: fileName,
+                Thunderstore: {
+                    namespace: mod.owner,
+                    name: mod.name
+                },
+                key: key
             })
 
-            let task = this.getTaskById(mod.uuid4) as IDownloadTask
+            let task = this.getTaskById(mod.package_url) as IDownloadTask
 
             const settings = useSettings()
-            let fileExt = '.zip'
             // let dest = `${settings.settings.modStorageLocation}\\cache\\`
             let dest = join(settings.settings.modStorageLocation, 'cache')
-            FileHandler.deleteFile(join(dest, `${task.name}${fileExt}`))
+            FileHandler.deleteFile(join(dest, fileName))
 
-            let gid = await this.aria2.addUri(task.link, task.name + fileExt, dest).catch(err => {
+            let gid = await this.aria2.addUri(task.link, fileName, dest).catch(err => {
                 ElMessage.error(`下载错误: ${err}`)
             })
             console.log(gid);
@@ -241,10 +245,11 @@ export const useDownload = defineStore('Download', {
             // 判断是否已经存在
             if (this.getTaskById(mod.id)) {
                 // 如果已存在则移除
-
                 this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
             }
 
+            let fileExt = '.zip'
+            let fileName = mod.id + fileExt
             this.downloadTaskList.unshift({
                 id: mod.id,
                 type: "ModIo",
@@ -257,18 +262,18 @@ export const useDownload = defineStore('Download', {
                 modAuthor: mod.submitted_by.username,
                 status: "waiting",
                 website: mod.profile_url,
+                fileName: fileName
             })
 
             let task = this.getTaskById(mod.id) as IDownloadTask
 
             const settings = useSettings()
 
-            let fileExt = '.zip'
             // let dest = `${settings.settings.modStorageLocation}\\cache\\`
             let dest = join(settings.settings.modStorageLocation, 'cache')
-            FileHandler.deleteFile(join(dest, `${mod.id}${fileExt}`))   // 删除旧文件
+            FileHandler.deleteFile(join(dest, fileName))   // 删除旧文件
 
-            let gid = await this.aria2.addUri(task.link, mod.id + fileExt, dest).catch(err => {
+            let gid = await this.aria2.addUri(task.link, fileName, dest).catch(err => {
                 ElMessage.error(`下载错误: ${err}`)
             })
             console.log(gid);
@@ -278,7 +283,101 @@ export const useDownload = defineStore('Download', {
             ElMessage.success(`${task.name} 已添加到下载列表`)
 
 
-        }
+        },
 
+        async addDownloadByCurseForge(mod: ICurseForgeMod) {
+            // 判断是否已经存在
+            if (this.getTaskById(mod.id)) {
+                // 如果已存在则移除
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
+            }
+
+            // 将 mod.latestFiles[0].downloadUrl 里面的 edge.forgecdn.net 替换为 mediafilez.forgecdn.net
+            let downloadUrl = mod.latestFiles[0].downloadUrl.replace("edge.forgecdn.net", "mediafilez.forgecdn.net")
+
+            let fileName = mod.latestFiles[0].fileName
+            this.downloadTaskList.unshift({
+                id: mod.id,
+                type: "CurseForge",
+                name: mod.name,
+                version: mod.latestFilesIndexes[0].gameVersion,
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: downloadUrl,
+                modAuthor: mod.authors[0].name,
+                website: mod.links.websiteUrl,
+                status: "waiting",
+                fileName: fileName
+            })
+            let task = this.getTaskById(mod.id) as IDownloadTask
+
+            console.log(task);
+
+
+            const settings = useSettings()
+
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+
+            FileHandler.deleteFile(join(dest, fileName))   // 删除旧文件
+
+            let gid = await this.aria2.addUri(task.link, fileName, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+            console.log(gid);
+
+            task.gid = gid.result
+
+            ElMessage.success(`${task.name} 已添加到下载列表`)
+
+        },
+
+        //#endregion
+
+
+        //#region 重新下载
+        async ReStart(task: IDownloadTask, modStorage: string) {
+            FileHandler.deleteFile(modStorage)
+
+            switch (task.type) {
+                case "GlossMod":
+                    this.addDownloadById(task.id as number)
+                    break;
+                // case "NexusMods":
+                //     if (task.nexus_id) {
+                //         let { id, game_domain_name } = task.nexus_id.match(/(?<game_domain_name>.+)_(?<id>\d+)/)?.groups as any
+                //         download.addDownloadByNuxusId(id, game_domain_name)
+                //     }
+                //     break;
+                case "Thunderstore":
+                    const thunderstore = useThunderstore()
+                    let t_mod = await thunderstore.getModData(task.Thunderstore?.namespace, task.Thunderstore?.name)
+                    t_mod.uuid4 = task.id as string
+                    this.addDownloadByThunderstore(t_mod)
+                    break;
+                case 'ModIo':
+                    const modio = useModIo()
+                    let modio_data = await modio.getModDataById(task.id as number)
+                    console.log(modio_data);
+                    if (modio_data) {
+                        this.addDownloadByModIo(modio_data)
+                    }
+                    break
+                case 'CurseForge':
+                    const curseforge = useCurseForge()
+                    let cf_mod = await curseforge.GetModDataById(task.id as string)
+                    console.log(cf_mod);
+                    if (cf_mod) {
+                        this.addDownloadByCurseForge(cf_mod)
+                    }
+
+                    break
+                default:
+                    break;
+            }
+        },
+
+
+        //#endregion
     }
 })

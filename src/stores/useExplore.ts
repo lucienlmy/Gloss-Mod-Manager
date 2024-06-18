@@ -19,7 +19,7 @@ export const useExplore = defineStore('Explore', {
         showTourGameListDialog: false,
         gameTypeList: [] as any[],
         count: 1,
-        // gameId: 0 as number | string
+        loading: false,
 
     }),
     getters: {
@@ -37,7 +37,7 @@ export const useExplore = defineStore('Explore', {
     actions: {
         async GetModList() {
             const user = useUser()
-
+            this.loading = true
             let data = await ipcRenderer.invoke("get-mod-list", {
                 page: this.page,
                 pageSize: this.pageSize,
@@ -54,8 +54,8 @@ export const useExplore = defineStore('Explore', {
 
             this.mods = data.data.mod
             this.count = data.data.count
-            document.documentElement.scrollTop = 0
-
+            // document.documentElement.scrollTop = 0
+            this.loading = false
         },
         getGameType() {
             const settings = useSettings()
