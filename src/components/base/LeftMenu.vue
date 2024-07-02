@@ -35,6 +35,11 @@ let lists = computed(() => [
         path: "/Download"
     },
     {
+        title: t("Backup"),
+        icon: "mdi-file-star-outline",
+        path: '/Backup'
+    },
+    {
         title: t("Settings"),
         icon: "mdi-cog",
         path: '/Settings'

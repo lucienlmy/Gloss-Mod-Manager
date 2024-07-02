@@ -150,8 +150,9 @@ export interface IGameInfo {
     Thunderstore?: {
         community_identifier: string
     },
-    mod_io?: number,
+    mod_io?: number
     curseforge?: number
+    archivePath?: string
 }
 
 export interface IState {
@@ -622,7 +623,24 @@ export interface ICurseForgeMod {
     thumbsUpCount: number;
 }
 
+//#endregion
 
+//#region 备份
+
+export interface IArchive {
+    name: string
+    zipFile: string
+    files: string[]
+    size: number
+    time: number
+}
+
+
+export interface ITree {
+    label: string
+    filePath: string
+    children?: ITree[]
+}
 
 
 //#endregion

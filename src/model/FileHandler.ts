@@ -5,7 +5,7 @@
 import * as fs from 'fs';
 // import fs from 'fs/promises';
 import * as path from 'path';
-import { homedir } from "os";
+import { homedir, userInfo } from "os";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
 import { exec, execSync } from 'child_process';
@@ -674,5 +674,14 @@ export class FileHandler {
      */
     public static compareFileName(name1: string, name2: string) {
         return path.basename(name1).toLowerCase() == path.basename(name2).toLowerCase()
+    }
+
+    /**
+     * 获取 appdata 路径
+     * @returns 返回 C:\Users\[用户名]\AppData
+     */
+    public static GetAppData() {
+        const username = userInfo().username;
+        return path.join('C:', 'Users', username, 'AppData');
     }
 }

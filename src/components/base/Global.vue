@@ -14,13 +14,16 @@ import { Expands } from "@src/model/Expands"
 
 import PackInport from '@src/components/Manager/Pack/Inport.vue'
 import SelectGameWindows from '@src/components/Manager/SelectGameWindows.vue'
+import { useArchive } from "@src/stores/useArchive";
+import { useBackupGame } from "@src/stores/useBackupGame";
 
 
 const settings = useSettings()
 const download = useDownload()
 const manager = useManager()
 const { locale } = useI18n()
-
+const archive = useArchive()
+const backupGame = useBackupGame()
 
 
 APIAria2.init()             // 初始化 Aria2
@@ -49,7 +52,7 @@ if (!settings.settings.managerGameList) {
 //#region 初始化下载
 watch(() => download.downloadTaskList, () => {
     download.saveTaskConfig()
-    console.log(`当前下载缓存目录: ${settings.settings.modStorageLocation}\\cache`);
+    // console.log(`当前下载缓存目录: ${settings.settings.modStorageLocation}\\cache`);
 }, { deep: true })
 
 
@@ -177,6 +180,19 @@ function setLightTheme() {
 
 //#endregion
 
+
+//#region 监听游戏切换
+
+watch(() => settings.settings.managerGame, () => {
+    archive.getArchiveList()
+    archive.getBackupList()
+
+    backupGame.getBackupList()
+    backupGame.getGameFileList()
+
+})
+
+//#endregion
 
 
 

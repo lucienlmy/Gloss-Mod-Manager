@@ -240,6 +240,28 @@ const Settings = {
     "Change in Game run": "游戏运行时修改",
 }
 
+const Backup = {
+    "Backup": "备份",
+    "No save directory set": "未设置存档目录",
+    "Backup Saves": "备份存档",
+    "Saves Directory": "存档目录",
+    "Backup Directory": "备份目录",
+    "Backup Name": "备份名称",
+    "Name already exists": "备份名称已存在",
+    "Please enter a name": "请输入名称",
+    "Please select at least one saves to back up": "请至少选择一个存档进行备份",
+    "Game saves": "游戏存档",
+    "Refresh": "刷新",
+    "Saves is empty": "存档为空",
+    "Are you sure you want to delete this backup?": "确定要删除这个备份吗?",
+    "Are you sure you want to restore this backup?": "确定要还原这个备份吗?",
+    "Backup List": "备份列表",
+    "No backup yet": "暂无备份",
+    "Revert": "还原",
+    "Backup Games": "备份游戏",
+    "Game Folder": "游戏目录",
+    "The game directory is empty": "游戏目录为空",
+}
 const Games = {
     "Cyberpunk 2077": "赛博朋克2077",
     "ELDEN RING": "艾尔登法环",
@@ -393,6 +415,7 @@ const lang = {
     ...ManagerContent,
     ...ManagerHeader,
     ...Settings,
+    ...Backup,
     ...Games,
     ...Other,
 }

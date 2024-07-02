@@ -71,9 +71,38 @@ export class Steam {
                 return path.join(gameRootPath, 'steamapps', 'common', installdir)
             }
         }
-
         return ""
     }
+
+    public static GetLastSteamId32() {
+        // C:\Program Files (x86)\Steam\config\loginusers.vdf
+        let steamPath = this.getSteamInstallPath()
+        if (steamPath) {
+            let loginusers = FileHandler.readFile(path.join(steamPath, "config", "loginusers.vdf"))
+            let data: any = parse(loginusers)
+
+            let lastSteamId64 = BigInt(0)
+            let lastSteamId32 = BigInt(0)
+            const steamBaseBigInt = BigInt("76561197960265728");
+
+            for (let steamid in data['users']) {
+                const item = data['users'][steamid]
+                let back = data['users'][lastSteamId64.toString()]
+                // 获取 item.Timestamp 最大 的 steamid 赋值给 lastSteamId
+                if (lastSteamId64 == BigInt(0)) {
+                    lastSteamId64 = BigInt(steamid)
+                } else if (back && item['Timestamp'] > back['Timestamp']) {
+                    lastSteamId64 = BigInt(steamid)
+                }
+            }
+            if (lastSteamId64 != BigInt(0)) {
+                lastSteamId32 = lastSteamId64 - steamBaseBigInt
+            }
+            return lastSteamId32.toString()
+        }
+        return ""
+    }
+
 
     // 获取创意工坊列表
     public static getWorkshopList(appid: number, page: number, numperpage: number = 24, return_details: boolean = true) {

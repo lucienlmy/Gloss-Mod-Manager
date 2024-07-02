@@ -106,24 +106,6 @@ export class Unzipper {
                     resolve(data ?? "")
                 }
             })
-
-            // const myStream = extractFull(zipPath, target, {
-            //     $bin: await this.get7zip(),
-            //     charset: 'utf-8',
-            //     $cherryPick: [file]
-            // })
-            // myStream.on('data', function (data) {
-            //     console.log(data);
-
-            // })
-            // myStream.on('error', (err) => {
-            //     reject(err)
-            // })
-            // myStream.on('end', function () {
-            //     let data = FileHandler.readFile(path.join(target, file))
-            //     FileHandler.deleteFolder(target)
-            //     resolve(data ?? "")
-            // })
         })
     }
 
@@ -194,20 +176,18 @@ export class Unzipper {
      * @param zipPath zip文件路径
      * @param name 重命名列表
      */
-    public static async renameForZip(zipPath: string, name: string[][]): Promise<void> {
+    public static async renameForZip(zipPath: string, name: string[][]) {
         return new Promise(async (resolve, reject) => {
-            const myStream = rename(zipPath, name, {
-                $bin: await this.get7zip(),
-                charset: 'utf-8',
-            })
-            myStream.on('data', function (data) {
-                console.log(data);
-            })
-            myStream.on('error', (err) => {
-                reject(err)
-            })
-            myStream.on('end', function () {
-                resolve()
+            // 7z rn 
+            let _7z = await this.get7zip()
+            name.forEach(item => {
+                exec(`"${_7z}" rn "${zipPath}" "${item[0]}" "${item[1]}"`, (err, stdout, stderr) => {
+                    if (err) reject(err)
+                    if (stderr) reject(stderr)
+                    if (stdout) {
+                        resolve(stdout)
+                    }
+                })
             })
         })
     }
@@ -240,4 +220,30 @@ export class Unzipper {
         })
     }
 
+    /**
+     * 批量将文件添加到压缩包 (保持路径)
+     * @param zip 压缩包地址
+     * @param fileList 文件列表
+     * @param bassPath 基础目录
+     * @returns 
+     */
+    public static async AddFileListToZip(zip: string, fileList: string[], bassPath: string) {
+        return new Promise(async (resolve, reject) => {
+
+            let listFile = path.join(path.dirname(zip), 'list.txt')
+            FileHandler.writeFile(listFile, fileList.join('\n'))
+            let _7z = await this.get7zip()
+            exec(`"${_7z}" a "${zip}" @"${listFile}" -spf`, {
+                cwd: bassPath
+            }, (err, stdout, stderr) => {
+
+                if (err) reject(err)
+                if (stderr) reject(stderr)
+                if (stdout) {
+                    FileHandler.deleteFile(listFile)
+                    resolve(stdout)
+                }
+            })
+        })
+    }
 }

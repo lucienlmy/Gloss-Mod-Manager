@@ -233,6 +233,30 @@ const Settings = {
     "Document": "Document",
     "Change in Game run": "Change in Game run",
 }
+
+const Backup = {
+    "Backup": "Backup",
+    "No save directory set": "No save directory set",
+    "Backup Saves": "Backup Saves",
+    "Saves Directory": "Saves Directory",
+    "Backup Directory": "Backup Directory",
+    "Backup Name": "Backup Name",
+    "Name already exists": "Name already exists",
+    "Please enter a name": "Please enter a name",
+    "Please select at least one saves to back up": "Please select at least one saves to back up",
+    "Game saves": "Game saves",
+    "Refresh": "Refresh",
+    "Saves is empty": "Saves is empty",
+    "Are you sure you want to delete this backup?": "Are you sure you want to delete this backup?",
+    "Are you sure you want to restore this backup?": "Are you sure you want to restore this backup?",
+    "Backup List": "Backup List",
+    "No backup yet": "No backup yet",
+    "Revert": "Revert",
+    "Backup Games": "Backup Games",
+    "Game Folder": "Game Folder",
+    "The game directory is empty": "The game directory is empty",
+}
+
 const Games = {
     "Cyberpunk 2077": "Cyberpunk 2077",
     "ELDEN RING": "ELDEN RING",
@@ -383,6 +407,7 @@ const lang = {
     ...ManagerHeader,
     ...Settings,
     ...Games,
+    ...Backup,
     ...Other,
 }
 

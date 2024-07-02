@@ -63,6 +63,7 @@ export class UnityGame {
         mod.modFiles.forEach(item => {
             if (basename(item).toLowerCase() == 'winhttp.dll') BepInEx = true
             if (extname(item) == '.dll') plugins = true
+            if (item.toLocaleLowerCase().indexOf('plugins') > -1) plugins = true
         })
 
         if (BepInEx) return 1
