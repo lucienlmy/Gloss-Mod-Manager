@@ -18,7 +18,7 @@ async function startGame(startExe: string) {
             exec(`start ${startExe}`)
         } else {
             startExe = join(props.game?.gamePath ?? "", startExe)
-            console.log(startExe);
+            // console.log(startExe);
             FileHandler.runExe(startExe)
         }
         ElMessage.success("启动成功~")

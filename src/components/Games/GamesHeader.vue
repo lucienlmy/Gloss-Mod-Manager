@@ -1,28 +1,44 @@
 <script lang='ts' setup>
-import { useSettings } from '@src/stores/useSettings';
 
-import GameList from '@src/components/Games/GamesList.vue'
 import SelectGame from '@src/components/Manager/SelectGame.vue'
 import { useManager } from '@src/stores/useManager';
 
-const Settings = useSettings()
+import GameList from '@src/components/Games/GamesList.vue'
+import { useGames } from "@src/stores/useGames";
+
+const games = useGames()
 const manager = useManager()
 
-// console.log(Settings.settings.managerGameList);
 
 </script>
 <template>
+    <v-app-bar :elevation="0" density="compact">
+        <v-container fluid>
+            <v-row>
+                <v-col cols="4" class="hader-lift">
+                    游戏库 <SelectGame></SelectGame>
+                    <v-btn @click="games.showLst = !games.showLst">
+                        <v-icon v-if="games.showLst">mdi-view-comfy</v-icon>
+                        <v-icon v-else>mdi-format-list-bulleted</v-icon>
+                    </v-btn>
+                </v-col>
+                <v-col cols="8">
+                    <v-text-field hide-details variant="solo" append-inner-icon="mdi-magnify" placeholder="搜索游戏"
+                        v-model="games.search">
+                    </v-text-field>
+                </v-col>
+            </v-row>
+        </v-container>
+    </v-app-bar>
+
     <v-card>
-        <v-card-title>游戏库 <SelectGame></SelectGame> </v-card-title>
         <v-card-text>
             <v-row>
-                <v-col cols="3">
+                <v-col cols="3" v-if="!games.showLst">
                     <div class="add-game" @click="manager.selectGameDialog = true"></div>
                     <div class="add-game-text">{{ $t("Add Game") }}</div>
                 </v-col>
-                <v-col cols="3" v-for="item in Settings.settings.managerGameList" :key="item.GlossGameId">
-                    <GameList :item="item"></GameList>
-                </v-col>
+                <GameList v-for="item in games.gameList" :key="item.GlossGameId" :item="item"></GameList>
             </v-row>
         </v-card-text>
     </v-card>
@@ -34,6 +50,12 @@ export default {
 }
 </script>
 <style lang='less' scoped>
+.hader-lift {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
 .add-game {
     position: relative;
     width: 100px;

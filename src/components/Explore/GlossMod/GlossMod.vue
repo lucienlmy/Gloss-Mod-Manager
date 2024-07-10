@@ -22,7 +22,7 @@ if (explore.mods.length == 0) {
 
 const settings = useSettings()
 
-console.log(settings.settings.tourGameList.length);
+// console.log(settings.settings.tourGameList.length);
 
 
 

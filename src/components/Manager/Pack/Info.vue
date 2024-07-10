@@ -25,7 +25,7 @@ packs.Info.gameID = settings.settings.managerGame?.GlossGameId
 packs.Info.author = user.user?.user_nickName
 
 
-console.log(packs.Info.gameID);
+// console.log(packs.Info.gameID);
 
 
 </script>

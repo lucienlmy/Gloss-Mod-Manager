@@ -16,14 +16,18 @@ import PackInport from '@src/components/Manager/Pack/Inport.vue'
 import SelectGameWindows from '@src/components/Manager/SelectGameWindows.vue'
 import { useArchive } from "@src/stores/useArchive";
 import { useBackupGame } from "@src/stores/useBackupGame";
+import { useMain } from "@src/stores/useMain";
+import { useRouter } from 'vue-router'
 
-
+const { locale } = useI18n()
 const settings = useSettings()
 const download = useDownload()
 const manager = useManager()
-const { locale } = useI18n()
 const archive = useArchive()
 const backupGame = useBackupGame()
+const main = useMain()
+const router = useRouter()
+
 
 
 APIAria2.init()             // 初始化 Aria2
@@ -195,6 +199,12 @@ watch(() => settings.settings.managerGame, () => {
 //#endregion
 
 
+//#region 自定义启动页
+if (settings.settings.defaultPage && !main.start) {
+    main.start = true
+    router.push({ name: settings.settings.defaultPage })
+}
+//#endregion
 
 </script>
 <template>

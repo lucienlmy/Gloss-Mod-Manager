@@ -16,7 +16,7 @@ const settings = useSettings()
 <template>
     <v-container fluid>
         <Header></Header>
-        <template v-if="$route.name == 'ExploreHome'">
+        <template v-if="$route.name == 'Explore'">
             <GlossMod v-if="settings.settings.exploreType == 'GlossMod'"> </GlossMod>
             <NexusMods v-if="settings.settings.exploreType == 'NexusMods'"> </NexusMods>
             <Thunderstore v-if="settings.settings.exploreType == 'Thunderstore'"> </Thunderstore>

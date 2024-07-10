@@ -42,7 +42,7 @@ export const useModIo = defineStore('ModIo', {
                     _offset: ((this.page - 1) * this.pageSize).toString(),
                 })
 
-                console.log(params.toString());
+                // console.log(params.toString());
 
 
                 let response = await fetch(`https://u-24301997.modapi.io/v1/games/${game_id}/mods?${params}`, {

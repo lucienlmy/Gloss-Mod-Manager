@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo, ICurseForgeMod } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo, ICurseForgeMod, IGitHubAsset } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -12,6 +12,7 @@ import { useNexusMods } from "@src/stores/useNexusMods";
 import { useModIo } from '@src/stores/useModIo';
 import { useThunderstore } from '@src/stores/useThunderstore';
 import { useCurseForge } from '@src/stores/useCurseForge';
+import { useGithub } from "./useGithub";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -21,7 +22,7 @@ export const useDownload = defineStore('Download', {
         searchName: "",
         aria2: new APIAria2(),
         showAddTaskDialog: false,
-        addTaskTab: 0,
+        addTaskTab: 'GlossMod',
         form: {
             url: '',
             id: '',
@@ -134,25 +135,25 @@ export const useDownload = defineStore('Download', {
             // let url = gmm://installmod/172999?game=185&name=只狼：影逝二度
             const params = new URLSearchParams(url.replace("gmm://installmod/", ""));
             const id = params.get("id");
-            const game = params.get("game");
-            const name = params.get("name");
-            const settings = useSettings()
+            // const game = params.get("game");
+            // const name = params.get("name");
+            // const settings = useSettings()
 
-            if (!settings.settings.managerGame) {
-                ElMessage.error(`该Mod是 ${name} 的Mod, 请先在“管理”中选择此游戏.`)
-                return
-            }
+            // if (!settings.settings.managerGame) {
+            //     ElMessage.error(`该Mod是 ${name} 的Mod, 请先在“管理”中选择此游戏.`)
+            //     return
+            // }
 
-            if (game != (settings.settings.managerGame.GlossGameId).toString()) {
-                ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)
-                return
-            }
+            // if (game != (settings.settings.managerGame.GlossGameId).toString()) {
+            //     ElMessage.error(`该Mod是 ${name} 的Mod, 无法安装到 ${settings.settings.managerGame.gameName} 中.`)
+            //     return
+            // }
 
             this.addDownloadById(Number(id))
         },
 
         /**
-         * 通过 N网 添加下载任务
+         * 通过 第三方网站 添加下载任务
          */
         async addDownloadByNexus(mod: IMod, url: string, game_domain_name: string) {
             // console.log(mod);
@@ -332,6 +333,49 @@ export const useDownload = defineStore('Download', {
 
         },
 
+        async addDownloadByGitHub(mod: IGitHubAsset, version: string, website: string) {
+            // 判断是否已经存在
+            if (this.getTaskById(mod.id)) {
+                // 如果已存在则移除
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
+            }
+
+            this.downloadTaskList.unshift({
+                id: mod.id,
+                type: "GitHub",
+                name: mod.name,
+                version: version,
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: mod.browser_download_url,
+                modAuthor: mod.uploader.login,
+                website: website,
+                status: "waiting",
+                fileName: mod.name
+            })
+            let task = this.getTaskById(mod.id) as IDownloadTask
+
+            console.log(task);
+
+
+            const settings = useSettings()
+
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+
+            FileHandler.deleteFile(join(dest, mod.name))   // 删除旧文件
+
+            let gid = await this.aria2.addUri(task.link, mod.name, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+            console.log(gid);
+
+            task.gid = gid.result
+
+            ElMessage.success(`${task.name} 已添加到下载列表`)
+
+        },
+
         //#endregion
 
 
@@ -371,6 +415,18 @@ export const useDownload = defineStore('Download', {
                         this.addDownloadByCurseForge(cf_mod)
                     }
 
+                    break
+                case 'GitHub':
+                    const github = useGithub()
+                    if (task.website) {
+                        let release = await github.parse(task.website)
+                        if (release) {
+                            let mod = release.assets.find(item => item.name == task.fileName)
+                            if (mod) {
+                                this.addDownloadByGitHub(mod, release.tag_name, task.website)
+                            }
+                        }
+                    }
                     break
                 default:
                     break;

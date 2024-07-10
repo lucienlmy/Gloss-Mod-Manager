@@ -22,7 +22,7 @@ function switchGame(game: ISupportedGames) {
         ...sGame,
     }
 
-    console.log(settings.settings.managerGame);
+    // console.log(settings.settings.managerGame);
 
     manager.getModInfo()
 }

@@ -6,6 +6,8 @@ import StartGame from '@src/components/Manager/StartGame.vue'
 import { FileHandler } from "@src/model/FileHandler"
 import { join } from 'path'
 import { useManager } from "@src/stores/useManager"
+import { AppAnalytics } from "@src/model/Analytics"
+import { useGames } from "@src/stores/useGames"
 
 const props = defineProps<{
     item: ISupportedGames
@@ -14,9 +16,12 @@ const props = defineProps<{
 const settings = useSettings()
 const manager = useManager()
 const router = useRouter()
+const games = useGames()
 
 function ChangeGame() {
     let sgame = manager.supportedGames.find(item => item.GlossGameId == props.item.GlossGameId)
+
+    AppAnalytics.sendEvent(`switch_game`, props.item.gameName)
 
     settings.settings.managerGame = {
         ...props.item,
@@ -39,27 +44,51 @@ function openModFolder() {
 
 </script>
 <template>
-    <v-card>
-        <v-img class="cover" @click="ChangeGame" :aspect-ratio="16 / 9" :src="item.gameCoverImg"></v-img>
-        <v-card-text>{{ $t(item.gameName) }}</v-card-text>
-        <v-card-actions class="actions">
-            <v-menu open-on-hover>
-                <template v-slot:activator="{ props }">
-                    <v-btn v-bind="props">
-                        <v-icon>mdi-menu</v-icon>
-                    </v-btn>
-                </template>
-                <v-list>
-                    <v-list-item :title="$t('Open Mod Folder')" @click="openModFolder"
-                        append-icon="mdi-folder-open-outline"></v-list-item>
-                    <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
-                        append-icon="mdi-folder-open-outline"></v-list-item>
-                    <v-list-item @click="Delete" append-icon="mdi-delete-outline">{{ $t("Delete") }}</v-list-item>
-                </v-list>
-            </v-menu>
-            <StartGame :game="item"></StartGame>
-        </v-card-actions>
-    </v-card>
+    <v-col cols="12" v-if="games.showLst">
+        <el-row class="list" @click="ChangeGame">
+            <el-col :span="20">{{ $t(item.gameName) }}</el-col>
+            <el-col :span="4">
+                <v-menu open-on-hover>
+                    <template v-slot:activator="{ props }">
+                        <v-btn v-bind="props">
+                            <v-icon>mdi-menu</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item :title="$t('Open Mod Folder')" @click="openModFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <v-list-item @click="Delete" append-icon="mdi-delete-outline">{{ $t("Delete") }}</v-list-item>
+                    </v-list>
+                </v-menu>
+                <StartGame :game="item"></StartGame>
+            </el-col>
+        </el-row>
+    </v-col>
+    <v-col cols="3" v-else>
+        <v-card>
+            <v-img class="cover" @click="ChangeGame" :aspect-ratio="16 / 9" :src="item.gameCoverImg"></v-img>
+            <v-card-text>{{ $t(item.gameName) }}</v-card-text>
+            <v-card-actions class="actions">
+                <v-menu open-on-hover>
+                    <template v-slot:activator="{ props }">
+                        <v-btn v-bind="props">
+                            <v-icon>mdi-menu</v-icon>
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item :title="$t('Open Mod Folder')" @click="openModFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <v-list-item :title="$t('Open Game Folder')" @click="openGameFolder"
+                            append-icon="mdi-folder-open-outline"></v-list-item>
+                        <v-list-item @click="Delete" append-icon="mdi-delete-outline">{{ $t("Delete") }}</v-list-item>
+                    </v-list>
+                </v-menu>
+                <StartGame :game="item"></StartGame>
+            </v-card-actions>
+        </v-card>
+    </v-col>
 </template>
 <script lang='ts'>
 
@@ -79,5 +108,16 @@ export default {
 .actions {
     display: flex;
     justify-content: space-between;
+}
+
+.list {
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+
+    &:hover {
+        // 底部阴影
+        box-shadow: 0 0 10px rgba(var(--v-theme-on-surface), 0.3);
+    }
 }
 </style>

@@ -105,14 +105,15 @@ async function reinstall() {
                 name: props.mod.Thunderstore?.name || ''
             },
             name: '',
-            fileName: '',
+            fileName: props.mod.fileName,
             version: '',
             status: 'active',
             speed: 0,
             totalSize: 0,
             downloadedSize: 0,
             link: '',
-            modAuthor: ''
+            modAuthor: '',
+            website: props.mod.modWebsite
         }
         let modStorage = join(settings.settings.modStorageLocation, 'cache', props.mod.fileName ?? "")
 
@@ -223,7 +224,7 @@ async function reinstall() {
             </el-form>
         </el-dialog>
     </Teleport>
-    <ContentAdvanced :mod="mod" :showAdvanced="showAdvanced" @changeAdvanced="(value) => showAdvanced = value">
+    <ContentAdvanced :mod="mod" :showAdvanced="showAdvanced" @changeAdvanced="(value: any) => showAdvanced = value">
     </ContentAdvanced>
 </template>
 <script lang='ts'>

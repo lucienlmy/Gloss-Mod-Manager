@@ -4,7 +4,7 @@ import UserTag from '@src/components/Model/UserTag.vue'
 
 const user = useUser()
 
-console.log(user.user);
+// console.log(user.user);
 
 
 </script>

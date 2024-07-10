@@ -135,7 +135,12 @@ const ExploreFilter = {
 
 const Welcome = {
     "Welcome to use {0}, where you can": "欢迎使用 {0},在这里你可以...",
-    "Partner": "合作方"
+    "Partner": "合作方",
+    "News": "新闻",
+    "More": "更多",
+    "New Games": "新增游戏",
+    "New Mods": "最新作品",
+    "Hot Mods": "近期热门",
 }
 
 const ManagerContent = {
@@ -238,6 +243,7 @@ const Settings = {
     "Select Game By folder": "通过目录选择游戏",
     "Document": "食用教程",
     "Change in Game run": "游戏运行时修改",
+    "Default Page": "默认页面",
 }
 
 const Backup = {
@@ -399,6 +405,7 @@ const Other = {
     "tyf": "载具(替换式)",
     "ydd": "人物",
     "tools": "工具",
+    "GitHub": "GitHub",
 }
 
 const lang = {

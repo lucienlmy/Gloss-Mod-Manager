@@ -7,7 +7,7 @@ import { useSettings } from '@src/stores/useSettings';
 import { FileHandler } from '@src/model/FileHandler'
 import { useManager } from '@src/stores/useManager';
 
-import DownloadAddTask from '@src/components/Download/AddTask.vue'
+import DownloadAddTask from '@src/components/Download/AddTask/AddTask.vue'
 
 const download = useDownload()
 const settings = useSettings()

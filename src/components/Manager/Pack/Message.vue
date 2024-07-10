@@ -11,7 +11,7 @@ if (settings.settings.showPakeMessage) {
 
 function show() {
     let html = `在打包的时候, 请将前置和Mod本体 以及可选文件分为多个Mod进行打包, 例如: <a href="https://mod.3dmgame.com/mod/204427" target="_blank" >这个作品</a> <br/>  
-更多 打包相关的内容请参考wiki: <a href="https://wiki.aoe.top/GMM/GMMFile/Make.html">如何制作GMM文件</a>`
+更多 打包相关的内容请参考wiki: <a href="https://gmm.aoe.top/GMMFile/Make.html">如何制作GMM文件</a>`
 
     ElMessageBox.confirm(html, '提示', {
         confirmButtonText: '我知道了',

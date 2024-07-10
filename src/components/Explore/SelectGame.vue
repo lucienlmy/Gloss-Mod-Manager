@@ -39,7 +39,7 @@ function select(all: boolean) {
 }
 
 function isOk() {
-    console.log(settings.settings.tourGameList);
+    // console.log(settings.settings.tourGameList);
     explore.showTourGameListDialog = false
 }
 
@@ -60,7 +60,8 @@ function isOk() {
                             <v-chip label append-icon="mdi-close" @click="select(false)" variant="text">反选</v-chip>
                         </div>
                         <v-text-field density="compact" variant="solo" :label="$t('Search Game')"
-                            append-inner-icon="mdi-magnify" single-line hide-details v-model="searchText"></v-text-field>
+                            append-inner-icon="mdi-magnify" single-line hide-details
+                            v-model="searchText"></v-text-field>
                     </div>
                     <div class="close">
                         <v-chip label append-icon="mdi-close" @click="explore.showTourGameListDialog = false"

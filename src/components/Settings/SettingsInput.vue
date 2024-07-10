@@ -26,14 +26,13 @@ function selectModStorageLocation() {
 
                 // 判断选择的目录是否包含 "Gloss Mod Manager"
                 if (res[0].includes("Gloss Mod Manager")) {
-                    ElMessageBox.confirm(`储存目录不能在软件安装目录里面，不然软件更新后Mod会被清空.
-                    尽管如此, 您是否还依然要继续?<br/>`, '警告', {
-                        confirmButtonText: '继续',
+                    ElMessageBox.confirm(`储存目录不能在软件安装目录里面，不然软件更新后Mod会被清空!`, '警告', {
+                        confirmButtonText: '好的',
                         cancelButtonText: '取消',
-                        type: 'warning',
+                        type: 'error',
                         dangerouslyUseHTMLString: true
                     }).then(() => {
-                        settings.settings.modStorageLocation = res[0]
+                        // settings.settings.modStorageLocation = res[0]
                     }).catch(() => { })
                     return
                 }
@@ -59,7 +58,7 @@ watch(() => settings.settings.autoLaunch, () => {
             <h3 class="title">{{ $t('Settings') }}</h3>
         </v-col>
 
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
             <!-- 设置Mod储存路径 -->
             <v-text-field :label="$t('Storage Location')" v-model="settings.settings.modStorageLocation"
                 :hint="$t('Mod Folder Tip')" persistent-hint>
@@ -69,17 +68,30 @@ watch(() => settings.settings.autoLaunch, () => {
             </v-text-field>
 
         </v-col>
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
             <!-- 设置语言 -->
             <v-select variant="solo" :label="$t('Language')" v-model="settings.settings.language"
                 :items="settings.langList" item-title="text" item-value="value"></v-select>
         </v-col>
-        <v-col cols="12" md="4">
+        <v-col cols="12" md="3">
             <!-- 设置主题 -->
             <v-select variant="solo" :label="$t('Theme')" v-model="settings.settings.theme" :items="[
                 { text: $t('Auto'), value: 'system' },
                 { text: $t('Light'), value: 'light' },
                 { text: $t('Dark'), value: 'dark' },
+            ]" item-title="text" item-value="value"></v-select>
+        </v-col>
+        <v-col cols="3">
+            <!-- 默认启动页 -->
+            <v-select variant="solo" :label="$t('Default Page')" v-model="settings.settings.defaultPage" :items="[
+                { text: $t('Home'), value: 'Home' },
+                { text: $t('Games'), value: 'Games' },
+                { text: $t('Manager'), value: 'Manager' },
+                { text: $t('Tour'), value: 'Explore' },
+                { text: $t('Download'), value: 'Download' },
+                { text: $t('Backup'), value: 'Backup' },
+                { text: $t('Settings'), value: 'Settings' },
+                { text: $t('About'), value: 'About' },
             ]" item-title="text" item-value="value"></v-select>
         </v-col>
         <v-col cols="12" sm="6" md="3">

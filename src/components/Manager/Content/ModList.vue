@@ -5,7 +5,7 @@ import { useSettings } from '@src/stores/useSettings';
 import { computed, watch, ref } from "vue";
 
 import { FileHandler } from '@src/model/FileHandler';
-import { ElMessageBox } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import ContentModMenu from '@src/components/Manager/Content/ModMenu.vue'
 
 const props = defineProps<{
@@ -45,6 +45,7 @@ watch(() => props.mod.isInstalled, () => {
                 loading.value = false
             }).catch(err => {
                 console.log(err);
+                ElMessage.error(`错误: ${err}`)
                 loading.value = false
             })
         }
@@ -59,6 +60,7 @@ watch(() => props.mod.isInstalled, () => {
                 loading.value = false
             }).catch(err => {
                 console.log(err);
+                ElMessage.error(`错误: ${err}`)
                 loading.value = false
             })
         }

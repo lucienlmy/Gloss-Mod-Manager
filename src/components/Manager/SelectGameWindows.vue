@@ -64,7 +64,7 @@ function select(item: ISupportedGames) {
                 // 判断 item.gameExe 是否存在于 files 中
                 let exe = item.gameExe.find(item => files.includes(item.name))
                 if (exe) {
-                    console.log(exe);
+                    // console.log(exe);
                     settings.settings.managerGame = item
                     settings.settings.managerGame.gamePath = join(folder, exe.rootPath)
                 } else {
@@ -74,7 +74,7 @@ function select(item: ISupportedGames) {
                 }
             }
 
-            console.log(settings.settings);
+            // console.log(settings.settings);
             manager.selectGameDialog = false
             manager.getModInfo()
             AppAnalytics.sendEvent(`switch_game`, item.gameName)
@@ -109,7 +109,7 @@ function select(item: ISupportedGames) {
                             {{ $t('select game') }}
                             <small>({{ $t('{0} games', [list.length]) }})</small>
                         </div>
-                        <v-btn variant="text" href="https://wiki.aoe.top/GMM/Expands/README.html" target="_blank">
+                        <v-btn variant="text" href="https://gmm.aoe.top/Expands/README.html" target="_blank">
                             <v-icon>mdi-plus</v-icon>
                             <v-tooltip activator="parent" location="top">{{ $t('Add Game') }}</v-tooltip>
                         </v-btn>

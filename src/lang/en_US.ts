@@ -129,6 +129,11 @@ const ExploreFilter = {
 const Welcome = {
     "Welcome to use {0}, where you can": "Welcome to {0}, where you can...",
     "Partner": "Partner",
+    "News": "News",
+    "More": "More",
+    "New Games": "New Games",
+    "New Mods": "New Mods",
+    "Hot Mods": "Hot Mods",
 }
 
 const ManagerContent = {
@@ -232,6 +237,7 @@ const Settings = {
     "Select Game By folder": "Select Game By folder",
     "Document": "Document",
     "Change in Game run": "Change in Game run",
+    "Default Page": "Default Page",
 }
 
 const Backup = {
@@ -390,6 +396,7 @@ const Other = {
     "plugins": "plugins",
     "mods": "mods",
     "Map": "Map",
+    "GitHub": "GitHub",
 }
 
 const lang = {

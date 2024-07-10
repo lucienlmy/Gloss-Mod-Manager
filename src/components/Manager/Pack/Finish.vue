@@ -10,7 +10,7 @@ const props = defineProps<{
 
 
 function open() {
-    console.log(path.dirname(packs.exportPath));
+    // console.log(path.dirname(packs.exportPath));
     FileHandler.openFolder(path.dirname(packs.exportPath))
 }
 

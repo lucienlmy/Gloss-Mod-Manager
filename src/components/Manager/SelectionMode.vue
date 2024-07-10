@@ -93,7 +93,7 @@ function getTags(list: IModInfo[]) {
 
     // 深度 去重
     let arr = [...new Set(tags.map(item => item ? JSON.stringify(item) : undefined))].map(item => item ? JSON.parse(item) : undefined);
-    console.log(arr);
+    // console.log(arr);
 
     return arr
 }

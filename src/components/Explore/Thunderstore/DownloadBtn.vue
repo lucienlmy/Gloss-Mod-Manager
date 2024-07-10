@@ -79,7 +79,7 @@ function toDownload() {
         })
     }
     let data = props.mod
-    console.log(data);
+    // console.log(data);
 
     let key = `${data?.owner}-${data?.name}-${data?.latest.version_number}`
     download.addDownloadByThunderstore(props.mod, key)

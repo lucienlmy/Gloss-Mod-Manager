@@ -22,14 +22,14 @@ let time_filter = computed(() => [
     { text: t('3 Months'), value: '90Today' },
 ])
 
-console.log(thunderstore.categories);
+// console.log(thunderstore.categories);
 
 </script>
 <template>
     <v-row class="filter">
         <v-col cols="12" sm="4" md="2">
-            <v-select hide-details="auto" :label="t('Update time')" v-model="thunderstore.filter.time" :items="time_filter"
-                item-title="text" item-value="value" variant="solo"></v-select>
+            <v-select hide-details="auto" :label="t('Update time')" v-model="thunderstore.filter.time"
+                :items="time_filter" item-title="text" item-value="value" variant="solo"></v-select>
         </v-col>
         <v-col cols="12" sm="4" md="2">
             <v-select hide-details="auto" :label="t('Sort')" v-model="thunderstore.filter.sort_by" :items="order_filter"

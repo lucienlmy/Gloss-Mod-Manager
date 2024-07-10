@@ -48,7 +48,8 @@ export class Config {
             exploreType: settings.exploreType,
             selectGameByFolder: settings.selectGameByFolder,
             showPakeMessage: settings.showPakeMessage,
-            changeInRun: settings.changeInRun
+            changeInRun: settings.changeInRun,
+            defaultPage: settings.defaultPage
         }
     }
     // 保存配置文件
@@ -89,6 +90,7 @@ export class Config {
             selectGameByFolder: data.selectGameByFolder ?? false,
             showPakeMessage: data.showPakeMessage ?? true,
             changeInRun: data.changeInRun ?? false,
+            defaultPage: data.defaultPage ?? "Home"
         }
 
         // 初始化游戏

@@ -49,7 +49,7 @@ async function onProgress() {
         if (result.gid == props.task.gid) {
             if (props.task.status != "complete" && result.status == "complete") {
                 ElMessage.success(`${props.task.name} 下载完成`)
-                if (settings.settings.autoInstall && download.autoInstall) {
+                if (settings.settings.managerGame && settings.settings.autoInstall && download.autoInstall) {
                     install()
                 }
             }

@@ -2,7 +2,7 @@
  * 虚幻引擎通用安装
  */
 
-import { join, basename, dirname, extname } from "path"
+import { join, dirname, extname } from "path"
 
 import { useManager } from "@src/stores/useManager"
 import { FileHandler } from "@src/model/FileHandler"
@@ -133,6 +133,17 @@ export class UnrealEngine {
                 },
                 async uninstall(mod) {
                     return Manager.installByFolderParent(mod, this.installPath ?? "", "Scripts", false)
+                }
+            },
+            {
+                id: 6,
+                name: "游戏根目录",
+                installPath: join(),
+                async install(mod) {
+                    return Manager.generalInstall(mod, this.installPath ?? "", true)
+                },
+                async uninstall(mod) {
+                    return Manager.generalUninstall(mod, this.installPath ?? "", true)
                 }
             },
             {

@@ -8,6 +8,7 @@ export const useMain = defineStore('Main', {
         host: 'https://mod.3dmgame.com',
         version: "",
         webVersion: null as any,
+        start: false
     }),
     getters: {
         lazy_img: (state) => `${state.host}/assets/image/lazy_img.webp`,

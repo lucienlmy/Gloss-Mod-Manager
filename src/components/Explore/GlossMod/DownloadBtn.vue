@@ -44,7 +44,7 @@ let task = computed<IDownloadTask | undefined>(() => {
 async function toDownload() {
     try {
         let data = await ipcRenderer.invoke("get-mod-data", { id: props.id })
-        console.log(data)
+        // console.log(data)
         // 将 link.value 里面的 http://mod.3dmgame.com 换成 https://mod.3dmgame.com
         data.mods_resource_url = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
         link.value = data.mods_resource_url

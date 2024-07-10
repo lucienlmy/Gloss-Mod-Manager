@@ -36,7 +36,7 @@ const images = computed(() => {
 
 })
 
-console.log(images.value);
+// console.log(images.value);
 
 </script>
 <template>

@@ -21,7 +21,7 @@ if (modio.gameTags.length === 0) {
 }
 
 const gameTags = computed(() => {
-    console.log(modio.gameTags);
+    // console.log(modio.gameTags);
 
     let tags = modio.gameTags.map((item: any) => {
         return {
