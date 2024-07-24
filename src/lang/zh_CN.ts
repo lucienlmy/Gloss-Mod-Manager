@@ -367,6 +367,8 @@ const Games = {
     "Kerbal Space Program": "坎巴拉太空计划",
     "Expeditions A MudRunner Game": "远征: 泥泞奔驰游戏",
     "Legend Of Mortal": "活侠传",
+    "HaiShan": "海山：昆仑镜",
+    "Flintlock The Siege of Dawn": "燧石枪：黎明之围"
 }
 
 const Other = {

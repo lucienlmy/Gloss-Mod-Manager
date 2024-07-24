@@ -18,6 +18,7 @@ import { useArchive } from "@src/stores/useArchive";
 import { useBackupGame } from "@src/stores/useBackupGame";
 import { useMain } from "@src/stores/useMain";
 import { useRouter } from 'vue-router'
+import { useGames } from "@src/stores/useGames";
 
 const { locale } = useI18n()
 const settings = useSettings()
@@ -204,6 +205,16 @@ if (settings.settings.defaultPage && !main.start) {
     main.start = true
     router.push({ name: settings.settings.defaultPage })
 }
+//#endregion
+
+
+//#region 游戏所需前置列表
+const game = useGames()
+
+if (game.GamePlugins.length == 0) {
+    game.getGamePlugins()
+}
+
 //#endregion
 
 </script>

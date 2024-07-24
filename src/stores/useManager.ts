@@ -9,6 +9,9 @@ import { Manager } from "@src/model/Manager";
 import { FileHandler } from "@src/model/FileHandler"
 import { Unzipper } from '@src/model/Unzipper'
 import { usePacks } from "@src/stores/usePacks";
+import { useDownload } from "./useDownload";
+import { useI18n } from "vue-i18n";
+import { useGames } from "./useGames";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -72,6 +75,29 @@ export const useManager = defineStore('Manager', {
         canChange(state) {
             let settings = useSettings()
             return state.runing && (!settings.settings.changeInRun)
+        },
+        plugins(state) {
+            const game = useGames()
+            const settings = useSettings()
+
+            let plugins = game.GamePlugins.filter(item => item.plugins_gameId == settings.settings.managerGame?.GlossGameId)
+
+            plugins = plugins.filter(item => {
+                // 判断是否已经添加
+                let mod = state.managerModList.filter(m =>
+                ((m.webId && m.webId == item.plugins_webId) ||
+                    (m.modIo_id && m.modIo_id == item.plugins_modIo_id) ||
+                    (m.Thunderstore && m.Thunderstore.name == item.plugins_Thunderstore_name) ||
+                    (m.modWebsite && m.modWebsite == item.plugins_website)
+                ))
+                // 如果存在则从这里移除
+                // console.log(mod);
+
+                return mod.length == 0
+            })
+
+
+            return plugins || []
         }
     },
     actions: {
@@ -381,6 +407,38 @@ export const useManager = defineStore('Manager', {
                 })
             }
         },
+
+        async updateMod(mod: IModInfo) {
+            // const { t } = useI18n()
+            if (mod.from) {
+                let taks: IDownloadTask = {
+                    id: mod.webId ?? 0,
+                    type: mod.from,
+                    Thunderstore: {
+                        namespace: mod.Thunderstore?.namespace || '',
+                        name: mod.Thunderstore?.name || ''
+                    },
+                    name: '',
+                    fileName: mod.fileName,
+                    version: '',
+                    status: 'active',
+                    speed: 0,
+                    totalSize: 0,
+                    downloadedSize: 0,
+                    link: '',
+                    modAuthor: '',
+                    website: mod.modWebsite
+                }
+
+                const settings = useSettings()
+                const download = useDownload()
+
+                let modStorage = path.join(settings.settings.modStorageLocation, 'cache', mod.fileName ?? "")
+
+                download.ReStart(taks, modStorage)
+            }
+        },
+
         // 检查游戏是否在运行
         async checkRuning() {
             let settings = useSettings()

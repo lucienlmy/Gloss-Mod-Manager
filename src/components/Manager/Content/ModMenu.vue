@@ -94,33 +94,35 @@ function del() {
 }
 
 async function reinstall() {
-    if (props.mod.from) {
-        toDel()
+    manager.updateMod(props.mod)
+    toDel()
 
-        let taks: IDownloadTask = {
-            id: props.mod.webId ?? 0,
-            type: props.mod.from,
-            Thunderstore: {
-                namespace: props.mod.Thunderstore?.namespace || '',
-                name: props.mod.Thunderstore?.name || ''
-            },
-            name: '',
-            fileName: props.mod.fileName,
-            version: '',
-            status: 'active',
-            speed: 0,
-            totalSize: 0,
-            downloadedSize: 0,
-            link: '',
-            modAuthor: '',
-            website: props.mod.modWebsite
-        }
-        let modStorage = join(settings.settings.modStorageLocation, 'cache', props.mod.fileName ?? "")
+    // if (props.mod.from) {
+    //     toDel()
+    //     let taks: IDownloadTask = {
+    //         id: props.mod.webId ?? 0,
+    //         type: props.mod.from,
+    //         Thunderstore: {
+    //             namespace: props.mod.Thunderstore?.namespace || '',
+    //             name: props.mod.Thunderstore?.name || ''
+    //         },
+    //         name: '',
+    //         fileName: props.mod.fileName,
+    //         version: '',
+    //         status: 'active',
+    //         speed: 0,
+    //         totalSize: 0,
+    //         downloadedSize: 0,
+    //         link: '',
+    //         modAuthor: '',
+    //         website: props.mod.modWebsite
+    //     }
+    //     let modStorage = join(settings.settings.modStorageLocation, 'cache', props.mod.fileName ?? "")
 
-        download.ReStart(taks, modStorage)
-    } else {
-        ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
-    }
+    //     download.ReStart(taks, modStorage)
+    // } else {
+    //     ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
+    // }
 
     // switch (props.mod.from) {
     //     case "GlossMod":

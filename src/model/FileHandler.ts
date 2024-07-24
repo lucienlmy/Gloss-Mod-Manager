@@ -192,8 +192,8 @@ export class FileHandler {
             }
             return true
         } catch (err) {
-            ElMessage.error(`删除文件失败：${err}`)
-            this.writeLog(err as string)
+            // ElMessage.error(`删除文件失败：${err}`)
+            console.log(err as string);
             return false
         }
     }

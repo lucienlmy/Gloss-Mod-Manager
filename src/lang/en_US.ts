@@ -362,6 +362,8 @@ const Games = {
     "Kerbal Space Program": "Kerbal Space Program",
     "Expeditions A MudRunner Game": "Expeditions A MudRunner Game",
     "Legend Of Mortal": "Legend Of Mortal",
+    "HaiShan": "HaiShan",
+    "Flintlock The Siege of Dawn": "Flintlock: The Siege of Dawn",
 }
 
 const Other = {

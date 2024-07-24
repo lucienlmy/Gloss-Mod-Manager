@@ -5,6 +5,7 @@ import { useSettings } from '@src/stores/useSettings';
 import { computed } from "vue";
 
 import ManagerContentTags from '@src/components/Manager/Content/Tags.vue'
+import ManagerContentGamePlugins from '@src/components/Manager/Content/GamePlugins.vue'
 
 const manager = useManager()
 const settings = useSettings()
@@ -48,6 +49,7 @@ let types = computed(() => {
                     <ManagerContentTags></ManagerContentTags>
                 </v-col>
             </v-app-bar>
+            <ManagerContentGamePlugins></ManagerContentGamePlugins>
             <ContentList></ContentList>
         </div>
     </div>
