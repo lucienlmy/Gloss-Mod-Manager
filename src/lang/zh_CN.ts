@@ -234,7 +234,7 @@ const Settings = {
     "Export Language": "导出语言包",
     // "Feed Xiaom": "投喂小莫",
     "Feedback": "帮助",
-    "QQChat": "QQ群: 492849207",
+    "QQChat": "QQ群: 948689016",
     "Theme": "主题",
     "Light": "浅色",
     "Dark": "深色",
@@ -368,7 +368,9 @@ const Games = {
     "Expeditions A MudRunner Game": "远征: 泥泞奔驰游戏",
     "Legend Of Mortal": "活侠传",
     "HaiShan": "海山：昆仑镜",
-    "Flintlock The Siege of Dawn": "燧石枪：黎明之围"
+    "Flintlock The Siege of Dawn": "燧石枪：黎明之围",
+    "Jagged Alliance 3": "铁血联盟3",
+    "DRAGON BALL FighterZ": "龙珠战士Z",
 }
 
 const Other = {

@@ -1,6 +1,6 @@
 // import { Download } from "@src/model/Download"
 
-export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge" | "GitHub"
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge" | "GitHub" | "Customize"
 export type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
 export type TaskStatus = "active" | "waiting" | "paused" | "error" | "complete" | "removed"
 

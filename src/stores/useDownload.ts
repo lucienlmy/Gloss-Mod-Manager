@@ -12,7 +12,7 @@ import { useNexusMods } from "@src/stores/useNexusMods";
 import { useModIo } from '@src/stores/useModIo';
 import { useThunderstore } from '@src/stores/useThunderstore';
 import { useCurseForge } from '@src/stores/useCurseForge';
-import { useGithub } from "./useGithub";
+import { useGithub } from "@src/stores/useGithub";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -372,6 +372,35 @@ export const useDownload = defineStore('Download', {
 
             task.gid = gid.result
 
+            ElMessage.success(`${task.name} 已添加到下载列表`)
+
+        },
+
+        async addDownloadByCustomize(url: string, name: string) {
+            let task: IDownloadTask = {
+                id: APIAria2.uuid(),
+                type: "Customize",
+                name: name,
+                version: "1.0.0",
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: url,
+                modAuthor: "",
+                website: "",
+                status: "waiting",
+                fileName: name
+            }
+            this.downloadTaskList.unshift(task)
+            const settings = useSettings()
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+
+            let gid = await this.aria2.addUri(task.link, name, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+
+            console.log(gid);
+            task.gid = gid.result
             ElMessage.success(`${task.name} 已添加到下载列表`)
 
         },

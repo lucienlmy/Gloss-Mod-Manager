@@ -364,6 +364,8 @@ const Games = {
     "Legend Of Mortal": "Legend Of Mortal",
     "HaiShan": "HaiShan",
     "Flintlock The Siege of Dawn": "Flintlock: The Siege of Dawn",
+    "Jagged Alliance 3": "Jagged Alliance 3",
+    "DRAGON BALL FighterZ": "DRAGON BALL FighterZ",
 }
 
 const Other = {

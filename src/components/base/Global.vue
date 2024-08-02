@@ -110,6 +110,20 @@ function GetModInfo() {
 //#endregion
 
 //#region 处理 .gmm 文件打开 
+function parseUrlParams(url: string) {
+    let params: any = {};
+    let parser = new URL(url);
+    let queryString = parser.search.slice(1);
+    let queries = queryString.split("&");
+
+    queries.forEach(query => {
+        let [key, value] = query.split("=");
+        params[key] = decodeURIComponent(value || "");
+    });
+
+    return params;
+}
+
 ipcRenderer.on('open-gmm-file', (_, args) => {
     console.log(args);
     let path = args[args.length - 1]
@@ -118,6 +132,9 @@ ipcRenderer.on('open-gmm-file', (_, args) => {
     // 判断是否是 gmm://installmod 开头
     if (path.startsWith("gmm://installmod")) {
         download.addDownloadByWeb(path)
+    } if (path.startsWith("gmm://customize")) {
+        let { url, name } = parseUrlParams(path)
+        download.addDownloadByCustomize(url, name)
     } else if (FileHandler.fileExists(path)) {
         manager.addModByGmm(path)
     }

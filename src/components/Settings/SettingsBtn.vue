@@ -80,7 +80,7 @@ function checkUpdates() {
             <v-chip variant="text" label append-icon="mdi-text-box-search-outline" href="https://gmm.aoe.top/">
                 {{ $t('Document') }}
             </v-chip>
-            <v-chip variant="text" label append-icon="mdi-qqchat" href="https://qm.qq.com/q/cA8Asd8kCI">
+            <v-chip variant="text" label append-icon="mdi-qqchat" href="https://qm.qq.com/q/3PzfmR1sBi">
                 {{ $t('QQChat') }}
             </v-chip>
             <v-chip variant="text" label append-icon="mdi-github"

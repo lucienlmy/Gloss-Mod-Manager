@@ -1,8 +1,5 @@
 import { defineStore } from "pinia";
-import { ipcRenderer } from "electron";
-import type { IGameInfo, IGitHubAsset, IGitHubRelease, IMod, ISupportedGames } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
-import { useUser } from "@src/stores/useUser";
+import type { IGitHubAsset, IGitHubRelease } from "@src/model/Interfaces";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 
@@ -16,9 +13,6 @@ export const useGithub = defineStore('Github', {
         loading: false,
         version: '',
     }),
-    getters: {
-
-    },
     actions: {
         async parse(url: string) {
             const reg = /https:\/\/github.com\/([^/]+)\/([^/]+)($|\/)/

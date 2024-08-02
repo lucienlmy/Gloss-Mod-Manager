@@ -2,6 +2,7 @@
 import { useDownload } from '@src/stores/useDownload';
 import AddTaskGlossMod from "@src/components/Download/AddTask/GlossMod.vue"
 import AddTaskGitHub from "@src/components/Download/AddTask/GitHub.vue"
+import AddCustomize from "@src/components/Download/AddTask/Customize.vue"
 
 const download = useDownload()
 
@@ -28,11 +29,13 @@ const download = useDownload()
                     <v-chip-group v-model="download.addTaskTab" mandatory>
                         <v-chip label value="GlossMod" variant="text">{{ $t('3DM Mods') }}</v-chip>
                         <v-chip label value="GitHub" variant="text">{{ $t('GitHub') }}</v-chip>
+                        <v-chip label value="Customize" variant="text">{{ $t('Customize') }}</v-chip>
                     </v-chip-group>
                 </v-col>
             </v-card-title>
             <AddTaskGlossMod v-if="download.addTaskTab == 'GlossMod'"></AddTaskGlossMod>
             <AddTaskGitHub v-if="download.addTaskTab == 'GitHub'"></AddTaskGitHub>
+            <AddCustomize v-if="download.addTaskTab == 'Customize'"></AddCustomize>
         </v-card>
     </v-dialog>
 </template>
