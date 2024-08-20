@@ -366,6 +366,7 @@ const Games = {
     "Flintlock The Siege of Dawn": "Flintlock: The Siege of Dawn",
     "Jagged Alliance 3": "Jagged Alliance 3",
     "DRAGON BALL FighterZ": "DRAGON BALL FighterZ",
+    "Black Myth Wukong": "Black Myth Wukong",
 }
 
 const Other = {

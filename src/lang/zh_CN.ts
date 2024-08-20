@@ -371,6 +371,7 @@ const Games = {
     "Flintlock The Siege of Dawn": "燧石枪：黎明之围",
     "Jagged Alliance 3": "铁血联盟3",
     "DRAGON BALL FighterZ": "龙珠战士Z",
+    "Black Myth Wukong": "黑神话: 悟空",
 }
 
 const Other = {
