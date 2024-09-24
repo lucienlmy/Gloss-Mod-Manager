@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
-import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo, ICurseForgeMod, IGitHubAsset } from "@src/model/Interfaces";
+import type { IDownloadTask, IMod, IModInfo, IThunderstoreMod, sourceType, IModIo, ICurseForgeMod, IGitHubAsset, IGameBananaMod } from "@src/model/Interfaces";
 // import { DownloadStatus } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
 // import { Download } from "@src/model/Download"
@@ -13,6 +13,7 @@ import { useModIo } from '@src/stores/useModIo';
 import { useThunderstore } from '@src/stores/useThunderstore';
 import { useCurseForge } from '@src/stores/useCurseForge';
 import { useGithub } from "@src/stores/useGithub";
+import axios from "axios";
 
 export const useDownload = defineStore('Download', {
     state: () => ({
@@ -376,6 +377,49 @@ export const useDownload = defineStore('Download', {
 
         },
 
+        async addDownloadByGameBanana(id: number) {
+            let { data: mod } = await axios.get<IGameBananaMod>(`https://gamebanana.com/apiv11/Mod/${id}/ProfilePage`)
+
+            // 判断是否已经存在
+            if (this.getTaskById(mod._idRow)) {
+                // 如果已存在则移除
+                this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod._idRow)
+            }
+
+            this.downloadTaskList.unshift({
+                id: mod._idRow,
+                type: "GameBanana",
+                name: mod._sName,
+                version: mod._sVersion || '1.0.0',
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: mod._aFiles[0]._sDownloadUrl,
+                modAuthor: mod._aSubmitter._sName,
+                website: mod._sProfileUrl,
+                status: "waiting",
+                fileName: mod._aFiles[0]._sFile
+            })
+            let task = this.getTaskById(mod._idRow) as IDownloadTask
+
+            const settings = useSettings()
+
+            let dest = join(settings.settings.modStorageLocation, 'cache')
+
+            FileHandler.deleteFile(join(dest, mod._aFiles[0]._sFile))   // 删除旧文件
+
+            let gid = await this.aria2.addUri(task.link, mod._aFiles[0]._sFile, dest).catch(err => {
+                ElMessage.error(`下载错误: ${err}`)
+            })
+
+            console.log(gid);
+
+            task.gid = gid.result
+
+            ElMessage.success(`${task.name} 已添加到下载列表`)
+
+        },
+
         async addDownloadByCustomize(url: string, name: string) {
             let task: IDownloadTask = {
                 id: APIAria2.uuid(),
@@ -456,6 +500,9 @@ export const useDownload = defineStore('Download', {
                             }
                         }
                     }
+                    break
+                case 'GameBanana':
+                    this.addDownloadByGameBanana(task.id as number)
                     break
                 default:
                     break;

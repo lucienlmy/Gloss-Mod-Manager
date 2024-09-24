@@ -4,7 +4,7 @@
 
 import { existsSync, statSync } from 'node:fs'
 import type { IModInfo, IState, ITag } from "@src/model/Interfaces";
-import { join, dirname, basename, extname } from 'node:path'
+import { join, dirname, basename, extname, sep } from 'node:path'
 import { FileHandler } from "@src/model/FileHandler";
 import { useManager } from '@src/stores/useManager';
 import { useDownload } from '@src/stores/useDownload';
@@ -103,23 +103,24 @@ export class Manager {
 
     // 检查插件是否已经安装
     public static checkInstalled(name: string, webId: number) {
-        const manager = useManager()
-        let modId = manager.isAddedWebId(webId)
-        if (modId) {
-            let engine = manager.getModInfoById(modId)
-            if (!(engine?.isInstalled)) {
-                ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
-                    engine!.isInstalled = true
-                }).catch(() => { })
-            }
-            return true
-        } else {
-            ElMessageBox.confirm(`该Mod需要${name}才能使用, 是否现在下载?`).then(() => {
-                const download = useDownload()
-                download.addDownloadById(webId)
-            }).catch(() => { })
-            return false
-        }
+        // const manager = useManager()
+        // let modId = manager.isAddedWebId(webId)
+        // if (modId) {
+        //     let engine = manager.getModInfoById(modId)
+        //     if (!(engine?.isInstalled)) {
+        //         ElMessageBox.confirm(`该Mod需要${name}才能使用,您已添加到管理器,是否现在安装?`).then(() => {
+        //             engine!.isInstalled = true
+        //         }).catch(() => { })
+        //     }
+        //     return true
+        // } else {
+        //     ElMessageBox.confirm(`该Mod需要${name}才能使用, 是否现在下载?`).then(() => {
+        //         const download = useDownload()
+        //         download.addDownloadById(webId)
+        //     }).catch(() => { })
+        //     return false
+        // }
+        return true
     }
 
     /**
@@ -178,8 +179,9 @@ export class Manager {
      * @param isExtname 是否按拓展名匹配 = false
      * @param inGameStorage 是否在游戏目录 = true
      * @param isLink 是否是软链 = true
+     * @param commonParent 过滤掉相同路径的文件夹 = false
      */
-    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true, isLink: boolean = true) {
+    public static async installByFile(mod: IModInfo, installPath: string, fileName: string, isInstall: boolean, isExtname: boolean = false, inGameStorage: boolean = true, isLink: boolean = true, commonParent: boolean = false) {
         const manager = useManager()
         let modStorage = join(manager.modStorage, mod.id.toString())
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
@@ -195,6 +197,14 @@ export class Manager {
 
         // folder 去重
         folder = [...new Set(folder)]
+
+        if (commonParent) {
+            console.log(folder);
+
+            folder = this.getCommonParentFolder(modStorage, folder)
+            console.log(folder);
+            // return true
+        }
 
         if (folder.length > 0) {
             folder.forEach(item => {
@@ -315,5 +325,45 @@ export class Manager {
 
         }
         return true
+    }
+
+    static getCommonParentFolder(modStorage: string, paths: string[]): string[] {
+
+        /**
+         * 将下面这段数组，
+         * [
+    "E:\\GMM\\Genshin Impact\\8\\FavoniusSwordMod",
+    "E:\\GMM\\Genshin Impact\\8\\Lynette_Miyako\\0",
+    "E:\\GMM\\Genshin Impact\\8\\Lynette_Miyako\\1",
+    "E:\\GMM\\Genshin Impact\\8\\Lynette_Miyako"
+]
+         * 转换为 下面这样的数组
+[
+    "E:\\GMM\\Genshin Impact\\8\\FavoniusSwordMod",
+    "E:\\GMM\\Genshin Impact\\8\\Lynette_Miyako"
+]
+         */
+
+        // 从 paths 中移除 modStorage
+        paths = paths.map(item => item.replace(modStorage, ''))
+
+        // 移除 paths 中相同路径的文件夹
+        let res = [] as string[]
+
+        let dirs = paths.map(item => {
+            let arr = item.split(sep)
+            // 移除空值
+            arr = arr.filter(i => i != '')
+            return arr
+        })
+
+        dirs.forEach(item => {
+            res.push(item[0])
+        })
+        // 移除重复的文件夹
+        res = [...new Set(res)]
+
+        let arr = res.map(item => join(modStorage, item))
+        return arr
     }
 }

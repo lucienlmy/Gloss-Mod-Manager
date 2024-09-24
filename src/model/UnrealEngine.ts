@@ -7,7 +7,7 @@ import { join, dirname, extname } from "path"
 import { useManager } from "@src/stores/useManager"
 import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus"
-import { IModInfo, ISupportedGames } from "@src/model/Interfaces"
+import type { IModInfo, ISupportedGames } from "@src/model/Interfaces"
 import { Manager } from "@src/model/Manager"
 
 
@@ -31,7 +31,7 @@ export class UnrealEngine {
                     ]
                 },
                 async install(mod) {
-                    if (useUE4SS) UnrealEngine.setBPModLoaderMod(bassPath)
+                    // if (useUE4SS) UnrealEngine.setBPModLoaderMod(bassPath)
                     let installPath = join(
                         this.installPath ?? "",
                         mod.advanced?.enabled ? mod.advanced?.data.installPath : this.advanced?.item[0].defaultValue
@@ -53,29 +53,29 @@ export class UnrealEngine {
                 async install(mod) {
                     for (let index in mod.modFiles) {
                         const item = mod.modFiles[index];
-                        if (FileHandler.compareFileName(item, 'ue4ss.dll')) {
-                            return Manager.installByFileSibling(mod, this.installPath ?? "", "ue4ss.dll", true)
+                        if (FileHandler.compareFileName(item, 'dwmapi.dll')) {
+                            return Manager.installByFileSibling(mod, this.installPath ?? "", "dwmapi.dll", true)
                         }
                         if (FileHandler.compareFileName(item, 'xinput1_3.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "xinput1_3.dll", true)
                         }
                     }
 
-                    ElMessage.warning("未找到ue4ss.dll或xinput1_3.dll, 类型可能错误, 请重新导入! ")
+                    ElMessage.warning("未找到dwmapi.dll或xinput1_3.dll, 类型可能错误, 请重新导入! ")
 
                     return false
                 },
                 async uninstall(mod) {
                     for (let index in mod.modFiles) {
                         const item = mod.modFiles[index];
-                        if (FileHandler.compareFileName(item, 'ue4ss.dll')) {
-                            return Manager.installByFileSibling(mod, this.installPath ?? "", "ue4ss.dll", false)
+                        if (FileHandler.compareFileName(item, 'dwmapi.dll')) {
+                            return Manager.installByFileSibling(mod, this.installPath ?? "", "dwmapi.dll", false)
                         }
                         if (FileHandler.compareFileName(item, 'xinput1_3.dll')) {
                             return Manager.installByFileSibling(mod, this.installPath ?? "", "xinput1_3.dll", false)
                         }
                     }
-                    ElMessage.warning("未找到ue4ss.dll或xinput1_3.dll, 类型可能错误, 请重新导入! ")
+                    ElMessage.warning("未找到dwmapi.dll或xinput1_3.dll, 类型可能错误, 请重新导入! ")
 
                     return false
                 }
@@ -98,7 +98,7 @@ export class UnrealEngine {
                 name: "LogicMods",
                 installPath: join(bassPath, "Content", "Paks", "LogicMods"),
                 async install(mod) {
-                    UnrealEngine.setBPModLoaderMod(bassPath)
+                    // UnrealEngine.setBPModLoaderMod(bassPath)
                     return Manager.generalInstall(mod, this.installPath ?? "")
                 },
                 async uninstall(mod) {
@@ -172,6 +172,7 @@ export class UnrealEngine {
             if (FileHandler.compareFileName(item, 'Enabled.txt')) mods = true
 
             if (FileHandler.compareFileName(item, 'ue4ss.dll')) us4ss = true
+            if (FileHandler.compareFileName(item, 'dwmapi.dll')) us4ss = true
             if (FileHandler.compareFileName(item, 'xinput1_3.dll')) us4ss = true
 
             // 路径中是否有 Scripts

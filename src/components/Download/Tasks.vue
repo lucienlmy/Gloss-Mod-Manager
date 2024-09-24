@@ -2,7 +2,6 @@
 // import { Download } from '@src/model/Download';
 import { FileHandler } from '@src/model/FileHandler';
 import type { IDownloadTask } from '@src/model/Interfaces';
-// import { DownloadStatus } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { useMain } from '@src/stores/useMain';
 import { useSettings } from '@src/stores/useSettings';

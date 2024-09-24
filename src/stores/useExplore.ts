@@ -48,8 +48,8 @@ export const useExplore = defineStore('Explore', {
                 key: this.key,
                 gameId: this.gameId,
                 gameType: this.gameType,
-                show_adult: user.user?.user_p_show_adult == 1 ?? null,
-                show_charge: user.user?.user_p_show_charge == 1 ?? null,
+                show_adult: user.user?.user_p_show_adult == 1 ? user.user?.user_p_show_adult : null,
+                show_charge: user.user?.user_p_show_charge == 1 ? user.user?.user_p_show_adult : null,
             })
 
             this.mods = data.data.mod
@@ -61,12 +61,14 @@ export const useExplore = defineStore('Explore', {
             const settings = useSettings()
             ipcRenderer.invoke("get-types", { gameId: settings.settings.managerGame?.GlossGameId }).then(data => {
                 // console.log(data);
+                let type = [] as any[]
                 data.forEach((item: any) => {
-                    this.gameTypeList.push({
+                    type.push({
                         value: item.id,
                         text: item.mods_type_name
                     })
                 })
+                this.gameTypeList = type
             })
         },
         search() {

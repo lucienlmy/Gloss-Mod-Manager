@@ -73,6 +73,11 @@ watch(() => settings.settings.language, () => {
 
 //#region 初始化Mod管理
 GetModInfo()
+if (settings.settings.managerGame) {
+    // modType 通过 modType.id 去重
+    settings.settings.managerGame.modType = [...new Map(settings.settings.managerGame.modType.map(item => [item.id, item])).values()]
+}
+
 watch(() => manager.managerModList, () => {
     manager.saveModInfo()
 }, { deep: true })
@@ -84,6 +89,7 @@ watch(() => manager.tags, () => {
 function GetModInfo() {
     // manager.managerModList.length == 0 && settings.settings.managerGame
     if (settings.settings.managerGame) {
+
         manager.getModInfo().then(() => {
             // 移除 manager.managerModList 中为 null 的值
             manager.managerModList = manager.managerModList.filter((item) => {

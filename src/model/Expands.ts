@@ -6,7 +6,7 @@ import { join, extname, basename } from "path";
 import { Config } from "@src/model/Config";
 import { FileHandler } from "@src/model/FileHandler";
 import { useManager } from "@src/stores/useManager";
-import { IModInfo, ISupportedGames, IType, ITypeInstall, ICheckModType } from "@src/model/Interfaces";
+import type { IModInfo, ISupportedGames, IType, ITypeInstall, ICheckModType } from "@src/model/Interfaces";
 import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
 

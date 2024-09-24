@@ -1,12 +1,12 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
 import { useManager } from '@src/stores/useManager';
-import { basename, dirname, join } from 'path'
+import { dirname, join } from 'path'
 import { ElMessage } from "element-plus";
 import { useMain } from "@src/stores/useMain";
 import { useSettings } from "@src/stores/useSettings";
 import { ref, computed } from "vue"
-import type { IGameExe, IGameInfo, ISupportedGames } from "@src/model/Interfaces";
+import type { ISupportedGames } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
 import { AppAnalytics } from "@src/model/Analytics"
 import { Steam } from "@src/model/Steam"

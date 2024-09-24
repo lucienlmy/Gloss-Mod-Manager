@@ -1,5 +1,6 @@
 import * as https from "https";
-import { ClientRequestConstructorOptions, app, net } from 'electron'
+import { app, net } from 'electron'
+import type { ClientRequestConstructorOptions } from 'electron'
 
 
 export class NexusMods {
@@ -12,7 +13,7 @@ export class NexusMods {
             } as ClientRequestConstructorOptions)
 
             request.on('response', (response) => {
-                let data;
+                let data: any;
                 response.on('data', (chunk) => {
                     if (chunk) {
                         data += chunk
@@ -21,7 +22,7 @@ export class NexusMods {
                 response.on("end", () => {
                     resolve(data.toString())
                 })
-                response.on('error', (error) => {
+                response.on('error', (error: any) => {
                     reject(error)
                 })
             })
@@ -41,7 +42,7 @@ export class NexusMods {
             } as ClientRequestConstructorOptions)
 
             request.on('response', (response) => {
-                let res_data;
+                let res_data: any;
                 response.on('data', (chunk) => {
                     if (chunk) {
                         res_data += chunk
@@ -50,7 +51,7 @@ export class NexusMods {
                 response.on("end", () => {
                     resolve(res_data.toString())
                 })
-                response.on('error', (error) => {
+                response.on('error', (error: any) => {
                     reject(error)
                 })
             })
@@ -108,7 +109,7 @@ export class NexusMods {
         // 转换 cookies 格式
         let cookie = ''
         for (let key in cookies) {
-            cookie += `${key}=${cookies[key]};`
+            cookie += `${key}=${(cookies as any)[key]};`
         }
 
         return this.Request_POST(`https://www.nexusmods.com/Core/Libs/Common/Managers/Downloads?GenerateDownloadUrl`, {

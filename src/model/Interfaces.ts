@@ -1,6 +1,6 @@
 // import { Download } from "@src/model/Download"
 
-export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge" | "GitHub" | "Customize"
+export type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge" | "GitHub" | "Customize" | "GameBanana"
 export type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
 export type TaskStatus = "active" | "waiting" | "paused" | "error" | "complete" | "removed"
 
@@ -151,6 +151,7 @@ export interface IGameInfo {
         community_identifier: string
     },
     mod_io?: number
+    gamebanana?: number
     curseforge?: number
     archivePath?: string
 }
@@ -723,6 +724,152 @@ interface IGitHubReactions {
 
 
 //#endregion
+
+//#region GameBanana
+
+export interface IGameBananaMod {
+    _idRow: number;
+    _nStatus?: string;
+    _bIsPrivate?: boolean;
+    _tsDateModified?: number;
+    _tsDateAdded?: number;
+    _sProfileUrl: string;
+    _aPreviewMedia: {
+        _aImages: IGameBananaMedia[];
+    };
+    _sCommentsMode?: string;
+    _bAccessorIsSubmitter?: boolean;
+    _bIsTrashed?: boolean;
+    _bIsWithheld?: boolean;
+    _sName: string;
+    _nUpdatesCount?: number;
+    _bHasUpdates?: boolean;
+    _nAllTodosCount?: number;
+    _bHasTodos?: boolean;
+    _nPostCount: number;
+    _aTags: Array<{ _sTitle: string; _sValue: string; }>;
+    _bCreatedBySubmitter?: boolean;
+    _bIsPorted?: boolean;
+    _nThanksCount?: number;
+    _sInitialVisibility: string;
+    _sDownloadUrl?: string;
+    _nDownloadCount?: number;
+    _aFiles: IGameBananaFile[];
+    _nSubscriberCount?: number;
+    _aContributingStudios?: any[];
+    _sLicense?: string;
+    _aLicenseChecklist?: IGameBananaLicenseChecklist;
+    _bGenerateTableOfContents?: boolean;
+    _sText?: string;
+    _bIsObsolete: boolean;
+    _nLikeCount: number;
+    _nViewCount: number;
+    _sVersion?: string;
+    _bAcceptsDonations?: boolean;
+    _bShowRipePromo?: boolean;
+    _aEmbeddables?: {
+        _sEmbeddableImageBaseUrl: string;
+        _aVariants: string[];
+    };
+    _aSubmitter: IGameBananaSubmitter;
+    _aGame: IGameBananaGame;
+    _aCategory: {
+        _idRow: number;
+        _sName: string;
+        _sModelName: string;
+        _sProfileUrl: string;
+        _sIconUrl: string;
+    };
+    _aSuperCategory: {
+        _idRow: number;
+        _sName: string;
+        _sModelName: string;
+        _sProfileUrl: string;
+        _sIconUrl: string;
+    };
+    _aRootCategory: IGameBananaRootCategory;
+    _aCredits?: {
+        _sGroupName: string;
+        _aAuthors: { _sRole: string; _idRow: number; _sName: string; _sProfileUrl: string; _bIsOnline: boolean; }[];
+    }[];
+    _idAccessorSubscriptionRow?: number;
+    _bAccessorIsSubscribed?: boolean;
+    _bAccessorHasThanked?: boolean;
+    _bAccessorHasUnliked?: boolean;
+    _bAccessorHasLiked?: boolean;
+}
+
+
+interface IGameBananaMedia {
+    _sType: string;
+    _sBaseUrl: string;
+    _sFile: string;
+    _sFile100: string;
+    _hFile100: number;
+    _wFile100: number;
+    _sFile220?: string;
+    _hFile220?: number;
+    _wFile220?: number;
+    _sFile530?: string;
+    _hFile530?: number;
+    _wFile530?: number;
+    _sCaption?: string;
+}
+
+interface IGameBananaSubmitter {
+    _idRow: number;
+    _sName: string;
+    _bIsOnline: boolean;
+    _bHasRipe: boolean;
+    _sProfileUrl: string;
+    _sAvatarUrl: string;
+}
+
+interface IGameBananaRootCategory {
+    _sName: string;
+    _sProfileUrl: string;
+    _sIconUrl: string;
+}
+
+interface IGameBananaLicenseChecklist {
+    yes: string[];
+    ask: string[];
+    no: string[];
+}
+
+interface IGameBananaFile {
+    _idRow: number;
+    _sFile: string;
+    _nFilesize: number;
+    _sDescription: string;
+    _tsDateAdded: number;
+    _nDownloadCount: number;
+    _sAnalysisState: string;
+    _sAnalysisResultCode: string;
+    _sAnalysisResult: string;
+    _bContainsExe: boolean;
+    _sDownloadUrl: string;
+    _sMd5Checksum: string;
+    _sClamAvResult: string;
+    _sAvastAvResult: string;
+}
+
+interface IGameBananaGame {
+    _idRow: number;
+    _sName: string;
+    _sAbbreviation: string;
+    _sProfileUrl: string;
+    _sIconUrl: string;
+    _sBannerUrl: string;
+    _nSubscriberCount: number;
+    _bHasSubmissionQueue: boolean;
+}
+
+
+
+//#endregion
+
+
 
 //#region 备份
 

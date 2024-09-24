@@ -86,7 +86,7 @@ async function createWindow() {
     })
 
     if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
-        win.loadURL(url)
+        if (url) win.loadURL(url)
         // Open devTool if the app is not packaged
         win.webContents.openDevTools()
     } else {
@@ -150,7 +150,7 @@ app.on('second-instance', (event, argv) => {
         if (win.isMinimized()) win.restore()
         win.focus()
     }
-    win.webContents.send('open-gmm-file', argv)
+    win?.webContents.send('open-gmm-file', argv)
 })
 
 
@@ -294,22 +294,22 @@ ipcMain.handle('install-update-and-restart', (event, arg) => {
 })
 
 autoUpdater.on('checking-for-update', () => {
-    win.webContents.send('checking-for-update')
+    win?.webContents.send('checking-for-update')
 })
 autoUpdater.on('update-available', (info) => {
-    win.webContents.send('update-available', info);
+    win?.webContents.send('update-available', info);
 })
 autoUpdater.on('update-not-available', (info) => {
-    win.webContents.send('update-not-available', info);
+    win?.webContents.send('update-not-available', info);
 })
 autoUpdater.on('error', (err) => {
-    win.webContents.send('update-error', err);
+    win?.webContents.send('update-error', err);
 })
 autoUpdater.on('download-progress', (progressObj) => {
-    win.webContents.send("download-progress", progressObj);
+    win?.webContents.send("download-progress", progressObj);
 })
 autoUpdater.on('update-downloaded', (info) => {
-    win.webContents.send('update-downloaded', info);
+    win?.webContents.send('update-downloaded', info);
 });
 
 //#endregion
@@ -373,7 +373,7 @@ ipcMain.handle('set-auto-launch', async (event, arg) => {
 
 
 ipcMain.on('open-gmm-file', (event, arg) => {
-    win.webContents.send('open-gmm-file', arg)
+    win?.webContents.send('open-gmm-file', arg)
 })
 
 // 获取系统语言

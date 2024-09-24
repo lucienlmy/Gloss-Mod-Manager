@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { IGamePlugins, IModInfo, sourceType } from '@src/model/Interfaces';
+import type { IGamePlugins, IModInfo, sourceType } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 
 

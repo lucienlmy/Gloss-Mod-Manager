@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { IMod } from '@src/model/Interfaces';
+import type { IMod } from '@src/model/Interfaces';
 import { useDownload } from '@src/stores/useDownload';
 import { ipcRenderer } from 'electron';
 import { ElMessage } from 'element-plus';

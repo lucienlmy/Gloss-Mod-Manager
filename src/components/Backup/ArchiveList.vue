@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { ITree } from '@src/model/Interfaces';
+import type { ITree } from '@src/model/Interfaces';
 import { useArchive } from '@src/stores/useArchive';
 import { ElMessage, ElMessageBox, ElTree } from 'element-plus';
 import { ref, computed } from 'vue';

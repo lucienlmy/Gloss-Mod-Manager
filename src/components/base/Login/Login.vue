@@ -59,11 +59,11 @@ function login() {
             <!-- 账号密码登录 -->
             <v-col cols="12" class="account-login" v-show="loginType == 1">
                 <v-form class="login-from" ref="form" lazy-validation>
-                    <v-text-field :label="$t('phone number / 3DM username')" :rules="rules.username" v-model="user.username"
-                        prepend-inner-icon="mdi-account" @keydown.enter="login">
+                    <v-text-field :label="$t('phone number / 3DM username')" :rules="rules.username"
+                        v-model="user.username" prepend-inner-icon="mdi-account" @keydown.enter="login">
                     </v-text-field>
-                    <v-text-field type="password" :label="$t('password')" :rules="rules.password" v-model="user.password"
-                        prepend-inner-icon="mdi-lock" @keydown.enter="login">
+                    <v-text-field type="password" :label="$t('password')" :rules="rules.password"
+                        v-model="user.password" prepend-inner-icon="mdi-lock" @keydown.enter="login">
                     </v-text-field>
                     <v-switch v-model="user.remember" :label="$t('Remember me')" color="blue darken-1"
                         hide-details></v-switch>
@@ -72,12 +72,12 @@ function login() {
                             <a href="https://my.3dmgame.com/register">{{ $t('Register') }}</a> | <a
                                 href="https://my.3dmgame.com/findpasswd">{{ $t('Forgot password') }}</a>
                         </div>
-                        <v-chip label :loading="loading" :disabled="loading" variant="text" append-icon="mdi-login-variant"
-                            @click="login">
+                        <v-chip label :loading="loading" :disabled="loading" variant="text"
+                            append-icon="mdi-login-variant" @click="login">
                             {{ $t('Login') }}
-                            <template v-slot:loader>
+                            <!-- <template v-slot:loader>
                                 <span>{{ $t('Logining') }}</span>
-                            </template>
+                            </template> -->
                         </v-chip>
                     </div>
                 </v-form>

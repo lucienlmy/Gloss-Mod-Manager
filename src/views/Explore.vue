@@ -6,6 +6,7 @@ import Thunderstore from "@src/components/Explore/Thunderstore/Thunderstore.vue"
 import ModIo from "@src/components/Explore/ModIo/ModIo.vue"
 import SteamWorkshop from "@src/components/Explore/SteamWorkshop/SteamWorkshop.vue"
 import CurseForge from "@src/components/Explore/CurseForge/CurseForge.vue"
+import GameBanana from "@src/components/Explore/GameBanana/GameBanana.vue"
 
 import { useSettings } from "@src/stores/useSettings";
 
@@ -23,6 +24,7 @@ const settings = useSettings()
             <ModIo v-if="settings.settings.exploreType == 'ModIo'"> </ModIo>
             <SteamWorkshop v-if="settings.settings.exploreType == 'SteamWorkshop'"></SteamWorkshop>
             <CurseForge v-if="settings.settings.exploreType == 'CurseForge'"></CurseForge>
+            <GameBanana v-if="settings.settings.exploreType == 'GameBanana'"></GameBanana>
         </template>
         <router-view></router-view>
     </v-container>

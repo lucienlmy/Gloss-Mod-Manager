@@ -2,7 +2,7 @@
 import { spawn } from 'child_process'
 import { FileHandler } from '@src/model/FileHandler'
 import * as path from 'path'
-import { IAria2Request } from "@src/model/Interfaces";
+import type { IAria2Request } from "@src/model/Interfaces";
 
 import axios from 'axios'
 import { Subject, filter } from 'rxjs';

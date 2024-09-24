@@ -4,7 +4,7 @@ import { watch } from "vue";
 
 import BackupList from '@src/components/Backup/BackupList.vue'
 import { ElMessageBox } from 'element-plus';
-import { IArchive } from '@src/model/Interfaces';
+import type { IArchive } from '@src/model/Interfaces';
 import { useI18n } from 'vue-i18n';
 
 const archive = useArchive()

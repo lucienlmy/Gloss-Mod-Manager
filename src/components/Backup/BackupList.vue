@@ -1,8 +1,6 @@
 <script lang='ts' setup>
-import { IArchive } from '@src/model/Interfaces';
-import { useBackupGame } from '@src/stores/useBackupGame';
+import type { IArchive } from '@src/model/Interfaces';
 import { useMain } from '@src/stores/useMain';
-import { ElMessageBox } from 'element-plus';
 import { computed, ref } from 'vue'
 
 const props = defineProps<{

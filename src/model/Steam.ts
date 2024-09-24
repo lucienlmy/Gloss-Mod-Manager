@@ -6,30 +6,6 @@ import axios from 'axios';
 
 
 export class Steam {
-
-    // public steamcmd;
-
-    // constructor() {
-    //     let steamcmdPath = path.join(FileHandler.getResourcesPath(), 'steamcmd', 'steamcmd.exe')
-    //     this.steamcmd = spawn(`steamcmd`, {
-    //         shell: true,
-    //         cwd: path.dirname(steamcmdPath)
-    //     })
-
-    //     this.steamcmd.stdout.on('data', (data) => {
-    //         console.log(`stdout: ${data}`);
-    //     });
-
-    //     this.steamcmd.stderr.on('data', (data) => {
-    //         console.log(`stderr: ${data}`);
-    //     });
-    //     this.steamcmd.on('error', (error) => {
-    //         console.log(`error: ${error}`);
-    //     })
-
-
-    // }
-
     // 获取steam安装目录
     public static getSteamInstallPath() {
         try {
@@ -49,62 +25,74 @@ export class Steam {
 
     // 获取游戏安装目录
     public static getSteamGamePath(steamAppID: number, installdir: string = '') {
-        let steamPath = this.getSteamInstallPath()
-        if (!steamPath) return ""
-        // console.log(steamPath);
-        // C:\Program Files (x86)\Steam\steamapps\libraryfolders.vdf
-        let fileData = FileHandler.readFile(path.join(steamPath, 'steamapps', 'libraryfolders.vdf'))
-        if (fileData) {
-            let data: any = parse(fileData)
-            let gameRootPath = ''
-            for (const folderId in data.libraryfolders) {
-                const folder = data.libraryfolders[folderId];
-                // console.log(folder);
-                if (!folder.apps) continue;
-                if (folder.apps.hasOwnProperty(steamAppID)) {
-                    console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
-                    gameRootPath = folder.path
-                    break;
+        try {
+            let steamPath = this.getSteamInstallPath()
+            if (!steamPath) return ""
+            // console.log(steamPath);
+            // C:\Program Files (x86)\Steam\steamapps\libraryfolders.vdf
+            let fileData = FileHandler.readFile(path.join(steamPath, 'steamapps', 'libraryfolders.vdf'))
+            // console.log(fileData);
+
+            if (fileData) {
+                let data: any = parse(fileData)
+                let gameRootPath = ''
+                for (const folderId in data.libraryfolders) {
+                    const folder = data.libraryfolders[folderId];
+                    // console.log(folder);
+                    if (!folder.apps) continue;
+                    if (folder.apps.hasOwnProperty(steamAppID)) {
+                        console.log(`"${steamAppID}" is found in folder "${folder.path}".`);
+                        gameRootPath = folder.path
+                        break;
+                    }
+                }
+                if (gameRootPath != '') {
+                    return path.join(gameRootPath, 'steamapps', 'common', installdir)
                 }
             }
-            if (gameRootPath != '') {
-                return path.join(gameRootPath, 'steamapps', 'common', installdir)
-            }
+            return ""
+        } catch (error) {
+            return ""
         }
-        return ""
+
     }
 
     public static GetLastSteamId32() {
-        // C:\Program Files (x86)\Steam\config\loginusers.vdf
-        let steamPath = this.getSteamInstallPath()
-        if (steamPath) {
-            try {
-                let loginusers = FileHandler.readFile(path.join(steamPath, "config", "loginusers.vdf"))
-                let data: any = parse(loginusers)
+        try {
+            // C:\Program Files (x86)\Steam\config\loginusers.vdf
+            let steamPath = this.getSteamInstallPath()
+            if (steamPath) {
+                try {
+                    let loginusers = FileHandler.readFile(path.join(steamPath, "config", "loginusers.vdf"))
+                    let data: any = parse(loginusers)
 
-                let lastSteamId64 = BigInt(0)
-                let lastSteamId32 = BigInt(0)
-                const steamBaseBigInt = BigInt("76561197960265728");
+                    let lastSteamId64 = BigInt(0)
+                    let lastSteamId32 = BigInt(0)
+                    const steamBaseBigInt = BigInt("76561197960265728");
 
-                for (let steamid in data['users']) {
-                    const item = data['users'][steamid]
-                    let back = data['users'][lastSteamId64.toString()]
-                    // 获取 item.Timestamp 最大 的 steamid 赋值给 lastSteamId
-                    if (lastSteamId64 == BigInt(0)) {
-                        lastSteamId64 = BigInt(steamid)
-                    } else if (back && item['Timestamp'] > back['Timestamp']) {
-                        lastSteamId64 = BigInt(steamid)
+                    for (let steamid in data['users']) {
+                        const item = data['users'][steamid]
+                        let back = data['users'][lastSteamId64.toString()]
+                        // 获取 item.Timestamp 最大 的 steamid 赋值给 lastSteamId
+                        if (lastSteamId64 == BigInt(0)) {
+                            lastSteamId64 = BigInt(steamid)
+                        } else if (back && item['Timestamp'] > back['Timestamp']) {
+                            lastSteamId64 = BigInt(steamid)
+                        }
                     }
+                    if (lastSteamId64 != BigInt(0)) {
+                        lastSteamId32 = lastSteamId64 - steamBaseBigInt
+                    }
+                    return lastSteamId32.toString()
+                } catch (error) {
+                    return ""
                 }
-                if (lastSteamId64 != BigInt(0)) {
-                    lastSteamId32 = lastSteamId64 - steamBaseBigInt
-                }
-                return lastSteamId32.toString()
-            } catch (error) {
-                return ""
             }
+            return ""
+        } catch (error) {
+            return ""
         }
-        return ""
+
     }
 
 

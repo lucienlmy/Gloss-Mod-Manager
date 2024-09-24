@@ -474,10 +474,8 @@ export class FileHandler {
      */
     public static pathToArray(filePath: string) {
 
-        // 将 / 替换为 path.sep
-        // filePath = filePath.replace(/\//g, path.sep)
-        // 通过 path.sep 或 / 分割路径
-        return filePath.split(/\/|\\/)
+        // 通过 path.sep 分割路径
+        return filePath.split(path.sep)
     }
 
     /**

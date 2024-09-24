@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { IModInfo } from '@src/model/Interfaces';
+import type { IModInfo } from '@src/model/Interfaces';
 import { useSortMod } from "@src/stores/useSortMod"
 
 
@@ -83,8 +83,8 @@ function bottom(mod: IModInfo) {
     <el-col :span="24">
         <el-row class="mod-list">
             <el-col :span="20" class="name">
-                <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true" @dragstart="dragstart($event, index)"
-                    @dragenter="dragenter($event, index, mod)" @dragend="dragend"
+                <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                    @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)" @dragend="dragend"
                     @dragover="dragover">mdi-dots-vertical</v-icon>
                 <p>{{ mod.modName }}</p>
             </el-col>

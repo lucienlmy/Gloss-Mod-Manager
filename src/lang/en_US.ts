@@ -367,6 +367,9 @@ const Games = {
     "Jagged Alliance 3": "Jagged Alliance 3",
     "DRAGON BALL FighterZ": "DRAGON BALL FighterZ",
     "Black Myth Wukong": "Black Myth Wukong",
+    "Shapez 2": "Shapez 2",
+    "Genshin Impact": "Genshin Impact",
+    "The road of Jianghu": "The road of Jianghu"
 }
 
 const Other = {

@@ -2,7 +2,7 @@
  * 解压文件
  */
 
-import { extractFull, Data, add, rename } from 'node-7z'
+import { extractFull, type Data, add, rename } from 'node-7z'
 import { ipcRenderer } from 'electron'
 import { exec, execSync } from 'child_process';
 import path from 'path'

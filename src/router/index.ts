@@ -52,6 +52,11 @@ const router = createRouter({
                     path: "CurseForge/:CurseForgeModId",
                     name: "CurseForgeContent",
                     component: () => import("@src/components/Explore/CurseForge/Content/Content.vue")
+                },
+                {
+                    path: "GameBanana/:GameBananaModId",
+                    name: "GameBananaContent",
+                    component: () => import("@src/components/Explore/GameBanana/Content/Content.vue")
                 }
             ]
         },

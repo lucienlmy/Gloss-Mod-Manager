@@ -1,4 +1,4 @@
-import { IMod } from "@src/model/Interfaces";
+import type { IMod } from "@src/model/Interfaces";
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
 

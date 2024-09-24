@@ -4,19 +4,19 @@ import { ElMessage, ElNotification } from "element-plus";
 
 ipcRenderer.invoke('check-for-updates')
 
-ipcRenderer.on('checking-for-update', (event, data) => {
+ipcRenderer.on('checking-for-update', () => {
     console.log("开始检查更新")
 })
-ipcRenderer.on('update-available', (event, data) => {
+ipcRenderer.on('update-available', (_, data) => {
     console.log("有新版本可用", data.version)
 })
-ipcRenderer.on('update-not-available', (event, data) => {
+ipcRenderer.on('update-not-available', (_, data) => {
     console.log("已经是最新版本", data.version)
 })
-ipcRenderer.on('update-error', (event, data) => {
+ipcRenderer.on('update-error', (_, data) => {
     console.log(`检查更新失败`, data)
 })
-ipcRenderer.on('update-downloaded', (event, data) => {
+ipcRenderer.on('update-downloaded', (_, data) => {
     console.log(`更新下载完成, 请重启应用`, data.version)
     ElMessage.success(`${data.version} 版本已下载完成, 将在退出后自动更新.`)
     ElNotification.success({

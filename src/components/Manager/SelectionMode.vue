@@ -2,7 +2,7 @@
 import { ref, watch } from "vue";
 import { useManager } from '@src/stores/useManager';
 import { ElMessage, ElMessageBox } from "element-plus";
-import { IModInfo, ITag } from "@src/model/Interfaces";
+import type { IModInfo, ITag } from "@src/model/Interfaces";
 import { useI18n } from "vue-i18n";
 import { FileHandler } from "@src/model/FileHandler";
 import { useSettings } from "@src/stores/useSettings";

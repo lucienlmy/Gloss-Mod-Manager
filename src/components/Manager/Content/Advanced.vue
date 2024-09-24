@@ -1,10 +1,9 @@
 <script lang='ts' setup>
-import { IModInfo } from '@src/model/Interfaces';
-import { useManager } from '@src/stores/useManager';
+import type { IModInfo } from '@src/model/Interfaces';
 import { useSettings } from '@src/stores/useSettings';
 import { ElMessageBox } from 'element-plus';
 
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 
 const props = defineProps<{
     mod: IModInfo,

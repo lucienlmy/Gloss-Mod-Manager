@@ -1,9 +1,9 @@
 <script lang='ts' setup>
 import { join } from 'path';
-import { spawn, exec } from 'child_process';
+import { exec } from 'child_process';
 import { FileHandler } from '@src/model/FileHandler';
 import { ElMessage } from 'element-plus';
-import { ISupportedGames } from '@src/model/Interfaces';
+import type { ISupportedGames } from '@src/model/Interfaces';
 
 const props = defineProps<{
     game: ISupportedGames

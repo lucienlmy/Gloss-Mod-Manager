@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 import { useSettings } from "@src/stores/useSettings";
-import { IMod } from "@src/model/Interfaces";
+import type { IMod } from "@src/model/Interfaces";
 
 export const useNews = defineStore("News", {
     state: () => ({

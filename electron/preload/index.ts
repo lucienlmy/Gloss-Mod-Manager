@@ -1,4 +1,3 @@
-import { ipcRenderer } from "electron"
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
     return new Promise((resolve) => {

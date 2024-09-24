@@ -31,6 +31,11 @@ import NexusMods from '@src/components/home/logo/NexusMods.vue'
                         <CurseForge width="100%"></CurseForge>
                     </a>
                 </v-col>
+                <v-col cols="4" class="partner">
+                    <a href="https://gamebanana.com/" target="_blank">
+                        <v-img src="imgs/Gamebanana.png" alt="Gamebanana" class="gloss-logo"></v-img>
+                    </a>
+                </v-col>
                 <!-- <v-col cols="4">
                     <a href="https://www.nexusmods.com/">
                         <NexusMods height="84px" width="100%"></NexusMods>

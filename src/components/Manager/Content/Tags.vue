@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { ITag } from '@src/model/Interfaces';
+import type { ITag } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { ref } from 'vue';
@@ -63,9 +63,9 @@ function dragend(e: any) {
 <template>
     <div class="tags">
         <v-chip-group class="group" v-model="manager.filterTags" multiple>
-            <v-chip class="chip" v-for="(item, index) in manager.tags" :key="item.name" label variant="text" :value="item"
-                :draggable="true" @dragstart="dragstart($event, index, item)" @dragenter="dragenter($event, index)"
-                @dragend="dragend" @dragover="dragover">
+            <v-chip class="chip" v-for="(item, index) in manager.tags" :key="item.name" label variant="text"
+                :value="item" :draggable="true" @dragstart="dragstart($event, index, item)"
+                @dragenter="dragenter($event, index)" @dragend="dragend" @dragover="dragover">
                 <!-- <v-chip label variant="text" :color="item.color"> </v-chip> -->
                 <div :style="{ color: item.color }">{{ item.name }}</div>
                 <template #append>

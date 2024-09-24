@@ -372,6 +372,9 @@ const Games = {
     "Jagged Alliance 3": "铁血联盟3",
     "DRAGON BALL FighterZ": "龙珠战士Z",
     "Black Myth Wukong": "黑神话: 悟空",
+    "Shapez 2": "异形工厂 2",
+    "Genshin Impact": "原神",
+    "The road of Jianghu": "刀剑江湖路",
 }
 
 const Other = {

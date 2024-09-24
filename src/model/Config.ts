@@ -2,7 +2,7 @@ import { join, dirname } from 'node:path'
 import { homedir } from "os";
 import { readFileSync, writeFile, existsSync, writeFileSync, mkdirSync } from 'node:fs'
 import { useSettings } from '@src/stores/useSettings'
-import { ISettings } from './Interfaces';
+import type { ISettings } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 import { ipcRenderer } from 'electron';
 import { FileHandler } from '@src/model/FileHandler'

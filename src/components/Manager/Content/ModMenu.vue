@@ -1,15 +1,14 @@
 <script lang='ts' setup>
-import { IDownloadTask, IModInfo, IType } from '@src/model/Interfaces';
+import type { IModInfo, IType } from '@src/model/Interfaces';
 import { useManager } from '@src/stores/useManager';
 import { useSettings } from '@src/stores/useSettings';
 import { useDownload } from '@src/stores/useDownload';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { FileHandler } from '@src/model/FileHandler'
 import { useI18n } from 'vue-i18n';
 import { join } from 'path'
 import ContentAdvanced from '@src/components/Manager/Content/Advanced.vue'
-import { useModIo } from '@src/stores/useModIo';
 
 
 const props = defineProps<{
@@ -97,69 +96,6 @@ async function reinstall() {
     manager.updateMod(props.mod)
     toDel()
 
-    // if (props.mod.from) {
-    //     toDel()
-    //     let taks: IDownloadTask = {
-    //         id: props.mod.webId ?? 0,
-    //         type: props.mod.from,
-    //         Thunderstore: {
-    //             namespace: props.mod.Thunderstore?.namespace || '',
-    //             name: props.mod.Thunderstore?.name || ''
-    //         },
-    //         name: '',
-    //         fileName: props.mod.fileName,
-    //         version: '',
-    //         status: 'active',
-    //         speed: 0,
-    //         totalSize: 0,
-    //         downloadedSize: 0,
-    //         link: '',
-    //         modAuthor: '',
-    //         website: props.mod.modWebsite
-    //     }
-    //     let modStorage = join(settings.settings.modStorageLocation, 'cache', props.mod.fileName ?? "")
-
-    //     download.ReStart(taks, modStorage)
-    // } else {
-    //     ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
-    // }
-
-    // switch (props.mod.from) {
-    //     case "GlossMod":
-    //         if (props.mod.webId) {
-    //             FileHandler.writeLog(`更新: ${props.mod.modName}`)
-    //             toDel()
-    //             download.addDownloadById(props.mod.webId)
-    //         }
-    //         else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
-    //         break;
-
-    //     case "ModIo":
-    //         if (props.mod.modIo_id) {
-    //             FileHandler.writeLog(`更新: ${props.mod.modName}`)
-    //             toDel()
-
-    //             const modio = useModIo()
-
-    //             let modData = await modio.getModDataById(props.mod.modIo_id)
-
-    //             if (modData) {
-    //                 download.addDownloadByModIo(modData)
-    //             }
-    //         }
-    //         else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
-
-    //         break;
-
-    //     default:
-    //         if (props.mod.webId) {
-    //             FileHandler.writeLog(`更新: ${props.mod.modName}`)
-    //             toDel()
-    //             download.addDownloadById(props.mod.webId)
-    //         }
-    //         else ElMessage.error(t('This mod was not downloaded from the manager and cannot be updated'))
-    //         break;
-    // }
 }
 
 </script>

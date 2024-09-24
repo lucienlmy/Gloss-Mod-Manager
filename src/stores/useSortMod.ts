@@ -1,6 +1,6 @@
 import path from "path";
 import { defineStore } from "pinia";
-import { IModInfo } from "@src/model/Interfaces";
+import type { IModInfo } from "@src/model/Interfaces";
 import { useSettings } from "@src/stores/useSettings";
 import { Manager } from "@src/model/Manager";
 import { useManager } from "./useManager";

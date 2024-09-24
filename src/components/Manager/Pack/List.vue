@@ -1,6 +1,5 @@
 <script lang='ts' setup>
-import { IModInfo } from '@src/model/Interfaces';
-import { useManager } from '@src/stores/useManager';
+import type { IModInfo } from '@src/model/Interfaces';
 import { usePacks } from '@src/stores/usePacks';
 
 

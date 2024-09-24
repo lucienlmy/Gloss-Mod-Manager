@@ -1,5 +1,5 @@
 <script lang='ts' setup>
-import { ISupportedGames } from '@src/model/Interfaces';
+import type { ISupportedGames } from '@src/model/Interfaces';
 import { useExplore } from '@src/stores/useExplore';
 import { useMain } from '@src/stores/useMain';
 import { useManager } from '@src/stores/useManager';
