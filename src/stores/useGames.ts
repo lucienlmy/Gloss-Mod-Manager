@@ -12,16 +12,16 @@ export const useGames = defineStore("Games", {
         GamePlugins: [] as IGamePlugins[],
     }),
     getters: {
-        gameList(state) {
-            const { t } = useI18n()
-            const Settings = useSettings()
-            let list = Settings.settings.managerGameList
-            if (state.search != '') {
-                list = list.filter(item => t(item.gameName).includes(state.search))
-            }
+        // gameList(state) {
+        //     const { t } = useI18n()
+        //     const Settings = useSettings()
+        //     let list = Settings.settings.managerGameList
+        //     if (state.search != '') {
+        //         list = list.filter(item => t(item.gameName).includes(state.search))
+        //     }
 
-            return list
-        }
+        //     return list
+        // }
     },
     actions: {
         async getGamePlugins() {

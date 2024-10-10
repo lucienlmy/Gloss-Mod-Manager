@@ -375,6 +375,10 @@ const Games = {
     "Shapez 2": "异形工厂 2",
     "Genshin Impact": "原神",
     "The road of Jianghu": "刀剑江湖路",
+    "GUNDAM BREAKER 4": "高达创坏者 4",
+    "Frostpunk 2": "冰汽时代 2",
+    "Warhammer 40000 Space Marine 2": "战锤40K: 星际战士2",
+    "Dead Rising Deluxe Remaster": "丧尸围城豪华复刻版",
 }
 
 const Other = {

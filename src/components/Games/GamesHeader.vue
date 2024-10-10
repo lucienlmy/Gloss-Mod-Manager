@@ -6,8 +6,27 @@ import { useManager } from '@src/stores/useManager';
 import GameList from '@src/components/Games/GamesList.vue'
 import { useGames } from "@src/stores/useGames";
 
+import {computed} from 'vue'
+import { useI18n } from 'vue-i18n';
+import { useSettings } from '@src/stores/useSettings';
+
 const games = useGames()
 const manager = useManager()
+const { t } = useI18n()
+const Settings = useSettings()
+
+const gameList = computed(()=>{
+
+    let list = Settings.settings.managerGameList
+    if (games.search != '') {
+        list = list.filter(item => t(item.gameName).includes(games.search))
+    }
+
+    console.log(list);
+    
+
+    return list
+})
 
 
 </script>
@@ -38,7 +57,7 @@ const manager = useManager()
                     <div class="add-game" @click="manager.selectGameDialog = true"></div>
                     <div class="add-game-text">{{ $t("Add Game") }}</div>
                 </v-col>
-                <GameList v-for="item in games.gameList" :key="item.GlossGameId" :item="item"></GameList>
+                <GameList v-for="item in gameList" :key="item.GlossGameId" :item="item"></GameList>
             </v-row>
         </v-card-text>
     </v-card>

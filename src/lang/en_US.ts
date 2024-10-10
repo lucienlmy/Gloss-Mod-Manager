@@ -369,7 +369,11 @@ const Games = {
     "Black Myth Wukong": "Black Myth Wukong",
     "Shapez 2": "Shapez 2",
     "Genshin Impact": "Genshin Impact",
-    "The road of Jianghu": "The road of Jianghu"
+    "The road of Jianghu": "The road of Jianghu",
+    "GUNDAM BREAKER 4": 'GUNDAM BREAKER 4',
+    "Frostpunk 2": "Frostpunk 2",
+    "Warhammer 40000 Space Marine 2": "Warhammer 40000 Space Marine 2",
+    "Dead Rising Deluxe Remaster": "Dead Rising Deluxe Remaster",
 }
 
 const Other = {

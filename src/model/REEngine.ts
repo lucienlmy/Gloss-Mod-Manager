@@ -56,9 +56,11 @@ export class REEngine {
                     pakListData.push([mod.id.toString(), basename(modStorage), pakName])
                 } else {
                     let modPakInGamePak = pakListData.filter(item => item.includes(basename(modStorage)))
-                    let pakName = modPakInGamePak[0][1];
+                    let pakName = modPakInGamePak[0][2];
                     pakListData = pakListData.filter(item => !item.includes(pakName))
                     let gamePak = join(gameStorage, pakName)
+                    console.log(gamePak);
+
                     FileHandler.deleteFile(gamePak)
                 }
             }
