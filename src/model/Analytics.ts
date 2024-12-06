@@ -1,10 +1,8 @@
 /**
  * 数据统计
  */
-import { ElectronStore } from '@src/model/ElectronStore'
-import { useMain } from '@src/stores/useMain';
-import { useSettings } from '@src/stores/useSettings';
-import { useUser } from '@src/stores/useUser';
+
+
 
 
 export class AppAnalytics {
@@ -25,7 +23,6 @@ export class AppAnalytics {
         }
         return id
     }
-
 
     public static async sendEvent(event_name: string, event_value?: any) {
 

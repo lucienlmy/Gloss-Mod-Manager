@@ -1,7 +1,6 @@
 <script lang='ts' setup>
-import { useUser } from "@src/stores/useUser";
-import { ref, onMounted, onUnmounted } from "vue";
 
+import { ref, onMounted, onUnmounted } from "vue";
 let qrcode = ref()
 const user = useUser()
 

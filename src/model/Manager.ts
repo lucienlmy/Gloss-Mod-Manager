@@ -3,14 +3,9 @@
  */
 
 import { existsSync, statSync } from 'node:fs'
-import type { IModInfo, IState, ITag } from "@src/model/Interfaces";
 import { join, dirname, basename, extname, sep } from 'node:path'
-import { FileHandler } from "@src/model/FileHandler";
-import { useManager } from '@src/stores/useManager';
-import { useDownload } from '@src/stores/useDownload';
+
 import { ElMessage, ElMessageBox } from 'element-plus';
-
-
 export class Manager {
 
     public static passFiles = ['README.md', 'manifest.json', 'icon.png', 'CHANGELOG.md', 'LICENSE']

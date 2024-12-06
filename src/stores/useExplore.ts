@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import type { IGameInfo, IMod, ISupportedGames } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
-import { useUser } from "@src/stores/useUser";
+
 
 export const useExplore = defineStore('Explore', {
     state: () => ({

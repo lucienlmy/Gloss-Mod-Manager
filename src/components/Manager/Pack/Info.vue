@@ -1,12 +1,9 @@
 <script lang='ts' setup>
-import { useManager } from '@src/stores/useManager';
-import { usePacks } from '@src/stores/usePacks';
-import { useSettings } from '@src/stores/useSettings';
-import { useUser } from '@src/stores/useUser';
+
+
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-
 const packs = usePacks()
 const manager = useManager()
 const { t } = useI18n()
@@ -24,9 +21,7 @@ let gameList = computed(() => {
 packs.Info.gameID = settings.settings.managerGame?.GlossGameId
 packs.Info.author = user.user?.user_nickName
 
-
 // console.log(packs.Info.gameID);
-
 
 </script>
 <template>

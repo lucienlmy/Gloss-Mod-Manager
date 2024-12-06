@@ -1,7 +1,5 @@
 <script lang='ts' setup>
 import { ref, computed } from "vue";
-import type { IUser } from "@src/model/Interfaces";
-
 const props = defineProps<{
     user: IUser,
 }>()

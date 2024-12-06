@@ -1,13 +1,10 @@
 <script lang='ts' setup>
-import { FileHandler } from '@src/model/FileHandler'
-import { usePacks } from '@src/stores/usePacks';
-import path from 'path'
 
+import path from 'path'
 const packs = usePacks()
 const props = defineProps<{
     type: 'pack' | 'inport'
 }>()
-
 
 function open() {
     // console.log(path.dirname(packs.exportPath));
@@ -19,8 +16,8 @@ function open() {
     <el-result v-if="type == 'pack'" icon="success" :title="$t('Finish')"
         :sub-title="$t('Your GMM package has been exported, you can...')">
         <template #extra>
-            <v-btn variant="text" append-icon="mdi-share-variant"
-                href="https://mod.3dmgame.com/Workshop/PublishMod">{{ $t('Share to Mod Station') }}</v-btn>
+            <v-btn variant="text" append-icon="mdi-share-variant" href="https://mod.3dmgame.com/Workshop/PublishMod">{{
+                $t('Share to Mod Station') }}</v-btn>
             <v-btn variant="text" append-icon="mdi-folder-open-outline" @click="open">{{ $t('Open location') }}</v-btn>
         </template>
     </el-result>

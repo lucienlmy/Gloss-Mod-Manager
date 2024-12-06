@@ -1,6 +1,5 @@
 <script lang='ts' setup>
-import { useManager } from '@src/stores/useManager';
-import { useNews } from '@src/stores/useNews';
+
 
 const news = useNews()
 const manager = useManager()

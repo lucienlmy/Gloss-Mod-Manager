@@ -1,8 +1,6 @@
 import { defineStore } from "pinia";
-import type { IGitHubAsset, IGitHubRelease } from "@src/model/Interfaces";
 import { ElMessage } from "element-plus";
 import axios from "axios";
-
 export const useGithub = defineStore('Github', {
     state: () => ({
         url: '',

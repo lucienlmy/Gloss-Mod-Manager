@@ -1,7 +1,6 @@
 <script lang='ts' setup>
-import { usePacks } from '@src/stores/usePacks';
-import { watch, nextTick } from 'vue';
 
+import { watch, nextTick } from 'vue';
 const pack = usePacks()
 
 // 监听 pack.logText 的变化

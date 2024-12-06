@@ -271,5 +271,4 @@ const lang = {
     "tools": "工具"
 }
 
-
 export default lang

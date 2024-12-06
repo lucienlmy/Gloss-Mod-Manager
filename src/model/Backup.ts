@@ -1,9 +1,7 @@
-import type { IArchive, ITree } from "@src/model/Interfaces";
-import { FileHandler } from "@src/model/FileHandler";
+
+
 import { join } from 'path'
 import { ElLoading, ElMessage } from "element-plus";
-import { Unzipper } from "@src/model/Unzipper";
-
 
 export class Backup {
 
@@ -54,7 +52,6 @@ export class Backup {
         FileHandler.writeFile(backupFile, JSON.stringify(data))
     }
     //#endregion
-
 
     /**
      * 备份存档
@@ -116,7 +113,6 @@ export class Backup {
         } catch (error) {
             ElMessage.error(`错误: ${error}`)
         }
-
 
         loading.close()
     }

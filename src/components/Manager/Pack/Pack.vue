@@ -1,17 +1,14 @@
 <script lang='ts' setup>
-import { usePacks } from '@src/stores/usePacks';
-import { useManager } from '@src/stores/useManager';
+
 import { ipcRenderer } from 'electron';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import PackInfo from '@src/components/Manager/Pack/Info.vue'
-import PackList from '@src/components/Manager/Pack/List.vue'
-import PackLogs from '@src/components/Manager/Pack/Logs.vue'
-import PackFinish from '@src/components/Manager/Pack/Finish.vue'
-import PackMessage from '@src/components/Manager/Pack/Message.vue'
-
+import PackInfo from '@/components/Manager/Pack/Info.vue'
+import PackList from '@/components/Manager/Pack/List.vue'
+import PackLogs from '@/components/Manager/Pack/Logs.vue'
+import PackFinish from '@/components/Manager/Pack/Finish.vue'
+import PackMessage from '@/components/Manager/Pack/Message.vue'
 const packs = usePacks()
 const manager = useManager()
-
 
 function prev() {
     packs.step--
@@ -51,7 +48,6 @@ function selectExportPath() {
         }
     })
 }
-
 
 
 </script>
@@ -106,8 +102,9 @@ function selectExportPath() {
                             @click="toggle"></v-btn>
                     </v-item>
                 </v-item-group>
-                <v-btn v-if="packs.step == 1" variant="plain" append-icon="mdi-chevron-right"
-                    @click="next">{{ $t('Next') }}</v-btn>
+                <v-btn v-if="packs.step == 1" variant="plain" append-icon="mdi-chevron-right" @click="next">{{
+                    $t('Next')
+                    }}</v-btn>
                 <v-btn v-else-if="packs.step == 2" variant="plain" append-icon="mdi-content-save-all-outline"
                     @click="selectExportPath">{{ $t('package') }}</v-btn>
                 <v-btn v-else variant="plain" append-icon="mdi-check" :disabled="packs.step == 3"

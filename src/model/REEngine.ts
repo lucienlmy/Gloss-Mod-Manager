@@ -3,14 +3,9 @@
  */
 
 
-import type { IModInfo, IState, ISupportedGames } from "@src/model/Interfaces";
 import { join, extname, basename } from 'path'
-import { Manager } from "@src/model/Manager";
 import { ElMessage } from "element-plus";
-import { useManager } from "@src/stores/useManager";
 import { statSync } from "fs"
-import { FileHandler } from "@src/model/FileHandler";
-
 
 export class REEngine {
 
@@ -85,7 +80,6 @@ export class REEngine {
                 const uninstalledPakName = REEngine.pakList.data.find(item => item[0] == mod.id.toString())?.[2] ?? ""
                 // console.log("pakListData:", uninstalledPakName);
                 // console.log("mod.id:", mod.id);
-
 
                 // 重命名最后一个 pak
                 await FileHandler.renameFile(join(manager.gameStorage, lastPakName), join(manager.gameStorage, uninstalledPakName))

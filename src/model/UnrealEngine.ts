@@ -4,15 +4,11 @@
 
 import { join, dirname, extname } from "path"
 
-import { useManager } from "@src/stores/useManager"
-import { FileHandler } from "@src/model/FileHandler"
 import { ElMessage } from "element-plus"
-import type { IModInfo, ISupportedGames } from "@src/model/Interfaces"
-import { Manager } from "@src/model/Manager"
 
 
 export class UnrealEngine {
-    public static modType(bassPath: string, useUE4SS: boolean = true): ISupportedGames["modType"] {
+    public static modType(bassPath: string = "", useUE4SS: boolean = true): ISupportedGames["modType"] {
         return [
             {
                 id: 1,
@@ -128,7 +124,6 @@ export class UnrealEngine {
                     // console.log(enableFile);
                     FileHandler.ensureDirectoryExistence(enableFile)
 
-
                     return Manager.installByFolderParent(mod, this.installPath ?? "", "Scripts", true)
                 },
                 async uninstall(mod) {
@@ -161,7 +156,7 @@ export class UnrealEngine {
         ]
     }
 
-    static checkModType(mod: IModInfo) {
+    public static checkModType(mod: IModInfo) {
         let pak = false
         let us4ss = false
         let mods = false

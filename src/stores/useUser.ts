@@ -1,12 +1,8 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-import type { IMod, IModInfo, IUser } from "@src/model/Interfaces";
-import { ElectronStore } from '@src/model/ElectronStore'
 import { ElMessage } from "element-plus";
 import QRCode from 'qrcode'
 import crypto from "crypto";
-import { AppAnalytics } from "@src/model/Analytics"
-
 
 export const useUser = defineStore('User', {
     state: () => ({

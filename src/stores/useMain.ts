@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-
 export const useMain = defineStore('Main', {
     state: () => ({
         leftMenu: true,

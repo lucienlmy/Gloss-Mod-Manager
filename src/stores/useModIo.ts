@@ -1,7 +1,5 @@
-import type { IModIo, IModIoModfile } from "@src/model/Interfaces";
-import { defineStore } from "pinia";
-import { useSettings } from "@src/stores/useSettings";
 
+import { defineStore } from "pinia";
 
 export const useModIo = defineStore('ModIo', {
     state: () => ({
@@ -43,7 +41,6 @@ export const useModIo = defineStore('ModIo', {
                 })
 
                 // console.log(params.toString());
-
 
                 let response = await fetch(`https://u-24301997.modapi.io/v1/games/${game_id}/mods?${params}`, {
                     headers: {

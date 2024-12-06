@@ -2,7 +2,6 @@
 //  * 下载管理
 //  */
 
-// import type { IDownloadTask, sourceType, TaskStatus } from "@src/model/Interfaces"
 
 // export class Download {
 

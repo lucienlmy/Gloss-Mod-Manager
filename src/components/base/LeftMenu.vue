@@ -1,11 +1,9 @@
 <script lang='ts' setup>
-import { useMain } from '@src/stores/useMain';
-import { useSettings } from '@src/stores/useSettings';
+
 import { useI18n } from "vue-i18n";
 import { computed } from "vue";
-import AutoUpdate from "@src/components/AutoUpdate/AutoUpdate.vue"
-import BaseUser from "@src/components/base/User.vue"
-
+import AutoUpdate from "@/components/AutoUpdate/AutoUpdate.vue"
+import BaseUser from "@/components/base/User.vue"
 const { t } = useI18n()
 
 let lists = computed(() => [

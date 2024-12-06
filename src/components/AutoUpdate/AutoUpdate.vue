@@ -1,7 +1,6 @@
 <script lang='ts' setup>
 import { ipcRenderer } from "electron";
 import { ElMessage, ElNotification } from "element-plus";
-
 ipcRenderer.invoke('check-for-updates')
 
 ipcRenderer.on('checking-for-update', () => {
@@ -31,7 +30,6 @@ ipcRenderer.on('update-downloaded', (_, data) => {
         }
     })
 })
-
 
 </script>
 <template></template>

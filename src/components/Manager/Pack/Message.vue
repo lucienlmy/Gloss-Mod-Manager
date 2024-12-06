@@ -1,9 +1,7 @@
 <script lang='ts' setup>
-import { useSettings } from '@src/stores/useSettings';
+
 import { ElMessageBox } from 'element-plus';
-
 const settings = useSettings()
-
 
 if (settings.settings.showPakeMessage) {
     show()

@@ -1,18 +1,12 @@
 // Aria2 下载相关
 import { spawn } from 'child_process'
-import { FileHandler } from '@src/model/FileHandler'
 import * as path from 'path'
-import type { IAria2Request } from "@src/model/Interfaces";
-
 import axios from 'axios'
-import { Subject, filter } from 'rxjs';
-
-
+import { ElMessage } from 'element-plus';
 export class APIAria2 {
     // public aria2: any
     // socket: WebSocket;
     // listener: Subject<any>;
-
 
     constructor() {
         // this.socket = new WebSocket('ws://localhost:6800/jsonrpc')
@@ -32,7 +26,6 @@ export class APIAria2 {
             console.log('aria2c 已启动');
             return;
         }
-
         // 启动 aria2
         let aria2Path = path.join(FileHandler.getResourcesPath(), 'aria2')
         let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf')], {
@@ -41,6 +34,10 @@ export class APIAria2 {
         })
         aria2c.on('error', (err) => {
             console.log(`aria2c error: ${err}`);
+            // 重试
+            setTimeout(() => {
+                APIAria2.init()
+            }, 1000);
         })
         aria2c.stdout.on('data', (data) => {
             let str = data.toString()
@@ -57,7 +54,8 @@ export class APIAria2 {
     }
 
     public static Token() {
-        return '4Oe86X40FICqdNL3i9RnStRcrkNgkIA2kxK3cbQVHykQAJeIeT'
+        // return '4Oe86X40FICqdNL3i9RnStRcrkNgkIA2kxK3cbQVHykQAJeIeT'
+        return ''
     }
 
     public static uuid() {
@@ -67,23 +65,19 @@ export class APIAria2 {
         });
     }
 
+    public static randomNumbers() {
+        return Math.floor(Math.random() * 1000000000)
+    }
+
     // 发送消息
-    public async send(request: IAria2Request) {
-        // return new Promise((resolve, reject) => {
+    public static async send(request: IAria2Request) {
         if (!request.id) request.id = APIAria2.uuid()
-        request.params = [`token:${APIAria2.Token()}`, ...request.params]
-        try {
-            const { data } = await axios.post(`http://localhost:6800/jsonrpc`, request);
-            return data;
-        } catch (err) {
-            console.log(err);
-            return err;
-        }
+        const { data } = await axios.post(`http://localhost:6800/jsonrpc`, request)
+        return data;
     }
 
     // 创建下载
-    public async addUri(uri: string, name: string, dir: string) {
-        APIAria2.init();
+    public static addUri(uri: string, name: string, dir: string) {
         return this.send({
             jsonrpc: '2.0',
             method: 'aria2.addUri',
@@ -99,7 +93,7 @@ export class APIAria2 {
     }
 
     // 暂停
-    public async pause(gid: string) {
+    public static async pause(gid: string) {
         return this.send({
             jsonrpc: '2.0',
             id: 'pause',
@@ -110,7 +104,7 @@ export class APIAria2 {
     }
 
     // 恢复
-    public async unpause(gid: string) {
+    public static async unpause(gid: string) {
         return this.send({
             jsonrpc: '2.0',
             id: 'unpause',
@@ -120,7 +114,7 @@ export class APIAria2 {
     }
 
     // 下载进度
-    public onProgress(gid: string) {
+    public static onProgress(gid: string) {
         return this.send({
             jsonrpc: '2.0',
             id: 'progress',
@@ -135,7 +129,7 @@ export class APIAria2 {
     }
 
     // 下载列表
-    public getDownloadList(): Promise<any> {
+    public static getDownloadList(): Promise<any> {
         return this.send({
             jsonrpc: '2.0',
             id: 'list',
@@ -144,13 +138,18 @@ export class APIAria2 {
         });
     }
 
-    // public tellStatus(gid: string) {
-    //     return this.send({
-    //         jsonrpc: '2.0',
-    //         id: 'progress',
-    //         method: 'aria2.tellStatus',
-    //         params: [gid, ["gid", "status", "totalLength", "completedLength", "downloadSpeed", "dir"]],
-    //     })
-    // }
+    public static async test() {
+        APIAria2.send({
+            "jsonrpc": "2.0",
+            "method": "aria2.getGlobalStat",
+            "id": APIAria2.uuid(),
+            params: []
+        }).then(() => {
+            console.log('success');
+        }).catch((err) => {
+            // console.log(err);
+            ElMessage.error('Aria2连接失败! 下载功能可能受影响');
+        })
+    }
 
 }

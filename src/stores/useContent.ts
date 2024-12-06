@@ -1,7 +1,6 @@
-import type { IMod } from "@src/model/Interfaces";
+
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-
 export const useContent = defineStore('Content', {
     state: () => ({
         modData: null as IMod | null,

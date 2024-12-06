@@ -1,10 +1,7 @@
 import { execSync, spawn } from 'child_process';
 import path from 'path';
-import { FileHandler } from '@src/model/FileHandler'
 import { parse } from 'vdf-parser'
 import axios from 'axios';
-
-
 export class Steam {
     // 获取steam安装目录
     public static getSteamInstallPath() {
@@ -94,7 +91,6 @@ export class Steam {
         }
 
     }
-
 
     // 获取创意工坊列表
     public static getWorkshopList(appid: number, page: number, numperpage: number = 24, return_details: boolean = true) {

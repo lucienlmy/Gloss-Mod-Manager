@@ -1,84 +1,83 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
         {
             path: "/",
             name: "Home",
-            component: () => import("@src/views/Home.vue"),
+            component: () => import("@/views/Home/Index.vue"),
         },
         {
             path: "/Manager",
             name: "Manager",
-            component: () => import("@src/views/Manager.vue"),
+            component: () => import("@/views/Manager/Index.vue"),
         },
         {
             path: "/Backup",
             name: "Backup",
-            component: () => import("@src/views/Backup.vue"),
+            component: () => import("@/views/Backup/Index.vue"),
         },
         {
             path: "/Games",
             name: "Games",
-            component: () => import("@src/views/Games.vue"),
+            component: () => import("@/views/Games/Index.vue"),
         },
         {
             path: "/Explore",
             name: "Explore",
-            component: () => import("@src/views/Explore.vue"),
+            component: () => import("@/views/Explore/Index.vue"),
             children: [
                 {
                     path: "GlossMod/:modId",
                     name: "GlossModContent",
-                    component: () => import("@src/components/Explore/GlossMod/Content/Content.vue"),
+                    component: () => import("@/views/Explore/GlossMod/Content/Content.vue"),
                 },
                 {
                     path: "ModIo/:modId",
                     name: "ModIoModsContent",
-                    component: () => import("@src/components/Explore/ModIo/Content/Content.vue")
+                    component: () => import("@/views/Explore/ModIo/Content/Content.vue")
                 },
                 {
                     path: "Thunderstore/:namespace/:name/:version",
                     name: "ThunderstoreModsContent",
-                    component: () => import("@src/components/Explore/Thunderstore/Content/Content.vue")
+                    component: () => import("@/views/Explore/Thunderstore/Content/Content.vue")
                 },
                 {
                     path: "SteamWorkshop/:workshopId",
                     name: "SteamWorkshop",
-                    component: () => import("@src/components/Explore/SteamWorkshop/Content/Content.vue")
+                    component: () => import("@/views/Explore/SteamWorkshop/Content/Content.vue")
                 },
                 {
                     path: "CurseForge/:CurseForgeModId",
                     name: "CurseForgeContent",
-                    component: () => import("@src/components/Explore/CurseForge/Content/Content.vue")
+                    component: () => import("@/views/Explore/CurseForge/Content/Content.vue")
                 },
                 {
                     path: "GameBanana/:GameBananaModId",
                     name: "GameBananaContent",
-                    component: () => import("@src/components/Explore/GameBanana/Content/Content.vue")
+                    component: () => import("@/views/Explore/GameBanana/Content/Content.vue")
                 }
             ]
         },
         {
             path: "/Download",
             name: "Download",
-            component: () => import("@src/views/Download.vue"),
+            component: () => import("@/views/Download/Index.vue"),
         },
         {
             path: "/Settings",
             name: "Settings",
-            component: () => import("@src/views/Settings.vue"),
+            component: () => import("@/views/Settings/Index.vue"),
         },
         {
             path: "/About",
             name: "About",
-            component: () => import("@src/views/About.vue"),
+            component: () => import("@/views/About/Index.vue"),
         },
         {
             path: "/User",
             name: "User",
-            component: () => import("@src/views/User.vue"),
+            component: () => import("@/views/User/Index.vue"),
         }
     ]
 });
@@ -87,6 +86,5 @@ const router = createRouter({
 router.afterEach(() => {
     window.scrollTo(0, 0);
 });
-
 
 export default router;

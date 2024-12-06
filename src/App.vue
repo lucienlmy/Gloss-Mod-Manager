@@ -1,8 +1,7 @@
 <script lang='ts' setup>
-import AppHeader from '@src/components/base/AppHeader.vue'
-import LeftMenu from '@src/components/base/LeftMenu.vue'
-import Global from '@src/components/base/Global.vue'
-
+import AppHeader from '@/components/base/AppHeader.vue'
+import LeftMenu from '@/components/base/LeftMenu.vue'
+import Global from '@/components/base/Global.vue'
 </script>
 <template>
     <v-card>

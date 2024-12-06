@@ -1,9 +1,5 @@
 import { defineStore } from "pinia";
-import { useSettings } from "@src/stores/useSettings";
-import type { IArchive, ITree } from "@src/model/Interfaces";
 import { join } from 'path'
-import { FileHandler } from "@src/model/FileHandler";
-import { Backup } from "@src/model/Backup";
 
 
 export const useArchive = defineStore('Archive', {

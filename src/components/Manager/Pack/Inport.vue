@@ -1,15 +1,11 @@
 <script lang='ts' setup>
 import { onUnmounted, watch } from 'vue'
-import { usePacks } from '@src/stores/usePacks';
 import { ElMessage } from 'element-plus';
-import PackList from '@src/components/Manager/Pack/List.vue'
-import PackInpurtInfo from '@src/components/Manager/Pack/Inpurt/Info.vue'
-import PackLogs from '@src/components/Manager/Pack/Logs.vue'
-import PackFinish from '@src/components/Manager/Pack/Finish.vue'
-
-
+import PackList from '@/components/Manager/Pack/List.vue'
+import PackInpurtInfo from '@/components/Manager/Pack/Inpurt/Info.vue'
+import PackLogs from '@/components/Manager/Pack/Logs.vue'
+import PackFinish from '@/components/Manager/Pack/Finish.vue'
 const packs = usePacks()
-
 
 function prev() {
     packs.step--
@@ -29,7 +25,6 @@ function install() {
     packs.step = 3
     packs.installGmm()
 }
-
 
 watch(() => packs.dialog, () => {
     if (packs.dialog == false) packs.clear()
@@ -51,8 +46,8 @@ watch(() => packs.inpurtDialog, () => {
                         </div>
                     </div>
                     <div class="close">
-                        <v-chip label append-icon="mdi-close" @click="packs.inpurtDialog = false"
-                            variant="text">{{ $t('Close') }}</v-chip>
+                        <v-chip label append-icon="mdi-close" @click="packs.inpurtDialog = false" variant="text">{{
+                            $t('Close') }}</v-chip>
                     </div>
                 </v-col>
             </v-card-title>
@@ -76,10 +71,10 @@ watch(() => packs.inpurtDialog, () => {
             </v-card-text>
             <v-card-actions class="justify-space-between">
                 <!-- || packs.step == 3 -->
-                <v-btn variant="plain" prepend-icon="mdi-chevron-left" @click="prev"
-                    :disabled="packs.step == 1">{{ $t('Previous') }}</v-btn>
-                <v-btn v-if="packs.step == 1" variant="plain" append-icon="mdi-chevron-right"
-                    @click="next">{{ $t('Next') }}</v-btn>
+                <v-btn variant="plain" prepend-icon="mdi-chevron-left" @click="prev" :disabled="packs.step == 1">{{
+                    $t('Previous') }}</v-btn>
+                <v-btn v-if="packs.step == 1" variant="plain" append-icon="mdi-chevron-right" @click="next">{{
+                    $t('Next') }}</v-btn>
                 <v-btn v-else-if="packs.step == 2" variant="text" append-icon="mdi-download-multiple"
                     @click="install">{{ $t('inport') }}</v-btn>
                 <v-btn v-else variant="plain" append-icon="mdi-check" :disabled="packs.step == 3"

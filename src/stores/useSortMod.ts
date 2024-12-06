@@ -1,10 +1,7 @@
 import path from "path";
 import { defineStore } from "pinia";
-import type { IModInfo } from "@src/model/Interfaces";
-import { useSettings } from "@src/stores/useSettings";
-import { Manager } from "@src/model/Manager";
-import { useManager } from "./useManager";
 
+import { useManager } from "./useManager";
 export const useSortMod = defineStore('SortMod', {
     state: () => ({
         dialogVisible: false,

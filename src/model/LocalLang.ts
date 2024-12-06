@@ -1,9 +1,6 @@
 import path from 'path'
-import { Config } from "@src/model/Config";
-import { FileHandler } from '@src/model/FileHandler'
-import { useSettings } from "@src/stores/useSettings";
-import fs from 'fs'
 
+import fs from 'fs'
 export class LocalLang {
     public static langFolder = path.join(Config.configFolder(), 'lang')
 
@@ -16,7 +13,6 @@ export class LocalLang {
             settings.langList.push(...list)
         })
     }
-
 
     private static async getLocalLangList() {
         let list = await FileHandler.readFileSync(path.join(this.langFolder, 'lang.json'), '[]')

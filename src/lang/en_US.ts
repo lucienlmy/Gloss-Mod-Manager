@@ -204,14 +204,14 @@ const ManagerHeader = {
     "Your GMM package has been exported, you can...": "Your GMM package has been exported, you can...",
     "Share to Mod Station": "Share to Mod Station",
     "Open location": "Open location",
-    "Import completed, you can now enable these mods in the manager and enter the game...": "Import completed, you can now enable these mods in the manager and enter the game...",
-
+    "import completed, you can now enable these mods in the manager and enter the game...": "Import completed, you can now enable these mods in the manager and enter the game...",
     "Fold": "Fold",
     "Add": "Add",
     "Tag": "Tags",
     "Color": "Color",
 
     "Game is running...": "Game is running...",
+    "Share": "Share",
 }
 
 const Settings = {
@@ -429,7 +429,6 @@ const lang = {
     ...Backup,
     ...Other,
 }
-
 
 
 export default lang

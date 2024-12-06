@@ -1,9 +1,6 @@
 import path from 'path'
 import { defineStore } from "pinia";
-import type { IInfo, IModInfo } from '@src/model/Interfaces'
-import { FileHandler } from '@src/model/FileHandler'
-import { useManager } from "@src/stores/useManager";
-import { Unzipper } from "@src/model/Unzipper";
+
 
 export const usePacks = defineStore('Packs', {
     state: () => ({

@@ -2,7 +2,6 @@
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { computed } from "vue";
-
 const router = useRouter()
 const { t } = useI18n()
 

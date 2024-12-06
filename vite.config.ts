@@ -1,82 +1,90 @@
-import { rmSync, copyFileSync, mkdirSync, existsSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import electron from 'vite-plugin-electron'
+import electron from 'vite-plugin-electron/simple'
 import renderer from 'vite-plugin-electron-renderer'
-import pkg from './package.json'
 import path from 'path'
+import AutoImport from 'unplugin-auto-import/vite'
+import Components from 'unplugin-vue-components/vite'
+import IconsResolver from 'unplugin-icons/resolver'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
-    rmSync('dist-electron', { recursive: true, force: true })
-
-    const isServe = command === 'serve'
-    const isBuild = command === 'build'
-    const sourcemap = isServe || !!process.env.VSCODE_DEBUG
-
-    return {
-        plugins: [
-            vue(),
-            electron([
-                {
-                    // Main-Process entry file of the Electron App.
-                    entry: 'electron/main/index.ts',
-                    onstart(options) {
-                        if (process.env.VSCODE_DEBUG) {
-                            console.log(/* For `.vscode/.debug.script.mjs` */'[startup] Electron App')
-                        } else {
-                            options.startup()
-                        }
-                    },
-                    vite: {
-                        build: {
-                            sourcemap,
-                            minify: isBuild,
-                            outDir: 'dist-electron/main',
-                            rollupOptions: {
-                                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
-                            },
-                        },
-                    },
+export default defineConfig({
+    plugins: [
+        vue(),
+        electron(
+            {
+                main: {
+                    // Shortcut of `build.lib.entry`.
+                    entry: 'electron/main.ts',
                 },
-                {
-                    entry: 'electron/preload/index.ts',
-                    onstart(options) {
-                        // Notify the Renderer-Process to reload the page when the Preload-Scripts build is complete, 
-                        // instead of restarting the entire Electron App.
-                        options.reload()
-                    },
-                    vite: {
-                        build: {
-                            sourcemap: sourcemap ? 'inline' : undefined, // #332
-                            minify: isBuild,
-                            outDir: 'dist-electron/preload',
-                            rollupOptions: {
-                                external: Object.keys('dependencies' in pkg ? pkg.dependencies : {}),
-                            },
-                        },
-                    },
-                }
-            ]),
-            // Use Node.js API in the Renderer-process
-            renderer({
-                nodeIntegration: true,
-            }),
-        ],
-        server: process.env.VSCODE_DEBUG && (() => {
-            const url = new URL(pkg.debug.env.VITE_DEV_SERVER_URL)
-            return {
-                host: url.hostname,
-                port: +url.port,
+                preload: {
+                    // Shortcut of `build.rollupOptions.input`.
+                    // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
+                    input: path.join(__dirname, 'electron/preload.ts'),
+                },
+                // Ployfill the Electron and Node.js API for Renderer process.
+                // If you want use Node.js in Renderer process, the `nodeIntegration` needs to be enabled in the Main process.
+                // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
+                renderer: process.env.NODE_ENV === 'test'
+                    // https://github.com/electron-vite/vite-plugin-electron-renderer/issues/78#issuecomment-2053600808
+                    ? undefined
+                    : {},
             }
-        })(),
-        clearScreen: false,
-        // 映射 @src目录
-        resolve: {
-            alias: {
-                '@src': path.resolve(__dirname, 'src'),
-                // 'vue-i18n': 'vue-i18n/dist/vue-i18n.runtime.esm-bundler.js'
-            }
-        },
-    }
+        ),
+        renderer({
+            // resolve: {
+            //     "electron-edge-js-v33-only": {
+            //         type: 'cjs',
+            //         build({ cjs }) {
+            //             console.log("cjs", cjs);
+
+            //             return cjs('electron-edge-js-v33-only')
+            //         }
+            //     }
+            // }
+        }),
+        AutoImport({
+            imports: ['vue', 'vue-router', 'vue-i18n'],
+            resolvers: [
+                ElementPlusResolver(),
+                // 自动导入图标组件
+                IconsResolver({
+                    prefix: 'Icon',
+                }),
+            ],
+            dirs: ['src/model', 'src/stores'],
+        }),
+        Components({
+            resolvers: [
+                ElementPlusResolver(),
+                // 自动注册图标组件
+                IconsResolver({
+                    enabledCollections: ['ep'],
+                }),
+            ],
+        }),
+        // optimizer({
+        //     // 预构建 ipcRenderer 在 Electron 渲染进程中使用
+        //     electron: `const { ipcRenderer } = require('electron'); export { ipcRenderer };`,
+        //     // 这表示 'fs' 与 'node:fs' 同时支持
+        //     // e.g.
+        //     //   `import fs from 'fs'`
+        //     //   or
+        //     //   `import fs from 'node:fs'`
+        //     fs: () => ({
+        //         // 这与 `alias` 行为一致
+        //         find: /^(node:)?fs$/,
+        //         code: `const fs = require('fs'); export { fs as default }`;
+        //     }),
+        // }),
+    ],
+    // 映射 @src目录
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, 'src'),
+            // 'vue-i18n': 'vue-i18n/dist/vue-i18n.runtime.esm-bundler.js'
+        }
+    },
 })

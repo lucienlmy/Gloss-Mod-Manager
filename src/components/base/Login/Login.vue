@@ -1,9 +1,8 @@
 <script lang='ts' setup>
-import { useUser } from '@src/stores/useUser'
+
 import { ElMessage } from 'element-plus';
 import { ref, onMounted } from "vue";
-import QrcodeVue from '@src/components/base/Login/Qrcode.vue'
-
+import QrcodeVue from '@/components/base/Login/Qrcode.vue'
 const user = useUser()
 
 let loading = ref(false)
@@ -31,7 +30,6 @@ function login() {
     })
 }
 
-
 </script>
 <template>
     <v-dialog v-model="user.loginBox" persistent width="400px">
@@ -45,8 +43,8 @@ function login() {
                         </v-chip-group>
                     </div>
                     <div class="close">
-                        <v-chip label append-icon="mdi-close" @click="user.loginBox = false"
-                            variant="text">{{ $t('Close') }}</v-chip>
+                        <v-chip label append-icon="mdi-close" @click="user.loginBox = false" variant="text">{{
+                            $t('Close') }}</v-chip>
                     </div>
                 </div>
             </v-col>
@@ -125,7 +123,6 @@ export default {
                     }
                 }
             }
-
 
         }
 

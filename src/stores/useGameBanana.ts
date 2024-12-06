@@ -3,8 +3,6 @@
 import axios from "axios";
 import { defineStore } from "pinia";
 import { useSettings } from "./useSettings";
-import type { IGameBananaMod } from '@src/model/Interfaces'
-
 
 export const useGameBanana = defineStore('GameBanana', {
     state: () => ({

@@ -3,10 +3,7 @@
  */
 
 import { join, basename, extname } from "path";
-import { Manager } from "@src/model/Manager";
-import type { ISupportedGames, IModInfo } from "@src/model/Interfaces";
 import { ElMessage } from "element-plus";
-
 export class UnityGame {
     static modType: ISupportedGames["modType"] = [
         {

@@ -1,17 +1,9 @@
 import { defineStore } from "pinia";
 import path from 'path'
-import { getAllExpands } from "@src/Expands";
-import type { ISupportedGames, IModInfo, IDownloadTask, ITag } from "@src/model/Interfaces";
+import { getAllExpands } from "@/Expands";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
-import { useSettings } from '@src/stores/useSettings';
-import { Manager } from "@src/model/Manager";
-import { FileHandler } from "@src/model/FileHandler"
-import { Unzipper } from '@src/model/Unzipper'
-import { usePacks } from "@src/stores/usePacks";
-import { useDownload } from "./useDownload";
-import { useI18n } from "vue-i18n";
-import { useGames } from "./useGames";
+import { FileHandler } from "@/model/FileHandler";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -28,6 +20,8 @@ export const useManager = defineStore('Manager', {
         selectionMode: false,
         selectionList: [] as IModInfo[],
         runing: false,
+        showShare: false,
+        shareList: [] as IModInfo[],
     }),
     getters: {
         /**
@@ -86,8 +80,8 @@ export const useManager = defineStore('Manager', {
                 // 判断是否已经添加
                 let mod = state.managerModList.filter(m =>
                 ((m.webId && m.webId == item.plugins_webId) ||
-                    (m.modIo_id && m.modIo_id == item.plugins_modIo_id) ||
-                    (m.Thunderstore && m.Thunderstore.name == item.plugins_Thunderstore_name) ||
+                    (m.webId && m.webId == item.plugins_modIo_id) ||
+                    (m.other && m.other.name == item.plugins_Thunderstore_name) ||
                     (m.modWebsite && m.modWebsite == item.plugins_website)
                 ))
                 // 如果存在则从这里移除
@@ -95,7 +89,6 @@ export const useManager = defineStore('Manager', {
 
                 return mod.length == 0
             })
-
 
             return plugins || []
         }
@@ -197,7 +190,6 @@ export const useManager = defineStore('Manager', {
                 console.log(id);
 
 
-
                 let Folder = file;
                 let files = FileHandler.getAllFilesInFolder(Folder, true, true)
                 // 将 Folder 从 files 的路径中删除
@@ -261,17 +253,17 @@ export const useManager = defineStore('Manager', {
                 id
             )
 
-            let res = await Unzipper.unzip(modStorage, target)
+            await Unzipper.unzip(modStorage, target)
             let files: string[] = []
-            res.forEach((item) => {
-                if (item.status == 'extracted') {
-                    files.push(item.file)
-                }
-            });
+
+            files = FileHandler.getAllFilesInFolder(target, true, true)
+
+            files = files.map(item => item.replace(target, ''))
+
             let mod: IModInfo = {
                 id: parseInt(id),
-                from: task.type,
-                webId: task.id,
+                from: task.from,
+                webId: task.webId,
                 modName: task.name,
                 md5: md5,
                 modVersion: task.version,
@@ -279,16 +271,18 @@ export const useManager = defineStore('Manager', {
                 weight: 500,
                 modFiles: files,
                 modAuthor: task.modAuthor,
-                modWebsite: task.website,
+                modWebsite: task.modWebsite,
                 fileName: task.fileName,
-                Thunderstore: {
-                    namespace: task.Thunderstore?.namespace || '',
-                    name: task.Thunderstore?.name || '',
-                },
                 key: task.key,
+                other: task.other,
+                tags: task.tags,
             }
-            if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                mod.modType = settings.settings.managerGame?.checkModType(mod)
+            if (task.modType) {
+                mod.modType = task.modType
+            } else {
+                if (typeof (settings.settings.managerGame?.checkModType) == "function") {
+                    mod.modType = settings.settings.managerGame?.checkModType(mod)
+                }
             }
 
             this.managerModList.push(mod)
@@ -411,31 +405,13 @@ export const useManager = defineStore('Manager', {
         async updateMod(mod: IModInfo) {
             // const { t } = useI18n()
             if (mod.from) {
-                let taks: IDownloadTask = {
-                    id: mod.webId ?? 0,
-                    type: mod.from,
-                    Thunderstore: {
-                        namespace: mod.Thunderstore?.namespace || '',
-                        name: mod.Thunderstore?.name || ''
-                    },
-                    name: '',
-                    fileName: mod.fileName,
-                    version: '',
-                    status: 'active',
-                    speed: 0,
-                    totalSize: 0,
-                    downloadedSize: 0,
-                    link: '',
-                    modAuthor: '',
-                    website: mod.modWebsite
-                }
 
                 const settings = useSettings()
                 const download = useDownload()
 
                 let modStorage = path.join(settings.settings.modStorageLocation, 'cache', mod.fileName ?? "")
 
-                download.ReStart(taks, modStorage)
+                download.ReStart(mod, modStorage)
             }
         },
 

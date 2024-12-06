@@ -1,6 +1,5 @@
 <script lang='ts' setup>
 import { ipcRenderer } from 'electron'
-
 function handleMinimize() {
     ipcRenderer.send('window-min')
 }
@@ -25,7 +24,8 @@ function handleClose() {
                 <li @click="handleMinimize" :title="$t('Minimize window')">
                     <svg version="1.1" role="presentation" width="12" height="12" viewBox="0 0 12 12" class="mo-icon">
                         <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
-                            <line x1="1" y1="6" x2="11" y2="6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="1" y1="6" x2="11" y2="6" fill="none" stroke-linecap="round"
+                                stroke-linejoin="round">
                             </line>
                         </g>
                     </svg>

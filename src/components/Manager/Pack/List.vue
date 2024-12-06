@@ -1,6 +1,5 @@
 <script lang='ts' setup>
-import type { IModInfo } from '@src/model/Interfaces';
-import { usePacks } from '@src/stores/usePacks';
+
 
 
 const props = defineProps<{
@@ -27,10 +26,10 @@ function select(all: boolean) {
             <div class="subheader">
                 <div class="text">{{ `${subheader} (${packs.packs.length})` }}</div>
                 <div class="btn">
-                    <v-chip label append-icon="mdi-check" @click="select(true)"
-                        variant="text">{{ $t('Select All') }}</v-chip>
-                    <v-chip label append-icon="mdi-close" @click="select(false)"
-                        variant="text">{{ $t('Invert Select') }}</v-chip>
+                    <v-chip label append-icon="mdi-check" @click="select(true)" variant="text">
+                        {{ $t('Select All') }}</v-chip>
+                    <v-chip label append-icon="mdi-close" @click="select(false)" variant="text">
+                        {{ $t('Invert Select') }}</v-chip>
                 </div>
             </div>
         </v-list-subheader>

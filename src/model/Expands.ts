@@ -3,13 +3,9 @@
  */
 
 import { join, extname, basename } from "path";
-import { Config } from "@src/model/Config";
-import { FileHandler } from "@src/model/FileHandler";
-import { useManager } from "@src/stores/useManager";
-import type { IModInfo, ISupportedGames, IType, ITypeInstall, ICheckModType } from "@src/model/Interfaces";
-import { Manager } from "@src/model/Manager";
-import { ElMessage } from "element-plus";
 
+
+import { ElMessage } from "element-plus";
 export class Expands {
 
     /**
@@ -46,30 +42,38 @@ export class Expands {
         // json 实现游戏拓展
         files.forEach(item => {
             if (extname(item) == '.json') {
-                let data: ISupportedGames = JSON.parse(FileHandler.readFile(item))
-                data = Expands.JsonToSupportedGamesData(data)
-                manager.supportedGames.push(data)
+                const data: IExpandsSupportedGames = JSON.parse(FileHandler.readFile(item))
+                const Supported = Expands.JsonToSupportedGamesData(data)
+                manager.supportedGames.push(Supported)
             }
         })
     }
 
     // json 数据转可执行方法
-    public static JsonToSupportedGamesData(data: ISupportedGames): ISupportedGames {
-        data.modType.forEach(item => {
-            if (typeof (item.install) == 'object') {
-                console.log(typeof (item.install));
-                let install = item.install
-                item.install = async (mod) => {
-                    return Expands.typeToFunction(install, mod, item)
+    public static JsonToSupportedGamesData(data: IExpandsSupportedGames): ISupportedGames {
+        if (typeof (data.modType) == 'object') {
+            data.modType.forEach(item => {
+                if (typeof (item.install) == 'object') {
+                    console.log(typeof (item.install));
+                    let install = item.install
+                    item.install = async (mod) => {
+                        return Expands.typeToFunction(install, mod, item)
+                    }
                 }
-            }
-            if (typeof (item.uninstall) == 'object') {
-                let uninstall = item.uninstall
-                item.uninstall = async (mod) => {
-                    return Expands.typeToFunction(uninstall, mod, item)
+                if (typeof (item.uninstall) == 'object') {
+                    let uninstall = item.uninstall
+                    item.uninstall = async (mod) => {
+                        return Expands.typeToFunction(uninstall, mod, item)
+                    }
                 }
+            })
+        } else {
+            switch (data.modType) {
+                case "UnityGame.modType": data.modType = UnityGame.modType; break;
+                case "UnityGameILCPP2.modType": data.modType = UnityGameILCPP2.modType; break;
+                case "UnrealEngine.modType": data.modType = UnrealEngine.modType(data.unrealEngineData?.bassPath, data.unrealEngineData?.useUE4SS); break;
             }
-        })
+        }
 
         if (typeof (data.checkModType) == 'object') {
             let checkModType = data.checkModType as ICheckModType[]
@@ -91,10 +95,16 @@ export class Expands {
                 }
                 return 99
             }
+        } else {
+            switch (data.checkModType) {
+                case "UnityGame.checkModType": data.checkModType = UnityGame.checkModType; break;
+                case "UnityGameILCPP2.checkModType": data.checkModType = UnityGameILCPP2.checkModType; break;
+                case "UnrealEngine.checkModType": data.checkModType = UnrealEngine.checkModType; break;
+            }
         }
 
         // console.log(data.modType);
-        return data
+        return data as ISupportedGames
     }
 
     // 解析 类型

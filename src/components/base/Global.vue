@@ -1,25 +1,13 @@
 <script lang='ts' setup>
-import { useSettings } from "@src/stores/useSettings";
-import { useManager } from '@src/stores/useManager';
+
 import { watch, onMounted } from "vue";
-import { Config } from '@src/model/Config'
-import { useDownload } from "@src/stores/useDownload";
 import { useI18n } from "vue-i18n";
-import { AppAnalytics } from "@src/model/Analytics"
 import { ipcRenderer } from 'electron'
-import { FileHandler } from '@src/model/FileHandler'
 import { useTheme } from 'vuetify'
-import { APIAria2 } from "@src/model/APIAria2";
-import { Expands } from "@src/model/Expands"
+import PackInport from '@/components/Manager/Pack/Inport.vue'
+import SelectGameWindows from '@/components/Games/SelectGameWindows.vue'
 
-import PackInport from '@src/components/Manager/Pack/Inport.vue'
-import SelectGameWindows from '@src/components/Manager/SelectGameWindows.vue'
-import { useArchive } from "@src/stores/useArchive";
-import { useBackupGame } from "@src/stores/useBackupGame";
-import { useMain } from "@src/stores/useMain";
 import { useRouter } from 'vue-router'
-import { useGames } from "@src/stores/useGames";
-
 const { locale } = useI18n()
 const settings = useSettings()
 const download = useDownload()
@@ -29,9 +17,11 @@ const backupGame = useBackupGame()
 const main = useMain()
 const router = useRouter()
 
-
-
-APIAria2.init()             // 初始化 Aria2
+// 初始化 Aria2
+APIAria2.init().then(() => {
+    // 测试链接
+    APIAria2.test()
+})
 Expands.init()              // 初始化扩展
 Config.initialization()     // 初始化配置
 download.initialization()   // 初始化下载
@@ -40,7 +30,6 @@ AppAnalytics.sendEvent("start")
 console.log(`正在初始化.`);
 console.log("当前配置目录:", Config.configFolder());
 console.log("我的文档位置:", FileHandler.getMyDocuments());
-
 
 //#region  初始化设置
 watch(() => settings.settings, () => {
@@ -59,7 +48,6 @@ watch(() => download.downloadTaskList, () => {
     download.saveTaskConfig()
     // console.log(`当前下载缓存目录: ${settings.settings.modStorageLocation}\\cache`);
 }, { deep: true })
-
 
 //#endregion
 
@@ -112,7 +100,6 @@ function GetModInfo() {
     }
 }
 
-
 //#endregion
 
 //#region 处理 .gmm 文件打开 
@@ -134,23 +121,25 @@ ipcRenderer.on('open-gmm-file', (_, args) => {
     console.log(args);
     let path = args[args.length - 1]
     // console.log(path);  // gmm://installmod/?id=172999&game=185&name=只狼：影逝二度
+    ParsingGmm.parsing(path)
+    // // 判断是否是 gmm://installmod 开头
+    // if (path.startsWith("gmm://installmod")) {
+    //     download.addDownloadByWeb(path)
+    // } else if (path.startsWith("gmm://customize")) {
+    //     let { url, name } = parseUrlParams(path)
+    //     download.addDownloadByCustomize(url, name)
+    // } else if (path.startsWith("gmm://package")) {
+    //     // gmm://package/?packages=[]
 
-    // 判断是否是 gmm://installmod 开头
-    if (path.startsWith("gmm://installmod")) {
-        download.addDownloadByWeb(path)
-    } if (path.startsWith("gmm://customize")) {
-        let { url, name } = parseUrlParams(path)
-        download.addDownloadByCustomize(url, name)
-    } else if (FileHandler.fileExists(path)) {
-        manager.addModByGmm(path)
-    }
+    // } else if (FileHandler.fileExists(path)) {
+    //     manager.addModByGmm(path)
+    // }
 })
 //#endregion
 
 //#region 主题
 
 const theme = useTheme()
-
 
 watch(() => settings.settings.theme, () => {
     setHtmlClass()
@@ -172,7 +161,6 @@ onMounted(() => {
 })
 
 // console.log(settings.settings.theme);
-
 
 function setHtmlClass() {
     switch (settings.settings.theme) {
@@ -208,7 +196,6 @@ function setLightTheme() {
 
 //#endregion
 
-
 //#region 监听游戏切换
 
 watch(() => settings.settings.managerGame, () => {
@@ -222,14 +209,12 @@ watch(() => settings.settings.managerGame, () => {
 
 //#endregion
 
-
 //#region 自定义启动页
 if (settings.settings.defaultPage && !main.start) {
     main.start = true
     router.push({ name: settings.settings.defaultPage })
 }
 //#endregion
-
 
 //#region 游戏所需前置列表
 const game = useGames()
@@ -239,6 +224,14 @@ if (game.GamePlugins.length == 0) {
 }
 
 //#endregion
+
+// 全局监听 粘贴事件
+document.addEventListener('paste', (event) => {
+    // 打印粘贴板内容
+    let code = event.clipboardData?.getData('text')
+    if (code) ParsingGmm.parsing(code)
+
+})
 
 </script>
 <template>

@@ -1,7 +1,5 @@
-import type { IThunderstoreMod } from "@src/model/Interfaces";
-import { defineStore } from "pinia";
-import { useSettings } from "@src/stores/useSettings";
 
+import { defineStore } from "pinia";
 export const useThunderstore = defineStore('Thunderstore', {
     state: () => ({
         modList: [] as IThunderstoreMod[],
@@ -138,7 +136,6 @@ export const useThunderstore = defineStore('Thunderstore', {
 
             let data = this.modList.find(item => item.owner == namespace && item.name == name)
             // console.log(data);
-
 
             let response = await fetch(`https://thunderstore.io/api/experimental/package/${namespace}/${name}/`, {
                 headers: {

@@ -1,7 +1,6 @@
 <script lang='ts' setup>
-import { usePacks } from '@src/stores/usePacks';
-import Markdown from '@src/components/Model/Markdown.vue'
 
+import Markdown from '@/components/Model/Markdown.vue'
 const packs = usePacks()
 
 </script>

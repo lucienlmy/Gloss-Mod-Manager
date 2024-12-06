@@ -1,10 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-
-import type { ICurseForgeMod } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
-
-
 export const useCurseForge = defineStore('CurseForge', {
     state: () => ({
         mods: [] as ICurseForgeMod[],

@@ -9,10 +9,7 @@ import { homedir, userInfo } from "os";
 import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
 import { exec, execSync } from 'child_process';
-
 import { info, error } from 'electron-log/renderer';
-
-
 
 export class FileHandler {
 
@@ -26,7 +23,6 @@ export class FileHandler {
     public static fileExists(filePath: string): boolean {
         return fs.existsSync(filePath);
     }
-
 
     /**
      * 递归创建目录
@@ -108,7 +104,6 @@ export class FileHandler {
             }
         })
     }
-
 
     // 移动文件
     public static moveFile(srcPath: string, destPath: string) {
@@ -311,7 +306,6 @@ export class FileHandler {
         return folderHash;
     }
 
-
     /**
      * 打开文件夹
      * @param folderPath 打开文件夹
@@ -441,7 +435,6 @@ export class FileHandler {
             });
         });
     }
-
 
     /**
      * 移除软连接
@@ -580,7 +573,7 @@ export class FileHandler {
      * @param folderPat 路径
      * @param includepath 是否包含路径 false
      * @param subdirectory 是否包含子文件夹 false
-     * @param getFolderPath 是否获取文件夹路径 false
+     * @param getFolder 是否获取文件夹路径 false
      * @returns 
      */
     public static getAllFilesInFolder(folderPath: string, includepath: boolean = false, subdirectory: boolean = false, getFolder = false) {

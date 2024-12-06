@@ -1,10 +1,9 @@
 <script lang='ts' setup>
 
-import ModIo from '@src/components/home/logo/ModIo.vue'
-import Thunderstore from '@src/components/home/logo/Thunderstore.vue'
-import CurseForge from '@src/components/home/logo/CurseForge.vue'
-import NexusMods from '@src/components/home/logo/NexusMods.vue'
-
+import ModIo from '@/components/home/logo/ModIo.vue'
+import Thunderstore from '@/components/home/logo/Thunderstore.vue'
+import CurseForge from '@/components/home/logo/CurseForge.vue'
+import NexusMods from '@/components/home/logo/NexusMods.vue'
 </script>
 <template>
     <v-card>
@@ -63,7 +62,6 @@ a {
 .sponsor {
     display: flex;
     align-items: center;
-
 
     .gloss-logo {
         width: 300px;

@@ -2,10 +2,7 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
 import * as cheerio from 'cheerio';
-import type { IMod } from "@src/model/Interfaces";
 import { useSettings } from "./useSettings";
-
-
 export const useNexusMods = defineStore('NexusMods', {
     state: () => ({
         mods: [] as IMod[],

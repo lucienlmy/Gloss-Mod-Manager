@@ -1,8 +1,5 @@
 import { createI18n } from 'vue-i18n'
-import { LocalLang } from '@src/model/LocalLang'
-
 const modules = import.meta.glob('./*', { eager: true })
-
 export function getLangAll() {
     // let message: any = {}
     let message = getLangFiles(modules)
@@ -46,6 +43,5 @@ const i18n = createI18n({
     fallbackLocale: 'en_US', // 默认语言
     messages: getLangAll()
 });
-
 
 export default i18n;

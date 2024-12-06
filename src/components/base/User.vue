@@ -1,12 +1,9 @@
 <script lang='ts' setup>
-import { useUser } from '@src/stores/useUser'
-import BaseLogin from '@src/components/base/Login/Login.vue'
-import { useSettings } from '@src/stores/useSettings'
-import { computed } from "vue";
 
+import BaseLogin from '@/components/base/Login/Login.vue'
+import { computed } from "vue";
 const user = useUser()
 const settings = useSettings()
-
 
 if (!user.user) {
     user.getUser()

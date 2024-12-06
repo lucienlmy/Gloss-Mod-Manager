@@ -214,10 +214,11 @@ const ManagerHeader = {
     "Your GMM package has been exported, you can...": "您的 GMM 包已经导出完成, 接下来你可以...",
     "Share to Mod Station": "分享到Mod站",
     "Open location": "打开所在位置",
-    "Import completed, you can now enable these mods in the manager and enter the game...": "导入完成, 接下来你可以在管理器中启用这些模组并进入游戏了...",
-
+    "import completed, you can now enable these mods in the manager and enter the game...": "导入完成, 接下来你可以在管理器中启用这些模组并进入游戏了...",
     "Fold": "折展",
     "Game is running...": "游戏正在运行...",
+
+    "Share": "分享",
 }
 
 const Settings = {
@@ -438,7 +439,6 @@ const lang = {
     ...Games,
     ...Other,
 }
-
 
 
 export default lang

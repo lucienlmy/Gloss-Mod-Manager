@@ -1,10 +1,7 @@
 import { defineStore } from "pinia";
 import { } from "electron";
-import { Steam } from "@src/model/Steam";
 import { useSettings } from "./useSettings";
-import type { ISteamWorkshopItem } from "@src/model/Interfaces";
 import { ElMessage } from 'element-plus';
-
 export const useSteamWorkshop = defineStore('SteamWorkshop', {
     state: () => ({
         filter: {

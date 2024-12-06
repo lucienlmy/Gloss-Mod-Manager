@@ -6,15 +6,13 @@ import { extractFull, type Data, add, rename } from 'node-7z'
 import { ipcRenderer } from 'electron'
 import { exec, execSync } from 'child_process';
 import path from 'path'
-import { FileHandler } from '@src/model/FileHandler'
-import { useSettings } from '@src/stores/useSettings';
 import { ElMessage } from 'element-plus';
-
 export class Unzipper {
 
     private static async get7zip(): Promise<string> {
 
-        let zipPath = await ipcRenderer.invoke("get-7z-path")
+        // let zipPath = await ipcRenderer.invoke("get-7z-path")
+        let zipPath = path.join(FileHandler.getResourcesPath(), '7z', '7z.exe')
         return zipPath
     }
 
@@ -139,7 +137,6 @@ export class Unzipper {
             })
 
             // ===================================================================
-
 
 
         })
