@@ -93,32 +93,29 @@ function select(item: ISupportedGames) {
     })
 }
 
+const ExpandsGameRef = ref()
+
+function editGame(item: ISupportedGames) {
+    console.log(ExpandsGameRef.value);
+    ExpandsGameRef.value.setForm(item)
+    games.showExpandsGame = true
+}
+
 </script>
 <template>
-    <ExpandsGame></ExpandsGame>
-    <v-dialog v-model="manager.selectGameDialog" persistent width="900px">
-        <v-card class="select-game">
+    <ExpandsGame ref="ExpandsGameRef"></ExpandsGame>
+    <Dialog v-model="manager.selectGameDialog" persistent width="900px">
+        <template #header>
+            <div class="title">
+                <div class="text">
+                    {{ $t('select game') }}
+                    <small>({{ $t('{0} games', [list.length]) }})</small>
+                </div>
+                <el-input v-model="searchText" :placeholder="$t('Search Game')" />
+            </div>
+        </template>
+        <div class="select-game">
             <v-row>
-                <v-col cols="12" class="top">
-                    <div class="title">
-                        <div class="text">
-                            {{ $t('select game') }}
-                            <small>({{ $t('{0} games', [list.length]) }})</small>
-                        </div>
-                        <v-btn variant="text" href="https://gmm.aoe.top/Expands/README.html" target="_blank">
-                            <v-icon>mdi-plus</v-icon>
-                            <v-tooltip activator="parent" location="top">{{ $t('Add Game') }}</v-tooltip>
-                        </v-btn>
-                        <v-text-field density="compact" variant="solo" :label="$t('Search Game')"
-                            append-inner-icon="mdi-magnify" single-line hide-details
-                            v-model="searchText"></v-text-field>
-                    </div>
-                    <div class="close">
-                        <v-chip label append-icon="mdi-close" @click="manager.selectGameDialog = false"
-                            variant="text">{{ $t('Close') }}</v-chip>
-                    </div>
-                </v-col>
-                <v-divider></v-divider>
                 <v-col cols="12" class="content">
                     <v-row>
                         <v-col cols="6" sm="4" md="3" class="game-list expands-games"
@@ -128,19 +125,25 @@ function select(item: ISupportedGames) {
                         </v-col>
                         <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameName"
                             @click="select(item)">
-                            <v-row no-gutters>
-                                <v-col cols="12">
+                            <el-row no-gutters>
+                                <el-col :span="24" class="game-image">
                                     <v-img :lazy-src="lazy_img" :aspect-ratio="247 / 139" :src="item.gameCoverImg"
                                         :alt="item.gameName" min-height="90px" />
+                                    <div class="from" v-if="item.from">{{ $t(item.from) }}</div>
+                                </el-col>
+                                <v-col class="game-name" cols="12">
+                                    {{ $t(item.gameName) }}
+                                    <el-button link v-if="item.from == 'Local'" @click.stop="editGame(item)">
+                                        编辑 <el-icon><el-icon-edit /></el-icon>
+                                    </el-button>
                                 </v-col>
-                                <v-col class="game-name" cols="12">{{ $t(item.gameName) }}</v-col>
-                            </v-row>
+                            </el-row>
                         </v-col>
                     </v-row>
                 </v-col>
             </v-row>
-        </v-card>
-    </v-dialog>
+        </div>
+    </Dialog>
 </template>
 <script lang='ts'>
 
@@ -149,6 +152,16 @@ export default {
 }
 </script>
 <style lang='less' scoped>
+.title {
+    display: flex;
+    align-items: center;
+
+    .text {
+        flex: 1 0 auto;
+        margin-right: 15px;
+    }
+}
+
 .select-game {
     padding: 1rem;
 
@@ -167,6 +180,9 @@ export default {
 
             .game-name {
                 margin-top: 0.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
             }
         }
 
@@ -176,6 +192,24 @@ export default {
             align-items: center;
             // 虚线边框
             flex-direction: column;
+        }
+
+        .game-image {
+            position: relative;
+
+            .from {
+                position: absolute;
+                color: black;
+                // 字体加粗
+                font-weight: bold;
+                top: 8px;
+                right: -15px;
+                transform: rotate(45deg);
+                height: 0;
+                border-left: 20px solid transparent;
+                border-right: 20px solid transparent;
+                border-bottom: 20px solid yellow;
+            }
         }
     }
 }

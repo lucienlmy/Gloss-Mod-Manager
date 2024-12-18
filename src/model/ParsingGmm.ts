@@ -36,7 +36,7 @@ export class ParsingGmm {
                     manager.updateMod(mod)
 
                 } else {
-                    download.addDownloadById(mod)
+                    manager.updateMod(mod)
                 }
 
 

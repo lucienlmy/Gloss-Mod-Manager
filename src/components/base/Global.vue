@@ -25,6 +25,8 @@ APIAria2.init().then(() => {
 Expands.init()              // 初始化扩展
 Config.initialization()     // 初始化配置
 download.initialization()   // 初始化下载
+LocalLang.init()            // 初始化本地语言
+
 AppAnalytics.sendEvent("start")
 
 console.log(`正在初始化.`);

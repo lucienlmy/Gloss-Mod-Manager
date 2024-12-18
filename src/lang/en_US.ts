@@ -209,9 +209,11 @@ const ManagerHeader = {
     "Add": "Add",
     "Tag": "Tags",
     "Color": "Color",
-
     "Game is running...": "Game is running...",
+
     "Share": "Share",
+    "Local": "Local",
+    "Internal": "Internal",
 }
 
 const Settings = {
@@ -374,6 +376,10 @@ const Games = {
     "Frostpunk 2": "Frostpunk 2",
     "Warhammer 40000 Space Marine 2": "Warhammer 40000 Space Marine 2",
     "Dead Rising Deluxe Remaster": "Dead Rising Deluxe Remaster",
+    "Stalker2": "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
+    "SparkingZERO": "DRAGON BALL: Sparking! ZERO",
+    "DQIIIHD2DRemake": "DRAGON QUEST III HD-2D Remake",
+    "Red Dead Redemption": "Red Dead Redemption",
 }
 
 const Other = {

@@ -22,9 +22,14 @@ let slides = computed(() => {
 
 </script>
 <template>
-    <v-carousel cycle height="290" hide-delimiter-background show-arrows="hover" interval="2000">
+    <!-- <v-carousel cycle height="290" hide-delimiter-background show-arrows="hover" interval="2000">
         <v-carousel-item v-for="(slide, i) in slides" :key="i" cover :src="slide"></v-carousel-item>
-    </v-carousel>
+    </v-carousel> -->
+    <el-carousel height="290px" indicator-position="none">
+        <el-carousel-item v-for="(slide, i) in slides" :key="i">
+            <el-image :src="slide" :preview-src-list="slides" :initial-index="i" preview-teleported></el-image>
+        </el-carousel-item>
+    </el-carousel>
 </template>
 <script lang='ts'>
 

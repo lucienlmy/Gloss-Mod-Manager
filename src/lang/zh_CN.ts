@@ -219,6 +219,8 @@ const ManagerHeader = {
     "Game is running...": "游戏正在运行...",
 
     "Share": "分享",
+    "Local": "本地",
+    "Internal": "内部",
 }
 
 const Settings = {
@@ -380,6 +382,10 @@ const Games = {
     "Frostpunk 2": "冰汽时代 2",
     "Warhammer 40000 Space Marine 2": "战锤40K: 星际战士2",
     "Dead Rising Deluxe Remaster": "丧尸围城豪华复刻版",
+    "Stalker2": "潜行者2：切尔诺贝利之心",
+    "SparkingZERO": "七龙珠 电光炸裂！ZERO",
+    "DQIIIHD2DRemake": "勇者斗恶龙III HD-2D Remake",
+    "Red Dead Redemption": "荒野大镖客",
 }
 
 const Other = {

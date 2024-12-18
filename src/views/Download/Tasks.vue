@@ -100,6 +100,7 @@ function del() {
             FileHandler.deleteFile(modStorage.value)
             FileHandler.deleteFile(`${modStorage.value}.downloaded`)
         }
+        if (props.task.gid) APIAria2.remove(props.task.gid)
         pause()
         download.downloadTaskList.splice(download.downloadTaskList.findIndex(item => item.webId == props.task.webId), 1)
     }).catch(() => { })

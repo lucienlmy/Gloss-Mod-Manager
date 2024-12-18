@@ -1,18 +1,17 @@
 <script lang='ts' setup>
 import { ElCol, ElInput, ElMessage, ElMessageBox } from 'element-plus';
-import { VInput } from 'vuetify/components';
 
 
 const manager = useManager()
 
 // 全选
 function selectAll() {
-    manager.shareList = manager.managerModList.filter(item => item.webId)
+    manager.shareList = manager.managerModList.filter(item => (item.webId || item.other?.namespace))
 }
 
 // 反选
 function reverseSelection() {
-    manager.shareList = manager.managerModList.filter(item => item.webId && !manager.shareList.includes(item))
+    manager.shareList = manager.managerModList.filter(item => (item.webId || item.other?.namespace) && !manager.shareList.includes(item))
 }
 
 function share() {
@@ -56,8 +55,8 @@ function share() {
         <v-icon>mdi-share-variant-outline</v-icon>
         <v-tooltip activator="parent" location="top">{{ $t('Share') }}</v-tooltip>
     </v-btn>
-    <Dialog v-model:show="manager.showShare">
-        <template #title>
+    <Dialog v-model="manager.showShare">
+        <template #header>
             <div class="text"> {{ $t('Share') }} </div>
         </template>
         <v-col cols="12">
@@ -67,9 +66,10 @@ function share() {
         <div class="list">
             <el-checkbox-group v-model="(manager.shareList as any[])">
                 <v-list-item v-for="item in manager.managerModList" :key="item.id">
-                    <el-checkbox :value="item" :disabled="!item.webId">
-                        <v-list-item-title>
-                            <ModTags :mod="item"></ModTags>
+                    <el-checkbox :value="item" :disabled="!(item.webId || item.other?.namespace)">
+                        <v-list-item-title
+                            :title="!(item.webId || item.other?.namespace) ? '本地文件无法分享, 请先上传到任意合作方' : ''">
+                            <ModTags :tags="item.tags"></ModTags>
                             {{ item.modName }}
                         </v-list-item-title>
                     </el-checkbox>

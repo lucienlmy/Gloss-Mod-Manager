@@ -239,27 +239,33 @@ export const useDownload = defineStore('Download', {
 
         },
 
-        async addDownloadByGitHub(mod: IGitHubAsset, version: string, website: string) {
+        async addDownloadByGitHub(release: IGitHubRelease, website: string, fileName: string) {
             // // 判断是否已经存在
             // if (this.getTaskById(mod.id)) {
             //     // 如果已存在则移除
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
             // }
 
+            let _mod = release.assets.find(item => item.name == fileName)
+            if (!_mod) {
+                ElMessage.warning("未找到对应文件")
+                return
+            }
+
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
-                webId: mod.id,
+                webId: release.id,
                 from: "GitHub",
-                name: mod.name,
-                version: version,
+                name: release.name,
+                version: release.tag_name,
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
-                link: mod.browser_download_url,
-                modAuthor: mod.uploader.login,
+                link: _mod.browser_download_url,
+                modAuthor: release.author.login,
                 modWebsite: website,
                 status: "waiting",
-                fileName: mod.name
+                fileName: release.name
             }
 
             this.addDownloadTask(task)
@@ -400,7 +406,11 @@ export const useDownload = defineStore('Download', {
                     const thunderstore = useThunderstore()
                     if (mod.other) {
                         let data = await thunderstore.getModData(mod.other.namespace, mod.other.name)
-                        data.latest = await thunderstore.getModVersionData(mod.other.namespace, mod.other.name, data.versions[0].name)
+                        console.log(data);
+                        if (!data.latest) {
+                            data.latest = await thunderstore.getModVersionData(mod.other.namespace, mod.other.name, data.versions[0].name)
+                        }
+
                         let key = `${data?.owner}-${data?.name}-${data?.latest.version_number}`
                         this.addDownloadByThunderstore(data, key)
                     }
@@ -427,10 +437,13 @@ export const useDownload = defineStore('Download', {
                     if (mod.modWebsite) {
                         let release = await github.parse(mod.modWebsite)
                         if (release) {
-                            let _mod = release.assets.find(item => item.name == mod.fileName)
-                            if (_mod) {
-                                this.addDownloadByGitHub(_mod, release.tag_name, mod.modWebsite)
-                            }
+                            console.log(mod.fileName);
+                            this.addDownloadByGitHub(release, mod.modWebsite, mod.fileName)
+
+                            // let _mod = release.assets.find(item => item.name == mod.fileName)
+                            // if (_mod) {
+                            //     this.addDownloadByGitHub(release, release.tag_name, mod.modWebsite)
+                            // }
                         }
                     }
                     break

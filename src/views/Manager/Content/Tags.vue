@@ -102,6 +102,7 @@ export default {
 </script>
 <style lang='less' scoped>
 .tags {
+
     .group {
         display: flex;
         align-items: center;

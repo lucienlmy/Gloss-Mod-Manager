@@ -1,22 +1,18 @@
 <script lang='ts' setup>
 
 import { ipcRenderer } from "electron";
-import { ref, computed } from "vue";
 import { ElMessage } from "element-plus";
 import { join } from "node:path"
-import { getLangAll } from '@/lang'
 import { useI18n } from 'vue-i18n';
 const main = useMain()
 const settings = useSettings()
-const download = useDownload()
-const { locale } = useI18n()
+const i18n = useI18n()
 
 let langIsCn = computed(() => {
     // console.log(locale);
-    return locale.value.includes("zh")
+    return i18n.locale.value.includes("zh")
 })
 
-LocalLang.init()
 
 function openDownloadCache() {
     let downloadCachePath = join(settings.settings.modStorageLocation, "cache")
@@ -29,13 +25,26 @@ function openGameFolder() {
 }
 
 async function exportLang() {
-    let allLang = await getLangAll()
-    let langList = settings.langList
-    FileHandler.writeFile(join(LocalLang.langFolder, "lang.json"), JSON.stringify(langList, null, 4))
-    Object.keys(allLang).forEach(key => {
-        FileHandler.writeFile(join(LocalLang.langFolder, `${key}.json`), JSON.stringify(allLang[key], null, 4))
+
+    console.log(i18n);
+    // 获取所有语言
+    const languages = i18n.availableLocales;
+    // console.log(languages);
+    languages.forEach(lang => {
+        // 获取语言数据
+        const langData = i18n.getLocaleMessage(lang);
+        let data = {
+            data: {
+                name: settings.langList.find(item => item.value == lang)?.text,
+                code: lang,
+                author: "",
+                version: main.version,
+            },
+            Language: langData
+        }
+        LocalLang.saveLanguage(data)
     })
-    ElMessage.success("导出完成~")
+
     FileHandler.openFolder(LocalLang.langFolder)
 }
 

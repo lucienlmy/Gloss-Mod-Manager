@@ -42,6 +42,7 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
     "axios": "^1.7.8",
+    "cropperjs": "^1.6.2",
     "electron": "^33.2.1",
     "electron-builder": "^25.1.8",
     "electron-updater": "^6.3.9",
@@ -72,7 +73,7 @@
   "dependencies": {
     "auto-launch": "^5.0.5",
     "cheerio": "^1.0.0-rc.12",
-    "electron-edge-js": "^33.0.3",
+    "electron-edge-js-v33-only": "^33.0.5",
     "electron-log": "^5.2.3",
     "electron-store": "^10.0.0",
     "request": "^2.88.2",

@@ -19,32 +19,28 @@ export class Expands {
         return join(Config.configFolder(), 'Expands')
     }
 
+    public static saveExpands(data: IExpandsSupportedGames) {
+        const file = join(this.expandsFolder(), data.gameName + '.json')
+        FileHandler.writeFile(file, JSON.stringify(data, null, 4))
+    }
+
     public static getExpandsList() {
         const expandsFolder = this.expandsFolder()
         FileHandler.createDirectory(expandsFolder)
         const files = FileHandler.getAllFilesInFolder(expandsFolder, true)
-        const folders = FileHandler.getAllFolderInFolder(expandsFolder, true)
-        // console.log(folders);
 
         const manager = useManager()
 
-        // ts 实现游戏拓展
-        folders.forEach(item => {
-            let index = join(item, 'index.js')
-            // 判断文件是否存在
-            if (FileHandler.fileExists(index)) {
-                let { supportedGames } = require(index)
-                // console.log(supportedGames);
-                manager.supportedGames.push(supportedGames)
-            }
-        })
+        // 移除旧的
+        manager.supportedGames = manager.supportedGames.filter(item => item.from != 'Local')
 
         // json 实现游戏拓展
         files.forEach(item => {
             if (extname(item) == '.json') {
                 const data: IExpandsSupportedGames = JSON.parse(FileHandler.readFile(item))
                 const Supported = Expands.JsonToSupportedGamesData(data)
-                manager.supportedGames.push(Supported)
+                Supported.from = 'Local'
+                manager.supportedGames.unshift(Supported)
             }
         })
     }

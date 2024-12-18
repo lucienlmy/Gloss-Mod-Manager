@@ -46,10 +46,9 @@ export const useGameBanana = defineStore('GameBanana', {
         },
         async GetModData(id: string) {
             let api = `https://gamebanana.com/apiv11/Mod/${id}/ProfilePage`
-            axios.get(api).then(({ data }) => {
-                // console.log(data);
-                this.modData = data
-            })
+            const { data } = await axios.get(api)
+            this.modData = data
+            return data as IGameBananaMod
         }
     }
 })

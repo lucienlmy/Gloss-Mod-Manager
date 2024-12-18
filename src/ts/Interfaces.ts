@@ -3,6 +3,8 @@ declare global {
     type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
     type TaskStatus = "active" | "waiting" | "paused" | "error" | "complete" | "removed"
 
+    type install = ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
+
     //#region 基础Mod
 
     interface IMod {
@@ -143,8 +145,9 @@ declare global {
     }
     interface IStartExe {
         name: string
-        exePath: string
+        exePath?: string
         options?: string
+        cmd?: string
     }
 
     interface IGameInfo {
@@ -212,21 +215,22 @@ declare global {
             icon: string
             item: IAdvancedItem[]
         }
-        install: ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
-        uninstall: ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
+        install: install
+        uninstall: install
         checkPlugin?: (plugin: IModInfo) => boolean
     }
 
     interface ISupportedGames extends IGameInfo {
         modType: IType[]
+        from?: 'Local' | 'Internal'
         checkModType: (((mod: IModInfo) => number) | ICheckModType[])
         sortMod?: (list: IModInfo[]) => boolean
     }
 
     interface IExpandsSupportedGames extends IGameInfo {
-        modType: IType[] | 'UnityGame.modType' | 'UnityGameILCPP2.modType' | 'UnrealEngine.modType'
-        unrealEngineData?: { bassPath: string, useUE4SS: boolean }
-        checkModType: (((mod: IModInfo) => number) | ICheckModType[]) | 'UnrealEngine.checkModType' | 'UnityGame.checkModType' | 'UnityGameILCPP2.checkModType'
+        modType: IType[] | 'UnityGame.modType' | 'UnityGameILCPP2.modType' | 'UnrealEngine.modType' | 'Custom'
+        unrealEngineData: { bassPath: string, useUE4SS: boolean }
+        checkModType: (((mod: IModInfo) => number) | ICheckModType[]) | 'UnrealEngine.checkModType' | 'UnityGame.checkModType' | 'UnityGameILCPP2.checkModType' | 'Custom'
         sortMod?: (list: IModInfo[]) => boolean
     }
 

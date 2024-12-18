@@ -4,7 +4,7 @@ export function getLangAll() {
     // let message: any = {}
     let message = getLangFiles(modules)
 
-    LocalLang.getLocalLangData(message)
+    // LocalLang.getLocalLangData(message)
     //   getLangFiles(viewModules,message)
     // console.log(message);
 

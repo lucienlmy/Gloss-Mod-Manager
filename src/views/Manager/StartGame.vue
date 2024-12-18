@@ -7,18 +7,17 @@ const props = defineProps<{
 }>()
 
 async function startGame(startExe: string) {
-    // let startExe = game?.startExe
-    if (startExe) {
-        // 判断 startExe 里面是否包含 steam 
-        if (startExe.includes('steam://rungameid')) {
-            exec(`start ${startExe}`)
-        } else {
-            startExe = join(props.game?.gamePath ?? "", startExe)
-            // console.log(startExe);
-            FileHandler.runExe(startExe)
-        }
-        ElMessage.success("启动成功~")
-    }
+
+    startExe = join(props.game?.gamePath ?? "", startExe)
+    FileHandler.runExe(startExe)
+    ElMessage.success("启动成功~")
+}
+
+function startGameByCmd(cmd: string) {
+    console.log(cmd);
+
+    exec(`start ${cmd}`)
+    ElMessage.success("启动成功~")
 }
 
 </script>
@@ -34,8 +33,13 @@ async function startGame(startExe: string) {
             </template>
             <v-card>
                 <v-list>
-                    <v-list-item v-for="item in game.startExe" :title="$t(item.name)"
-                        @click="startGame(item.exePath)"></v-list-item>
+                    <template v-for="item in game.startExe">
+                        <v-list-item v-if="item.exePath" :title="$t(item.name)"
+                            @click="startGame(item.exePath)"></v-list-item>
+                        <v-list-item v-if="item.cmd" :title="$t(item.name)"
+                            @click="startGameByCmd(item.cmd)"></v-list-item>
+                    </template>
+
                 </v-list>
             </v-card>
         </v-menu>

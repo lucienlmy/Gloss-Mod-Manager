@@ -2,6 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import Markdown from '@/components/Model/Markdown.vue'
+import axios from "axios";
 let readme = ref('')
 const { locale } = useI18n()
 
@@ -13,12 +14,15 @@ let readmeFile = computed(() => {
     return `https://p.aoe.top/githubusercontent/GlossMod/Gloss-Mod-Manager-info/main/${file}`
 })
 
-function getReadme() {
-    fetch(readmeFile.value)
-        .then(res => res.text())
-        .then(text => {
-            readme.value = text
-        })
+async function getReadme() {
+    try {
+        let { data } = await axios.get(readmeFile.value)
+        readme.value = data
+    } catch (error) {
+        let { data } = await axios.get(`https://p.aoe.top/githubusercontent/GlossMod/Gloss-Mod-Manager-info/main/README.md`)
+        readme.value = data
+    }
+
 }
 
 watch(() => readmeFile.value, () => {

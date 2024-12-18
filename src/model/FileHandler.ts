@@ -384,14 +384,9 @@ export class FileHandler {
      * 运行程序
      * @param exe 程序路径
      */
-    public static runExe(exe: string) {
+    public static runExe(exe: string, options: string[] = []) {
         let { root, dir: folder, base: name } = path.parse(exe)
-        // 去除 root 中的 \
-        // root = root.replace(/\\/g, '')
-
-        // let cmd = `${root} && cd "${folder}" && "${name}" `;
-        // console.log(cmd);
-        exec(name, {
+        exec(`${name} ${options.join(' ')}`, {
             cwd: folder,
         })
     }

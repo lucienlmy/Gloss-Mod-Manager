@@ -113,6 +113,16 @@ export class APIAria2 {
         });
     }
 
+    // 删除
+    public static async remove(gid: string) {
+        return this.send({
+            jsonrpc: '2.0',
+            id: 'remove',
+            method: 'aria2.remove',
+            params: [gid],
+        });
+    }
+
     // 下载进度
     public static onProgress(gid: string) {
         return this.send({

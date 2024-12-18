@@ -32,25 +32,27 @@ function byName(b: sort) {
             // 根据 Tags 排序 顺序按照 manager.tags 中的顺序
             // 如果没有 Tags 则排在最后
 
-            /**
-             * let aIndex = manager.tags.findIndex(item => item.name == (a.tags ? [0]?.name))
-                let bIndex = manager.tags.findIndex(item => item.name == (b.tags ? [0]?.name))
-                if (aIndex == -1) aIndex = manager.tags.length
-                if (bIndex == -1) bIndex = manager.tags.length 
-                return aIndex - bIndex
-             */
-
             manager.managerModList.sort((a, b) => {
-                let aTags = a.tags ?? [{ name: '', color: '' }]
-                let bTags = b.tags ?? [{ name: '', color: '' }]
+                let aTags = a.tags ?? []
+                let bTags = b.tags ?? []
+
+                if (aTags.length === 0) return 1;
+                if (bTags.length === 0) return -1;
+
                 let aIndex = aTags.map(item => manager.tags.findIndex(tag => tag.name == item.name)).sort((a, b) => a - b)
                 let bIndex = bTags.map(item => manager.tags.findIndex(tag => tag.name == item.name)).sort((a, b) => a - b)
 
-                if (aIndex[0] == -1) aIndex[0] = manager.tags.length
-                if (bIndex[0] == -1) bIndex[0] = manager.tags.length
+                for (let i = 0; i < Math.max(aIndex.length, bIndex.length); i++) {
+                    if (aIndex[i] === undefined) return 1;
+                    if (bIndex[i] === undefined) return -1;
+                    if (aIndex[i] !== bIndex[i]) return aIndex[i] - bIndex[i];
+                }
 
-                return aIndex[0] - bIndex[0]
+                return 0;
             })
+
+            console.log(manager.managerModList);
+
             break;
         default:
             break;

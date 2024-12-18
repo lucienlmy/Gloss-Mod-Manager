@@ -144,7 +144,7 @@ function list_drop(e: any) {
                         <template #default>
                             <!-- <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
                                 {{ item.name }}</v-chip> -->
-                            <ModTags :mod="mod"></ModTags>
+                            <ModTags :tags="mod.tags"></ModTags>
                             {{ mod.modName }}
                         </template>
                     </el-checkbox>
@@ -155,7 +155,7 @@ function list_drop(e: any) {
                                 @dragend="dragend" @dragover="dragover"></v-icon>
                             <!-- <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
                                 {{ item.name }}</v-chip> -->
-                            <ModTags :mod="mod"></ModTags>
+                            <ModTags :tags="mod.tags"></ModTags>
                             {{ mod.modName }}
                         </p>
                         <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"

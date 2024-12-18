@@ -1,4 +1,5 @@
 
+import axios from "axios";
 import { defineStore } from "pinia";
 
 export const useModIo = defineStore('ModIo', {
@@ -94,6 +95,16 @@ export const useModIo = defineStore('ModIo', {
             }
 
             return data
+        },
+        async getModDataByPath(game: string, mod: string) {
+            // https://mod.io/v1/games/@baldursgate3/mods/@unlocklevelcurve-patch-xp-x075
+            let params = new URLSearchParams({
+                api_key: '10356e364c5af111af2e4a956a1506df',
+            })
+
+            let url = `https://mod.io/v1/games/@${game}/mods/@${mod}?${params}`
+            let { data } = await axios.get(url)
+            return data as IModIo
         },
         async getGameTags() {
             const settings = useSettings()

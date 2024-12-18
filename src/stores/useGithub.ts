@@ -25,7 +25,7 @@ export const useGithub = defineStore('Github', {
             this.loading = true
             let { data } = await axios.get(`https://api.github.com/repos/${owner}/${repo}/releases/latest`)
             this.loading = false
-            console.log(data);
+            // console.log(data);
             this.version = data.tag_name
             this.assets = data.assets
             this.release = data
