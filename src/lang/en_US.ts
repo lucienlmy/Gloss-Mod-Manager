@@ -49,6 +49,16 @@ const DownloadHeader = {
     "Paused": "Paused",
     "Completed": "Completed",
     "Waiting/Failure": "Waiting/Failure",
+
+    "New Download": "New Download",
+    "Website": "Website",
+    "Website Tip": "Enter the Mod URL, then click Analyze",
+    "Analyze": "Analyze",
+    "From": "From",
+    "Mod name": "Mod Name",
+    "File Name": "File Name",
+    "OK": "OK",
+    "Download Link": "Download Link",
 }
 
 const DownloadTasks = {
@@ -214,6 +224,31 @@ const ManagerHeader = {
     "Share": "Share",
     "Local": "Local",
     "Internal": "Internal",
+}
+
+const GameManage = {
+    "Create a custom game": "Create a custom game",
+    "Game ID": "Game ID",
+    "Game ID Tip": "Game ID on 3DN Mod",
+    "Steam Id Tip": "AppId on Steam, fill in 0 if not",
+    "Thunderstore Tip": "Community path on Thunderstore",
+    "Mod.Io Tip": "ID on Mod.Io",
+    "Gamebanana Tip": "ID on Gamebanana",
+    "CurseForge Tip": "ID on CurseForge",
+    "Installation Directory": "Installation Directory",
+    "Installation Directory Tip": "Game installation directory, type string",
+    "Game Name": "Game Name",
+    "Game Name Tip": "Game name, preferably in English",
+    "Exe Name": "Exe Name",
+    "Easy": "Easy",
+    "Name Tip": "Displayed name",
+    "Relative Path": "Relative Path",
+    "Relative Path Tip": "Path relative to the root directory",
+    "Startup method": "Startup method",
+    "Cover": "Cover",
+    "Upload cover": "Upload cover",
+    "Check type": "Check type",
+
 }
 
 const Settings = {
@@ -430,6 +465,7 @@ const lang = {
     ...Welcome,
     ...ManagerContent,
     ...ManagerHeader,
+    ...GameManage,
     ...Settings,
     ...Games,
     ...Backup,

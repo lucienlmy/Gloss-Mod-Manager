@@ -184,6 +184,12 @@ function addTag() {
 }
 
 function save() {
+
+    if (form.value.link == '') {
+        ElMessage.error('下载链接不能为空')
+        return
+    }
+
     download.addDownloadTask(form.value)
     download.showAddTaskDialog = false
     form.value = {
@@ -203,44 +209,44 @@ function save() {
 </script>
 <template>
     <v-chip append-icon="mdi-plus" @click="download.showAddTaskDialog = !download.showAddTaskDialog" label
-        variant="text"> 新建下载</v-chip>
+        variant="text"> {{ $t('New Download') }}</v-chip>
     <el-dialog v-model="download.showAddTaskDialog" draggable :close-on-click-modal="false" append-to-body
         width="900px">
         <template #header>
-            <div class="text"> 新建下载 </div>
+            <div class="text"> {{ $t('New Download') }} </div>
         </template>
         <!-- <el-card> -->
         <el-form label-width="120" v-model="form">
-            <el-form-item label="网址">
-                <el-input v-model="form.modWebsite" placeholder="输入Mod地址, 然后点击解析">
+            <el-form-item :label="$t('Website')">
+                <el-input v-model="form.modWebsite" :placeholder="$t('Website Tip')">
                     <template #append>
-                        <el-button @click="parsing" :loading="loading">解析</el-button>
+                        <el-button @click="parsing" :loading="loading">{{ $t('Analyze') }}</el-button>
                     </template>
                 </el-input>
             </el-form-item>
-            <el-form-item label="来源">
+            <el-form-item :label="$t('From')">
                 <!-- <el-input v-model="form.type" disabled></el-input> -->
                 <el-select v-model="form.from" :disabled="editingProhibited">
                     <el-option v-for="item in types" :key="item.value" :label="item.label" :value="item.value"
                         :disabled="item.disabled" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="Mod名称" :disabled="editingProhibited">
+            <el-form-item :label="$t('Mod name')" :disabled="editingProhibited">
                 <el-input v-model="form.name" :disabled="editingProhibited"></el-input>
             </el-form-item>
-            <el-form-item label="文件名" :disabled="editingProhibited">
+            <el-form-item :label="$t('File Name')" :disabled="editingProhibited">
                 <el-input v-model="form.fileName" :disabled="editingProhibited"></el-input>
             </el-form-item>
-            <el-form-item label="版本" :disabled="editingProhibited">
+            <el-form-item :label="$t('Version')" :disabled="editingProhibited">
                 <el-input v-model="form.version" :disabled="editingProhibited"></el-input>
             </el-form-item>
-            <el-form-item label="下载链接">
+            <el-form-item :label="$t('Download Link')">
                 <el-input v-model="form.link" :disabled="editingProhibited"></el-input>
             </el-form-item>
-            <el-form-item label="作者">
+            <el-form-item :label="$t('Author')">
                 <el-input v-model="form.modAuthor" :disabled="editingProhibited"></el-input>
             </el-form-item>
-            <el-form-item label="标签">
+            <el-form-item :label="$t('Tag')">
                 <div class="tags">
                     <ModTags :tags="form.tags"></ModTags>
                     <!-- <el-button link>
@@ -271,7 +277,7 @@ function save() {
                     </el-popover>
                 </div>
             </el-form-item>
-            <el-form-item label="Mod类型" v-if="settings.settings.managerGame">
+            <el-form-item :label="$t('Type')" v-if="settings.settings.managerGame">
                 <el-select v-model="form.modType">
                     <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id" :label="item.name"
                         :value="item.id" />
@@ -279,8 +285,8 @@ function save() {
             </el-form-item>
         </el-form>
         <v-card-actions>
-            <v-btn color="primary" @click="save">确定</v-btn>
-            <v-btn @click="download.showAddTaskDialog = false">取消</v-btn>
+            <v-btn color="primary" @click="save">{{ $t('OK') }}</v-btn>
+            <v-btn @click="download.showAddTaskDialog = false">{{ $t('Cancel') }}</v-btn>
         </v-card-actions>
         <!-- </el-card> -->
     </el-dialog>

@@ -250,64 +250,67 @@ defineExpose({
     <Dialog :draggable="false" v-model="games.showExpandsGame" persistent width="500px" @close="close">
         <template #header>
             <div class="header">
-                <h3>添加游戏 <el-link href="https://gmm.aoe.top/Expands/README.html" :underline="false"
+                <h3>{{ $t("Add Game") }} <el-link href="https://gmm.aoe.top/Expands/README.html" :underline="false"
                         target="_blank"><v-icon>mdi-help</v-icon></el-link></h3>
             </div>
         </template>
         <v-card color="#0000">
             <v-card-text>
                 <el-form label-width="100">
-                    <el-form-item label="游戏ID" required>
-                        <el-input type="number" v-model="form.GlossGameId" placeholder="3DN Mod站的游戏ID"> </el-input>
+                    <el-form-item :label="$t('Game ID')" required>
+                        <el-input type="number" v-model="form.GlossGameId" :placeholder="$t('Game ID Tip')"> </el-input>
                     </el-form-item>
                     <el-form-item label="Steam Id" required>
-                        <el-input type="number" v-model="form.steamAppID"
-                            placeholder="游戏在Steam中的AppId, 没有则填 0"></el-input>
+                        <el-input type="number" v-model="form.steamAppID" :placeholder="$t('Steam Id Tip')"></el-input>
                     </el-form-item>
                     <el-form-item label="Thunderstore">
                         <el-input v-model="form.Thunderstore!.community_identifier"
-                            placeholder="Thunderstore 的社区路径"></el-input>
+                            :placeholder="$t('Thunderstore Tip')"></el-input>
                     </el-form-item>
                     <el-form-item label="Mod.Io Id">
-                        <el-input type="number" v-model="form.mod_io" placeholder="在 Mod.Io 中的ID"></el-input>
+                        <el-input type="number" v-model="form.mod_io" :placeholder="$t('Mod.Io Tip')"></el-input>
                     </el-form-item>
                     <el-form-item label="GameBanana">
-                        <el-input type="number" v-model="form.gamebanana" placeholder="在 Gamebanana 中的ID"></el-input>
+                        <el-input type="number" v-model="form.gamebanana"
+                            :placeholder="$t('Gamebanana Tip')"></el-input>
                     </el-form-item>
                     <el-form-item label="CurseForge">
-                        <el-input type="number" v-model="form.curseforge" placeholder="在 CurseForge 中的ID"></el-input>
+                        <el-input type="number" v-model="form.curseforge"
+                            :placeholder="$t('CurseForge Tip')"></el-input>
                     </el-form-item>
 
-                    <el-form-item label="安装目录" required>
-                        <el-input v-model="form.installdir" placeholder="游戏安装目录, string 类型"></el-input>
+                    <el-form-item :label="$t('Installation Directory')" required>
+                        <el-input v-model="form.installdir" :placeholder="$t('Installation Directory Tip')"></el-input>
                     </el-form-item>
-                    <el-form-item label="游戏名称" required>
-                        <el-input v-model="form.gameName" placeholder="游戏名称, 尽量使用英文"></el-input>
+                    <el-form-item :label="$t('Game Name')" required>
+                        <el-input v-model="form.gameName" :placeholder="$t('Game Name Tip')"></el-input>
                     </el-form-item>
-                    <el-form-item label="主程序名称" required>
+                    <el-form-item :label="$t('Exe Name')" required>
                         <el-row>
                             <el-col :span="24">
                                 <el-switch v-model="moreGameExe" inline-prompt
                                     style="--el-switch-on-color: #FF6F00; --el-switch-off-color: #1565C0"
-                                    active-text="高级" inactive-text="简易" />
+                                    :active-text="$t('Advanced')" :inactive-text="$t('Easy')" />
                             </el-col>
                             <el-col :span="24" v-if="moreGameExe">
                                 <el-popover :visible="gameVisible" trigger="click" :width="250" :teleported="false">
                                     <template #reference>
-                                        <el-button link @click="gameVisible = true"
-                                            class="star-exe-list">添加<el-icon><el-icon-plus></el-icon-plus></el-icon></el-button>
+                                        <el-button link @click="gameVisible = true" class="star-exe-list">{{ $t('Add')
+                                            }}<el-icon><el-icon-plus></el-icon-plus></el-icon></el-button>
                                     </template>
                                     <v-card color="#0000">
                                         <el-form label-width="80">
-                                            <el-form-item label="名称">
-                                                <el-input v-model="gameExe.name" placeholder="显示的名称"></el-input>
+                                            <el-form-item :label="$t('Name')">
+                                                <el-input v-model="gameExe.name"
+                                                    :placeholder="$t('Name Tip')"></el-input>
                                             </el-form-item>
-                                            <el-form-item label="相对路径">
-                                                <el-input v-model="gameExe.rootPath" placeholder="相对于根目录的路径"></el-input>
+                                            <el-form-item :label="$t('Relative Path')">
+                                                <el-input v-model="gameExe.rootPath"
+                                                    :placeholder="$t('Relative Path Tip')"></el-input>
                                             </el-form-item>
                                         </el-form>
                                         <template #actions>
-                                            <el-button @click="addGameExe">添加</el-button>
+                                            <el-button @click="addGameExe">{{ $t('Add') }}</el-button>
                                         </template>
                                     </v-card>
                                 </el-popover>
@@ -322,12 +325,12 @@ defineExpose({
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item label="启动方式" required>
+                    <el-form-item :label="$t('Startup method')" required>
                         <el-row>
                             <el-col :span="24">
                                 <el-switch v-model="moreStarExe" inline-prompt
                                     style="--el-switch-on-color: #FF6F00; --el-switch-off-color: #1565C0"
-                                    active-text="高级" inactive-text="简易" />
+                                    :active-text="$t('Advanced')" :inactive-text="$t('Easy')" />
                             </el-col>
                             <el-col :span="24" v-if="moreStarExe" class="star-exe">
                                 <el-popover :visible="starVisible" trigger="click" :width="250" :teleported="false">
@@ -366,23 +369,24 @@ defineExpose({
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item label="封面" required>
+                    <el-form-item :label="$t('Cover')" required>
                         <el-row>
                             <el-col :span="24">
                                 <div class="cover" @click="uploadCover = true">
                                     <el-image v-if="form.gameCoverImg" :src="form.gameCoverImg"></el-image>
                                     <el-icon v-else> <el-icon-plus></el-icon-plus> </el-icon>
                                 </div>
-                                <Cropped v-model="uploadCover" title="上传封面" @submit="submitCover"></Cropped>
+                                <Cropped v-model="uploadCover" :title="$t('Upload cover')" @submit="submitCover">
+                                </Cropped>
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item label="类型" required>
+                    <el-form-item :label="$t('Type')" required>
                         <el-select v-model="modType">
                             <el-option label="通用 unity" value="UnityGame.modType"></el-option>
                             <el-option label="通用 unity ILCPP2" value="UnityGameILCPP2.modType"></el-option>
                             <el-option label="通用 虚幻" value="UnrealEngine.modType"></el-option>
-                            <el-option label="自定义" value="Custom"></el-option>
+                            <el-option :label="$t('Customize')" value="Custom"></el-option>
                         </el-select>
                         <v-row>
                             <v-col cols="12" v-if="modType == 'UnrealEngine.modType'">
@@ -411,12 +415,12 @@ defineExpose({
                             </v-col>
                         </v-row>
                     </el-form-item>
-                    <el-form-item label="检查类型" required>
+                    <el-form-item :label="$t('Check type')" required>
                         <el-select v-model="checkModType">
                             <el-option label="通用 unity" value="UnityGame.checkModType"></el-option>
                             <el-option label="通用 unity ILCPP2" value="UnityGameILCPP2.checkModType"></el-option>
                             <el-option label="通用 虚幻" value="UnrealEngine.checkModType"></el-option>
-                            <el-option label="自定义" value="Custom"></el-option>
+                            <el-option :label="$t('Customize')" value="Custom"></el-option>
                         </el-select>
                         <v-row>
                             <v-col cols="12" v-if="checkModType == 'Custom'" class="mod-type">

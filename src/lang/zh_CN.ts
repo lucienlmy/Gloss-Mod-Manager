@@ -51,6 +51,16 @@ const DownloadHeader = {
     "Paused": "暂停",
     "Completed": "已完成",
     "Waiting/Failure": "等待/失败",
+
+    "New Download": "新建下载",
+    "Website": "网站",
+    "Website Tip": "输入Mod地址, 然后点击解析",
+    "Analyze": "解析",
+    "From": "来源",
+    "Mod name": "Mod名称",
+    "File Name": "文件名",
+    "OK": "确定",
+    "Download Link": "下载链接",
 }
 
 const DownloadTasks = {
@@ -221,6 +231,30 @@ const ManagerHeader = {
     "Share": "分享",
     "Local": "本地",
     "Internal": "内部",
+}
+
+const GameManage = {
+    "Create a custom game": "创建自定义游戏",
+    "Game ID": "游戏ID",
+    "Game ID Tip": "3DN Mod站的游戏ID",
+    "Steam Id Tip": "游戏在Steam中的AppId, 没有则填 0",
+    "Thunderstore Tip": "Thunderstore 的社区路径",
+    "Mod.Io Tip": "在 Mod.Io 中的ID",
+    "Gamebanana Tip": "在 Gamebanana 中的ID",
+    "CurseForge Tip": "在 CurseForge 中的ID",
+    "Installation Directory": "安装目录",
+    "Installation Directory Tip": "游戏安装目录, string 类型",
+    "Game Name": "游戏名称",
+    "Game Name Tip": "游戏名称, 尽量使用英文",
+    "Exe Name": "主程序名称",
+    "Easy": "简易",
+    "Name Tip": "显示的名称",
+    "Relative Path": "相对路径",
+    "Relative Path Tip": "相对于根目录的路径",
+    "Startup method": "启动方式",
+    "Cover": "封面",
+    "Upload cover": "上传封面",
+    "Check type": "检查类型",
 }
 
 const Settings = {
@@ -440,6 +474,7 @@ const lang = {
     ...Welcome,
     ...ManagerContent,
     ...ManagerHeader,
+    ...GameManage,
     ...Settings,
     ...Backup,
     ...Games,

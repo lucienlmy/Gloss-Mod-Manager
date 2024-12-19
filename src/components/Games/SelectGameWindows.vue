@@ -121,7 +121,7 @@ function editGame(item: ISupportedGames) {
                         <v-col cols="6" sm="4" md="3" class="game-list expands-games"
                             @click="games.showExpandsGame = true">
                             <v-icon>mdi-plus</v-icon>
-                            创建自定义游戏
+                            {{ $t("Create a custom game") }}
                         </v-col>
                         <v-col cols="6" sm="4" md="3" class="game-list" v-for="item in list" :key="item.gameName"
                             @click="select(item)">
