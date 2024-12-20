@@ -47,22 +47,21 @@ export class LocalLang {
 
                 let data = JSON.parse(FileHandler.readFile(item, "[]"))
                 // langData.push(data)
-                let message = i18n.getLocaleMessage(data.data.code)
-                // {}
-                // console.log(message);
+                let message = i18n.getLocaleMessage(data.data?.code)
 
-                if (Object.keys(message).length > 0) {
-                    let newMessage = { ...message, ...data.Language, }
-                    i18n.setLocaleMessage(data.data.code, newMessage)
-                } else {
-                    i18n.setLocaleMessage(data.data.code, data.Language)
-                    const settings = useSettings()
-                    settings.langList.push({
-                        text: data.data.name,
-                        value: data.data.code
-                    })
-                    console.log(settings.langList);
-
+                if (message) {
+                    if (Object.keys(message).length > 0) {
+                        let newMessage = { ...message, ...data.Language, }
+                        i18n.setLocaleMessage(data.data.code, newMessage)
+                    } else {
+                        i18n.setLocaleMessage(data.data.code, data.Language)
+                        const settings = useSettings()
+                        settings.langList.push({
+                            text: data.data.name,
+                            value: data.data.code
+                        })
+                        console.log(settings.langList);
+                    }
                 }
             }
         })
