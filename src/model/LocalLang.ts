@@ -49,11 +49,13 @@ export class LocalLang {
                 // langData.push(data)
                 let message = i18n.getLocaleMessage(data.data?.code)
 
-                if (message) {
+                if (message && data.data) {
                     if (Object.keys(message).length > 0) {
                         let newMessage = { ...message, ...data.Language, }
                         i18n.setLocaleMessage(data.data.code, newMessage)
                     } else {
+                        console.log(data);
+
                         i18n.setLocaleMessage(data.data.code, data.Language)
                         const settings = useSettings()
                         settings.langList.push({
