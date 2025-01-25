@@ -2,7 +2,7 @@
  * 管理相关
  */
 
-import { existsSync, statSync } from 'node:fs'
+import { existsSync, statSync, readdirSync } from 'node:fs'
 import { join, dirname, basename, extname, sep } from 'node:path'
 
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -162,6 +162,10 @@ export class Manager {
                 ElMessage.error(`错误: ${error}`)
             }
         })
+        if (!isInstall) {
+            // 卸载时增加空文件夹清理
+            FileHandler.removeEmptyFolders(join(manager.gameStorage ?? "", installPath));
+        }
         return res
     }
 
@@ -275,7 +279,13 @@ export class Manager {
                     if (isInstall) {
                         FileHandler.copyFile(source, target)
                     } else {
+                        // 删除文件
                         FileHandler.deleteFile(target)
+                        // 删除空文件夹(递归向上)
+                        const parentDir = dirname(target);
+                        if (parentDir !== gameStorage) {
+                            FileHandler.removeEmptyFolders(parentDir);
+                        }
                     }
                 })
             })
@@ -322,9 +332,7 @@ export class Manager {
         return true
     }
 
-    static getCommonParentFolder(modStorage: string, paths: string[]): string[] {
-
-        /**
+    /**
          * 将下面这段数组，
          * [
     "E:\\GMM\\Genshin Impact\\8\\FavoniusSwordMod",
@@ -337,28 +345,72 @@ export class Manager {
     "E:\\GMM\\Genshin Impact\\8\\FavoniusSwordMod",
     "E:\\GMM\\Genshin Impact\\8\\Lynette_Miyako"
 ]
-         */
-
+     * 获取相同父路径的文件夹
+     * @param modStorage mod存储路径
+     * @param paths 路径数组
+     * @returns 处理后的路径数组
+     */
+    static getCommonParentFolder(modStorage: string, paths: string[]): string[] {
         // 从 paths 中移除 modStorage
-        paths = paths.map(item => item.replace(modStorage, ''))
+        paths = paths.map(item => item.replace(modStorage, ''));
 
         // 移除 paths 中相同路径的文件夹
-        let res = [] as string[]
+        let res = [] as string[];
 
         let dirs = paths.map(item => {
-            let arr = item.split(sep)
+            let arr = item.split(sep);
             // 移除空值
-            arr = arr.filter(i => i != '')
-            return arr
-        })
+            arr = arr.filter(i => i != '');
+            return arr;
+        });
 
         dirs.forEach(item => {
-            res.push(item[0])
-        })
+            res.push(item[0]);
+        });
         // 移除重复的文件夹
-        res = [...new Set(res)]
+        res = [...new Set(res)];
 
-        let arr = res.map(item => join(modStorage, item))
-        return arr
+        let arr = res.map(item => join(modStorage, item));
+        return arr;
+    }
+
+    /**
+     * 通用卸载
+     * @param mod Mod信息
+     * @param installPath 安装路径
+     * @param root 是否为根目录安装
+     * @returns 是否卸载成功
+     */
+    public static generalUninstall(mod: IModInfo, installPath: string = "", root: boolean = false): boolean {
+        try {
+            const manager = useManager();
+            const gameStorage = join(manager.gameStorage ?? "");
+            const modStorage = join(manager.modStorage ?? "", mod.id.toString());
+            
+            mod.modFiles.forEach(item => {
+                const source = join(modStorage, item);
+                const target = join(gameStorage, installPath, root ? item : basename(item));
+                
+                if (FileHandler.isDir(source)) {
+                    // 如果是文件夹，需要递归删除内容
+                    const files = FileHandler.getAllFilesInFolder(source, true, true);
+                    files.forEach(file => {
+                        const relativePath = file.replace(source, '');
+                        const targetFile = join(target, relativePath);
+                        FileHandler.deleteFile(targetFile);
+                    });
+                    // 删除空文件夹
+                    FileHandler.deleteFolder(target);
+                } else {
+                    // 如果是文件，删除单个文件
+                    FileHandler.deleteFile(target);
+                }
+            });
+            
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
     }
 }

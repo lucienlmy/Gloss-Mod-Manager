@@ -71,6 +71,7 @@
     "vuetify": "^3.7.4"
   },
   "dependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.32.0",
     "auto-launch": "^5.0.5",
     "cheerio": "^1.0.0-rc.12",
     "electron-edge-js-v33-only": "^33.0.5",

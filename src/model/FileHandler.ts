@@ -148,25 +148,36 @@ export class FileHandler {
      */
     public static deleteFolder(folderPath: string): boolean {
         try {
-            const files = fs.readdirSync(folderPath);
-            // 删除每个文件和子目录
-            files.forEach(file => {
-                const filePath = path.join(folderPath, file);
-                // 如果是子目录，递归调用自身
-                if (fs.lstatSync(filePath).isDirectory()) {
-                    this.deleteFolder(filePath);
-                } else { // 否则直接删除文件
-                    this.deleteFile(filePath);
-                }
-            });
-            // 删除空目录
-            fs.rmdirSync(folderPath);
-            return true
-        } catch (err) {
-            this.writeLog(err as string)
-            return false
-        }
+            if (!this.fileExists(folderPath)) {
+                return true;
+            }
 
+            const files = fs.readdirSync(folderPath);
+            
+            // 先删除文件夹内的所有文件和子文件夹
+            for (const file of files) {
+                const curPath = join(folderPath, file);
+                if (fs.lstatSync(curPath).isDirectory()) {
+                    // 递归删除子文件夹
+                    this.deleteFolder(curPath);
+                } else {
+                    // 删除文件
+                    fs.unlinkSync(curPath);
+                }
+            }
+
+            // 删除空文件夹
+            try {
+                fs.rmdirSync(folderPath);
+            } catch (err) {
+                console.log(`Failed to remove folder: ${folderPath}, error: ${err}`);
+            }
+
+            return true;
+        } catch (err) {
+            this.writeLog(err as string);
+            return false;
+        }
     }
 
     /**
@@ -669,5 +680,44 @@ export class FileHandler {
     public static GetAppData() {
         const username = userInfo().username;
         return path.join('C:', 'Users', username, 'AppData');
+    }
+
+    /**
+     * 删除空文件夹
+     * @param path 文件夹路径 
+     * @returns boolean
+     */
+    public static removeEmptyFolders(path: string): boolean {
+        try {
+            if (!fs.existsSync(path)) {
+                return true;
+            }
+
+            // 获取文件夹下所有内容
+            const files = fs.readdirSync(path);
+            
+            // 递归处理所有子文件夹
+            for (const file of files) {
+                const curPath = join(path, file);
+                if (fs.lstatSync(curPath).isDirectory()) {
+                    // 递归清理子文件夹
+                    this.removeEmptyFolders(curPath);
+                }
+            }
+
+            // 再次读取文件夹内容（因为子文件夹可能已被删除）
+            const remainingFiles = fs.readdirSync(path);
+            
+            // 如果文件夹为空则删除
+            if (remainingFiles.length === 0) {
+                fs.rmdirSync(path);
+                return true;
+            }
+
+            return true;
+        } catch (err) {
+            console.error(`Error removing empty folders: ${err}`);
+            return false;
+        }
     }
 }
