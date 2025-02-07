@@ -157,7 +157,9 @@ export const useManager = defineStore('Manager', {
 
             if (allowedExtensions.some(ext => file.endsWith(ext))) {
                 this.maxID++
-                let id = this.maxID.toString()
+                // 获取文件名(不含扩展名)并添加ID
+                let baseName = path.basename(file, path.extname(file))
+                let id = `${baseName}-${this.maxID}`
                 console.log(id);
 
                 let md5 = await FileHandler.getFileMd5(file).catch(err => {
@@ -183,10 +185,12 @@ export const useManager = defineStore('Manager', {
                         files.push(item.file)
                     }
                 });
-                await this.addModInfo(file, parseInt(id), files, md5);
+                await this.addModInfo(file, id, files, md5);
             } else if (FileHandler.isDir(file)) {
                 this.maxID++
-                let id = this.maxID.toString()
+                // 获取文件夹名并添加ID 
+                let baseName = path.basename(file)
+                let id = `${baseName}-${this.maxID}`
                 console.log(id);
 
 
@@ -207,7 +211,7 @@ export const useManager = defineStore('Manager', {
                     id
                 )
                 await FileHandler.copyFolder(Folder, target)
-                this.addModInfo(file, parseInt(id), files, md5);
+                this.addModInfo(file, id, files, md5);
             }
         },
         /**
@@ -219,7 +223,9 @@ export const useManager = defineStore('Manager', {
             FileHandler.writeLog(`Add Task: ${task.name}`)
 
             this.maxID++
-            let id = this.maxID.toString()
+            // 获取任务名称并添加ID
+            let baseName = task.name.replace(/[<>:"/\\|?*]/g, '') // 移除非法字符
+            let id = `${baseName}-${this.maxID}`
             const settings = useSettings()
             if (settings.settings.modStorageLocation == '') {
                 ElMessage.error('请先选择Mod存放位置')
@@ -261,7 +267,7 @@ export const useManager = defineStore('Manager', {
             files = files.map(item => item.replace(target, ''))
 
             let mod: IModInfo = {
-                id: parseInt(id),
+                id: id,
                 from: task.from,
                 webId: task.webId,
                 modName: task.name,
@@ -289,7 +295,7 @@ export const useManager = defineStore('Manager', {
             ElMessage.success(`『${task.name}』已添加到管理列表`)
         },
         // 在管理器中添加Mod信息
-        async addModInfo(file: string, id: number, files: string[], md5: string) {
+        async addModInfo(file: string, id: string, files: string[], md5: string) {
             // console.log(md5);
             const settings = useSettings()
             let mod: IModInfo = {
@@ -325,7 +331,7 @@ export const useManager = defineStore('Manager', {
         // 删除Mod
         deleteMod(mod: IModInfo) {
             let settings = useSettings()
-            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id.toString())
+            let savePath = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", mod.id)
             let modIndex = this.managerModList.findIndex(item => item.id == mod.id)
             // console.log(savePath);
             Manager.deleteMod(savePath)
@@ -348,7 +354,7 @@ export const useManager = defineStore('Manager', {
             return this.managerModList.find(item => item.md5 == md5)
         },
         // 通过id获取Mod信息
-        getModInfoById(id: number) {
+        getModInfoById(id: string) {
             return this.managerModList.find(item => item.id == id)
         },
         getModInfoByWebId(webId: number) {

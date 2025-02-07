@@ -58,6 +58,11 @@ let Website = computed({
     }
 })
 
+let ModPath = computed({
+    get: () => join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", props.mod.id),
+    set: (value) => { }
+})
+
 function open() {
     // let modStorage = `${settings.settings.modStorageLocation}\\${settings.settings.managerGame.gameName}\\${props.mod.id}`
     let modStorage = join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", props.mod.id.toString())

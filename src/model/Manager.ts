@@ -50,15 +50,12 @@ export class Manager {
      * @returns 
      */
     public static generalInstall(mod: IModInfo, installPath: string, keepPath: boolean = false, inGameStorage: boolean = true): IState[] {
-        // FileHandler.writeLog(`安装mod: ${mod.modName}`)
         const manager = useManager()
-
-        let modStorage = join(manager.modStorage, mod.id.toString())
+        let modStorage = join(manager.modStorage, mod.id)
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
         let res: IState[] = []
         mod.modFiles.forEach(async item => {
             try {
-                // let source = `${modStorage}\\${item}`
                 let source = join(modStorage, item)
                 if (statSync(source).isFile()) {
                     let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
@@ -74,17 +71,15 @@ export class Manager {
 
     // 一般卸载
     public static generalUninstall(mod: IModInfo, installPath: string, keepPath: boolean = false, inGameStorage: boolean = true): IState[] {
-        // FileHandler.writeLog(`卸载mod: ${mod.modName}`);
         const manager = useManager()
         let gameStorage = inGameStorage ? join(manager.gameStorage ?? "", installPath) : installPath
-        let modStorage = join(manager.modStorage, mod.id.toString())
+        let modStorage = join(manager.modStorage, mod.id)
 
         let res: IState[] = []
         mod.modFiles.forEach(item => {
             try {
                 let source = join(modStorage, item)
                 if (statSync(source).isFile()) {
-                    // console.log("source:", source);
                     let target = keepPath ? join(gameStorage, item) : join(gameStorage, basename(item))
                     let state = FileHandler.deleteFile(target)
                     res.push({ file: item, state: state })
