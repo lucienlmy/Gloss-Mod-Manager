@@ -123,6 +123,7 @@ ipcRenderer.on('open-gmm-file', (_, args) => {
     console.log(args);
     let path = args[args.length - 1]
     // console.log(path);  // gmm://installmod/?id=172999&game=185&name=只狼：影逝二度
+
     ParsingGmm.parsing(path)
     // // 判断是否是 gmm://installmod 开头
     // if (path.startsWith("gmm://installmod")) {

@@ -128,6 +128,9 @@ function list_drop(e: any) {
                 name: name,
                 color: color
             })
+        } else {
+            // 移除 
+            props.mod.tags = props.mod.tags.filter(item => item.name != name)
         }
     }
 }

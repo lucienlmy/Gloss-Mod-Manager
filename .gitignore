@@ -31,6 +31,7 @@ yarn.lock
 .key
 .env
 /AC.ps1
+docs/.vitepress/cache
 
 # config files
 electron-builder.json5

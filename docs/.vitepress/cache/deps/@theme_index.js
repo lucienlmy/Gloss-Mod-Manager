@@ -9,32 +9,32 @@ import {
 } from "./chunk-KFYDTNHK.js";
 
 // node_modules/vitepress/dist/client/theme-default/index.js
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/fonts.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/fonts.css";
 
 // node_modules/vitepress/dist/client/theme-default/without-fonts.js
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/vars.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/base.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/icons.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/utils.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/components/custom-block.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/components/vp-code.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/components/vp-code-group.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/components/vp-doc.css";
-import "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/styles/components/vp-sponsor.css";
-import VPBadge from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPBadge.vue";
-import Layout from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/Layout.vue";
-import { default as default2 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPBadge.vue";
-import { default as default3 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPImage.vue";
-import { default as default4 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPButton.vue";
-import { default as default5 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPHomeHero.vue";
-import { default as default6 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPHomeFeatures.vue";
-import { default as default7 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPHomeSponsors.vue";
-import { default as default8 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPDocAsideSponsors.vue";
-import { default as default9 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPSponsors.vue";
-import { default as default10 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPTeamPage.vue";
-import { default as default11 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPTeamPageTitle.vue";
-import { default as default12 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPTeamPageSection.vue";
-import { default as default13 } from "D:/Gloss_Mod_Manager/main/Gloss-Mod-Manager/node_modules/vitepress/dist/client/theme-default/components/VPTeamMembers.vue";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/vars.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/base.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/icons.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/utils.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/components/custom-block.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/components/vp-code.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/components/vp-code-group.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/components/vp-doc.css";
+import "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/styles/components/vp-sponsor.css";
+import VPBadge from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPBadge.vue";
+import Layout from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/Layout.vue";
+import { default as default2 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPBadge.vue";
+import { default as default3 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPImage.vue";
+import { default as default4 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPButton.vue";
+import { default as default5 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPHomeHero.vue";
+import { default as default6 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPHomeFeatures.vue";
+import { default as default7 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPHomeSponsors.vue";
+import { default as default8 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPDocAsideSponsors.vue";
+import { default as default9 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPSponsors.vue";
+import { default as default10 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPTeamPage.vue";
+import { default as default11 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPTeamPageTitle.vue";
+import { default as default12 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPTeamPageSection.vue";
+import { default as default13 } from "D:/Gloss_Mod_Manager/App/node_modules/vitepress/dist/client/theme-default/components/VPTeamMembers.vue";
 
 // node_modules/vitepress/dist/client/theme-default/support/utils.js
 import { withBase } from "vitepress";
@@ -195,22 +195,22 @@ function resolveHeaders(headers, range) {
   }
   const ret = [];
   outer:
-  for (let i = 0; i < headers.length; i++) {
-    const cur = headers[i];
-    if (i === 0) {
-      ret.push(cur);
-    } else {
-      for (let j = i - 1; j >= 0; j--) {
-        const prev = headers[j];
-        if (prev.level < cur.level) {
-          ;
-          (prev.children || (prev.children = [])).push(cur);
-          continue outer;
+    for (let i = 0; i < headers.length; i++) {
+      const cur = headers[i];
+      if (i === 0) {
+        ret.push(cur);
+      } else {
+        for (let j = i - 1; j >= 0; j--) {
+          const prev = headers[j];
+          if (prev.level < cur.level) {
+            ;
+            (prev.children || (prev.children = [])).push(cur);
+            continue outer;
+          }
         }
+        ret.push(cur);
       }
-      ret.push(cur);
     }
-  }
   return ret;
 }
 

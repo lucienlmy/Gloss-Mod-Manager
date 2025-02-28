@@ -51,7 +51,7 @@ function byName(b: sort) {
                 return 0;
             })
 
-            console.log(manager.managerModList);
+            // console.log(manager.managerModList);
 
             break;
         default:

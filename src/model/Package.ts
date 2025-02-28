@@ -8,7 +8,10 @@ export class Package {
 
     // 解析包代码 base64解码
     public static parsePackageCode(code: string): IModInfo[] {
-        return JSON.parse(Buffer.from(code, 'base64').toString())
+        const str = Buffer.from(code, 'base64').toString()
+        console.log(str);
+
+        return JSON.parse(str)
     }
 
 }
