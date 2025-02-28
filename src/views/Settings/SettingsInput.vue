@@ -89,14 +89,7 @@ watch(() => settings.settings.autoLaunch, () => {
                 { text: $t('About'), value: 'About' },
             ]" item-title="text" item-value="value"></v-select>
         </v-col>
-        <v-col cols="12" sm="6" md="3">
-            <v-switch
-                v-model="settings.settings.showPlugins" 
-                :label="$t('Show Plugins List')" color="#039BE5"
-                persistent-hint
-                :hint="$t('Show required plugins list when connected to network')"
-            ></v-switch>
-        </v-col>
+
         <v-col cols="12" sm="6" md="3">
             <v-switch :label="$t('Auto install for download')" color="#039BE5"
                 v-model="settings.settings.autoInstall"></v-switch>
@@ -112,6 +105,10 @@ watch(() => settings.settings.autoLaunch, () => {
         <v-col cols="12" sm="6" md="3">
             <v-switch :label="$t('Change in Game run')" color="#039BE5"
                 v-model="settings.settings.changeInRun"></v-switch>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+            <v-switch v-model="settings.settings.showPlugins" :label="$t('Show Plugins List')" color="#039BE5"
+                persistent-hint></v-switch>
         </v-col>
     </v-row>
 </template>
