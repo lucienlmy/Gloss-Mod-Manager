@@ -423,6 +423,7 @@ const Games = {
     "DQIIIHD2DRemake": "勇者斗恶龙III HD-2D Remake",
     "Red Dead Redemption": "荒野大镖客",
     "Kingdom Come Deliverance 2": "天国: 拯救2",
+    "Monster Hunter Wilds": "怪物猎人 荒野",
 }
 
 const Other = {
