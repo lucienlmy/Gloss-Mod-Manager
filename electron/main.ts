@@ -382,6 +382,8 @@ ipcMain.handle('set-auto-launch', async (event, arg) => {
 
 
 ipcMain.on('open-gmm-file', (event, arg) => {
+    console.log(arg);
+
     win?.webContents.send('open-gmm-file', arg)
 })
 

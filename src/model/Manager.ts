@@ -371,16 +371,16 @@ export class Manager {
 
     // 删除空文件夹
     private static deleteEmptyFolders(folderPath: string) {
-        if (!existsSync(folderPath)) return;
+        // if (!existsSync(folderPath)) return;
 
-        const isDirEmpty = (path: string) => {
-            const files = FileHandler.getAllFilesInFolder(path, false);
-            return files.length === 0;
-        };
+        // const isDirEmpty = (path: string) => {
+        //     const files = FileHandler.getAllFilesInFolder(path, false);
+        //     return files.length === 0;
+        // };
 
-        while (isDirEmpty(folderPath)) {
-            FileHandler.deleteFolder(folderPath);
-            folderPath = dirname(folderPath);
-        }
+        // while (isDirEmpty(folderPath)) {
+        //     FileHandler.deleteFolder(folderPath);
+        //     folderPath = dirname(folderPath);
+        // }
     }
 }
