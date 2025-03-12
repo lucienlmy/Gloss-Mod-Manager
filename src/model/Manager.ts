@@ -373,10 +373,39 @@ export class Manager {
     private static deleteEmptyFolders(folderPath: string) {
         // if (!existsSync(folderPath)) return;
 
-        // const isDirEmpty = (path: string) => {
-        //     const files = FileHandler.getAllFilesInFolder(path, false);
-        //     return files.length === 0;
-        // };
+        // 如果是目录链接，不进行删除
+        try {
+            const stat = fs.lstatSync(folderPath);
+            if (stat.isSymbolicLink()) {
+                return;
+            }
+        } catch (error) {
+            return;
+        }
+
+        // 如果是目录链接，不进行删除
+        try {
+            const stat = fs.lstatSync(folderPath);
+            if (stat.isSymbolicLink()) {
+                return;
+            }
+        } catch (error) {
+            return;
+        }
+
+        const isDirEmpty = (path: string) => {
+            try {
+                const stat = fs.lstatSync(path);
+                // 如果是目录链接，认为不是空目录
+                if (stat.isSymbolicLink()) {
+                    return false;
+                }
+                const files = FileHandler.getAllFilesInFolder(path, false);
+                return files.length === 0;
+            } catch (error) {
+                return false;
+            }
+        };
 
         // while (isDirEmpty(folderPath)) {
         //     FileHandler.deleteFolder(folderPath);
