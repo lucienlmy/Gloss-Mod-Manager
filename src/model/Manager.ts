@@ -99,7 +99,6 @@ export class Manager {
 
     // 检查插件是否已经安装
     public static checkInstalled(name: string, webId: number) {
-        // 已经屏蔽了自动下载和安装的代码，但保留了判断逻辑
         // const manager = useManager()
         // let modId = manager.isAddedWebId(webId)
         // if (modId) {
@@ -209,12 +208,19 @@ export class Manager {
             folder.forEach(item => {
                 let target = join(gameStorage, basename(item))
                 if (isInstall) {
-                    if (isLink) FileHandler.createLink(item, target, true)
-                    else FileHandler.copyFolder(item, target)
+                    if (isLink) FileHandler.createLink(item, target, true) 
+                    else {
+                        FileHandler.copyFolder(item, target);
+                        // 非链接才需要处理空目录
+                        this.deleteEmptyFolders(dirname(target));
+                    }
                 } else {
                     if (isLink) FileHandler.removeLink(target, true)
-                    else FileHandler.deleteFolder(target)
-                    this.deleteEmptyFolders(dirname(target));
+                    else {
+                        FileHandler.deleteFolder(target);
+                        // 非链接才需要处理空目录  
+                        this.deleteEmptyFolders(dirname(target));
+                    }
                 }
             })
 
@@ -321,7 +327,8 @@ export class Manager {
                     FileHandler.createLink(item, target, true)
                 } else {
                     FileHandler.removeLink(target, true)
-                    this.deleteEmptyFolders(dirname(target));
+                    // 注释掉:软链接不需要清理空目录
+                    // this.deleteEmptyFolders(dirname(target));
                 }
             })
 
@@ -371,45 +378,41 @@ export class Manager {
 
     // 删除空文件夹
     private static deleteEmptyFolders(folderPath: string) {
-        // if (!existsSync(folderPath)) return;
+        if (!existsSync(folderPath)) return;
 
-        // 如果是目录链接，不进行删除
-        try {
-            const stat = fs.lstatSync(folderPath);
-            if (stat.isSymbolicLink()) {
-                return;
-            }
-        } catch (error) {
-            return;
-        }
-
-        // 如果是目录链接，不进行删除
-        try {
-            const stat = fs.lstatSync(folderPath);
-            if (stat.isSymbolicLink()) {
-                return;
-            }
-        } catch (error) {
-            return;
-        }
-
-        const isDirEmpty = (path: string) => {
+        // 检查目录是否为链接
+        const isSymlink = (path: string) => {
             try {
-                const stat = fs.lstatSync(path);
-                // 如果是目录链接，认为不是空目录
-                if (stat.isSymbolicLink()) {
-                    return false;
-                }
-                const files = FileHandler.getAllFilesInFolder(path, false);
-                return files.length === 0;
-            } catch (error) {
+                return statSync(path).isSymbolicLink();
+            } catch {
                 return false;
             }
         };
 
-        // while (isDirEmpty(folderPath)) {
-        //     FileHandler.deleteFolder(folderPath);
-        //     folderPath = dirname(folderPath);
-        // }
+        // 如果是链接目录,只删除链接本身
+        if (isSymlink(folderPath)) {
+            FileHandler.deleteFolder(folderPath);
+            return;
+        }
+
+        // 如果是普通目录,检查是否为空
+        const isDirEmpty = (path: string) => {
+            try {
+                const files = FileHandler.getAllFilesInFolder(path, false);
+                return files.length === 0;
+            } catch {
+                return false;
+            }
+        };
+
+        // 递归删除空目录
+        if (isDirEmpty(folderPath)) {
+            FileHandler.deleteFolder(folderPath);
+            // 检查父目录是否为空,如果为空则继续删除
+            const parentDir = dirname(folderPath);
+            if (parentDir && parentDir !== folderPath) {
+                this.deleteEmptyFolders(parentDir);
+            }
+        }
     }
 }
