@@ -389,26 +389,41 @@ export class Manager {
             }
         };
 
-        // 如果是链接目录,只删除链接本身
+        // 如果是链接目录,只删除链接本身  
         if (isSymlink(folderPath)) {
             FileHandler.deleteFolder(folderPath);
             return;
         }
 
-        // 如果是普通目录,检查是否为空
-        const isDirEmpty = (path: string) => {
+        // 递归检查目录是否为空
+        const isDirEmpty = (path: string): boolean => {
             try {
-                const files = FileHandler.getAllFilesInFolder(path, false);
-                return files.length === 0;
+                const items = FileHandler.getAllFilesInFolder(path, false, true);
+                // 如果没有任何文件和文件夹，则为空
+                if (items.length === 0) return true;
+
+                // 如果只包含目录，则递归检查每个子目录
+                for (const item of items) {
+                    const fullPath = join(path, item);
+                    // 如果是文件，说明目录非空
+                    if (!isSymlink(fullPath) && statSync(fullPath).isFile()) {
+                        return false;
+                    }
+                    // 如果是目录且不为空，说明当前目录不为空
+                    if (!isSymlink(fullPath) && statSync(fullPath).isDirectory() && !isDirEmpty(fullPath)) {
+                        return false;
+                    }
+                }
+                return true;
             } catch {
                 return false;
             }
         };
 
-        // 递归删除空目录
+        // 如果当前目录为空则删除
         if (isDirEmpty(folderPath)) {
             FileHandler.deleteFolder(folderPath);
-            // 检查父目录是否为空,如果为空则继续删除
+            // 检查父目录是否为空,如果为空则继续删除 
             const parentDir = dirname(folderPath);
             if (parentDir && parentDir !== folderPath) {
                 this.deleteEmptyFolders(parentDir);
