@@ -788,7 +788,16 @@ export const supportedGames: ISupportedGames = {
     steamAppID: 271590,
     installdir: join("Grand Theft Auto V"),
     gameName: "Grand Theft Auto V",
-    gameExe: "GTA5.exe",
+    gameExe: [
+        {
+            rootPath: '.',
+            name: '"GTA5.exe"'
+        },
+        {
+            rootPath: '.',
+            name: 'GTA5_Enhanced.exe'
+        }
+    ],
     startExe: [
         {
             name: "Steam 启动",

@@ -49,11 +49,10 @@ export const useExplore = defineStore('Explore', {
                 show_adult: user.user?.user_p_show_adult == 1 ? user.user?.user_p_show_adult : null,
                 show_charge: user.user?.user_p_show_charge == 1 ? user.user?.user_p_show_adult : null,
             })
-
+            this.loading = false
             this.mods = data.data.mod
             this.count = data.data.count
             // document.documentElement.scrollTop = 0
-            this.loading = false
         },
         getGameType() {
             const settings = useSettings()

@@ -39,7 +39,7 @@ export const useDownload = defineStore('Download', {
          * 通过ID添加下载任务
          * @param id 
          */
-        async addDownloadById(mod: IModInfo | IDownloadTask | number) {
+        async addDownloadById(mod: IModInfo | IDownloadTask | number, fid?: string | null) {
             let id: number
             if (typeof mod == 'number') {
                 id = mod
@@ -47,18 +47,35 @@ export const useDownload = defineStore('Download', {
                 id = mod.webId as number
             }
 
-            let data = await ipcRenderer.invoke("get-mod-data", { id })
+            let data: IMod = await ipcRenderer.invoke("get-mod-data", { id })
             // 将 link.value 里面的 http://mod.3dmgame.com 换成 https://mod.3dmgame.com
-            console.log(id);
+            console.log(data);
 
-            data.mods_resource_url = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
-            let link = data.mods_resource_url
+            // data = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
+            let resource = data.mods_resource.filter(item => {
+                item.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
+                return item.mods_resource_url.includes("https://mod.3dmgame.com")
+            })
 
-            if (!link.includes("https://mod.3dmgame.com")) {
+            if (fid) {
+                resource = data.mods_resource.filter(item => item.id == parseInt(fid))
+            }
+
+
+            if (resource.length == 0) {
                 window.open(`https://mod.3dmgame.com/mod/${id}`)
                 return
             }
-            let fileExt = extname(data.mods_resource_url)
+
+            // if (!link.includes("https://mod.3dmgame.com")) {
+            //     window.open(`https://mod.3dmgame.com/mod/${id}`)
+            //     return
+            // }
+
+            let link = resource[0].mods_resource_url
+
+
+            let fileExt = extname(link)
             let fileName = data.id + fileExt
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
@@ -69,7 +86,7 @@ export const useDownload = defineStore('Download', {
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
-                link: data.mods_resource_url,
+                link: link,
                 modAuthor: data.mods_author,
                 status: "waiting",
                 fileName: fileName,
@@ -103,11 +120,13 @@ export const useDownload = defineStore('Download', {
          */
         async addDownloadByWeb(url: string) {
             if (!url.startsWith("gmm://installmod")) return
-            // let url = gmm://installmod/172999?game=185&name=只狼：影逝二度
+            // let url = gmm://installmod/172999?fid=304507
             const params = new URLSearchParams(url.replace("gmm://installmod/", ""));
             const id = params.get("id");
+            const fid = params.get("fid");
+            console.log(id, fid);
 
-            this.addDownloadById(Number(id))
+            this.addDownloadById(Number(id), fid)
         },
 
         async addDownloadByThunderstore(mod: IThunderstoreMod, key?: string) {

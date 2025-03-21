@@ -9,7 +9,6 @@ declare global {
 
     interface IMod {
         id: number
-        nexus_id?: string
         mods_author: string
         mods_content: string
         mods_createTime: string
@@ -28,10 +27,12 @@ declare global {
         mods_original_url?: string
         mods_publish: number
         mods_state: number
-        mods_type_id?: number
-        mods_type_name?: string
+        mods_state_dec?: string
+        mods_type_id: number
+        mods_type_name: string
         mods_showAD: number
         mods_license?: string
+        game_inbbs?: string
 
         mods_SilverSnakeCoin_cnt: number
         mods_click_cnt: number
@@ -46,21 +47,41 @@ declare global {
         user_fan: number
 
         game_cover_imgUrl?: string
-        game_name?: string
+        game_name: string
         game_id?: number
         game_imgUrl?: string
-        game_path?: string
+        game_path: string
+        gmm_gmm?: boolean
+        support_gmm?: boolean
 
-        mods_resource_name: string
-        mods_resource_desc?: string
-        mods_resource_url: string
-        mods_resource_createTime: string
-        mods_resource_size: string
+        mods_resource: IResource[]
+
+
+        // mods_resource_name: string
+        // mods_resource_desc?: string
+        // mods_resource_url: string
+        // mods_resource_createTime: string
+        // mods_resource_size: string
 
         mods_charge_content?: number
         mods_adult_content?: number
         mods_API?: number
     }
+
+    interface IResource {
+        id?: number
+        mods_id?: number
+        mods_resource_name: string
+        mods_resource_desc?: string
+        mods_resource_url: string
+        mods_resource_size: string
+        mods_resource_sort: number
+        mods_resource_latest_version: boolean
+        mods_resource_version: string
+        mods_resource_createTime?: string
+        mods_resource_formart?: string
+    }
+
 
     interface IModData {
         webId?: number | string
