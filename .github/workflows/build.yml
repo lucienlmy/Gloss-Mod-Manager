@@ -1,0 +1,71 @@
+﻿name: Build and Release
+
+on:
+  push:
+    branches:
+      - '**'        # 匹配所有分支
+    tags-ignore:    # 忽略所有标签
+      - '**'
+    paths-ignore:   # 忽略这些文件的更改
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+
+jobs:
+  check_branch:
+    runs-on: windows-latest
+    outputs:
+      should_build: ${{ steps.check.outputs.should_build }}
+    steps:
+      - id: check
+        run: |
+          # 定义需要忽略的分支
+          $IGNORE_BRANCHES = @('test/*', 'dev/*', 'docs/*')
+          $CURRENT_BRANCH = "${{ github.ref_name }}"
+          
+          # 检查当前分支是否在忽略列表中
+          $should_build = $true
+          foreach ($pattern in $IGNORE_BRANCHES) {
+            if ($CURRENT_BRANCH -like $pattern) {
+              $should_build = $false
+              break
+            }
+          }
+          
+          echo "should_build=$should_build" >> $env:GITHUB_OUTPUT
+
+  build:
+    needs: check_branch
+    if: needs.check_branch.outputs.should_build == 'true'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+          
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Build project
+        run: |
+          npm run build
+          
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.exe
+            dist/*.zip
