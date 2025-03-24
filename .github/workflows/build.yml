@@ -1,4 +1,4 @@
-﻿name: Build and Release
+name: Build and Release
 
 on:
   push:
@@ -47,25 +47,47 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.x'
-          
-      - name: Install dependencies
+          node-version: '18.x'
+
+      - name: Get version from package.json
+        id: package_version
         run: |
-          npm install
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Debug Environment Variables
+        run: env
 
       - name: Build project
-        run: |
-          npm run build
-          
+        run: npm run build
+
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          name: Release ${{ github.ref_name }}
+          name: v${{ steps.package_version.outputs.version }}
           draft: false
           prerelease: false
           files: |
             dist/*.exe
             dist/*.zip
+        continue-on-error: true
+
+      - name: Upload Setup Exe
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gloss-Mod-Manager-Setup-${{ steps.package_version.outputs.version }}
+          path: release/${{ steps.package_version.outputs.version }}/Gloss Mod Manager_${{ steps.package_version.outputs.version }}.exe
+
+      - name: Upload Unpacked Files
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gloss-Mod-Manager-Unpacked-${{ steps.package_version.outputs.version }}
+          path: release/${{ steps.package_version.outputs.version }}/win-unpacked
