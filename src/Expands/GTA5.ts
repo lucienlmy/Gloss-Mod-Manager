@@ -791,7 +791,7 @@ export const supportedGames: ISupportedGames = {
     gameExe: [
         {
             rootPath: '.',
-            name: '"GTA5.exe"'
+            name: 'GTA5.exe'
         },
         {
             rootPath: '.',
