@@ -68,9 +68,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $exePath = Get-ChildItem ./dist -Filter "*.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
-          gh release create "v${{ steps.package_version.outputs.version }}" "$exePath" `
-            --title "v${{ steps.package_version.outputs.version }}" `
+          $setupExe = Get-ChildItem ./release/${{ steps.package_version.outputs.version }} -Filter "Gloss Mod Manager Setup ${{ steps.package_version.outputs.version }}.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          gh release create "v${{ steps.package_version.outputs.version }}" "$setupExe" `
+            --title "Gloss Mod Manager v${{ steps.package_version.outputs.version }}" `
             --generate-notes
 
       - name: Upload Setup Exe
