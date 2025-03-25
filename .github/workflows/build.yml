@@ -65,18 +65,13 @@ jobs:
         run: npm run build
 
       - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          name: v${{ steps.package_version.outputs.version }}
-          draft: false
-          prerelease: false
-          files: |
-            dist/*.exe
-            dist/*.zip
-        continue-on-error: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exePath = Get-ChildItem ./dist -Filter "*.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+          gh release create "v${{ steps.package_version.outputs.version }}" "$exePath" `
+            --title "v${{ steps.package_version.outputs.version }}" `
+            --generate-notes
 
       - name: Upload Setup Exe
         if: failure()
