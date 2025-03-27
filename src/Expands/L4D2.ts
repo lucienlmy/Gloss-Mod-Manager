@@ -10,7 +10,7 @@ import { extname, basename, join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 12,
     steamAppID: 550,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "left4dead2",
         game_id: 195
     },

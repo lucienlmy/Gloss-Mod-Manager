@@ -7,7 +7,7 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 258,
     steamAppID: 1547000,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: 'grandtheftautothetrilogy',
         game_id: 4142
     },

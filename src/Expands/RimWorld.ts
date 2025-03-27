@@ -35,7 +35,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 19,
     steamAppID: 294100,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: 'rimworld',
         game_id: 424
     },

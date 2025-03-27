@@ -3,7 +3,7 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 325,
     steamAppID: 1627720,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "liesofp",
         game_id: 5441
     },

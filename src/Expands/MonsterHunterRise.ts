@@ -103,7 +103,7 @@ export const supportedGames: ISupportedGames = {
 
     GlossGameId: 270,
     steamAppID: 1446780,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "monsterhunterrise",
         game_id: 4095
     },

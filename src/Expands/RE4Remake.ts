@@ -8,7 +8,7 @@ import { REEngine } from '@/model/REEngine';
 export const supportedGames: ISupportedGames = {
     GlossGameId: 303,
     steamAppID: 2050650,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "residentevil42023",
         game_id: 5195
     },

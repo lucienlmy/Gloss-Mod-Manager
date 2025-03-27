@@ -7,7 +7,7 @@ import { join } from 'node:path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 302,
     steamAppID: 990080,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "hogwartslegacy",
         game_id: 5113
     },

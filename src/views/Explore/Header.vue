@@ -9,7 +9,7 @@ let uploadMod = computed(() => {
     if (settings.settings.exploreType == "GlossMod") {
         return `https://mod.3dmgame.com/Workshop/PublishMod?gameId=${settings.settings.managerGame?.GlossGameId}`
     } else if (settings.settings.exploreType == "NexusMods") {
-        return `https://www.nexusmods.com/${settings.settings.managerGame?.NexusMods?.game_domain_name}/mods/add`
+        return `https://www.nexusmods.com/${settings.settings.managerGame?.nexusMods?.game_domain_name}/mods/add`
     } else if (settings.settings.exploreType == "Thunderstore") {
         return `https://thunderstore.io/c/${settings.settings.managerGame?.Thunderstore?.community_identifier}/create/`
     } else if (settings.settings.exploreType == "ModIo") {
@@ -43,6 +43,8 @@ let uploadMod = computed(() => {
                             value="CurseForge">{{ $t('CurseForge') }}</v-chip>
                         <v-chip label v-if="settings.settings.managerGame?.gamebanana" variant="text"
                             value="GameBanana">{{ $t('GameBanana') }}</v-chip>
+                        <v-chip label v-if="settings.settings.managerGame?.nexusMods" variant="text"
+                            value="NexusMods">{{ $t('NexusMods') }}</v-chip>
                     </v-chip-group>
                 </div>
             </v-col>

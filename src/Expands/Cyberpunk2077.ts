@@ -59,7 +59,7 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 195,
     steamAppID: 1091500,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "cyberpunk2077",
         game_id: 3333
     },

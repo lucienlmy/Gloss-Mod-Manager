@@ -1,29 +1,15 @@
 <script lang='ts' setup>
+import NexusModsModList from './ModList.vue'
+import NexusModsFilter from './Filter.vue'
 
-
-
-import ModList from '@/views/Explore/NexusMods/ModList.vue'
-import Filter from '@/views/Explore/NexusMods/Filter.vue'
-import { watch } from "vue";
 const nexusMods = useNexusMods()
-const settings = useSettings()
-const manager = useManager()
 
 if (nexusMods.mods.length == 0) {
-    nexusMods.GetModList()
+    nexusMods.getModList()
 }
 
-watch([
-    () => nexusMods.sort_by,
-    () => nexusMods.time,
-    () => settings.settings.managerGame?.gameName,
-], () => {
-    nexusMods.page = 1
-    nexusMods.GetModList()
-})
-
 watch(() => nexusMods.page, () => {
-    nexusMods.GetModList()
+    nexusMods.getModList()
 })
 
 </script>
@@ -34,19 +20,14 @@ watch(() => nexusMods.page, () => {
             @keydown.enter="nexusMods.search" append-inner-icon="mdi-magnify" @click:append-inner="nexusMods.search">
         </v-text-field>
     </Search>
-    <Filter></Filter>
-    <v-row v-if="!settings.settings.managerGame" class="empty">
-        <div @click="manager.selectGameDialog = true" class="empty-hint">
-            {{ $t('You have not selected a game yet. Please select a game first') }} <v-icon>mdi-plus</v-icon>
-        </div>
-    </v-row>
-    <v-card class="mod-wrap" v-else-if="nexusMods.mods.length > 0">
+    <v-card :loading="nexusMods.loading">
         <v-card-text>
             <v-row>
-                <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in nexusMods.mods" :key="item.id">
-                    <ModList :mod="item"></ModList>
+                <NexusModsFilter></NexusModsFilter>
+                <v-col cols="12" sm="6" md="3" xl="2" class="mod-list" v-for="item in nexusMods.mods" :key="item.modId">
+                    <NexusModsModList :item="item" />
                 </v-col>
-                <v-col cols="12" class="turn-page">
+                <v-col cols="12" v-if="nexusMods.mods.length > 0">
                     <v-pagination v-model="nexusMods.page" :length="nexusMods.pageLength"></v-pagination>
                 </v-col>
             </v-row>

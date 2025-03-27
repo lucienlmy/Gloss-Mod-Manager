@@ -7,7 +7,7 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 105,
     steamAppID: 264710,
-    NexusMods: {
+    nexusMods: {
         game_id: 1155,
         game_domain_name: "subnautica",
     },

@@ -35,11 +35,11 @@ import NexusMods from '@/components/home/logo/NexusMods.vue'
                         <v-img src="imgs/Gamebanana.png" alt="Gamebanana" class="gloss-logo"></v-img>
                     </a>
                 </v-col>
-                <!-- <v-col cols="4">
+                <v-col cols="4">
                     <a href="https://www.nexusmods.com/">
                         <NexusMods height="84px" width="100%"></NexusMods>
                     </a>
-                </v-col> -->
+                </v-col>
             </v-row>
         </v-card-text>
     </v-card>

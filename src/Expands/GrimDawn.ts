@@ -39,7 +39,7 @@ function handleMods(mod: IModInfo, installPath: string, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 80,
     steamAppID: 219990,
-    NexusMods: {
+    nexusMods: {
         game_id: 1190,
         game_domain_name: "grimdawn",
     },

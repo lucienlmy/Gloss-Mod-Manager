@@ -9,7 +9,7 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 183,
     steamAppID: 601150,
-    NexusMods: {
+    nexusMods: {
         game_id: 2751,
         game_domain_name: "devilmaycry5",
     },

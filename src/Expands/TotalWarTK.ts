@@ -22,7 +22,7 @@ function handlePack(mod: IModInfo, installPath: string, install: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 193,
     steamAppID: 779340,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "totalwarthreekingdoms",
         game_id: 2847
     },

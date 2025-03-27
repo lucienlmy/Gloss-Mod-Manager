@@ -282,7 +282,9 @@ const Settings = {
     "Change in Game run": "游戏运行时修改",
     "Default Page": "默认页面",
     "Show Plugins List": "显示前置列表",
-    "Show required plugins list when connected to network": "连接网络时显示必需的前置插件列表"
+    "Show required plugins list when connected to network": "连接网络时显示必需的前置插件列表",
+    "Download Proxy": "下载代理",
+    "Restore Aria2": "重启 Aria2",
 }
 
 const Backup = {

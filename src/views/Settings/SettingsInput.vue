@@ -46,6 +46,10 @@ watch(() => settings.settings.autoLaunch, () => {
     ipcRenderer.invoke("set-auto-launch", settings.settings.autoLaunch)
 })
 
+watch(() => settings.settings.downloadProxy, () => {
+    APIAria2.restart()
+})
+
 </script>
 <template>
     <v-row>
@@ -109,6 +113,10 @@ watch(() => settings.settings.autoLaunch, () => {
         <v-col cols="12" sm="6" md="3">
             <v-switch v-model="settings.settings.showPlugins" :label="$t('Show Plugins List')" color="#039BE5"
                 persistent-hint></v-switch>
+        </v-col>
+        <v-col cols="12" sm="6" md="3">
+            <v-text-field :label="$t('Download Proxy')" v-model="settings.settings.downloadProxy" persistent-hint>
+            </v-text-field>
         </v-col>
     </v-row>
 </template>

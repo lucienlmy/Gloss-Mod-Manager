@@ -69,7 +69,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 185,
     steamAppID: 814380,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "sekiro",
         game_id: 2763
     },

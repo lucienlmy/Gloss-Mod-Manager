@@ -146,11 +146,11 @@ async function createWindow() {
     if (process.defaultApp) {
         if (process.argv.length >= 1) {
             app.setAsDefaultProtocolClient('gmm', process.execPath, [resolve(process.argv[1])])
-            // app.setAsDefaultProtocolClient('nxm', process.execPath, [resolve(process.argv[1])])
+            app.setAsDefaultProtocolClient('nxm', process.execPath, [resolve(process.argv[1])])
         }
     } else {
         app.setAsDefaultProtocolClient('gmm')
-        // app.setAsDefaultProtocolClient('nxm')
+        app.setAsDefaultProtocolClient('nxm')
     }
 
 

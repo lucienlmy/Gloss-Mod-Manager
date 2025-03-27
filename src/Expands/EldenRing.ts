@@ -57,7 +57,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 275,
     steamAppID: 1245620,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "eldenring",
         game_id: 4333
     },

@@ -53,7 +53,7 @@ async function setPlugins(mod: IModInfo, install: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 2,
     steamAppID: 489830,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "skyrimspecialedition",
         game_id: 1704
     },
