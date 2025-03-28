@@ -68,7 +68,7 @@ async function parsing() {
         form.value.name = data.mods_title
         form.value.fileName = data.id + '.zip'
         form.value.version = data.mods_version || '1.0.0'
-        form.value.link = data.mods_resource_url
+        form.value.link = data.mods_resource[0].mods_resource_url
         form.value.modAuthor = data.mods_author
         form.value.webId = data.id
 

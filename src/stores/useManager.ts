@@ -384,7 +384,7 @@ export const useManager = defineStore('Manager', {
         async checkAllModUpdate() {
             let modId = [] as number[]
             this.managerModList.forEach(item => {
-                if (item.webId) modId.push(item.webId as number)
+                if (item.webId && item.from == "GlossMod") modId.push(item.webId as number)
             })
 
             if (modId.length > 0) {

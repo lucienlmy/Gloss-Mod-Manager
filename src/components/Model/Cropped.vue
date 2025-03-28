@@ -21,7 +21,7 @@ const container = ref()
 const preview = ref()
 
 let canvas = ref()
-useElementSize(canvas)
+useElementSize(canvas.value)
 
 
 let options = ref<Cropper.Options<HTMLImageElement>>({

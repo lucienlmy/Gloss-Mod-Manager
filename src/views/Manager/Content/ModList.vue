@@ -13,10 +13,6 @@ const settings = useSettings()
 
 let loading = ref(false)
 
-if (!props.mod.modType) {
-    if (typeof (settings.settings.managerGame?.checkModType) == "function")
-        props.mod.modType = settings.settings.managerGame?.checkModType(props.mod)
-}
 
 let type = computed<IType | undefined>(() => {
     return settings.settings.managerGame?.modType.find((item) => {
@@ -136,6 +132,16 @@ function list_drop(e: any) {
 }
 //#endregion
 
+
+
+async function checkModType() {
+    if (!props.mod.modType) {
+        if (typeof (settings.settings.managerGame?.checkModType) == "function")
+            props.mod.modType = await settings.settings.managerGame?.checkModType(props.mod)
+    }
+}
+
+checkModType()
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
@@ -182,51 +188,6 @@ function list_drop(e: any) {
                 </el-col>
             </el-row>
         </el-col>
-        <!-- <v-col cols="12" v-else>
-            <v-row class="mod-list">
-                <v-col cols="6" class="mod-name" @dragover="list_dragover" @drop="list_drop">
-                    <v-checkbox v-if="manager.selectionMode" v-model="manager.selectionList" :value="mod">
-                        <template v-slot:label>
-                            <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                                {{ item.name }}</v-chip>
-                            {{ mod.modName }}
-                        </template>
-                    </v-checkbox>
-                    <template v-else>
-                        <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
-                            <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
-                                @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
-                                @dragend="dragend" @dragover="dragover"></v-icon>
-                            <v-chip v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                                {{ item.name }}</v-chip>
-                            {{ mod.modName }}
-                        </p>
-                        <v-text-field v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
-                            v-model="mod.modName" variant="solo-filled" :hide-details="true"></v-text-field>
-                    </template>
-                </v-col>
-                <v-col cols="1" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</v-col>
-                <v-col cols="2">
-                    <v-select v-model="modType" variant="solo" :items="settings.settings.managerGame?.modType"
-                        :hide-details="true" item-title="name" item-value="id" :disabled="mod.isInstalled">
-                        <template v-slot:item="{ props, item }">
-                            <v-list-item v-bind="props" :title="$t(item.title)"></v-list-item>
-                        </template>
-                        <template v-slot:selection="{ item, index }">
-                            {{ $t(item.title) }}
-                        </template>
-                    </v-select>
-                </v-col>
-                <v-col cols="2">
-                    <v-switch v-model="mod.isInstalled" :label="mod.isInstalled ? $t('Installed') : $t('Uninstalled')"
-                        :loading="loading" :disabled="loading || manager.canChange" :hide-details="true"
-                        color="#0288D1"></v-switch>
-                </v-col>
-                <v-col cols="1" class="advanced">
-                    <ContentModMenu :mod="mod"></ContentModMenu>
-                </v-col>
-            </v-row>
-        </v-col> -->
     </div>
 </template>
 <script lang='ts'>
