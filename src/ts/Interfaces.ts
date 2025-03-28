@@ -244,7 +244,7 @@ declare global {
     interface ISupportedGames extends IGameInfo {
         modType: IType[]
         from?: 'Local' | 'Internal'
-        checkModType: (((mod: IModInfo) => number) | ICheckModType[])
+        checkModType: (((mod: IModInfo) => Promise<number> | number) | ICheckModType[])
         sortMod?: (list: IModInfo[]) => boolean
     }
 

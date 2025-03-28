@@ -88,6 +88,8 @@ const DownloadTasks = {
     "complete": "完成",
     "removed": "已删除",
     "Customize": "自定义",
+    "File Size": "文件大小",
+    "Lest Comment": "最后评论",
 }
 const ExploreDownloadBtn = {
     "Please manage the game first.": "请先选择游戏",

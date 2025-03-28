@@ -395,4 +395,10 @@ ipcMain.handle('get-system-language', async (event, arg) => {
     return locale
 })
 
+// 获取程序目录
+ipcMain.handle('get-app-path', async (event, arg) => {
+    let path = isDev ? process.env.APP_ROOT : app.getPath('exe')
+    return path
+})
+
 //#endregion

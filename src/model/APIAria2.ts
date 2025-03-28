@@ -13,10 +13,24 @@ export class APIAria2 {
     // 启动 aria2c
     public static async init() {
         // 判断 aria2 是否启动存在
-        if (await FileHandler.existsSync('aria2c.exe')) {
-            console.log('aria2c 已启动');
-            return;
+        try {
+            // 尝试连接而不是检查文件
+            const response = await APIAria2.send({
+                "jsonrpc": "2.0",
+                "method": "aria2.getVersion",
+                "id": APIAria2.uuid(),
+                params: []
+            });
+
+            if (response) {
+                console.log('aria2c 已启动');
+                return;
+            }
+        } catch (error) {
+            console.log('aria2c 未启动，准备启动');
+            // 继续执行启动流程
         }
+
         const settings = useSettings()
 
         let proxy: any[] = []
@@ -26,7 +40,9 @@ export class APIAria2 {
         }
 
         // 启动 aria2
-        let aria2Path = path.join(FileHandler.getResourcesPath(), 'aria2')
+        let aria2Path = path.join(await FileHandler.getResourcesPath(), 'aria2')
+        console.log("aria2Path", aria2Path);
+
         let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf'), ...proxy], {
             windowsHide: false,
             stdio: 'pipe',
@@ -186,16 +202,16 @@ export class APIAria2 {
         }).catch((err) => {
             this.retrytimes++
 
-            // ElMessage.error('Aria2连接失败! 下载功能可能受影响');
+            ElMessage.error('Aria2连接失败! 下载功能可能受影响');
 
             if (this.retrytimes > 3) {
                 console.log('Aria2连接失败! 下载功能可能受影响!');
                 return
             }
-            // 重试
-            this.init().then(() => {
-                this.test()
-            })
+            // // 重试
+            // this.restart().then(() => {
+            //     this.test()
+            // })
         })
     }
 

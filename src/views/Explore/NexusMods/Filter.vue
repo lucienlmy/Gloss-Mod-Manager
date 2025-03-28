@@ -8,11 +8,11 @@ watch([() => nexusMods.facets.categoryName, () => nexusMods.facets.languageName,
 
 const sortList = [
     { label: 'Update time', value: { updatedAt: { direction: "DESC" } } },
-    { label: 'Date Published', value: { createdAt: { direction: "DESC" } } },
+    { label: 'Release time', value: { createdAt: { direction: "DESC" } } },
     { label: 'Endorsements', value: { endorsements: { direction: "DESC" } } },
     { label: 'Downloads', value: { downloads: { direction: "DESC" } } },
     { label: 'Unique Downloads', value: { uniqueDownloads: { direction: "DESC" } } },
-    { label: 'Mod Name', value: { name: { direction: "DESC" } } },
+    { label: 'Mod name', value: { name: { direction: "DESC" } } },
     { label: 'File Size', value: { size: { direction: "DESC" } } },
     { label: 'Lest Comment', value: { lastComment: { direction: "DESC" } } },
     // { label: 'Random', value: { random: {} } },

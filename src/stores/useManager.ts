@@ -281,7 +281,7 @@ export const useManager = defineStore('Manager', {
                 mod.modType = task.modType
             } else {
                 if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                    mod.modType = settings.settings.managerGame?.checkModType(mod)
+                    mod.modType = await settings.settings.managerGame?.checkModType(mod)
                 }
             }
 
@@ -303,7 +303,7 @@ export const useManager = defineStore('Manager', {
                 fileName: path.basename(file),
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                mod.modType = settings.settings.managerGame?.checkModType(mod)
+                mod.modType = await settings.settings.managerGame?.checkModType(mod)
             }
 
             this.managerModList.push(mod)

@@ -10,6 +10,9 @@ import { createHash } from 'crypto';
 import { ElMessage } from 'element-plus';
 import { exec, execSync } from 'child_process';
 import { info, error } from 'electron-log/renderer';
+import { ipcRenderer } from 'electron';
+// import { app } from 'electron';
+
 
 export class FileHandler {
 
@@ -513,8 +516,14 @@ export class FileHandler {
     }
 
     // 获取程序目录下的 resources 目录
-    public static getResourcesPath() {
-        return path.join(process.cwd(), 'resources')
+    public static async getResourcesPath() {
+        let appPath = await ipcRenderer.invoke('get-app-path')
+        // console.log("appPath", appPath);
+        // C:\Users\xiaom\AppData\Local\Programs\Gloss Mod Manager\resources\app.asar
+        // 移除 resources\app.asar
+        appPath = appPath.replace(/resources\\app\.asar$/, '')
+
+        return path.join(appPath, 'resources')
     }
 
     /**
