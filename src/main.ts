@@ -17,6 +17,9 @@ app.use(vuetify)
 app.use(i18n)
 app.use(createPinia())
 
+window.router = router;
+
+
 // app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 app.mount('#app')
     .$nextTick(() => {

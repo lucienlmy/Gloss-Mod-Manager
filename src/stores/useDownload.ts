@@ -22,6 +22,7 @@ export const useDownload = defineStore('Download', {
             link: '',
         },
         autoInstall: true,
+        isInit: false,
     }),
     getters: {
         configPath(): string {
@@ -420,6 +421,7 @@ export const useDownload = defineStore('Download', {
         // 添加下载任务
         async addDownloadTask(task: IDownloadTask) {
 
+
             // 判断是否已经存在
             if (this.getTaskById(task.webId as string)) {
                 // 如果已存在则移除
@@ -437,6 +439,17 @@ export const useDownload = defineStore('Download', {
             console.log(task.gid);
 
             ElMessage.success(`${task.name} 已添加到下载列表`)
+
+            if (!this.isInit) {
+                // 跳转到 /download 页面
+                const router = window.router || (window as any).$router
+                console.log(router);
+
+                if (router) {
+                    router.push('/download')
+                }
+            }
+
         },
 
         //#endregion
@@ -502,5 +515,5 @@ export const useDownload = defineStore('Download', {
         },
 
         //#endregion
-    }
+    },
 })

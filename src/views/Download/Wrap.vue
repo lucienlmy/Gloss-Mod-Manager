@@ -16,6 +16,10 @@ let list = computed(() => {
     })
 })
 
+if (!download.isInit) {
+    download.isInit = true
+}
+
 </script>
 <template>
     <v-card>
