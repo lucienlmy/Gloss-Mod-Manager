@@ -175,7 +175,7 @@ export const supportedGames: ISupportedGames = {
         // 判断是否是CET
         // if (mod.webId == 197625) return 1
 
-        let folderList = ['archive', 'bin', 'engine', 'r6', 'mods']
+        let folderList = ['archive', 'bin', 'engine', 'r6', 'mods', 'red4ext']
 
         let cet = false
         let archive = false
