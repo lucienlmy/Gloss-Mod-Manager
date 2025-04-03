@@ -27,6 +27,10 @@ function ModImporter() {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 349,
     steamAppID: 1145350,
+    nexusMods: {
+        game_domain_name: "hades2",
+        game_id: 6354
+    },
     installdir: join("Hades II", "Ship"),
     gameName: "Hades2",
     Thunderstore: {

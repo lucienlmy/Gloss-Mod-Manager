@@ -9,6 +9,10 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 356,
     steamAppID: 2477340,
     mod_io: 5734,
+    nexusMods: {
+        game_domain_name: "expeditionsamudrunnergame",
+        game_id: 6257
+    },
     installdir: join("Expeditions A MudRunner Game", "Sources", "Bin"),
     gameName: "Expeditions A MudRunner Game",
     startExe: [

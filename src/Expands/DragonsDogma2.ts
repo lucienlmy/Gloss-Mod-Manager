@@ -9,6 +9,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 343,
     steamAppID: 2054970,
+    nexusMods: {
+        game_domain_name: "dragonsdogma2",
+        game_id: 6234
+    },
     installdir: "Dragons Dogma 2",
     gameName: "Dragons Dogma 2",
     gameExe: 'DD2.exe',

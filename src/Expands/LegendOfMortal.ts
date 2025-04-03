@@ -8,6 +8,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 357,
     steamAppID: 1859910,
+    nexusMods: {
+        game_domain_name: "legendofmortal",
+        game_id: 6702
+    },
     installdir: join("LegendOfMortal"),
     gameName: "Legend Of Mortal",
     gameExe: "Mortal.exe",

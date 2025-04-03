@@ -7,6 +7,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 387,
     steamAppID: 1601580,
+    nexusMods: {
+        game_domain_name: "frostpunk2",
+        game_id: 6349
+    },
     installdir: join("Frostpunk2"),
     gameName: "Frostpunk 2",
     gameExe: "Frostpunk2.exe",

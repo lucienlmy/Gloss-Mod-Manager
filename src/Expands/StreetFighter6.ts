@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 317,
     steamAppID: 1364780,
+    nexusMods: {
+        game_domain_name: "streetfighter6",
+        game_id: 5329
+    },
     installdir: "Street Fighter 6",
     gameName: "Street Fighter 6",
     gameExe: 'StreetFighter6.exe',

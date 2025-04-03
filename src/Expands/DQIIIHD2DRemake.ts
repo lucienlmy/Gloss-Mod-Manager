@@ -4,6 +4,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 410,
     steamAppID: 2701660,
+    nexusMods: {
+        game_domain_name: "dragonquest3remake",
+        game_id: 7044
+    },
     gameName: "DQIIIHD2DRemake",
     installdir: "DRAGON QUEST III HD-2D Remake",
     gameExe: 'DQIIIHD2DRemake.exe',

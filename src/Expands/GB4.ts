@@ -7,6 +7,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 388,
     steamAppID: 1672500,
+    nexusMods: {
+        game_domain_name: "gundambreaker4",
+        game_id: 6772
+    },
     installdir: join("GBBBB"),
     gameName: "GUNDAM BREAKER 4",
     gameExe: "GB4.exe",

@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 181,
     steamAppID: 816020,
+    nexusMods: {
+        game_domain_name: "jumpforce",
+        game_id: 2765
+    },
     installdir: join("JUMP FORCE"),
     gameName: "JUMP FORCE",
     gameExe: "JUMP_FORCE.exe",

@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     steamAppID: 289070,
     installdir: join("Sid Meier's Civilization VI", "Base", "Binaries", "Win64Steam"),
     gameName: "Sid Meier's Civilization VI",
+    nexusMods: {
+        game_domain_name: "civilisationvi",
+        game_id: 1694
+    },
     gameExe: [
         {
             name: "CivilizationVI.exe",

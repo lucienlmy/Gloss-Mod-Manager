@@ -9,6 +9,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 318,
     steamAppID: 1084160,
+    nexusMods: {
+        game_domain_name: "jaggedalliance3",
+        game_id: 5559
+    },
     installdir: join("Jagged Alliance 3"),
     gameName: "Jagged Alliance 3",
     gameExe: "JA3.exe",

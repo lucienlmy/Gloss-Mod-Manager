@@ -188,6 +188,10 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 240,
     steamAppID: 1086940,
     mod_io: 6715,
+    nexusMods: {
+        game_domain_name: 'baldursgate3',
+        game_id: 3474
+    },
     installdir: join("Baldurs Gate 3", "bin"),
     gameName: "Baldurs Gate 3",
     gameExe: [

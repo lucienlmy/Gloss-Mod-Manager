@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     steamAppID: 916440,
     installdir: join("Anno 1800", "Bin", "Win64"),
     gameName: "Anno 1800",
+    nexusMods: {
+        game_domain_name: "anno1800",
+        game_id: 2820
+    },
     gameExe: [
         {
             name: "Anno1800.exe",

@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 355,
     steamAppID: 2461850,
+    nexusMods: {
+        game_domain_name: "senuassagahellblade2",
+        game_id: 6438
+    },
     installdir: join("Senua's Saga Hellblade II"),
     gameName: "Senua's Saga Hellblade 2",
     gameExe: "Hellblade2.exe",

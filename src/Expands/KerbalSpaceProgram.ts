@@ -37,6 +37,10 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 62,
     steamAppID: 220200,
     curseforge: 4401,
+    nexusMods: {
+        game_domain_name: "kerbalspaceprogram",
+        game_id: 272
+    },
     installdir: join("Kerbal Space Program"),
     gameName: "Kerbal Space Program",
     startExe: [

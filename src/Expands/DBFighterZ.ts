@@ -4,6 +4,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 157,
     steamAppID: 678950,
+    nexusMods: {
+        game_domain_name: "dragonballfighterz",
+        game_id: 3948
+    },
     gameName: "DRAGON BALL FighterZ",
     installdir: "DRAGON BALL FighterZ",
     gameExe: 'DBFighterZ.exe',

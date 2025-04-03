@@ -8,6 +8,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 245,
     steamAppID: 1366540,
+    nexusMods: {
+        game_domain_name: "dysonsphereprogram",
+        game_id: 3641
+    },
     Thunderstore: {
         community_identifier: 'dyson-sphere-program'
     },

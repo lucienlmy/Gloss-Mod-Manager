@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'valheim'
     },
+    nexusMods: {
+        game_domain_name: "valheim",
+        game_id: 3667
+    },
     installdir: join("Valheim"),
     gameName: "Valheim",
     gameExe: "valheim.exe",

@@ -7,6 +7,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 328,
     steamAppID: 1876890,
+    nexusMods: {
+        game_domain_name: "wanderingsword",
+        game_id: 5732
+    },
     installdir: join("Wandering Sword"),
     gameName: "Wandering Sword",
     startExe: [

@@ -1,5 +1,5 @@
 /**
- * @description 剑士 支持
+ * @description 无双大蛇4 支持
  */
 
 import { basename, join, extname } from "node:path"
@@ -7,6 +7,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 168,
     steamAppID: 831560,
+    nexusMods: {
+        game_domain_name: "warriorsorochi4",
+        game_id: 2624
+    },
     installdir: join("WARRIORS OROCHI 4"),
     gameName: "Warriors Orochi 4",
     gameExe: "WO4.exe",

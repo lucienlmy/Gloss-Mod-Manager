@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'cult-of-the-lamb'
     },
+    nexusMods: {
+        game_domain_name: "cultofthelamb",
+        game_id: 4736
+    },
     installdir: join("Cult Of The Lamb"),
     gameName: "Cult Of The Lamb",
     gameExe: "Cult Of The Lamb.exe",

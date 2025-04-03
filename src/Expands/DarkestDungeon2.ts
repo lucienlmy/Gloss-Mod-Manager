@@ -8,6 +8,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 353,
     steamAppID: 1940340,
+    nexusMods: {
+        game_domain_name: "darkestdungeon2",
+        game_id: 4113
+    },
     installdir: join("Darkest Dungeon® II"),
     gameName: "Darkest Dungeon 2",
     gameExe: "Darkest Dungeon II.exe",

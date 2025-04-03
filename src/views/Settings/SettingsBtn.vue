@@ -1,5 +1,6 @@
 <script lang='ts' setup>
 
+import { APIAria2 } from "@/model/APIAria2";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { join } from "node:path"
@@ -56,9 +57,79 @@ function restoreAria2() {
     APIAria2.restart()
 }
 
+function loginNexus() {
+    let application_slug = "gloss"
+    const ws = new WebSocket("wss://sso.nexusmods.com")
+    ws.onopen = (event) => {
+        console.log(event);
+
+        let uuid = sessionStorage.getItem("uuid");
+        let token = sessionStorage.getItem("connection_token");
+
+        console.log(uuid, token);
+
+
+        if (uuid == null) {
+            uuid = APIAria2.uuid();
+            sessionStorage.setItem('uuid', uuid);
+        }
+
+        if (uuid !== null) {
+
+            var data = {
+                id: uuid,
+                token: token,
+                protocol: 2
+            };
+
+            // Send the SSO request
+            ws.send(JSON.stringify(data));
+
+            // Once the request is active, we can send the user to the site to authorise the SSO, passing an
+            // identifier for an application.
+            window.open("https://www.nexusmods.com/sso?id=" + uuid + "&application=" + application_slug);
+        }
+        else
+            console.error("uuid 错误~")
+    }
+
+    ws.onclose = function (event) {
+        console.log("连接关闭;")
+
+        // setTimeout(connect(), 5000);
+    }
+
+    ws.onmessage = function (event) {
+
+        const response = JSON.parse(event.data);
+
+        if (response && response.success) {
+            // 如果成功, 检查数据是否包含 connection_token 或 api_key
+            if (response.data.hasOwnProperty('connection_token')) {
+                // 存储连接令牌，以防我们需要重新连接
+                sessionStorage.setItem('connection_token', response.data.connection_token);
+            }
+            else if (response.data.hasOwnProperty('api_key')) {
+                // This is received when the user has approved the SSO request and the SSO is now returning with that user's API key
+                console.log("API Key Received: " + response.data.api_key);
+            }
+        }
+        else {
+            // The SSO  will return an error attribute that can be used for error reporting
+            console.error("Something went wrong! " + response.error)
+        }
+    }
+}
+
 </script>
 <template>
     <v-row>
+        <v-col cols="12">
+            <h3>账号</h3>
+        </v-col>
+        <v-col cols="12">
+            <v-chip label variant="text" @click="loginNexus">登录NexusMods</v-chip>
+        </v-col>
         <v-col cols="12">
             <h3>{{ $t('Features') }}</h3>
         </v-col>

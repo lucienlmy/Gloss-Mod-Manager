@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'lethal-company'
     },
+    nexusMods: {
+        game_domain_name: "lethalcompany",
+        game_id: 5848
+    },
     installdir: join("Lethal Company"),
     gameName: "Lethal Company",
     gameExe: "Lethal Company.exe",

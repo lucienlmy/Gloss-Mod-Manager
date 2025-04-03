@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'sons-of-the-forest'
     },
+    nexusMods: {
+        game_domain_name: "sonsoftheforest",
+        game_id: 5165
+    },
     installdir: join("Sons Of The Forest"),
     gameName: "Sons Of The Forest",
     gameExe: "SonsOfTheForest.exe",

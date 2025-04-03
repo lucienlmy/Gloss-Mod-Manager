@@ -9,6 +9,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 332,
     steamAppID: 1237970,
+    nexusMods: {
+        game_domain_name: "titanfall2",
+        game_id: 2532
+    },
     installdir: join("Titanfall2"),
     gameName: "Titanfall 2",
     gameExe: "Titanfall2.exe",

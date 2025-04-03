@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 335,
     steamAppID: 1778820,
+    nexusMods: {
+        game_domain_name: "tekken8",
+        game_id: 5622
+    },
     installdir: join("TEKKEN 8"),
     gameName: "Tekken 8",
     gameExe: "TEKKEN 8.exe",

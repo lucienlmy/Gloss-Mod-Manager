@@ -8,6 +8,10 @@ import { join, basename, extname } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 339,
     steamAppID: 756800,
+    nexusMods: {
+        game_domain_name: "contrabandpolice",
+        game_id: 5226
+    },
     installdir: join("Contraband Police"),
     gameName: "Contraband Police",
     gameExe: "ContrabandPolice.exe",

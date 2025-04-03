@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 368,
     steamAppID: 1832040,
+    nexusMods: {
+        game_domain_name: "flintlockthesiegeofdawn",
+        game_id: 6505
+    },
     installdir: join("Flintlock The Siege of Dawn"),
     gameName: "Flintlock The Siege of Dawn",
     startExe: [

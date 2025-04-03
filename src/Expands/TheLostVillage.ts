@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 347,
     steamAppID: 1963040,
+    nexusMods: {
+        game_domain_name: "thelostvillage",
+        game_id: 6362
+    },
     installdir: join("TheLostVillage"),
     gameName: "The Lost Village",
     startExe: [

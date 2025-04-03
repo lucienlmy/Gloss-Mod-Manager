@@ -10,6 +10,10 @@ import { join, dirname } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 376,
     steamAppID: 2358720,
+    nexusMods: {
+        game_domain_name: "blackmythwukong",
+        game_id: 6713
+    },
     installdir: join("BlackMythWukong"),
     gameName: "Black Myth Wukong",
     startExe: [
