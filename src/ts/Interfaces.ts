@@ -955,6 +955,18 @@ declare global {
         expires?: string
     }
 
+    interface INexusModsUser {
+        user_id: number;
+        key: string;
+        name: string;
+        "is_premium?": boolean;  // 由于包含特殊字符，需要用引号包裹
+        "is_supporter?": boolean;
+        email: string;
+        profile_url: string;
+        is_supporter: boolean;
+        is_premium: boolean;
+    }
+
     //#endregion
 
 

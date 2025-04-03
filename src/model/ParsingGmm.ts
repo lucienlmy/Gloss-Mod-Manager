@@ -51,7 +51,7 @@ export class ParsingGmm {
             const fileId = code.split("/")[6]
             const { key, expires, user_id } = this.parseUrlParams(code)
 
-            const mod = await nexusmods.GetModData(modId, gameDomainName)
+            const mod = await nexusmods.getModData(modId, gameDomainName)
             console.log(mod);
 
             download.addDownloadByNexusMods({

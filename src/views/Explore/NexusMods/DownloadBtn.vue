@@ -8,6 +8,7 @@ const props = defineProps<{
 const settings = useSettings()
 const download = useDownload()
 const nexusmods = useNexusMods()
+const user = useUser()
 const { t } = useI18n()
 const { formatSiez } = useMain()
 
@@ -49,6 +50,15 @@ const text = computed(() => {
 
 async function toDownload(event: Event) {
     event.preventDefault(); // 阻止 a 标签的默认跳转行为
+
+    if (!user.nexusModsUser.key) {
+        ElMessage.error("你需要先登录NexusMods账号 才能使用此功能下载")
+
+        user.loginNexusModsUser()
+
+        return
+    }
+
 
     filesList.value = await nexusmods.getFileList(props.item)
 

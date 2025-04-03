@@ -31,17 +31,17 @@ export const useNexusMods = defineStore('NexusMods', {
             this.page = 1
             this.getModList()
         },
-        async getKey() {
-            const config = await ipcRenderer.invoke("get-config")
-            return config.nexusmods.api_key
+        getKey() {
+            const user = useUser()
+            return user.nexusModsUser.key
         },
         async getheader() {
             const main = useMain()
             const version = await main.getVersion()
             return {
-                'apikey': await this.getKey(),
+                'apikey': this.getKey(),
                 'Accept': 'application/json',
-                'User-Agent': `Gloss Mod Manager/${version}`,
+                // 'User-Agent': `Gloss Mod Manager/${version}`,
             }
         },
         async getModList() {
@@ -75,6 +75,8 @@ export const useNexusMods = defineStore('NexusMods', {
             this.mods = []
             const { data } = await axios.post("https://api-router.nexusmods.com/graphql", {
                 query, variables
+            }, {
+                headers: await this.getheader()
             })
             this.loading = false
 
@@ -108,12 +110,20 @@ export const useNexusMods = defineStore('NexusMods', {
 
             return primary_files
         },
-        async GetModData(id: string, game_domain_name: string) {
+        async getModData(id: string, game_domain_name: string) {
             let url = `https://api.nexusmods.com/v1/games/${game_domain_name}/mods/${id}.json`
             const { data } = await axios.get(url, {
                 headers: await this.getheader()
             })
             return data as INexusMods
+        },
+
+        async getUserData() {
+            const url = `https://api.nexusmods.com/v1/users/validate.json`
+            const { data } = await axios.get(url, {
+                headers: await this.getheader()
+            })
+            return data as INexusModsUser
         }
     }
 })

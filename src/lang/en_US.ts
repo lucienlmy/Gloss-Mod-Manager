@@ -14,6 +14,7 @@ const LeftMenu = {
     "About": "About",
 }
 const User = {
+    "Logined": "Logined",
     "Login": "Login",
     "Logout": "Logout",
     "Register": "Register",

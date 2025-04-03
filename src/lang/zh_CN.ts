@@ -16,6 +16,7 @@ const LeftMenu = {
 }
 
 const User = {
+    "Logined": "已登录",
     "Login": "登录",
     "Logout": "登出",
     "Register": "注册",
