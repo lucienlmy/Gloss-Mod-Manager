@@ -13,7 +13,7 @@
 - 食用教程: https://gmm.aoe.top/
 - Mod前置: https://cloud.aoe.top/s/KrRfO
 - 问卷调查: https://wj.qq.com/s2/14010887/92e3/
-- 问题反馈: [QQ频道](https://pd.qq.com/s/hco46ol54) | [QQ群 948689016](https://qm.qq.com/q/3PzfmR1sBi) | [GitHub Issues](https://github.com/GlossMod/Gloss-Mod-Manager/issues) 
+- 问题反馈: [QQ频道](https://pd.qq.com/s/hco46ol54) | [QQ群 2169033132](https://qm.qq.com/q/ft6b4xx2PS) | [GitHub Issues](https://github.com/GlossMod/Gloss-Mod-Manager/issues) 
 
     <img src="https://mod.3dmgame.com/static/upload/mod/202410/MOD671f300fbe3b7.webp" width="200px" alt="频道">
 
@@ -29,7 +29,6 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 - 运行 `Gloss Mod Manager`.
 - 选择您游玩的游戏
 - 开始享受吧!
-
 
 
 ### 特性
