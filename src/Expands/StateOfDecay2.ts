@@ -7,7 +7,7 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 238,
     steamAppID: 495420,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "stateofdecay2",
         game_id: 2433
     },

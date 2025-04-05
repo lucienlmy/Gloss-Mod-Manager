@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'v-rising'
     },
+    nexusMods: {
+        game_domain_name: "vrising",
+        game_id: 4527
+    },
     installdir: join("VRising"),
     gameName: "VRising",
     gameExe: "VRising.exe",

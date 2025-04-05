@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 236,
     steamAppID: 1158310,
+    nexusMods: {
+        game_domain_name: "crusaderkings3",
+        game_id: 3486
+    },
     installdir: join("Crusader Kings III", 'binaries'),
     gameName: "Crusader Kings 3",
     gameExe: "ck3.exe",

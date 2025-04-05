@@ -2,33 +2,48 @@
 import { spawn } from 'child_process'
 import * as path from 'path'
 import axios from 'axios'
-import { ElMessage } from 'element-plus';
+
 export class APIAria2 {
-    // public aria2: any
-    // socket: WebSocket;
-    // listener: Subject<any>;
+    static retrytimes = 0
 
     constructor() {
-        // this.socket = new WebSocket('ws://localhost:6800/jsonrpc')
-
-        // this.listener = new Subject();
-
-        // this.socket.onmessage = (event: any) => {
-        //     this.listener.next(JSON.parse(event.data))
-        // }
 
     }
 
     // 启动 aria2c
     public static async init() {
         // 判断 aria2 是否启动存在
-        if (await FileHandler.existsSync('aria2c.exe')) {
-            console.log('aria2c 已启动');
-            return;
+        try {
+            // 尝试连接而不是检查文件
+            const response = await APIAria2.send({
+                "jsonrpc": "2.0",
+                "method": "aria2.getVersion",
+                "id": APIAria2.uuid(),
+                params: []
+            });
+
+            if (response) {
+                console.log('aria2c 已启动');
+                return;
+            }
+        } catch (error) {
+            console.log('aria2c 未启动，准备启动');
+            // 继续执行启动流程
         }
+
+        const settings = useSettings()
+
+        let proxy: any[] = []
+        if (settings.settings.downloadProxy != '') {
+            // 设置代理
+            proxy = ['--all-proxy', settings.settings.downloadProxy,]
+        }
+
         // 启动 aria2
-        let aria2Path = path.join(FileHandler.getResourcesPath(), 'aria2')
-        let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf')], {
+        let aria2Path = path.join(await FileHandler.getResourcesPath(), 'aria2')
+        console.log("aria2Path", aria2Path);
+
+        let aria2c = spawn(path.join(aria2Path, 'aria2c.exe'), [`--conf-path`, path.join(aria2Path, 'aria2.conf'), ...proxy], {
             windowsHide: false,
             stdio: 'pipe',
         })
@@ -51,6 +66,34 @@ export class APIAria2 {
         aria2c.on('close', (code) => {
             console.log(`aria2c close: ${code}`);
         })
+    }
+
+    // 关闭 aria2c
+    public static async close() {
+        // 关闭 aria2c
+        const aria2c = spawn('taskkill', ['/F', '/IM', 'aria2c.exe'])
+        aria2c.on('error', (err) => {
+            console.log(`aria2c error: ${err}`);
+        })
+        aria2c.stdout.on('data', (data) => {
+            let str = data.toString()
+            // 移除空格
+            str = str.replace(/\s+/g, "")
+            if (str != "") {
+                console.log(`aria2c stdout===>: ${data}`);
+            }
+        })
+    }
+
+    // 重启 aria2c
+    public static async restart() {
+        // 关闭 aria2c
+        await APIAria2.close()
+        // 重启 aria2c
+        setTimeout(() => {
+            APIAria2.init()
+            ElMessage.success('Aria2 已重启')
+        }, 1000);
     }
 
     public static Token() {
@@ -157,8 +200,18 @@ export class APIAria2 {
         }).then(() => {
             console.log('success');
         }).catch((err) => {
-            // console.log(err);
+            this.retrytimes++
+
             ElMessage.error('Aria2连接失败! 下载功能可能受影响');
+
+            if (this.retrytimes > 3) {
+                console.log('Aria2连接失败! 下载功能可能受影响!');
+                return
+            }
+            // // 重试
+            // this.restart().then(() => {
+            //     this.test()
+            // })
         })
     }
 

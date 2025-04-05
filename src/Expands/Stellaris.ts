@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 21,
     steamAppID: 281990,
+    nexusMods: {
+        game_domain_name: "stellaris",
+        game_id: 1606
+    },
     installdir: join("Stellaris"),
     gameName: "Stellaris",
     gameExe: "stellaris.exe",

@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 348,
     steamAppID: 1363080,
+    nexusMods: {
+        game_domain_name: "manorlords",
+        game_id: 6352
+    },
     installdir: join("Manor Lords"),
     gameName: "Manor Lords",
     startExe: [

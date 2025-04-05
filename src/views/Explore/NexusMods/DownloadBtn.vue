@@ -1,32 +1,37 @@
 <script lang='ts' setup>
 
 
-import { useI18n } from "vue-i18n";
-import { ref, computed } from "vue";
-
 const props = defineProps<{
-    mod: IMod
+    item: INexusMods
 }>()
 
-const download = useDownload()
 const settings = useSettings()
-const nexusMods = useNexusMods()
+const download = useDownload()
+const nexusmods = useNexusMods()
+const user = useUser()
 const { t } = useI18n()
+const { formatSiez } = useMain()
 
-let link = ref("")  // 下载地址
-let isDownloading = computed(() => {
-    if (task.value) return true
-    return false
+const showDialog = ref(false)
+const selectFile = ref<INexusModsFile>()
+const filesList = ref<INexusModsFile[]>([])
+
+const task = computed(() => {
+    return download.getTaskById(props.item.modId)
 })
 
-// 禁用按钮
-let disabled = computed(() => {
+const disabled = computed(() => {
     if (!settings.settings.managerGame) return true
     if (isDownloading.value) return true
     return false
 })
 
-let downloaded = computed(() => {
+const isDownloading = computed(() => {
+    if (task.value) return true
+    return false
+})
+
+const downloaded = computed(() => {
     if (task.value) {
         // console.log(task.value);
         // return task.value.progress
@@ -34,27 +39,63 @@ let downloaded = computed(() => {
     }
     return 0
 })
-let task = computed<IDownloadTask | undefined>(() => {
-    return download.getTaskById(props.mod.id)
-})
 
-let text = computed(() => {
+const text = computed(() => {
     if (!settings.settings.managerGame) return t('Please manage the game first.')
     if (task.value && task.value.totalSize == task.value.downloadedSize) return t('Downloaded')
     if (isDownloading.value) return `${downloaded.value} %`
 
-    return `${t('Download')} | ${props.mod.mods_resource_size}`
+    return t('Download') + formatSiez(props.item.fileSize * 1024)
 })
 
-async function toDownload() {
-    let mod_id = props.mod.id
-    let game_domain_name = settings.settings.managerGame?.NexusMods?.game_domain_name
-    if (game_domain_name) {
-        let url = await nexusMods.GetDownloadUrl(mod_id, game_domain_name)
+async function toDownload(event: Event) {
+    event.preventDefault(); // 阻止 a 标签的默认跳转行为
 
-        // download.addDownloadByNexus(props.mod, url, game_domain_name)
+    if (!user.nexusModsUser.key) {
+        ElMessage.error("你需要先登录NexusMods账号 才能使用此功能下载")
+
+        user.loginNexusModsUser()
+
+        return
     }
 
+
+    filesList.value = await nexusmods.getFileList(props.item)
+
+    if (filesList.value.length == 0) {
+        ElMessage.error(t('No files available for download.'))
+        return
+    }
+
+    console.log(filesList.value);
+
+    if (filesList.value.length > 1) {
+        showDialog.value = true
+        return
+    }
+
+    download.addDownloadByNexusMods({
+        domainName: props.item.game.domainName,
+        modId: props.item.modId,
+        author: props.item.uploader.name,
+        modName: props.item.name,
+        fileId: filesList.value[0].file_id,
+        version: filesList.value[0].version,
+    })
+
+}
+
+function toDownloadFile() {
+    if (!selectFile.value) return
+    showDialog.value = false
+    download.addDownloadByNexusMods({
+        domainName: props.item.game.domainName,
+        modId: props.item.modId,
+        author: props.item.uploader.name,
+        modName: props.item.name,
+        fileId: selectFile.value.file_id,
+        version: selectFile.value.version,
+    })
 }
 
 </script>
@@ -67,11 +108,40 @@ async function toDownload() {
         </template>
         {{ text }}
     </v-chip>
+    <Dialog v-model="showDialog">
+        <template #header>
+            <div class="title">{{ t('Select the file to download') }}</div>
+        </template>
+        <div class="files">
+            <el-select v-model="selectFile" value-key="file_id">
+                <el-option v-for="item in filesList" :key="item.file_id" :label="item.name" :value="item">
+                    <div class="file-list">
+                        <div class="name">{{ item.name }}</div>
+                        <div class="size">{{ formatSiez(item.size) }} | v{{ item.version }}</div>
+                    </div>
+                </el-option>
+            </el-select>
+        </div>
+        <template #footer>
+            <el-button @click="toDownloadFile">{{ $t('Download') }}</el-button>
+        </template>
+    </Dialog>
 </template>
 <script lang='ts'>
 
 export default {
-    name: 'DownloadBtn',
+    name: 'NexusModsDownloadBtn',
 }
 </script>
-<style lang='less' scoped></style>
+<style lang='less' scoped>
+.file-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .size {
+        font-size: 12px;
+        color: #999;
+    }
+}
+</style>

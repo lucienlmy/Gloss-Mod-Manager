@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 304,
     steamAppID: 668580,
+    nexusMods: {
+        game_domain_name: 'atomicheart',
+        game_id: 5158
+    },
     installdir: join("Atomic Heart"),
     gameName: "Atomic Heart",
     gameExe: "AtomicHeart.exe",

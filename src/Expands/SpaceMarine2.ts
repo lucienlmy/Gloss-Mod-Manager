@@ -7,6 +7,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 390,
     steamAppID: 2183900,
+    nexusMods: {
+        game_domain_name: "warhammer40000spacemarine2",
+        game_id: 6771
+    },
     installdir: join("Space Marine 2"),
     gameName: "Warhammer 40000 Space Marine 2",
     gameExe: "Warhammer 40000 Space Marine 2.exe",

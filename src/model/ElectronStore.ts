@@ -25,7 +25,7 @@ export class ElectronStore {
      * @param key 
      * @returns 
      */
-    public static async getStore(key: string) {
+    public static async getStore<T>(key: string): Promise<T | null> {
         let data = await FileHandler.readFileSync(this.cache, Cryption.encryptData('{}', this.key, this.iv))
         let json = JSON.parse(Cryption.decryptData(data, this.key, this.iv))
         return json[key]

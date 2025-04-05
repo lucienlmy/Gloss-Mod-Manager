@@ -10,6 +10,10 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 320,
     steamAppID: 105600,
     // curseforge: 431,
+    nexusMods: {
+        game_domain_name: "terraria",
+        game_id: 549
+    },
     SteamWorkshop: true,
     installdir: join("Terraria"),
     gameName: "Terraria",

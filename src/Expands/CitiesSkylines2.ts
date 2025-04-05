@@ -11,6 +11,10 @@ export const supportedGames: ISupportedGames = {
     Thunderstore: {
         community_identifier: 'cities-skylines-ii'
     },
+    nexusMods: {
+        game_domain_name: "citiesskylines2",
+        game_id: 5833
+    },
     installdir: join("Cities Skylines II"),
     gameName: "Cities Skylines II",
     gameExe: "Cities2.exe",

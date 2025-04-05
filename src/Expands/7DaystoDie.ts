@@ -9,7 +9,7 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 40,
     steamAppID: 251570,
-    NexusMods: {
+    nexusMods: {
         game_id: 1059,
         game_domain_name: "7daystodie",
     },

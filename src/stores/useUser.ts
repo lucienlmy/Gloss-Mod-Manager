@@ -17,7 +17,8 @@ export const useUser = defineStore('User', {
             list: [] as IMod[],
             page: 1,
             count: 1,
-        }
+        },
+        nexusModsUser: {} as INexusModsUser
     }),
     getters: {
         getUserAvatar(state) {
@@ -68,7 +69,7 @@ export const useUser = defineStore('User', {
         },
 
         async getUser() {
-            let user = await ElectronStore.getStore("user")
+            let user = await ElectronStore.getStore<any>("user")
             if (user) {
                 // console.log(user.timeout, new Date().getTime());
                 if (user.timeout < new Date().getTime()) {
@@ -78,6 +79,10 @@ export const useUser = defineStore('User', {
                 } else {
                     this.user = user
                 }
+            }
+            const nexusModsUser = await ElectronStore.getStore<INexusModsUser>('nexusModsUser')
+            if (nexusModsUser) {
+                this.nexusModsUser = nexusModsUser
             }
         },
         async getQrcode(canvas: HTMLCanvasElement) {
@@ -131,6 +136,71 @@ export const useUser = defineStore('User', {
                 }
 
             })
+        },
+        loginNexusModsUser() {
+            let application_slug = "gloss"
+            const ws = new WebSocket("wss://sso.nexusmods.com")
+            ws.onopen = (event) => {
+                let uuid = sessionStorage.getItem("uuid");
+                let token = sessionStorage.getItem("connection_token");
+
+                if (uuid == null) {
+                    uuid = APIAria2.uuid();
+                    sessionStorage.setItem('uuid', uuid);
+                }
+
+                if (uuid !== null) {
+
+                    var data = {
+                        id: uuid,
+                        token: token,
+                        protocol: 2
+                    };
+                    ws.send(JSON.stringify(data));
+                    window.open("https://www.nexusmods.com/sso?id=" + uuid + "&application=" + application_slug);
+                }
+                else {
+                    console.error("uuid 错误~")
+                }
+            }
+
+            ws.onclose = (event) => {
+                console.log("连接关闭;")
+            }
+
+            ws.onmessage = async (event) => {
+                const response = JSON.parse(event.data);
+
+                if (response && response.success) {
+                    // 如果成功, 检查数据是否包含 connection_token 或 api_key
+                    if (response.data.hasOwnProperty('connection_token')) {
+                        // 存储连接令牌，以防我们需要重新连接
+                        sessionStorage.setItem('connection_token', response.data.connection_token);
+                    }
+                    else if (response.data.hasOwnProperty('api_key')) {
+
+                        this.nexusModsUser.key = response.data.api_key
+                        const nexusMods = useNexusMods()
+                        const data = await nexusMods.getUserData()
+                        if (data.key) {
+                            this.nexusModsUser = data
+                            ElMessage.success(`${data.name} 登录成功~`)
+                            ElectronStore.setStore("nexusModsUser", data)
+                        }
+
+                        ws.close()
+                    }
+                }
+                else {
+                    // The SSO  will return an error attribute that can be used for error reporting
+                    console.error("Something went wrong! " + response.error)
+                }
+            }
+        },
+        async logoutNexusModsUser() {
+            this.nexusModsUser = {} as INexusModsUser
+            ElectronStore.removeStore("nexusModsUser")
+            ElMessage.success('注销成功~')
         }
     }
 })

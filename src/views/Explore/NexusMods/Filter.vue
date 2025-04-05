@@ -1,36 +1,56 @@
 <script lang='ts' setup>
 
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-const { t } = useI18n()
 const nexusMods = useNexusMods()
 
-let order_filter = computed(() => [
-    { text: t('Default'), value: 'lastupdate' },
-    { text: t('Downloads'), value: 'OLD_downloads' },
-    { text: t('Likes'), value: 'OLD_endorsements' },
-    { text: t('Newest'), value: 'date' },
-])
+watch([() => nexusMods.facets.categoryName, () => nexusMods.facets.languageName, () => nexusMods.facets.tag, () => nexusMods.sort], () => {
+    nexusMods.search()
+})
 
-let time_filter = computed(() => [
-    { text: t('All'), value: null },
-    { text: t('Today'), value: 1 },
-    { text: t('7 Days'), value: 7 },
-    { text: t('30 Days'), value: 30 },
-    { text: t('3 Months'), value: 90 },
-])
+const sortList = [
+    { label: 'Update time', value: { updatedAt: { direction: "DESC" } } },
+    { label: 'Release time', value: { createdAt: { direction: "DESC" } } },
+    { label: 'Endorsements', value: { endorsements: { direction: "DESC" } } },
+    { label: 'Downloads', value: { downloads: { direction: "DESC" } } },
+    { label: 'Unique Downloads', value: { uniqueDownloads: { direction: "DESC" } } },
+    { label: 'Mod name', value: { name: { direction: "DESC" } } },
+    { label: 'File Size', value: { size: { direction: "DESC" } } },
+    { label: 'Lest Comment', value: { lastComment: { direction: "DESC" } } },
+    // { label: 'Random', value: { random: {} } },
+]
+
 </script>
 <template>
-    <v-row class="filter">
-        <v-col cols="12" sm="4" md="2">
-            <v-select hide-details="auto" :label="t('Update time')" v-model="nexusMods.time" :items="time_filter"
-                item-title="text" item-value="value" variant="solo"></v-select>
-        </v-col>
-        <v-col cols="12" sm="4" md="2">
-            <v-select hide-details="auto" :label="t('Sort')" v-model="nexusMods.sort_by" :items="order_filter"
-                item-title="text" item-value="value" variant="solo"></v-select>
-        </v-col>
-    </v-row>
+    <v-col cols="12">
+        <v-row>
+            <v-col cols="2">
+                <el-select v-model="nexusMods.sort" value-key="label">
+                    <el-option v-for="item in sortList" :key="item.label" :label="$t(item.label)"
+                        :value="item"></el-option>
+                </el-select>
+            </v-col>
+            <v-col cols="2">
+                <el-select v-model="nexusMods.facets.categoryName" multiple filterable>
+                    <el-option v-for="(item, key) in nexusMods.categoryName" :key="key" :value="key" :label="key">
+                        {{ `${key} (${item})` }}
+                    </el-option>
+                </el-select>
+            </v-col>
+            <v-col cols="2">
+                <el-select v-model="nexusMods.facets.languageName" multiple filterable>
+                    <el-option v-for="(item, key) in nexusMods.languageName" :key="key" :value="key" :label="key">
+                        {{ `${key} (${item})` }}
+                    </el-option>
+                </el-select>
+            </v-col>
+            <v-col cols="2">
+                <el-select v-model="nexusMods.facets.tag" multiple filterable>
+                    <el-option v-for="(item, key) in nexusMods.tag" :key="key" :value="key" :label="key">
+                        {{ `${key} (${item})` }}
+                    </el-option>
+                </el-select>
+            </v-col>
+        </v-row>
+    </v-col>
 </template>
 <script lang='ts'>
 

@@ -43,7 +43,7 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 10,
     steamAppID: 413150,
     curseforge: 669,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: 'stardewvalley',
         game_id: 1303
     },

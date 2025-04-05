@@ -8,7 +8,7 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 266,
     steamAppID: 1462040,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "finalfantasy7remake",
         game_id: 4202
     },

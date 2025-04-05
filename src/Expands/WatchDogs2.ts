@@ -95,6 +95,10 @@ async function handlePak(mod: IModInfo, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 304,
     steamAppID: 447040,
+    nexusMods: {
+        game_domain_name: "watchdogs2",
+        game_id: 2454
+    },
     installdir: join("Watch_Dogs2"),
     gameName: "Watch Dogs 2",
     gameExe: "EAC.exe",

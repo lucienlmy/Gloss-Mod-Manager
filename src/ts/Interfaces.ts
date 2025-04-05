@@ -182,7 +182,7 @@ declare global {
         gamePath?: string
         gameVersion?: string
         gameCoverImg?: string
-        NexusMods?: {
+        nexusMods?: {
             game_id: number
             game_domain_name: string
         },
@@ -244,7 +244,7 @@ declare global {
     interface ISupportedGames extends IGameInfo {
         modType: IType[]
         from?: 'Local' | 'Internal'
-        checkModType: (((mod: IModInfo) => number) | ICheckModType[])
+        checkModType: (((mod: IModInfo) => Promise<number> | number) | ICheckModType[])
         sortMod?: (list: IModInfo[]) => boolean
     }
 
@@ -294,6 +294,7 @@ declare global {
         changeInRun: boolean
         defaultPage: string
         showPlugins: boolean // 是否显示前置列表
+        downloadProxy: string // 下载代理
     }
 
     interface IFileTreeNode {
@@ -882,6 +883,92 @@ declare global {
 
 
     //#endregion
+
+
+    //#region NexusMods
+
+    interface INexusMods {
+        adultContent: boolean;
+        createdAt: string; // ISO 8601 datetime (e.g., "2025-03-25T06:10:56Z")
+        downloads: number;
+        endorsements: number;
+        fileSize: number; // Assuming size in KB or bytes
+        game: {
+            domainName: string;
+            id: number;
+            name: string;
+        };
+        modCategory: {
+            categoryId: number;
+            name: string;
+        };
+        modId: number;
+        name: string;
+        status: string; // Could be enum like "published" | "draft" | "hidden"
+        summary: string;
+        thumbnailUrl: string;
+        uid: string;
+        updatedAt: string; // ISO 8601 datetime (e.g., "2025-03-25T06:10:56Z")
+        uploader: {
+            avatar: string;
+            memberId: number;
+            name: string;
+        };
+        viewerDownloaded: boolean | null;
+        viewerEndorsed: boolean | null;
+        viewerTracked: boolean;
+        viewerUpdateAvailable: boolean | null;
+        version: string;
+        author: string;
+    }
+
+    interface INexusModsFile {
+        id: number[];
+        uid: number;
+        file_id: number;
+        name: string;
+        version: string;
+        category_id: number;
+        category_name: string;
+        is_primary: boolean;
+        size: number;
+        file_name: string;
+        uploaded_timestamp: number;
+        uploaded_time: string;
+        mod_version: string;
+        external_virus_scan_url: string;
+        description: string;
+        size_kb: number;
+        size_in_bytes: number;
+        changelog_html: string;
+        content_preview_link: string;
+    }
+
+    interface INexusModsDownloadData {
+        domainName: string
+        modId: number
+        version: string
+        author: string
+        fileId: number
+        modName: string
+        key?: string
+        expires?: string
+    }
+
+    interface INexusModsUser {
+        user_id: number;
+        key: string;
+        name: string;
+        "is_premium?": boolean;  // 由于包含特殊字符，需要用引号包裹
+        "is_supporter?": boolean;
+        email: string;
+        profile_url: string;
+        is_supporter: boolean;
+        is_premium: boolean;
+    }
+
+    //#endregion
+
 
 
     //#region 备份

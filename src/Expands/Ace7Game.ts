@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 341,
     steamAppID: 502500,
+    nexusMods: {
+        game_domain_name: 'acecombat7skiesunknown',
+        game_id: 2777
+    },
     installdir: join("ACE COMBAT 7"),
     gameName: "ACE COMBAT 7",
     archivePath: join(FileHandler.GetAppData(), "Local", "BANDAI NAMCO Entertainment", "ACE COMBAT 7"),

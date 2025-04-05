@@ -25,7 +25,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 
         if (dictionaryList.length == 0) {
             // let SekiroDictionary = (await axios.get("res/SekiroDictionary.txt")).data
-            let SekiroDictionary = FileHandler.readFile(join(FileHandler.getResourcesPath(), 'res', 'SekiroDictionary.txt'))
+            let SekiroDictionary = FileHandler.readFile(join(await FileHandler.getResourcesPath(), 'res', 'SekiroDictionary.txt'))
             dictionaryList = SekiroDictionary.split("\r\n")
         }
         const manager = useManager()
@@ -69,7 +69,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 185,
     steamAppID: 814380,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "sekiro",
         game_id: 2763
     },
@@ -128,12 +128,12 @@ export const supportedGames: ISupportedGames = {
             }
         }
     ],
-    checkModType(mod) {
+    async checkModType(mod) {
         // if (mod.webId == 71282) return 2
 
         if (dictionaryList.length == 0) {
             // let SekiroDictionary = (await axios.get("res/SekiroDictionary.txt")).data
-            let SekiroDictionary = FileHandler.readFile(join(FileHandler.getResourcesPath(), 'res', 'SekiroDictionary.txt'))
+            let SekiroDictionary = FileHandler.readFile(join(await FileHandler.getResourcesPath(), 'res', 'SekiroDictionary.txt'))
             dictionaryList = SekiroDictionary.split("\r\n")
         }
 

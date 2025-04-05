@@ -10,6 +10,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 331,
     steamAppID: 1649080,
+    nexusMods: {
+        game_domain_name: "twopointcampus",
+        game_id: 7479
+    },
     installdir: join("Two Point Campus"),
     gameName: "Two Point Campus",
     gameExe: "TPC.exe",

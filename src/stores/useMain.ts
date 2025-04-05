@@ -53,7 +53,7 @@ export const useMain = defineStore('Main', {
         async getVersion() {
             let version = await ipcRenderer.invoke("get-version")
             this.version = version[0]
-            this.webVersion = version[1]
+            this.webVersion = version[1].mods_version
             return version
         },
         async sleep(time: number): Promise<void> {

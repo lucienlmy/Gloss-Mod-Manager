@@ -46,7 +46,8 @@ export class Config {
             showPakeMessage: settings.showPakeMessage,
             changeInRun: settings.changeInRun,
             defaultPage: settings.defaultPage,
-            showPlugins: settings.showPlugins
+            showPlugins: settings.showPlugins,
+            downloadProxy: settings.downloadProxy,
         }
     }
     // 保存配置文件
@@ -88,7 +89,8 @@ export class Config {
             showPakeMessage: data.showPakeMessage ?? true,
             changeInRun: data.changeInRun ?? false,
             defaultPage: data.defaultPage ?? "Home",
-            showPlugins: data.showPlugins ?? true  // 添加这一行
+            showPlugins: data.showPlugins ?? true,  // 添加这一行
+            downloadProxy: data.downloadProxy ?? "", // 添加这一行
         }
 
         // 初始化游戏

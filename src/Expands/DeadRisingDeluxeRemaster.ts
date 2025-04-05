@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 391,
     steamAppID: 2527390,
+    nexusMods: {
+        game_domain_name: "deadrisingdeluxeremaster",
+        game_id: 6837
+    },
     installdir: "DEAD RISING DELUXE REMASTER",
     gameName: "Dead Rising Deluxe Remaster",
     gameExe: 'DRDR.exe',

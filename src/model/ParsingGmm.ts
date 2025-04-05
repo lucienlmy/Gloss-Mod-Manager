@@ -1,7 +1,7 @@
 import { ElMessage } from "element-plus";
 
 export class ParsingGmm {
-    public static parsing(code: string) {
+    public static async parsing(code: string) {
         const download = useDownload()
         const manager = useManager()
 
@@ -41,6 +41,30 @@ export class ParsingGmm {
 
 
             })
+
+        } else if (code.startsWith("nxm://")) {
+            // nxm://cyberpunk2077/mods/20581/files/104899?key=xxuQRnBSdDEQOCuxPtETTw&expires=1743236334&user_id=48836423
+            const nexusmods = useNexusMods()
+
+            const gameDomainName = code.split("/")[2]
+            const modId = code.split("/")[4]
+            const fileId = code.split("/")[6]
+            const { key, expires, user_id } = this.parseUrlParams(code)
+
+            const mod = await nexusmods.getModData(modId, gameDomainName)
+            console.log(mod);
+
+            download.addDownloadByNexusMods({
+                domainName: gameDomainName,
+                modId: parseInt(modId),
+                fileId: parseInt(fileId),
+                key: key,
+                expires: expires,
+                version: mod.version,
+                author: mod.author,
+                modName: mod.name,
+            })
+
 
         } else if (FileHandler.fileExists(code)) {
             manager.addModByGmm(code)

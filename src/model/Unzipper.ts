@@ -12,7 +12,7 @@ export class Unzipper {
     private static async get7zip(): Promise<string> {
 
         // let zipPath = await ipcRenderer.invoke("get-7z-path")
-        let zipPath = path.join(FileHandler.getResourcesPath(), '7z', '7z.exe')
+        let zipPath = path.join(await FileHandler.getResourcesPath(), '7z', '7z.exe')
         return zipPath
     }
 

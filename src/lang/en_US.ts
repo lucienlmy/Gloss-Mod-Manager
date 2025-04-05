@@ -14,6 +14,7 @@ const LeftMenu = {
     "About": "About",
 }
 const User = {
+    "Logined": "Logined",
     "Login": "Login",
     "Logout": "Logout",
     "Register": "Register",
@@ -86,6 +87,8 @@ const DownloadTasks = {
     "complete": "complete",
     "removed": "removed",
     "Customize": "Customize",
+    "File Size": "File Size",
+    "Lest Comment": "Last Comment",
 }
 
 const ExploreDownloadBtn = {

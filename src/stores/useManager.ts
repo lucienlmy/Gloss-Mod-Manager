@@ -281,7 +281,7 @@ export const useManager = defineStore('Manager', {
                 mod.modType = task.modType
             } else {
                 if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                    mod.modType = settings.settings.managerGame?.checkModType(mod)
+                    mod.modType = await settings.settings.managerGame?.checkModType(mod)
                 }
             }
 
@@ -303,7 +303,7 @@ export const useManager = defineStore('Manager', {
                 fileName: path.basename(file),
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                mod.modType = settings.settings.managerGame?.checkModType(mod)
+                mod.modType = await settings.settings.managerGame?.checkModType(mod)
             }
 
             this.managerModList.push(mod)
@@ -382,9 +382,11 @@ export const useManager = defineStore('Manager', {
         },
         // 检查所有Mod更新
         async checkAllModUpdate() {
-            let modId = [] as number[]
+            let modId: number[] = []
+            let nexusModsList: IModInfo[] = []
             this.managerModList.forEach(item => {
-                if (item.webId) modId.push(item.webId as number)
+                if (item.webId && item.from == "GlossMod") modId.push(item.webId as number)
+                if (item.from == "NexusMods") nexusModsList.push(item)
             })
 
             if (modId.length > 0) {
@@ -400,6 +402,24 @@ export const useManager = defineStore('Manager', {
                     })
                 })
             }
+
+            if (nexusModsList.length > 0) {
+                const nexusMods = useNexusMods()
+
+                nexusModsList.forEach(async item => {
+                    if (!item.isUpdate && item.other) {
+
+                        const data = await nexusMods.getModData(item.other.modId, item.other.domainName)
+
+                        if (item.modVersion != data.version) {
+                            item.isUpdate = true
+                            console.log(`『${item.modName}』 有新版本可用.`);
+                        }
+                    }
+                })
+
+            }
+
         },
 
         async updateMod(mod: IModInfo) {

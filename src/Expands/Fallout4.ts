@@ -53,7 +53,7 @@ async function setPlugins(mod: IModInfo, install: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 6,
     steamAppID: 377160,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "fallout4",
         game_id: 1151
     },

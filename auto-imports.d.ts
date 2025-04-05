@@ -12,6 +12,7 @@ declare global {
   const Config: typeof import('./src/model/Config')['Config']
   const Cryption: typeof import('./src/model/Cryption')['Cryption']
   const EffectScope: typeof import('vue')['EffectScope']
+  const ElMessage: typeof import('element-plus/es')['ElMessage']
   const ElMessageBox: typeof import('element-plus/es')['ElMessageBox']
   const ElectronStore: typeof import('./src/model/ElectronStore')['ElectronStore']
   const Expands: typeof import('./src/model/Expands')['Expands']

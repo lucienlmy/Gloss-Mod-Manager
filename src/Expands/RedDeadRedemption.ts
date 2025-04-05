@@ -6,6 +6,10 @@ import { join, extname, basename } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 398,
     steamAppID: 2668510,
+    nexusMods: {
+        game_domain_name: "reddeadredemption",
+        game_id: 5175
+    },
     gameName: "Red Dead Redemption",
     installdir: "Red Dead Redemption",
     gameExe: 'RDR.exe',

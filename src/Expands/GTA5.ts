@@ -786,6 +786,10 @@ async function gameconfig(mod: IModInfo, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 261,
     steamAppID: 271590,
+    nexusMods: {
+        game_domain_name: "gta5",
+        game_id: 893
+    },
     installdir: join("Grand Theft Auto V"),
     gameName: "Grand Theft Auto V",
     gameExe: [

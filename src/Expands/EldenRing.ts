@@ -17,7 +17,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
         }
 
         if (dictionaryList.length == 0) {
-            let EldenRingDictionary = FileHandler.readFile(join(FileHandler.getResourcesPath(), 'res', 'EldenRingDictionary.txt'))
+            let EldenRingDictionary = FileHandler.readFile(join(await FileHandler.getResourcesPath(), 'res', 'EldenRingDictionary.txt'))
             dictionaryList = EldenRingDictionary.split("\r\n")
         }
 
@@ -57,7 +57,7 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 275,
     steamAppID: 1245620,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "eldenring",
         game_id: 4333
     },
@@ -113,13 +113,13 @@ export const supportedGames: ISupportedGames = {
             }
         }
     ],
-    checkModType(mod) {
+    async checkModType(mod) {
         // if (mod.webId == 197418) {
         //     return 2
         // }
 
         if (dictionaryList.length == 0) {
-            let EldenRingDictionary = FileHandler.readFile(join(FileHandler.getResourcesPath(), 'res', 'EldenRingDictionary.txt'))
+            let EldenRingDictionary = FileHandler.readFile(join(await FileHandler.getResourcesPath(), 'res', 'EldenRingDictionary.txt'))
             dictionaryList = EldenRingDictionary.split("\r\n")
         }
 

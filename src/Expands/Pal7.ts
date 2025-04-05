@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 277,
     steamAppID: 1543030,
+    nexusMods: {
+        game_domain_name: "swordandfairy7",
+        game_id: 4194
+    },
     installdir: join("仙剑奇侠传七"),
     gameName: "Pal7",
     gameExe: "Pal7.exe",

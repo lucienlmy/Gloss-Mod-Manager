@@ -8,7 +8,7 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 327,
     steamAppID: 703080,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "planetzoo",
         game_id: 3100
     },

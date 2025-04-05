@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 186,
     steamAppID: 233860,
+    nexusMods: {
+        game_domain_name: "kenshi",
+        game_id: 736
+    },
     installdir: join("Kenshi"),
     gameName: "Kenshi",
     gameExe: "kenshi_x64.exe",

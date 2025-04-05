@@ -8,9 +8,13 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 291,
     steamAppID: 0,
+    gamebanana: 8552,
+    nexusMods: {
+        game_domain_name: "genshinimpact",
+        game_id: 4613
+    },
     installdir: join("Genshin Impact"),
     gameName: "Genshin Impact",
-    gamebanana: 8552,
     startExe: [
         {
             name: "启动Mod",

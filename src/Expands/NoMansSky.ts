@@ -16,7 +16,7 @@ async function renameFile() {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 24,
     steamAppID: 275850,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "nomanssky",
         game_id: 1634
     },

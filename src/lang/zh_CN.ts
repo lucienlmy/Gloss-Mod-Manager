@@ -16,6 +16,7 @@ const LeftMenu = {
 }
 
 const User = {
+    "Logined": "已登录",
     "Login": "登录",
     "Logout": "登出",
     "Register": "注册",
@@ -88,6 +89,8 @@ const DownloadTasks = {
     "complete": "完成",
     "removed": "已删除",
     "Customize": "自定义",
+    "File Size": "文件大小",
+    "Lest Comment": "最后评论",
 }
 const ExploreDownloadBtn = {
     "Please manage the game first.": "请先选择游戏",
@@ -282,7 +285,9 @@ const Settings = {
     "Change in Game run": "游戏运行时修改",
     "Default Page": "默认页面",
     "Show Plugins List": "显示前置列表",
-    "Show required plugins list when connected to network": "连接网络时显示必需的前置插件列表"
+    "Show required plugins list when connected to network": "连接网络时显示必需的前置插件列表",
+    "Download Proxy": "下载代理",
+    "Restore Aria2": "重启 Aria2",
 }
 
 const Backup = {

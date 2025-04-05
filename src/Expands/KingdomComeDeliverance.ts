@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 155,
     steamAppID: 379430,
+    nexusMods: {
+        game_domain_name: "kingdomcomedeliverance",
+        game_id: 2298
+    },
     installdir: join("KingdomComeDeliverance", "Bin", "Win64"),
     gameName: "Kingdom Come Deliverance",
     gameExe: [

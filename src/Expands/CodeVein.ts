@@ -4,6 +4,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 207,
     steamAppID: 678960,
+    nexusMods: {
+        game_domain_name: "codevein",
+        game_id: 2981
+    },
     gameName: "CODE VEIN",
     installdir: "CodeVein",
     gameExe: 'CodeVein.exe',

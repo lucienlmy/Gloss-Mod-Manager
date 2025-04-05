@@ -1,5 +1,6 @@
 <script lang='ts' setup>
 
+import { APIAria2 } from "@/model/APIAria2";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { join } from "node:path"
@@ -7,6 +8,7 @@ import { useI18n } from 'vue-i18n';
 const main = useMain()
 const settings = useSettings()
 const i18n = useI18n()
+const user = useUser()
 
 let langIsCn = computed(() => {
     // console.log(locale);
@@ -52,17 +54,22 @@ function checkUpdates() {
     ipcRenderer.invoke('check-for-updates')
 }
 
+function restoreAria2() {
+    APIAria2.restart()
+}
+
+
 </script>
 <template>
     <v-row>
+
         <v-col cols="12">
             <h3>{{ $t('Features') }}</h3>
         </v-col>
         <v-col cols="12">
-            <!-- <v-chip label variant="text" append-icon="mdi-delete-clock-outline" @click="clearCache">
-                {{ $t('Clean cache') }}
-                <small>({{ main.formatSiez(cache) }})</small>
-            </v-chip> -->
+            <v-chip label variant="text" append-icon="mdi-restore" @click="restoreAria2">
+                {{ $t('Restore Aria2') }}
+            </v-chip>
             <v-chip label variant="text" append-icon="mdi-folder-download-outline" @click="openDownloadCache">
                 {{ $t('Open Download Folder') }}
             </v-chip>
@@ -76,6 +83,17 @@ function checkUpdates() {
             <v-chip label variant="text" @click="checkUpdates">
                 {{ `${$t('Current version')}: v${main.version}` }}
             </v-chip>
+        </v-col>
+        <v-col cols="12">
+            <h3>NexusMods</h3>
+        </v-col>
+        <v-col cols="12">
+            <v-chip v-if="!user.nexusModsUser.key" label variant="text" @click="user.loginNexusModsUser">
+                {{ $t('Login') }} NexusMods</v-chip>
+            <template v-else>
+                <v-chip label variant="text">{{ $t('Logined') }}: {{ user.nexusModsUser.name }}</v-chip>
+                <v-chip label variant="text" @click="user.logoutNexusModsUser">{{ $t('Logout') }}</v-chip>
+            </template>
         </v-col>
         <v-col cols="12">
             <h3>{{ $t('Feedback') }}</h3>

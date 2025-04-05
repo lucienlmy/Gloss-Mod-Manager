@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 345,
     steamAppID: 1544020,
+    nexusMods: {
+        game_domain_name: "callistoprotocol",
+        game_id: 4978
+    },
     installdir: join("The Callisto Protocol"),
     gameName: "The Callisto Protocol",
     gameExe: "TheCallistoProtocol.exe",

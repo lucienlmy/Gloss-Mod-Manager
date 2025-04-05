@@ -59,7 +59,7 @@ function handlePlugins(mod: IModInfo, installPath: string, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 195,
     steamAppID: 1091500,
-    NexusMods: {
+    nexusMods: {
         game_domain_name: "cyberpunk2077",
         game_id: 3333
     },
@@ -175,7 +175,7 @@ export const supportedGames: ISupportedGames = {
         // 判断是否是CET
         // if (mod.webId == 197625) return 1
 
-        let folderList = ['archive', 'bin', 'engine', 'r6', 'mods']
+        let folderList = ['archive', 'bin', 'engine', 'r6', 'mods', 'red4ext']
 
         let cet = false
         let archive = false

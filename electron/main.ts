@@ -146,11 +146,11 @@ async function createWindow() {
     if (process.defaultApp) {
         if (process.argv.length >= 1) {
             app.setAsDefaultProtocolClient('gmm', process.execPath, [resolve(process.argv[1])])
-            // app.setAsDefaultProtocolClient('nxm', process.execPath, [resolve(process.argv[1])])
+            app.setAsDefaultProtocolClient('nxm', process.execPath, [resolve(process.argv[1])])
         }
     } else {
         app.setAsDefaultProtocolClient('gmm')
-        // app.setAsDefaultProtocolClient('nxm')
+        app.setAsDefaultProtocolClient('nxm')
     }
 
 
@@ -393,6 +393,12 @@ ipcMain.handle('get-system-language', async (event, arg) => {
     // 将 - 替换为 _
     locale = locale.replace('-', '_')
     return locale
+})
+
+// 获取程序目录
+ipcMain.handle('get-app-path', async (event, arg) => {
+    let mainpath = isDev ? process.env.APP_ROOT : dirname(app.getPath('exe'))
+    return mainpath
 })
 
 //#endregion

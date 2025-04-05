@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 312,
     steamAppID: 1840080,
+    nexusMods: {
+        game_domain_name: "homeworld3",
+        game_id: 6432
+    },
     installdir: join("Homeworld 3"),
     gameName: "Homeworld 3",
     gameExe: "Homeworld3.exe",

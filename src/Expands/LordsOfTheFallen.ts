@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 352,
     steamAppID: 1501750,
+    nexusMods: {
+        game_domain_name: "lordsofthefallen2023",
+        game_id: 5803
+    },
     installdir: join("Lords of the Fallen"),
     gameName: "Lords of the Fallen",
     gameExe: "LOTF2.exe",

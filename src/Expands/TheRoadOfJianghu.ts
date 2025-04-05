@@ -7,6 +7,10 @@ import { join } from "node:path"
 export const supportedGames: ISupportedGames = {
     GlossGameId: 383,
     steamAppID: 2361680,
+    nexusMods: {
+        game_domain_name: "pathofkungfu",
+        game_id: 6910
+    },
     installdir: join("The road of Jianghu"),
     gameName: "The road of Jianghu",
     gameExe: "daojianjianghulu.exe",

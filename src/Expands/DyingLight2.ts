@@ -137,6 +137,10 @@ async function handlePak(mod: IModInfo, isInstall: boolean) {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 272,
     steamAppID: 534380,
+    nexusMods: {
+        game_domain_name: "dyinglight2",
+        game_id: 4302
+    },
     installdir: join("Dying Light 2", "ph", "work", "bin", "x64"),
     gameName: "Dying Light 2",
     gameExe: [

@@ -7,6 +7,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 420,
     steamAppID: 2246340,
+    nexusMods: {
+        game_domain_name: "monsterhunterwilds",
+        game_id: 6993
+    },
     installdir: "MonsterHunterWilds",
     gameName: "Monster Hunter Wilds",
     gameExe: 'MonsterHunterWilds.exe',

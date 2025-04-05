@@ -4,4 +4,12 @@ declare async function postMessage(...any);
 declare const _dgt: any
 declare module 'electron-google-analytics';
 declare module '@analytics/google-analytics';
-declare const window: any 
+declare const window: any
+
+interface Window {
+    router: Router;
+}
+
+interface ImportMeta {
+    glob(pattern: string, options?: { eager?: boolean }): Record<string, any>;
+}

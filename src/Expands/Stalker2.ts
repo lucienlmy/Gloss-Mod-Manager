@@ -4,6 +4,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 403,
     steamAppID: 1643320,
+    nexusMods: {
+        game_domain_name: "stalker2heartofchornobyl",
+        game_id: 6944
+    },
     gameName: "Stalker2",
     installdir: "S.T.A.L.K.E.R. 2 Heart of Chornobyl",
     gameExe: 'Stalker2.exe',

@@ -4,6 +4,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 409,
     steamAppID: 1790600,
+    nexusMods: {
+        game_domain_name: "dragonballsparkingzero",
+        game_id: 6892
+    },
     gameName: "SparkingZERO",
     installdir: "DRAGON BALL Sparking! ZERO",
     gameExe: 'SparkingZERO.exe',

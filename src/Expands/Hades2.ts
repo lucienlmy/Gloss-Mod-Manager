@@ -9,16 +9,16 @@ import { spawn } from 'child_process'
 function ModImporter() {
     const manage = useManager()
 
-    let Modimporter = join(manage.gameStorage, "Content", "modimporter.exe")
+    let _modimporter = join(manage.gameStorage, "Content", "modimporter.exe")
     // 判断 ModImporter 是否存在此文件
-    if (!FileHandler.fileExists(ModImporter)) {
+    if (!FileHandler.fileExists(_modimporter)) {
         ElMessage.warning("未找到 modimporter.exe, 您的Mod可能不会生效, 请先安装 ModImporter")
         return true
     }
 
     let cmd = `start cmd /S /C modimporter.exe --no-input`
     spawn(cmd, {
-        cwd: dirname(ModImporter),
+        cwd: dirname(_modimporter),
         shell: true,
     })
 
@@ -27,6 +27,10 @@ function ModImporter() {
 export const supportedGames: ISupportedGames = {
     GlossGameId: 349,
     steamAppID: 1145350,
+    nexusMods: {
+        game_domain_name: "hades2",
+        game_id: 6354
+    },
     installdir: join("Hades II", "Ship"),
     gameName: "Hades2",
     Thunderstore: {
@@ -93,13 +97,13 @@ export const supportedGames: ISupportedGames = {
     ],
     checkModType(mod) {
         let mods = false
-        let Modimporter = false
+        let _modimporter = false
         mod.modFiles.forEach(item => {
             if (basename(item) == 'modfile.txt') mods = true
-            if (basename(item) == 'modimporter.exe') ModImporter = true
+            if (basename(item) == 'modimporter.exe') _modimporter = true
         })
 
-        if (Modimporter) return 2
+        if (_modimporter) return 2
         if (mods) return 1
 
         return 99

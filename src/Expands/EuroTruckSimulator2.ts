@@ -23,6 +23,10 @@ async function handleMod(mod: IModInfo, installPath: string, isInstall: boolean)
 export const supportedGames: ISupportedGames = {
     GlossGameId: 15,
     steamAppID: 227300,
+    nexusMods: {
+        game_domain_name: "eurotrucksimulator2",
+        game_id: 328
+    },
     installdir: join("Euro Truck Simulator 2", "bin", "win_x64"),
     gameName: "Euro Truck Simulator 2",
     gameExe: [

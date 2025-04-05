@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 322,
     steamAppID: 518790,
+    nexusMods: {
+        game_domain_name: "thehuntercallofthewild",
+        game_id: 3158
+    },
     installdir: join("theHunterCotW"),
     gameName: "The Hunter CotW",
     gameExe: "theHunterCotW_F.exe",

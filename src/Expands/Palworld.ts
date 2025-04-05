@@ -9,6 +9,10 @@ export const supportedGames: ISupportedGames = {
     GlossGameId: 333,
     steamAppID: 1623730,
     curseforge: 85196,
+    nexusMods: {
+        game_domain_name: "palworld",
+        game_id: 6030
+    },
     installdir: join("Palworld"),
     gameName: "Palworld",
     startExe: [

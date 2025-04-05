@@ -8,6 +8,10 @@ import { join } from 'path'
 export const supportedGames: ISupportedGames = {
     GlossGameId: 65,
     steamAppID: 305620,
+    nexusMods: {
+        game_domain_name: "thelongdark",
+        game_id: 1779
+    },
     installdir: join("TheLongDark"),
     gameName: "The Long Dark",
     gameExe: "tld.exe",

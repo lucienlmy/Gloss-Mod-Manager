@@ -8,6 +8,10 @@ import { ElMessage } from "element-plus";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 351,
     steamAppID: 2215430,
+    nexusMods: {
+        game_domain_name: "ghostoftsushima",
+        game_id: 6434
+    },
     installdir: join("Ghost of Tsushima DIRECTOR'S CUT"),
     gameName: "Ghost of Tsushima",
     gameExe: "GhostOfTsushima.exe",

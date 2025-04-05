@@ -22,6 +22,7 @@ export const useDownload = defineStore('Download', {
             link: '',
         },
         autoInstall: true,
+        isInit: false,
     }),
     getters: {
         configPath(): string {
@@ -336,25 +337,6 @@ export const useDownload = defineStore('Download', {
             }
 
             this.addDownloadTask(task)
-
-            // let task = this.getTaskById(mod._idRow) as IDownloadTask
-
-            // const settings = useSettings()
-
-            // let dest = join(settings.settings.modStorageLocation, 'cache')
-
-            // FileHandler.deleteFile(join(dest, mod._aFiles[0]._sFile))   // 删除旧文件
-
-            // let gid = await APIAria2.addUri(task.link, mod._aFiles[0]._sFile, dest).catch(err => {
-            //     ElMessage.error(`下载错误: ${err}`)
-            // })
-
-            // console.log(gid);
-
-            // task.gid = gid.result
-
-            // ElMessage.success(`${task.name} 已添加到下载列表`)
-
         },
 
         async addDownloadByCustomize(url: string, name: string) {
@@ -374,22 +356,71 @@ export const useDownload = defineStore('Download', {
                 fileName: name
             }
             this.addDownloadTask(task)
-            // this.downloadTaskList.unshift(task)
-            // const settings = useSettings()
-            // let dest = join(settings.settings.modStorageLocation, 'cache')
+        },
 
-            // let gid = await APIAria2.addUri(task.link, name, dest).catch(err => {
-            //     ElMessage.error(`下载错误: ${err}`)
-            // })
+        async addDownloadByNexusMods(nexusmodsData: INexusModsDownloadData) {
+            const { domainName, modId, fileId, key, expires, version, author, modName } = nexusmodsData
 
-            // console.log(gid);
-            // task.gid = gid.result
-            // ElMessage.success(`${task.name} 已添加到下载列表`)
+            const nexusmods = useNexusMods()
+            let get_download_link = `https://api.nexusmods.com/v1/games/${domainName}/mods/${modId}/files/${fileId}/download_link.json`
+
+            if (key) {
+                get_download_link = `${get_download_link}?key=${key}&expires=${expires}`
+            }
+
+            const { data } = await axios.get(get_download_link, {
+                headers: await nexusmods.getheader()
+            }).catch(err => ({
+                data: {
+                    err: true,
+                    ...err.response.data
+                }
+            }))
+
+            // 没有权限, 打开网页 下载
+            if (data.err) {
+                ElMessage.error(data.message)
+                window.open(`https://www.nexusmods.com/${domainName}/mods/${modId}?tab=files&file_id=${fileId}&nmm=1`)
+                return
+            }
+
+            // 正常获取到下载地址
+            console.log(data);
+            const { URI, name, short_name } = data[0]
+
+            // URL = https://supporter-files.nexus-cdn.com/3333/2380/RED4ext-2380-1-27-0-1737651915.zip?md5=VZ2VLjGLyXNYWI6HLJ5slA&expires=1743080796&user_id=48836423
+            // 从 URL 获取文件后缀
+            let fileExt = extname(URI)
+            // 移除 ?md5=VZ2VLjGLyXNYWI6HLJ5slA&expires=1743080796&user_id=48836423
+            fileExt = fileExt.split("?")[0]
+            console.log("fileExt", fileExt);
+
+
+            let task: IDownloadTask = {
+                id: APIAria2.randomNumbers(),
+                webId: modId,
+                from: "NexusMods",
+                name: modName,
+                version: version,
+                speed: 0,
+                totalSize: 0,
+                downloadedSize: 0,
+                link: URI,
+                modAuthor: author,
+                modWebsite: `https://www.nexusmods.com/${domainName}/mods/${modId}`,
+                status: "waiting",
+                fileName: fileId + fileExt,
+                other: {
+                    domainName, modId, fileId, key, expires, version, author, modName
+                }
+            }
+            this.addDownloadTask(task)
 
         },
 
         // 添加下载任务
         async addDownloadTask(task: IDownloadTask) {
+
 
             // 判断是否已经存在
             if (this.getTaskById(task.webId as string)) {
@@ -408,6 +439,17 @@ export const useDownload = defineStore('Download', {
             console.log(task.gid);
 
             ElMessage.success(`${task.name} 已添加到下载列表`)
+
+            if (!this.isInit) {
+                // 跳转到 /download 页面
+                const router = window.router || (window as any).$router
+                console.log(router);
+
+                if (router) {
+                    router.push('/download')
+                }
+            }
+
         },
 
         //#endregion
@@ -458,16 +500,14 @@ export const useDownload = defineStore('Download', {
                         if (release) {
                             console.log(mod.fileName);
                             this.addDownloadByGitHub(release, mod.modWebsite, mod.fileName)
-
-                            // let _mod = release.assets.find(item => item.name == mod.fileName)
-                            // if (_mod) {
-                            //     this.addDownloadByGitHub(release, release.tag_name, mod.modWebsite)
-                            // }
                         }
                     }
                     break
                 case 'GameBanana':
                     this.addDownloadByGameBanana(mod.webId as number)
+                    break
+                case 'NexusMods':
+                    if (mod.other) this.addDownloadByNexusMods(mod.other as INexusModsDownloadData)
                     break
                 default:
                     break;
@@ -475,5 +515,5 @@ export const useDownload = defineStore('Download', {
         },
 
         //#endregion
-    }
+    },
 })
