@@ -63,25 +63,8 @@ export const shared = defineConfig({
                 "href": "https://mod.3dmgame.com/static/upload/mod/202405/MOD663ed1e5509eb.png@webp",
             }
         ],
-        // [
-        //     'script',
-        //     {
-        //         "src": "https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/0.1.0-beta.2/libs/oversea/index.js",
-        //         "type": "text/javascript",
-        //     }
-        // ],
-        // [
-        //     'script',
-        //     {},
-        //     `new CozeWebSDK.WebChatClient({
-        //         config: {
-        //             bot_id: '7368057478376407045',
-        //         },
-        //         componentProps: {
-        //             title: 'Coze',
-        //         },
-        //     });
-        //   `
-        // ]
     ],
+    sitemap: {
+        hostname: 'https://gmm.aoe.top',
+    }
 })
