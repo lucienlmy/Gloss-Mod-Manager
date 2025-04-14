@@ -9,7 +9,7 @@ titleTemplate: Gloss Mod Manager
 ## Preliminary Work
 
 1. Download and install [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. Download and install UE4SS [GitHub](https://github.com/UE4SS-RE/RE-UE4SS/releases) | [Mod站](https://mod.3dmgame.com/mod/205892) | [前置包](https://cloud.aoe.top/s/KrRfO)
+2. Download and install UE4SS [GitHub](https://github.com/UE4SS-RE/RE-UE4SS/releases) | [Mod站](https://mod.3dmgame.com/mod/205892) | [前置包](https://pan.aoe.top/GMM/Requirements)
 
 ## Selecting the Game
 

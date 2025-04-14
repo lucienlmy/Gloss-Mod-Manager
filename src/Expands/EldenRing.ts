@@ -101,6 +101,18 @@ export const supportedGames: ISupportedGames = {
             },
         },
         {
+            id: 3,
+            name: "游戏根目录",
+            installPath: join(""),
+            async install(mod) {
+                return Manager.generalInstall(mod, this.installPath ?? "", true)
+            },
+            async uninstall(mod) {
+                return Manager.generalUninstall(mod, this.installPath ?? "", false)
+
+            }
+        },
+        {
             id: 99,
             name: "未知",
             installPath: "",

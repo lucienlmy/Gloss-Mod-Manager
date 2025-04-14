@@ -29,7 +29,7 @@ defineOptions({
 <template>
     <v-card variant="tonal" color="#FFAB00" v-if="manager.plugins.length > 0 && settings.settings.showPlugins">
         <v-card-title>所需前置
-            <v-chip color="#1E88E5" label variant="text" target="_blank" href="https://cloud.aoe.top/s/KrRfO"
+            <v-chip color="#1E88E5" label variant="text" target="_blank" href="https://pan.aoe.top/GMM/Requirements"
                 append-icon="mdi-open-in-new">前置包
                 <v-tooltip activator="parent" location="bottom">一键下载并安装所有前置</v-tooltip>
             </v-chip>

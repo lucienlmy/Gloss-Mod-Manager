@@ -7,7 +7,7 @@ titleTemplate: Gloss Mod Manager
 ## Preliminary Work
 
 1. Download and install [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. Download the prerequisite package [GTA5 Mod Prerequisite Package](https://cloud.aoe.top/s/KrRfO)
+2. Download the prerequisite package [GTA5 Mod Prerequisite Package](https://pan.aoe.top/GMM/Requirements)
 3. (Optional) Download built-in modifiers: [Menyoo](https://github.com/MAFINS/MenyooSP/releases) | [Localization Patch](https://mod.3dmgame.com/mod/205488)
 
 ## Selecting the Game

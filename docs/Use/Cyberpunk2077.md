@@ -7,7 +7,7 @@ titleTemplate: Gloss Mod Manager
 ## 前置工作
 
 1. 下载并安装 [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. 下载 前置包 [赛博朋克2077 Mod前置包](https://cloud.aoe.top/s/KrRfO)
+2. 下载 前置包 [赛博朋克2077 Mod前置包](https://pan.aoe.top/GMM/Requirements)
 3. 安装 REDMod [Steam](https://store.steampowered.com/app/2060310/Cyberpunk_2077_REDmod/) | [官网](https://www.cyberpunk.net/zh-cn/modding-support)
 
 ## 选择游戏

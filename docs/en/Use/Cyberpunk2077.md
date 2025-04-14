@@ -7,7 +7,7 @@ titleTemplate: Gloss Mod Manager
 ## Preliminary Work
 
 1. Download and install [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. Download the prerequisite package [Cyberpunk 2077 Mod Prerequisite Package](https://cloud.aoe.top/s/KrRfO)
+2. Download the prerequisite package [Cyberpunk 2077 Mod Prerequisite Package](https://pan.aoe.top/GMM/Requirements)
 3. Install REDMod [Steam](https://store.steampowered.com/app/2060310/Cyberpunk_2077_REDmod/) | [Official Website](https://www.cyberpunk.net/zh-cn/modding-support)
 
 ## Selecting the Game

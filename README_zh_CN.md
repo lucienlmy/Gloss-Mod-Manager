@@ -11,7 +11,7 @@
 
 - 最新版本: [3DM Mod站](https://mod.3dmgame.com/mod/197445) | [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager) | [网盘](https://cloud.aoe.top/s/rmuL)
 - 食用教程: https://gmm.aoe.top/
-- Mod前置: https://cloud.aoe.top/s/KrRfO
+- Mod前置: https://pan.aoe.top/GMM/Requirements
 - 问卷调查: https://wj.qq.com/s2/14010887/92e3/
 - 问题反馈: [QQ频道](https://pd.qq.com/s/hco46ol54) | [QQ群 2169033132](https://qm.qq.com/q/ft6b4xx2PS) | [GitHub Issues](https://github.com/GlossMod/Gloss-Mod-Manager/issues) 
 

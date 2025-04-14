@@ -214,6 +214,7 @@ export const supportedGames: ISupportedGames = {
         mod.modFiles.forEach(item => {
             if (item.toLowerCase().includes('natives')) natives = true
             if (item.toLowerCase().includes('reframework')) reframework = true
+            if (basename(item) == 'dinput8.dll') reframework = true
             if (extname(item) == '.lua') luaPlugins = true
             if (extname(item) == '.dll') dllPlugins = true
             if (extname(item) == '.pak') pak = true

@@ -6,7 +6,7 @@ titleTemplate: Gloss Mod Manager
 Generally, it falls into the following situations:
 - You haven't installed the necessary prerequisite plugins for the mod.
   - Solution: Download and install the corresponding prerequisites according to the mod introduction.
-  - Some game prerequisites for download: https://cloud.aoe.top/s/KrRfO
+  - Some game prerequisites for download: https://pan.aoe.top/GMM/Requirements
 
 - The mod is outdated and no longer compatible with the new version of the game.
   > Solution: There is no solution. Go ask the author to update, or look for someone else who has updated and adapted the mod for the new version of the game.

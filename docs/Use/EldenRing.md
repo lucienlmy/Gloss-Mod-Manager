@@ -7,7 +7,7 @@ titleTemplate: Gloss Mod Manager
 ## 前置工作
 
 1. 下载并安装 [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. 下载 前置包 [艾尔登法环 Mod前置包](https://cloud.aoe.top/s/KrRfO)
+2. 下载 前置包 [艾尔登法环 Mod前置包](https://pan.aoe.top/GMM/Requirements)
 
 
 

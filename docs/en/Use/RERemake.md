@@ -9,7 +9,7 @@ The installation methods for Resident Evil 2, 3, 4, 7, and 8 are largely similar
 ## Preliminary Work
 
 1. Download and install [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. Download the prerequisite package [Resident Evil Mod Prerequisite Package](https://cloud.aoe.top/s/KrRfO)
+2. Download the prerequisite package [Resident Evil Mod Prerequisite Package](https://pan.aoe.top/GMM/Requirements)
 
 ## Select Game
 

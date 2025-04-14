@@ -7,7 +7,7 @@ titleTemplate: Gloss Mod Manager
 ## 前置工作
 
 1. 下载并安装 [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
-2. 下载 前置包 [GTA5 Mod前置包](https://cloud.aoe.top/s/KrRfO)
+2. 下载 前置包 [GTA5 Mod前置包](https://pan.aoe.top/GMM/Requirements)
 3. (可选) 下载内置修改器: [Menyoo](https://github.com/MAFINS/MenyooSP/releases) | [汉化补丁](https://mod.3dmgame.com/mod/205488)
 
 ## 选择游戏
