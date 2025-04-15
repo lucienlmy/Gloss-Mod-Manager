@@ -109,3 +109,7 @@
 - DRAGON BALL: Sparking! ZERO
 - DRAGON QUEST III HD-2D Remake
 - Red Dead Redemption
+- Kingdom Come: Deliverance 2
+- Monster Hunter Wilds
+- Legend of Heroes: Three Kingdoms
+- The Last of Us Part 2

@@ -1,5 +1,5 @@
 /**
- * @description 求生之路2 支持
+ * @description 美国末日2 支持
  */
 
 
