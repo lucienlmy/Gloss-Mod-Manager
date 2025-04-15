@@ -2,9 +2,6 @@
  * @description 艾尔登法环 支持
 */
 
-
-
-import axios from "axios";
 import { ElMessage } from "element-plus";
 import { statSync } from "fs";
 import { basename, join } from "path";

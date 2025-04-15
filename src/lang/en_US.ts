@@ -420,6 +420,8 @@ const Games = {
     "Red Dead Redemption": "Red Dead Redemption",
     "Kingdom Come Deliverance 2": "Kingdom Come Deliverance 2",
     "Monster Hunter Wilds": "Monster Hunter Wilds",
+    "Legend of Heroes Three Kingdoms": "Legend of Heroes Three Kingdoms",
+    "The Last of Us Part 2": "The Last of Us Part 2",
 }
 
 const Other = {

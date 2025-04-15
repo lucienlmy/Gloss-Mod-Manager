@@ -429,6 +429,8 @@ const Games = {
     "Red Dead Redemption": "荒野大镖客",
     "Kingdom Come Deliverance 2": "天国: 拯救2",
     "Monster Hunter Wilds": "怪物猎人 荒野",
+    "Legend of Heroes Three Kingdoms": "英雄立志传 三国志",
+    "The Last of Us Part 2": "最后生还者2",
 }
 
 const Other = {
@@ -468,6 +470,9 @@ const Other = {
     "ydd": "人物",
     "tools": "工具",
     "GitHub": "GitHub",
+
+    "Data": "数据",
+    "Portraits": "头像",
 }
 
 const lang = {
