@@ -466,7 +466,10 @@ export class FileHandler {
     public static pathToArray(filePath: string) {
 
         // 通过 path.sep 分割路径
-        return filePath.split(path.sep)
+        let list = filePath.split(path.sep)
+        // 去除空元素
+        list = list.filter(item => item != '')
+        return list
     }
 
     /**

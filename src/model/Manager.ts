@@ -130,7 +130,7 @@ export class Manager {
      * @param spare 是否保留其他文件
      * @returns 
      */
-    public static async installByFolder(mod: IModInfo, installPath: string, folderName: string, isInstall: boolean, include: boolean = false, spare: boolean = false) {
+    public static async installByFolder(mod: IModInfo, installPath: string, folderName: string | string[], isInstall: boolean, include: boolean = false, spare: boolean = false) {
         const manager = useManager()
         let res: IState[] = []
         mod.modFiles.forEach(async item => {
@@ -139,7 +139,23 @@ export class Manager {
 
                 let modStorage = join(manager.modStorage ?? "", mod.id.toString(), item)
                 if (statSync(modStorage).isFile()) {
-                    let path = FileHandler.getFolderFromPath(modStorage, folderName, include)
+                    // 检查是否匹配任意一个文件夹名
+                    let path: string | null = null
+
+                    if (Array.isArray(folderName)) {
+                        // 如果是数组，尝试每个文件夹名称
+                        for (const folder of folderName) {
+                            const tempPath = FileHandler.getFolderFromPath(modStorage, folder, include)
+                            if (tempPath) {
+                                path = tempPath
+                                break
+                            }
+                        }
+                    } else {
+                        // 原来的逻辑，使用单个文件夹名
+                        path = FileHandler.getFolderFromPath(modStorage, folderName, include)
+                    }
+
                     if (path) {
                         let gameStorage = join(manager.gameStorage ?? "", installPath, path)
                         if (isInstall) {

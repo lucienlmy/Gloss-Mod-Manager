@@ -7,6 +7,11 @@
 import { join, extname, sep, basename, dirname } from 'path'
 import { statSync } from "fs";
 import { ElMessage } from "element-plus";
+
+
+let folderList = ['archive', 'bin', 'engine', 'r6', 'mods', 'red4ext']
+
+
 function getCommonParentFolder(paths: string[]): string {
 
     /// AI 给的写法 虽然看不懂 但感觉很酷
@@ -152,10 +157,10 @@ export const supportedGames: ISupportedGames = {
             name: '主目录',
             installPath: '\\',
             async install(mod) {
-                return Manager.generalInstall(mod, this.installPath ?? "", true)
+                return Manager.installByFolder(mod, this.installPath ?? "", folderList, true, true)
             },
             async uninstall(mod) {
-                return Manager.generalUninstall(mod, this.installPath ?? "", true)
+                return Manager.installByFolder(mod, this.installPath ?? "", folderList, false, true)
             }
         },
         {
@@ -175,7 +180,6 @@ export const supportedGames: ISupportedGames = {
         // 判断是否是CET
         // if (mod.webId == 197625) return 1
 
-        let folderList = ['archive', 'bin', 'engine', 'r6', 'mods', 'red4ext']
 
         let cet = false
         let archive = false
