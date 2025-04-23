@@ -280,7 +280,7 @@ export class Manager {
             let indexs = folders.findIndex(i => i.files.toString() == item.files.toString())
             return indexs == index
         })
-        console.log(folders);
+        // console.log(folders);
 
         if (folders.length > 0) {
             // 复制 folder 下的所有文件和文件夹到 gameStorage

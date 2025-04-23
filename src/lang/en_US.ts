@@ -422,6 +422,7 @@ const Games = {
     "Monster Hunter Wilds": "Monster Hunter Wilds",
     "Legend of Heroes Three Kingdoms": "Legend of Heroes Three Kingdoms",
     "The Last of Us Part 2": "The Last of Us Part 2",
+    "Oblivion Remastered": "The Elder Scrolls IV: Oblivion Remastered",
 }
 
 const Other = {

@@ -79,7 +79,7 @@ export class UnrealEngine {
             {
                 id: 3,
                 name: "mods",
-                installPath: join(bassPath, "Binaries", "Win64", "Mods"),
+                installPath: join(bassPath, "Binaries", "Win64", "ue4ss", "Mods"),
                 async install(mod) {
                     console.log(this.installPath);
 
@@ -104,7 +104,7 @@ export class UnrealEngine {
             {
                 id: 5,
                 name: "Scripts",
-                installPath: join(bassPath, "Binaries", "Win64", "Mods"),
+                installPath: join(bassPath, "Binaries", "Win64", "ue4ss", "Mods"),
                 async install(mod) {
                     const manage = useManager()
 
