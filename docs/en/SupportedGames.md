@@ -114,3 +114,4 @@
 - Legend of Heroes: Three Kingdoms
 - The Last of Us Part 2
 - The Elder Scrolls IV: Oblivion Remastered
+- Clair Obscur: Expedition 33

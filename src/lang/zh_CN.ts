@@ -432,6 +432,7 @@ const Games = {
     "Legend of Heroes Three Kingdoms": "英雄立志传 三国志",
     "The Last of Us Part 2": "最后生还者2",
     "Oblivion Remastered": "上古卷轴4：湮灭 重制版",
+    "Clair Obscur Expedition 33": "光与影：33号远征队",
 }
 
 const Other = {
