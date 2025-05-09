@@ -21,7 +21,11 @@ titleTemplate: Gloss Mod Manager
 
 生化危机 的Mod前置有两个：
 - REFramework: REF 框架，是FirstNatives 的前置
-- FirstNatives: 最初是由 nfh994 为怪物猎人崛起 开发的一个插件， 使游戏能优先的加载 `natives` 文件夹里面的内容，由 [FluffyQuack](https://github.com/FluffyQuack/FirstNatives/tree/Fluffy) 适配支持 生化危机 系列.
+- FirstNatives (可选): 最初是由 nfh994 为怪物猎人崛起 开发的一个插件， 使游戏能优先的加载 `natives` 文件夹里面的内容，由 [FluffyQuack](https://github.com/FluffyQuack/FirstNatives/tree/Fluffy) 适配支持 生化危机 系列.
+
+> 为什么说 FirstNatives 是可选的呢? 因为在 REFramework 1.5.5 版本，更新了支持 加载 natives 文件夹的功能，所以在 1.5.5 版本之后，理论上不需要 FirstNatives 了, 但这个功能是需要手动开的，如果你不想手动开启这个功能，那么就可以安装 FirstNatives 插件.
+> ![](https://mod.3dmgame.com/static/upload/mod/202504/MOD68104246c0bf5.png@webp)
+> 另外, REFramework 自带的 `natives` 加载功能是有问题的, 需要在开启后 重启游戏才可能会生效
 
 需要注意一下的是，生化危机2、3 是分为 光追版(rt) 和 非光追版(dx11_not-rt), REFramework 也分了光追版 和非光追版, 前置包在安装的时候有进行标明，在安装的时候根据自己游戏的版本二选一进行导入，不要全部丢进去了！
 
@@ -64,6 +68,8 @@ titleTemplate: Gloss Mod Manager
 5. 请确保你已经换上了对应的服装, 部分Mod需要DLC才能使用;
 6. 确保Mod的版本和你的游戏版本匹配，光追和非光追版本的Mod与游戏不互相兼容，你需要自行判断是更换游戏版本还是Mod版本。
 7. 使用 [FLUFFY MANAGER 5000](https://fluffyquack.com/tools/modmanager.zip) 进行安装Mod. (这款管理器是英文的, 没有汉化)
+8.  开启 `LooseFileLoader` 功能
+  ![](https://mod.3dmgame.com/static/upload/mod/202504/MOD68104246c0bf5.png@webp)
 
 以上方法均试过了，都没有解决，那么就是Mod的问题，换一个的Mod吧
 

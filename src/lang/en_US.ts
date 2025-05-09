@@ -424,6 +424,7 @@ const Games = {
     "The Last of Us Part 2": "The Last of Us Part 2",
     "Oblivion Remastered": "The Elder Scrolls IV: Oblivion Remastered",
     "Clair Obscur Expedition 33": "Clair Obscur Expedition 33",
+    "Sid Meier's Civilization VII": "Sid Meier's Civilization VII",
 }
 
 const Other = {

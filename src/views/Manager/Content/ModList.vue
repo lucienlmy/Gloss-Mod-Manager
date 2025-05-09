@@ -13,6 +13,10 @@ const settings = useSettings()
 
 let loading = ref(false)
 
+// 自动滚动相关变量
+let autoScrollId = ref<number | null>(null);
+let scrollSpeed = ref(0);
+let scrollDirection = ref('');
 
 let type = computed<IType | undefined>(() => {
     return settings.settings.managerGame?.modType.find((item) => {
@@ -83,7 +87,60 @@ function dragstart(e: any, index: number) {
     setTimeout(() => {
         e.target.classList.add('moveing')
     }, 0)
+
+    // 开始监听拖拽过程中的鼠标移动
+    document.addEventListener('dragover', handleDragScroll);
 }
+
+function handleDragScroll(e: any) {
+    const scrollThresholdTop = 350; // 触发滚动的边缘距离
+    const scrollThresholdDown = 60; // 触发滚动的边缘距离
+    const maxScrollSpeed = 15; // 最大滚动速度
+
+    // 获取视口高度
+    const viewportHeight = window.innerHeight;
+    // 获取鼠标位置
+    const mouseY = e.clientY;
+
+    // 判断是否在页面顶部或底部边缘
+    if (mouseY < scrollThresholdTop) {
+        // 靠近顶部，向上滚动
+        scrollDirection.value = 'up';
+        // 计算滚动速度，越靠近边缘速度越快
+        scrollSpeed.value = Math.ceil((scrollThresholdTop - mouseY) / scrollThresholdTop * maxScrollSpeed);
+        startAutoScroll();
+    } else if (mouseY > viewportHeight - scrollThresholdDown) {
+        // 靠近底部，向下滚动
+        scrollDirection.value = 'down';
+        // 计算滚动速度
+        scrollSpeed.value = Math.ceil((mouseY - (viewportHeight - scrollThresholdDown)) / scrollThresholdDown * maxScrollSpeed);
+        startAutoScroll();
+    } else {
+        // 不在边缘，停止滚动
+        stopAutoScroll();
+    }
+}
+
+function startAutoScroll() {
+    // 如果已经在滚动，不重复启动
+    if (autoScrollId.value !== null) return;
+
+    autoScrollId.value = window.setInterval(() => {
+        if (scrollDirection.value === 'up') {
+            window.scrollBy(0, -scrollSpeed.value);
+        } else {
+            window.scrollBy(0, scrollSpeed.value);
+        }
+    }, 16); // 约60fps
+}
+
+function stopAutoScroll() {
+    if (autoScrollId.value !== null) {
+        window.clearInterval(autoScrollId.value);
+        autoScrollId.value = null;
+    }
+}
+
 function dragenter(e: any, index: number, mod: IModInfo) {
     e.preventDefault()
     // 拖拽到原位置时不触发
@@ -104,6 +161,9 @@ function dragover(e: any) {
 }
 function dragend(e: any) {
     e.target.classList.remove('moveing')
+    // 停止自动滚动并移除事件监听
+    stopAutoScroll();
+    document.removeEventListener('dragover', handleDragScroll);
 }
 
 function list_dragover(e: any) {

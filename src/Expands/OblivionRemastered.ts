@@ -1,5 +1,5 @@
 /**
- * @description 黑神话 悟空 支持
+ * @description 上古卷轴4 湮灭 重制版 支持
  */
 
 
@@ -67,7 +67,20 @@ export const supportedGames: ISupportedGames = {
             exePath: "OblivionRemastered.exe"
         }
     ],
-    gameExe: "OblivionRemastered.exe",
+    gameExe: [
+        {
+            name: "OblivionRemastered.exe",
+            rootPath: ""
+        },
+        {
+            name: 'OblivionRemastered-Win64-Shipping.exe',
+            rootPath: "../../../"
+        },
+        {
+            name: 'OblivionRemastered-WinGDK-Shipping.exe',
+            rootPath: "../../../"
+        },
+    ],
     // archivePath: join(FileHandler.GetAppData(), "Local", "b1", "Saved"),
     gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_68084078343d1.jpg",
     modType: [
