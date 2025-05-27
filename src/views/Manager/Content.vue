@@ -1,9 +1,10 @@
 <script lang='ts' setup>
 
+import CustomTypes from '@/views/Manager/CustomTypes.vue'
 import ContentList from '@/views/Manager/Content/ListWrapper.vue'
-import { computed } from "vue";
 import ManagerContentTags from '@/views/Manager/Content/Tags.vue'
 import ManagerContentGamePlugins from '@/views/Manager/Content/GamePlugins.vue'
+
 const manager = useManager()
 const settings = useSettings()
 
@@ -32,6 +33,7 @@ let types = computed(() => {
                                 <small v-if="manager.filterType == item.id">({{ manager.filterModList.length }})</small>
                             </v-chip>
                         </v-chip-group>
+                        <CustomTypes></CustomTypes>
                         <div class="const-search">
                             <v-text-field density="compact" variant="solo" :label="$t('Search Mod')"
                                 append-inner-icon="mdi-magnify" single-line hide-details

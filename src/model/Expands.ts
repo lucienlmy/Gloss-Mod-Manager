@@ -53,13 +53,13 @@ export class Expands {
                     console.log(typeof (item.install));
                     let install = item.install
                     item.install = async (mod) => {
-                        return Expands.typeToFunction(install, mod, item)
+                        return Expands.typeToFunction(install, mod, item.installPath)
                     }
                 }
                 if (typeof (item.uninstall) == 'object') {
                     let uninstall = item.uninstall
                     item.uninstall = async (mod) => {
-                        return Expands.typeToFunction(uninstall, mod, item)
+                        return Expands.typeToFunction(uninstall, mod, item.installPath)
                     }
                 }
             })
@@ -80,12 +80,12 @@ export class Expands {
                         let item = checkModType[index]
                         switch (item.UseFunction) {
                             case "extname":
-                                if (item.Keyword.includes(extname(file))) return item.TypeId
+                                if (item.Keyword.includes(extname(file))) return item.TypeId || 0
                             case "basename":
-                                if (item.Keyword.includes(basename(file))) return item.TypeId
+                                if (item.Keyword.includes(basename(file))) return item.TypeId || 0
                             case "inPath":
                                 let list = FileHandler.pathToArray(file)
-                                if (item.Keyword.every(key => list.includes(key))) return item.TypeId
+                                if (item.Keyword.every(key => list.includes(key))) return item.TypeId || 0
                         }
                     }
                 }
@@ -104,19 +104,17 @@ export class Expands {
     }
 
     // 解析 类型
-    public static typeToFunction(install: ITypeInstall, mod: IModInfo, item: IType) {
-        // let install = item.install as ITypeInstall
-        // console.log(install);
+    public static typeToFunction(install: ITypeInstall, mod: IModInfo, installPath?: string) {
 
         switch (install.UseFunction) {
             case "generalInstall":
-                return Manager.generalInstall(mod, item.installPath ?? "", install.keepPath)
+                return Manager.generalInstall(mod, installPath ?? "", install.keepPath)
             case "generalUninstall":
-                return Manager.generalUninstall(mod, item.installPath ?? "", install.keepPath)
+                return Manager.generalUninstall(mod, installPath ?? "", install.keepPath)
             case "installByFile":
                 return Manager.installByFile(
                     mod,
-                    item.installPath ?? "",
+                    installPath ?? "",
                     install.fileName ?? "",
                     install.isInstall ?? true,
                     install.isExtname,
@@ -124,7 +122,7 @@ export class Expands {
             case "installByFileSibling":
                 return Manager.installByFileSibling(
                     mod,
-                    item.installPath ?? "",
+                    installPath ?? "",
                     install.fileName ?? "",
                     install.isInstall ?? true,
                     install.isExtname,
@@ -133,7 +131,7 @@ export class Expands {
             case "installByFolder":
                 return Manager.installByFolder(
                     mod,
-                    item.installPath ?? "",
+                    installPath ?? "",
                     install.folderName ?? "",
                     install.isInstall ?? true,
                     install.include,
@@ -141,7 +139,7 @@ export class Expands {
             case "installByFolderParent":
                 return Manager.installByFolderParent(
                     mod,
-                    item.installPath ?? "",
+                    installPath ?? "",
                     install.folderName ?? "",
                     install.isInstall ?? true,
                     install.inGameStorage)

@@ -9,9 +9,10 @@
 
 ### 相关链接:
 
-- 最新版本: [3DM Mod站](https://mod.3dmgame.com/mod/197445) | [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager) | [网盘](https://cloud.aoe.top/s/rmuL)
+- 最新版本: [3DM Mod站](https://mod.3dmgame.com/mod/197445) | [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager) | [网盘](https://pan.aoe.top/Tools/GMM)
 - 食用教程: https://gmm.aoe.top/
 - Mod前置: https://pan.aoe.top/GMM/Requirements
+- 新增游戏: [新游戏请求](https://github.com/GlossMod/Gloss-Mod-Manager/discussions/36)
 - 问卷调查: https://wj.qq.com/s2/14010887/92e3/
 - 问题反馈: [QQ频道](https://pd.qq.com/s/hco46ol54) | [QQ群 2169033132](https://qm.qq.com/q/ft6b4xx2PS) | [GitHub Issues](https://github.com/GlossMod/Gloss-Mod-Manager/issues) 
 
@@ -73,18 +74,8 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 - [ ] 自动处理Mod冲突问题
 
 
-### 帮助翻译
-如果您愿意帮助我们将 GMM 翻译成您的语言,您可以这样操作：
+### [帮助翻译](https://gmm.aoe.top/Translate.html)
 
-- 在[设置](#/Settings) 中点击 “导出语言包”, 
-- 导出的语言包会在`我的文档\Gloss Mod Manager\lang`中.
-- 复制一份您熟悉的语言(我们会优先更新 简体中文 和 English 的语言包)
-- 重命名为您的语言代码, 并在 `lang.json`文件中添加 (记得注意json格式规范)
-- 在管理器里面按`Ctrl + R`重载管理器, 即可在设置页面的语言列表里面看到您的文本
-- 使用您喜欢的文本编辑器打开`*.json`文件, 然后进行翻译.
-- 您可以随时按`Ctrl + R`重载管理器来即时查看翻译.
-- 事后您可以将翻译完成的文件通过邮箱`mod@3dmgame.com`或`xm@aoe.top`发送给我
-- 请记得在邮件中附上您翻译的语言和您的著名
 
 ### 反馈问题
 

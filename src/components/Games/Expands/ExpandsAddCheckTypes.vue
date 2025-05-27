@@ -1,11 +1,15 @@
 <script lang='ts' setup>
 
+const props = defineProps<{
+    isType?: boolean
+}>()
+
 const value = defineModel<ICheckModType>()
 
 </script>
 <template>
     <el-form class="form" label-width="80" v-if="value">
-        <el-form-item label="类型ID" required>
+        <el-form-item v-if="!isType" label="类型ID" required>
             <el-input v-model="value.TypeId" type="number" placeholder="与类型的ID对应"></el-input>
         </el-form-item>
         <el-form-item label="方法" required>

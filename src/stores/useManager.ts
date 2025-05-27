@@ -4,6 +4,7 @@ import { getAllExpands } from "@/Expands";
 import { ipcRenderer } from "electron";
 import { ElMessage } from "element-plus";
 import { FileHandler } from "@/model/FileHandler";
+import { ExpandsType } from "@/model/ExpandsType";
 
 export const useManager = defineStore('Manager', {
     state: () => ({
@@ -281,7 +282,12 @@ export const useManager = defineStore('Manager', {
                 mod.modType = task.modType
             } else {
                 if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                    mod.modType = await settings.settings.managerGame?.checkModType(mod)
+                    const extype = ExpandsType.checkModType(settings.settings.managerGame.gameName, files)
+                    if (extype) {
+                        mod.modType = extype
+                    } else {
+                        mod.modType = await settings.settings.managerGame?.checkModType(mod)
+                    }
                 }
             }
 
@@ -303,7 +309,12 @@ export const useManager = defineStore('Manager', {
                 fileName: path.basename(file),
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
-                mod.modType = await settings.settings.managerGame?.checkModType(mod)
+                const extype = ExpandsType.checkModType(settings.settings.managerGame.gameName, files)
+                if (extype) {
+                    mod.modType = extype
+                } else {
+                    mod.modType = await settings.settings.managerGame?.checkModType(mod)
+                }
             }
 
             this.managerModList.push(mod)

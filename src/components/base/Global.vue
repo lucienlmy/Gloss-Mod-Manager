@@ -8,6 +8,7 @@ import PackInport from '@/components/Manager/Pack/Inport.vue'
 import SelectGameWindows from '@/components/Games/SelectGameWindows.vue'
 
 import { useRouter } from 'vue-router'
+import { ExpandsType } from "@/model/ExpandsType";
 const { locale } = useI18n()
 const settings = useSettings()
 const download = useDownload()
@@ -63,9 +64,13 @@ watch(() => settings.settings.language, () => {
 
 //#region 初始化Mod管理
 GetModInfo()
+
 if (settings.settings.managerGame) {
     // modType 通过 modType.id 去重
-    settings.settings.managerGame.modType = [...new Map(settings.settings.managerGame.modType.map(item => [item.id, item])).values()]
+    settings.settings.managerGame.modType = [
+        ...new Map(settings.settings.managerGame.modType.map(item => [item.id, item])).values(),
+        ...ExpandsType.getExpandsTypeList(settings.settings.managerGame.gameName)
+    ]
 }
 
 watch(() => manager.managerModList, () => {
@@ -77,7 +82,6 @@ watch(() => manager.tags, () => {
 }, { deep: true })
 
 function GetModInfo() {
-    // manager.managerModList.length == 0 && settings.settings.managerGame
     if (settings.settings.managerGame) {
 
         manager.getModInfo().then(() => {
@@ -178,12 +182,19 @@ function setLightTheme() {
 //#region 监听游戏切换
 
 watch(() => settings.settings.managerGame, () => {
+
     archive.getArchiveList()
     archive.getBackupList()
 
     backupGame.getBackupList()
     backupGame.getGameFileList()
 
+    if (settings.settings.managerGame) {
+        settings.settings.managerGame.modType = [
+            ...settings.settings.managerGame.modType,
+            ...ExpandsType.getExpandsTypeList(settings.settings.managerGame.gameName)
+        ]
+    }
 })
 
 //#endregion

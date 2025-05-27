@@ -89,7 +89,7 @@ declare global {
         modAuthor?: string
         modWebsite?: string
         tags?: ITag[]
-        modType?: number
+        modType?: number | string
         other?: {
             [key: string]: any
         }
@@ -224,11 +224,11 @@ declare global {
     interface ICheckModType {
         UseFunction: "extname" | "basename" | "inPath"
         Keyword: string[]
-        TypeId: number
+        TypeId?: number
     }
 
     interface IType {
-        id: number
+        id: number | string
         name: string
         installPath?: string
         advanced?: {
@@ -253,6 +253,15 @@ declare global {
         unrealEngineData: { bassPath: string, useUE4SS: boolean }
         checkModType: (((mod: IModInfo) => number) | ICheckModType[]) | 'UnrealEngine.checkModType' | 'UnityGame.checkModType' | 'UnityGameILCPP2.checkModType' | 'Custom'
         sortMod?: (list: IModInfo[]) => boolean
+    }
+
+    interface IExpandsType {
+        id?: string
+        name: string
+        installPath: string
+        install: install
+        uninstall: install
+        checkModType: ICheckModType
     }
 
     interface IGamePlugins {

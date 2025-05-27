@@ -3,6 +3,8 @@
 在 1.51.0 版本，我对 游戏适配进行了更加简单优化， 在 选择游戏 窗口中，能找到 “创建自定义游戏”的选项；
 
 ![](https://mod.3dmgame.com/static/upload/mod/202412/MOD676283a00e646.png@webp)
+
+> [新游戏请求](https://github.com/GlossMod/Gloss-Mod-Manager/discussions/36)
  
 ### 旧版本
 -  [使用 TS 来制作游戏适配](TS.md) 

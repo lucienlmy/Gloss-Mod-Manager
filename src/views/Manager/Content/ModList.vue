@@ -196,8 +196,14 @@ function list_drop(e: any) {
 
 async function checkModType() {
     if (!props.mod.modType) {
-        if (typeof (settings.settings.managerGame?.checkModType) == "function")
-            props.mod.modType = await settings.settings.managerGame?.checkModType(props.mod)
+        if (typeof (settings.settings.managerGame?.checkModType) == "function") {
+            const extype = ExpandsType.checkModType(settings.settings.managerGame.gameName, props.mod.modFiles)
+            if (extype) {
+                props.mod.modType = extype
+            } else {
+                props.mod.modType = await settings.settings.managerGame?.checkModType(props.mod)
+            }
+        }
     }
 }
 

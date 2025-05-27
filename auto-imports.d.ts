@@ -16,6 +16,7 @@ declare global {
   const ElMessageBox: typeof import('element-plus/es')['ElMessageBox']
   const ElectronStore: typeof import('./src/model/ElectronStore')['ElectronStore']
   const Expands: typeof import('./src/model/Expands')['Expands']
+  const ExpandsType: typeof import('./src/model/ExpandsType')['ExpandsType']
   const FileHandler: typeof import('./src/model/FileHandler')['FileHandler']
   const FormRules: typeof import('./src/model/FormRules')['FormRules']
   const LocalLang: typeof import('./src/model/LocalLang')['LocalLang']
@@ -138,6 +139,9 @@ declare global {
   // @ts-ignore
   export type { Expands } from './src/model/Expands'
   import('./src/model/Expands')
+  // @ts-ignore
+  export type { ExpandsType } from './src/model/ExpandsType'
+  import('./src/model/ExpandsType')
   // @ts-ignore
   export type { FileHandler } from './src/model/FileHandler'
   import('./src/model/FileHandler')
