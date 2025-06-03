@@ -435,6 +435,7 @@ const Games = {
     "Clair Obscur Expedition 33": "光与影：33号远征队",
     "Sid Meier's Civilization VII": "席德·梅尔的文明7",
     "FINAL FANTASY VII REBIRTH": "最终幻想7 重生",
+    "Stellar Blade": "剑星",
 }
 
 const Other = {

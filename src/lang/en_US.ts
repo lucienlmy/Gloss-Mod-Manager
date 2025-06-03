@@ -426,6 +426,7 @@ const Games = {
     "Clair Obscur Expedition 33": "Clair Obscur Expedition 33",
     "Sid Meier's Civilization VII": "Sid Meier's Civilization VII",
     "FINAL FANTASY VII REBIRTH": "FINAL FANTASY VII REBIRTH",
+    "Stellar Blade": "Stellar Blade",
 }
 
 const Other = {
