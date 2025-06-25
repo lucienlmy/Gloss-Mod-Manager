@@ -161,6 +161,7 @@ const ManagerContent = {
     "Version": "Version",
     "Type": "Type",
     "Status": "Status",
+    "Preview": "Preview",
     "Action": "Action",
     "Drag and drop the Mod compressed package here for management": "Drag and drop the Mod compressed package here for management",
     "Supports zip, rar, 7z file types": "Supports file types in zip, rar, 7z",

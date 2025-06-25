@@ -81,7 +81,7 @@ async function toDownload(event: Event) {
         modName: props.item.name,
         fileId: filesList.value[0].file_id,
         version: filesList.value[0].version,
-    })
+    }, props.item.thumbnailUrl)
 
 }
 

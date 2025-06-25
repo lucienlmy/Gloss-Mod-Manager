@@ -23,6 +23,38 @@ export const useManager = defineStore('Manager', {
         runing: false,
         showShare: false,
         shareList: [] as IModInfo[],
+        custonTypes: {
+            showEdit: false,
+            formData: {
+                name: '',
+                installPath: '',
+                install: {
+                    UseFunction: 'Unknown',
+                    folderName: '',
+                    isInstall: true,
+                    include: false,
+                    spare: false,
+                    keepPath: false,
+                    isExtname: false,
+                    inGameStorage: true,
+                },
+                local: true,
+                uninstall: {
+                    UseFunction: 'Unknown',
+                    folderName: '',
+                    isInstall: false,
+                    include: false,
+                    spare: false,
+                    keepPath: false,
+                    isExtname: false,
+                    inGameStorage: true,
+                },
+                checkModType: {
+                    UseFunction: 'extname',
+                    Keyword: [],
+                }
+            } as IExpandsType
+        }
     }),
     getters: {
         /**
@@ -177,13 +209,11 @@ export const useManager = defineStore('Manager', {
                     id
                 )
 
-                let res = await Unzipper.unzip(file, target)
+                await Unzipper.unzip(file, target)
                 let files: string[] = []
-                res.forEach((item) => {
-                    if (item.status == 'extracted') {
-                        files.push(item.file)
-                    }
-                });
+                files = FileHandler.getAllFilesInFolder(target, true, true)
+                files = files.map(item => item.replace(target, ''))
+
                 await this.addModInfo(file, parseInt(id), files, md5);
             } else if (FileHandler.isDir(file)) {
                 this.maxID++
@@ -209,6 +239,28 @@ export const useManager = defineStore('Manager', {
                 )
                 await FileHandler.copyFolder(Folder, target)
                 this.addModInfo(file, parseInt(id), files, md5);
+            } else {
+                // 当添加单个文件时
+                this.maxID++
+                let id = this.maxID.toString()
+                console.log(id);
+
+                let md5 = await FileHandler.getFileMd5(file)
+                // 检查是否已经添加
+                if (this.isAdded(md5)) {
+                    ElMessage.error(`您已经添加过『${path.basename(file)}』这款Mod了!`)
+                    return
+                }
+
+                let target = path.join(
+                    settings.settings.modStorageLocation,
+                    settings.settings.managerGame?.gameName ?? "",
+                    id
+                )
+                await FileHandler.copyFile(file, target)
+                let files: string[] = []
+                files.push(path.basename(file))
+                await this.addModInfo(file, parseInt(id), files, md5);
             }
         },
         /**
@@ -261,6 +313,9 @@ export const useManager = defineStore('Manager', {
 
             files = files.map(item => item.replace(target, ''))
 
+            let cover = task.cover
+
+
             let mod: IModInfo = {
                 id: parseInt(id),
                 from: task.from,
@@ -276,6 +331,7 @@ export const useManager = defineStore('Manager', {
                 fileName: task.fileName,
                 key: task.key,
                 other: task.other,
+                cover: cover,
                 tags: task.tags,
             }
             if (task.modType) {
@@ -298,6 +354,27 @@ export const useManager = defineStore('Manager', {
         async addModInfo(file: string, id: number, files: string[], md5: string) {
             // console.log(md5);
             const settings = useSettings()
+
+            let cover = undefined as string | undefined
+
+            let coverFiles = files.filter(file =>
+                file.includes('image') ||
+                file.includes('cover') ||
+                file.includes('logo') ||
+                file.includes('icon'));
+            if (coverFiles.length == 0) {
+                coverFiles = files.filter(file =>
+                    file.toLowerCase().endsWith('.jpg') ||
+                    file.toLowerCase().endsWith('.png') ||
+                    file.toLowerCase().endsWith('.jpeg') ||
+                    file.toLowerCase().endsWith('.webp')
+                )
+            }
+            if (coverFiles.length > 0) {
+                cover = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", id.toString(), coverFiles[0])
+            }
+
+
             let mod: IModInfo = {
                 id: id,
                 modName: path.basename(file),
@@ -307,6 +384,7 @@ export const useManager = defineStore('Manager', {
                 weight: 500,
                 modFiles: files,
                 fileName: path.basename(file),
+                cover: `file:///${cover}`,
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
                 const extype = ExpandsType.checkModType(settings.settings.managerGame.gameName, files)

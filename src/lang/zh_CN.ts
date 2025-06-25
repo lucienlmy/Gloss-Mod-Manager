@@ -161,6 +161,7 @@ const ManagerContent = {
     "Version": "版本",
     "Type": "类型",
     "Status": "状态",
+    "Preview": "预览",
     "Action": "操作",
     "Drag and drop the Mod compressed package here for management": "将Mod压缩包拖拽到这里进行管理",
     "Supports zip, rar, 7z file types": "支持zip、rar、7z类型文件",

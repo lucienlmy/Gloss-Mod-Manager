@@ -12,6 +12,19 @@ let types = computed(() => {
     return settings.settings.managerGame?.modType ?? []
 })
 
+function delType(type: IType) {
+    if (settings.settings.managerGame) {
+        settings.settings.managerGame.modType = settings.settings.managerGame.modType.filter(item => item.id != type.id)
+        ExpandsType.removeExpandsType(type as IExpandsType)
+    }
+}
+
+function editType(type: IType) {
+    manager.custonTypes.showEdit = true
+    manager.custonTypes.formData.name = type.name
+    manager.custonTypes.formData.installPath = type.installPath
+}
+
 </script>
 <template>
     <div class="content">
@@ -28,10 +41,30 @@ let types = computed(() => {
                             <v-chip label variant="text" :value="0">{{ $t('All') }}
                                 <small v-if="manager.filterType == 0">({{ manager.filterModList.length }})</small>
                             </v-chip>
-                            <v-chip label variant="text" v-for="item in types" :key="item.id" :value="item.id">
-                                {{ $t(item.name) }}
-                                <small v-if="manager.filterType == item.id">({{ manager.filterModList.length }})</small>
-                            </v-chip>
+                            <template v-for="item in types" :key="item.id">
+                                <el-popover v-if="item.local">
+                                    <template #reference>
+                                        <v-chip label variant="text" :value="item.id">
+                                            {{ $t(item.name) }}
+                                            <small v-if="manager.filterType == item.id">
+                                                ({{ manager.filterModList.length }})
+                                            </small>
+                                        </v-chip>
+                                    </template>
+                                    <el-button link type="warning" @click="editType(item)">编辑
+                                        <el-icon><el-icon-edit></el-icon-edit></el-icon>
+                                    </el-button>
+                                    <el-button link type="danger" @click="delType(item)">删除
+                                        <el-icon><el-icon-delete></el-icon-delete></el-icon></el-button>
+                                </el-popover>
+                                <v-chip v-else label variant="text" :value="item.id">
+                                    {{ $t(item.name) }}
+                                    <small v-if="manager.filterType == item.id">
+                                        ({{ manager.filterModList.length }})
+                                    </small>
+                                </v-chip>
+                            </template>
+
                         </v-chip-group>
                         <CustomTypes></CustomTypes>
                         <div class="const-search">

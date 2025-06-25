@@ -30,6 +30,25 @@ export class ExpandsType {
             await FileHandler.writeFile(file, JSON.stringify(oldData, null, 4))
         }
     }
+    public static async removeExpandsType(data: IExpandsType) {
+        const settings = useSettings()
+        const gameName = settings.settings.managerGame?.gameName
+        if (gameName) {
+            const file = join(this.expandsFolder(), gameName + '.json')
+            if (FileHandler.fileExists(file)) {
+                // 读取现有数据
+                let oldData: IExpandsType[] = JSON.parse(FileHandler.readFile(file))
+
+                // 过滤掉要删除的拓展类型
+                oldData = oldData.filter(item => item.name !== data.name)
+
+                // 重新写入文件
+                await FileHandler.writeFile(file, JSON.stringify(oldData, null, 4))
+                return true
+            }
+        }
+        return false
+    }
 
     public static getExpandsTypeList(gameName: string) {
         const file = join(this.expandsFolder(), gameName + '.json')

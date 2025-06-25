@@ -37,7 +37,14 @@ async function callApi(path: string, data: any = {}, hostname: string = "mod.3dm
             reject(error);
         });
 
-        const dataString = JSON.stringify(data);
+        let dataString: string = ''
+        try {
+            dataString = JSON.stringify(data);
+        } catch (error) {
+            reject(new Error("Failed to stringify data: " + error));
+            return;
+        }
+
         req.write(dataString);
         req.end();
     });

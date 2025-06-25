@@ -98,12 +98,12 @@ async function reinstall() {
 <template>
     <v-menu open-on-hover>
         <template v-slot:activator="{ props }">
-            <v-btn variant="text" v-bind="props">
+            <el-button link v-bind="props">
                 <v-badge v-if="mod.isUpdate" dot floating color="success">
                     <v-icon>mdi-menu</v-icon>
                 </v-badge>
                 <v-icon v-else>mdi-menu</v-icon>
-            </v-btn>
+            </el-button>
         </template>
         <v-list>
             <v-list-item append-icon="mdi-square-edit-outline" :title="t('Edit')" @click="showEdit = true">

@@ -28,6 +28,7 @@ declare module 'vue' {
     ElFormItem: typeof import('element-plus/es')['ElFormItem']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElIconClose: typeof import('@element-plus/icons-vue')['Close']
+    ElIconDelete: typeof import('@element-plus/icons-vue')['Delete']
     ElIconEdit: typeof import('@element-plus/icons-vue')['Edit']
     ElIconPlus: typeof import('@element-plus/icons-vue')['Plus']
     ElIconUpload: typeof import('@element-plus/icons-vue')['Upload']

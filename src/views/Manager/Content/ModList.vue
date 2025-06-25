@@ -207,53 +207,70 @@ async function checkModType() {
     }
 }
 
+// function getCover(mod: IModInfo = props.mod) {
+
+//     switch (mod.from) {
+//         case "GlossMod":
+//             return mod.cover || "require('@/assets/images/mod-cover.png')";
+//         case 'web':
+//             return mod.cover || require('@/assets/images/mod-cover.png');
+//         case 'steam':
+//             return mod.cover || require('@/assets/images/steam-cover.png');
+//         default:
+//             return require('@/assets/images/mod-cover.png');
+//     }
+
+//     return ''
+// }
+
 checkModType()
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
-        <el-col :span="24">
-            <!-- 小列表 -->
-            <el-row class="mod-list">
-                <el-col :span="12" @dragover="list_dragover" @drop="list_drop">
-                    <el-checkbox v-if="manager.selectionMode" v-model="(manager.selectionList as any)" :value="mod">
-                        <template #default>
-                            <!-- <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                                {{ item.name }}</v-chip> -->
-                            <ModTags :tags="mod.tags"></ModTags>
-                            {{ mod.modName }}
-                        </template>
-                    </el-checkbox>
-                    <template v-else>
-                        <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
-                            <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
-                                @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
-                                @dragend="dragend" @dragover="dragover"></v-icon>
-                            <!-- <v-chip size="small" v-for="item in mod.tags" label :key="item.name" :color="item.color">
-                                {{ item.name }}</v-chip> -->
-                            <ModTags :tags="mod.tags"></ModTags>
-                            {{ mod.modName }}
-                        </p>
-                        <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
-                            v-model="mod.modName"></el-input>
+        <v-row class="mod-list">
+            <v-col cols="5" @dragover="list_dragover" @drop="list_drop">
+                <el-checkbox v-if="manager.selectionMode" v-model="(manager.selectionList as any)" :value="mod">
+                    <template #default>
+                        <ModTags :tags="mod.tags"></ModTags>
+                        {{ mod.modName }}
                     </template>
-                </el-col>
-                <el-col :span="2" class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</el-col>
-                <el-col :span="4">
-                    <el-select v-model="modType" :disabled="mod.isInstalled">
-                        <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id"
-                            :label="$t(item.name)" :value="item.id" />
-                    </el-select>
-                </el-col>
-                <el-col :span="4" class="small-install">
-                    <el-switch v-model="mod.isInstalled" size="small" :loading="loading" :disabled="manager.canChange"
-                        :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
-                </el-col>
-                <el-col :span="2" class="advanced">
-                    <!-- <ContentAdvanced :mod="mod"></ContentAdvanced> -->
-                    <ContentModMenu :mod="mod"></ContentModMenu>
-                </el-col>
-            </el-row>
-        </el-col>
+                </el-checkbox>
+                <template v-else>
+                    <p v-if="!exit_name" @dblclick="exit_name = true" class="text-truncate" :title="mod.modName">
+                        <v-icon class="list-sort" icon="mdi-dots-vertical" draggable="true"
+                            @dragstart="dragstart($event, index)" @dragenter="dragenter($event, index, mod)"
+                            @dragend="dragend" @dragover="dragover"></v-icon>
+                        <ModTags :tags="mod.tags"></ModTags>
+                        {{ mod.modName }}
+                    </p>
+                    <el-input v-else @blur="exit_name = false" @keydown.enter="exit_name = false"
+                        v-model="mod.modName"></el-input>
+                </template>
+            </v-col>
+            <v-col class="text-truncate" :title="mod.modVersion">{{ mod.modVersion }}</v-col>
+            <v-col cols="2">
+                <el-select v-model="modType" :disabled="mod.isInstalled">
+                    <el-option v-for="item in settings.settings.managerGame?.modType" :key="item.id"
+                        :label="$t(item.name)" :value="item.id" />
+                </el-select>
+            </v-col>
+            <v-col class="small-install">
+                <el-switch v-model="mod.isInstalled" size="small" :loading="loading" :disabled="manager.canChange"
+                    :active-text="mod.isInstalled ? $t('Installed') : $t('Uninstalled')" />
+            </v-col>
+            <v-col class="preview">
+                <el-popover :width="350" v-if="mod.cover">
+                    <template #reference>
+                        <v-icon>mdi-eye-outline</v-icon>
+                    </template>
+                    <el-image :src="mod.cover" :preview-src-list="[mod.cover]"></el-image>
+                </el-popover>
+                <v-icon v-else title="暂无预览">mdi-eye-off-outline</v-icon>
+            </v-col>
+            <v-col class="advanced">
+                <ContentModMenu :mod="mod"></ContentModMenu>
+            </v-col>
+        </v-row>
     </div>
 </template>
 <script lang='ts'>
@@ -283,7 +300,8 @@ export default {
             box-shadow: 0 0 10px rgba(var(--v-theme-on-surface), 0.3);
         }
 
-        .advanced {
+        .advanced,
+        .preview {
             display: flex;
             align-items: center;
             justify-content: center;

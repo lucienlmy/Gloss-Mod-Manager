@@ -107,6 +107,7 @@ declare global {
         weight: number
         modFiles: string[]
         modDesc?: string
+        cover?: string
         advanced?: {
             enabled: boolean
             data: any
@@ -122,6 +123,7 @@ declare global {
         name: string
         fileName: string
         version: string
+        cover?: string
         status: TaskStatus
         speed: number
         totalSize: number
@@ -230,12 +232,13 @@ declare global {
     interface IType {
         id: number | string
         name: string
-        installPath?: string
+        installPath: string
         advanced?: {
             name: string
             icon: string
             item: IAdvancedItem[]
         }
+        local?: boolean
         install: install
         uninstall: install
         checkPlugin?: (plugin: IModInfo) => boolean
@@ -259,6 +262,7 @@ declare global {
         id?: string
         name: string
         installPath: string
+        local: boolean
         install: install
         uninstall: install
         checkModType: ICheckModType

@@ -40,11 +40,12 @@ async function drop(event: DragEvent) {
             <div class="mod-list" v-if="manager.filterModList.length > 0">
                 <v-col cols="12">
                     <v-row>
-                        <v-col cols="6">{{ $t('Name') }}</v-col>
-                        <v-col cols="1">{{ $t('Version') }}</v-col>
+                        <v-col cols="5">{{ $t('Name') }}</v-col>
+                        <v-col>{{ $t('Version') }}</v-col>
                         <v-col cols="2" class="text-center">{{ $t('Type') }}</v-col>
-                        <v-col cols="2" class="text-center">{{ $t('Status') }}</v-col>
-                        <v-col cols="1" class="text-center">{{ $t('Action') }}</v-col>
+                        <v-col class="text-center">{{ $t('Status') }}</v-col>
+                        <v-col class="text-center">{{ $t('Preview') }}</v-col>
+                        <v-col class="text-center">{{ $t('Action') }}</v-col>
                     </v-row>
                 </v-col>
                 <TransitionGroup name="list" tag="div" class="container">

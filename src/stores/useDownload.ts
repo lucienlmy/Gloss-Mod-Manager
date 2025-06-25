@@ -68,12 +68,19 @@ export const useDownload = defineStore('Download', {
                 return
             }
 
-            // if (!link.includes("https://mod.3dmgame.com")) {
-            //     window.open(`https://mod.3dmgame.com/mod/${id}`)
-            //     return
-            // }
-
             let link = resource[0].mods_resource_url
+
+            // let link = resource[0].mods_resource_url.replace("https://mod.3dmgame.com", "https://dmod.3dmgame.com")
+
+            const { host } = useMain()
+
+            let cover: string
+            if (data.mods_image_url) {
+                cover = host + data.mods_image_url
+            } else {
+                cover = host + data.game_imgUrl
+            }
+
 
 
             let fileExt = extname(link)
@@ -93,6 +100,7 @@ export const useDownload = defineStore('Download', {
                 fileName: fileName,
                 tags: (mod as IModInfo).tags,
                 modType: (mod as IModInfo).modType,
+                cover: cover
             }
             this.addDownloadTask(task)
         },
@@ -153,6 +161,7 @@ export const useDownload = defineStore('Download', {
                 modWebsite: mod.package_url,
                 fileName: fileName,
                 key: key,
+                cover: mod.versions[0].icon,
                 other: {
                     namespace: mod.owner,
                     name: mod.name
@@ -186,7 +195,8 @@ export const useDownload = defineStore('Download', {
                 modAuthor: mod.submitted_by.username,
                 status: "waiting",
                 modWebsite: mod.profile_url,
-                fileName: fileName
+                fileName: fileName,
+                cover: mod.logo.thumb_640x360,
             }
             this.addDownloadTask(task)
 
@@ -233,7 +243,8 @@ export const useDownload = defineStore('Download', {
                 modAuthor: mod.authors[0].name,
                 modWebsite: mod.links.websiteUrl,
                 status: "waiting",
-                fileName: fileName
+                fileName: fileName,
+                cover: mod.logo.thumbnailUrl,
             }
 
             this.addDownloadTask(task)
@@ -320,6 +331,9 @@ export const useDownload = defineStore('Download', {
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod._idRow)
             // }
 
+            let { _sBaseUrl, _sFile530 } = mod._aPreviewMedia._aImages[0]
+            const cover = `${_sBaseUrl}/${_sFile530}`
+
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: mod._idRow,
@@ -333,7 +347,8 @@ export const useDownload = defineStore('Download', {
                 modAuthor: mod._aSubmitter._sName,
                 modWebsite: mod._sProfileUrl,
                 status: "waiting",
-                fileName: mod._aFiles[0]._sFile
+                fileName: mod._aFiles[0]._sFile,
+                cover: cover
             }
 
             this.addDownloadTask(task)
@@ -358,7 +373,7 @@ export const useDownload = defineStore('Download', {
             this.addDownloadTask(task)
         },
 
-        async addDownloadByNexusMods(nexusmodsData: INexusModsDownloadData) {
+        async addDownloadByNexusMods(nexusmodsData: INexusModsDownloadData, cover?: string) {
             const { domainName, modId, fileId, key, expires, version, author, modName } = nexusmodsData
 
             const nexusmods = useNexusMods()
@@ -412,7 +427,8 @@ export const useDownload = defineStore('Download', {
                 fileName: fileId + fileExt,
                 other: {
                     domainName, modId, fileId, key, expires, version, author, modName
-                }
+                },
+                cover: cover
             }
             this.addDownloadTask(task)
 
