@@ -100,7 +100,7 @@ export const useNexusMods = defineStore('NexusMods', {
 
             const files: INexusModsFile[] = data.files
 
-            let primary_files = files.filter(item => item.is_primary)
+            let primary_files = files.filter(item => item.category_name == 'MAIN')
 
             if (primary_files.length == 0) {
                 primary_files = files

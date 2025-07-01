@@ -374,6 +374,9 @@ export const useManager = defineStore('Manager', {
                 cover = path.join(settings.settings.modStorageLocation, settings.settings.managerGame?.gameName ?? "", id.toString(), coverFiles[0])
             }
 
+            if (cover) {
+                cover = `file:///${cover}`
+            }
 
             let mod: IModInfo = {
                 id: id,
@@ -384,7 +387,7 @@ export const useManager = defineStore('Manager', {
                 weight: 500,
                 modFiles: files,
                 fileName: path.basename(file),
-                cover: `file:///${cover}`,
+                cover: cover,
             }
             if (typeof (settings.settings.managerGame?.checkModType) == "function") {
                 const extype = ExpandsType.checkModType(settings.settings.managerGame.gameName, files)
