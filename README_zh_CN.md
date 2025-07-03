@@ -9,7 +9,7 @@
 
 ### 相关链接:
 
-- 最新版本: [3DM Mod站](https://mod.3dmgame.com/mod/197445) | [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager) | [网盘](https://pan.aoe.top/Tools/GMM)
+- 最新版本: [3DM Mod站](https://mod.3dmgame.com/mod/197445) | [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager) | [Microsoft Apps](https://apps.microsoft.com/detail/9P5VGZ39PK6T) | [网盘](https://pan.aoe.top/Tools/GMM) 
 - 食用教程: https://gmm.aoe.top/
 - Mod前置: https://pan.aoe.top/GMM/Requirements
 - 新增游戏: [新游戏请求](https://github.com/GlossMod/Gloss-Mod-Manager/discussions/36)

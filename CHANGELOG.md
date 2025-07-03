@@ -4,7 +4,7 @@
 - 修复 从 NxusMods 下载的内容有概率为旧版本的问题
 
 1.57.1
-- 更新打包 appx 以上架[微软应用商店]()
+- 更新打包 appx 以上架[微软应用商店](https://apps.microsoft.com/detail/9P5VGZ39PK6T)
 
 1.57.0
 - 新增 Mod预览功能
