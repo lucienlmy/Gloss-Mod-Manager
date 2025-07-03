@@ -227,7 +227,7 @@ checkModType()
 </script>
 <template>
     <div class="wrap" v-if="mod?.id" :class="{ 'new-version': mod.isUpdate }">
-        <v-row class="mod-list">
+        <v-row class="mod-list" dense>
             <v-col cols="5" @dragover="list_dragover" @drop="list_drop">
                 <el-checkbox v-if="manager.selectionMode" v-model="(manager.selectionList as any)" :value="mod">
                     <template #default>
@@ -285,6 +285,8 @@ export default {
         display: flex;
         align-items: center;
         transition: all 0.3s;
+        margin-top: .5rem;
+        margin-bottom: .5rem;
 
         .list-sort {
             // 移动的手势
