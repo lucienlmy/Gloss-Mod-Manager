@@ -1,6 +1,6 @@
 {
   "name": "gmm",
-  "version": "1.57.2",
+  "version": "1.57.3",
   "main": "dist-electron/main.js",
   "description": "Gloss Mod Manager",
   "author": "小莫sky <xm@aoe.top>",

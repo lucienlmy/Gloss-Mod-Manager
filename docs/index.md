@@ -16,6 +16,9 @@ hero:
     - theme: alt
       text: 下载
       link: "https://mod.3dmgame.com/mod/197445?for=download"
+    - theme: alt
+      text: 微软应用商店
+      link: "https://apps.microsoft.com/detail/9p5vgz39pk6t"
   image:
     src: "https://mod.3dmgame.com/static/upload/mod/202405/MOD663ed1e5509eb.png@webp"
     # width: "200px"

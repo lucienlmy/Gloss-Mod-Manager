@@ -17,6 +17,49 @@ logger.initialize()
 
 autoUpdater.logger = logger
 
+// 检查是否为微软应用商店版本
+const isFromMicrosoftStore = (() => {
+    // 检查是否为 appx 包（微软应用商店）
+    const execPath = app.getPath('exe')
+    const appName = app.getName()
+
+    // 多种检测方式
+    const isAppx = process.windowsStore ||
+        process.mas ||
+        process.env.APPX_PACKAGE_FULL_NAME ||
+        process.env.APPX_PACKAGE_NAME ||
+        execPath.includes('WindowsApps') ||
+        execPath.includes('Microsoft.WindowsStore') ||
+        // 检查是否在微软应用商店的安装目录
+        /WindowsApps.*?\.exe$/i.test(execPath)
+
+    console.log('检查更新来源:', {
+        isAppx,
+        execPath: execPath,
+        appName: appName,
+        windowsStore: process.windowsStore,
+        appxPackageName: process.env.APPX_PACKAGE_NAME,
+        appxPackageFullName: process.env.APPX_PACKAGE_FULL_NAME,
+        platform: process.platform,
+        arch: process.arch
+    })
+
+    return isAppx
+})()
+
+// 根据安装来源配置更新源
+if (isFromMicrosoftStore) {
+    // 微软应用商店版本禁用自动更新
+    autoUpdater.autoDownload = false
+    autoUpdater.autoInstallOnAppQuit = false
+    console.log('微软应用商店版本，禁用自动更新')
+} else {
+    // 安装包版本使用默认更新源
+    autoUpdater.autoDownload = true
+    autoUpdater.autoInstallOnAppQuit = true
+    console.log('安装包版本，启用自动更新')
+}
+
 // const require = createRequire(import.meta.url)
 const __dirname = dirname(fileURLToPath(import.meta.url))
 // The built directory structure
@@ -157,6 +200,12 @@ async function createWindow() {
     // 稍微等待一下渲染进程
     setTimeout(() => {
         app.emit("second-instance", null, process.argv);
+
+        // 向渲染进程发送更新来源信息
+        win?.webContents.send('update-source-info', {
+            isFromMicrosoftStore,
+            source: isFromMicrosoftStore ? 'Microsoft Store' : 'Direct Download'
+        })
     }, 3000)
 
     win.on('close', () => {
@@ -302,31 +351,83 @@ ipcMain.handle('check-mod-update', async (event, arg) => {
 
 // 自动更新
 ipcMain.handle('check-for-updates', (event, arg) => {
-    autoUpdater.checkForUpdates();
+    if (isFromMicrosoftStore) {
+        // 微软应用商店版本，提示用户到应用商店更新
+        win?.webContents.send('update-from-store')
+        return { fromStore: true, message: '请前往微软应用商店更新应用' }
+    } else {
+        // 安装包版本，使用自动更新
+        autoUpdater.checkForUpdates()
+        return { fromStore: false }
+    }
 })
+
 // 安装并重启
 ipcMain.handle('install-update-and-restart', (event, arg) => {
-    // autoUpdater.quitAndInstall();
-    autoUpdater.quitAndInstall(false)
+    if (isFromMicrosoftStore) {
+        // 微软应用商店版本，提示用户到应用商店更新
+        win?.webContents.send('update-from-store')
+        return { fromStore: true, message: '请前往微软应用商店更新应用' }
+    } else {
+        // 安装包版本，执行自动更新
+        // autoUpdater.quitAndInstall();
+        autoUpdater.quitAndInstall(false)
+        return { fromStore: false }
+    }
+})
+
+// 获取更新来源信息
+ipcMain.handle('get-update-source', (event, arg) => {
+    return {
+        isFromMicrosoftStore,
+        source: isFromMicrosoftStore ? 'Microsoft Store' : 'Direct Download'
+    }
+})
+
+// 打开微软应用商店更新页面
+ipcMain.handle('open-microsoft-store-update', (event, arg) => {
+    if (isFromMicrosoftStore) {
+        // 打开微软应用商店的应用页面
+        const storeUrl = `ms-windows-store://pdp/?productid=9NBLGGH4NNS1` // 这里需要替换为实际的应用ID
+        shell.openExternal(storeUrl).catch(() => {
+            // 如果无法打开应用商店，则打开网页版
+            shell.openExternal('https://apps.microsoft.com/detail/9P5VGZ39PK6T')
+        })
+        return { success: true, message: '已打开微软应用商店' }
+    } else {
+        return { success: false, message: '当前不是微软应用商店版本' }
+    }
 })
 
 autoUpdater.on('checking-for-update', () => {
-    win?.webContents.send('checking-for-update')
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send('checking-for-update')
+    }
 })
 autoUpdater.on('update-available', (info) => {
-    win?.webContents.send('update-available', info);
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send('update-available', info);
+    }
 })
 autoUpdater.on('update-not-available', (info) => {
-    win?.webContents.send('update-not-available', info);
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send('update-not-available', info);
+    }
 })
 autoUpdater.on('error', (err) => {
-    win?.webContents.send('update-error', err);
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send('update-error', err);
+    }
 })
 autoUpdater.on('download-progress', (progressObj) => {
-    win?.webContents.send("download-progress", progressObj);
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send("download-progress", progressObj);
+    }
 })
 autoUpdater.on('update-downloaded', (info) => {
-    win?.webContents.send('update-downloaded', info);
+    if (!isFromMicrosoftStore) {
+        win?.webContents.send('update-downloaded', info);
+    }
 });
 
 //#endregion
