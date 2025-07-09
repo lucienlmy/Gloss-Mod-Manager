@@ -9,11 +9,12 @@ export const useContent = defineStore('Content', {
     getters: {
     },
     actions: {
-        async getModDataByID(id: number) {
+        async getModDataByID(id: number | string) {
             // get-mod-data
             this.loading = true
             this.modData = await ipcRenderer.invoke('get-mod-data', { id })
             this.loading = false
+            return this.modData
         }
     },
 

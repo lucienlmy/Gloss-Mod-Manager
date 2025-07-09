@@ -378,6 +378,10 @@ export const useManager = defineStore('Manager', {
                 cover = `file:///${cover}`
             }
 
+            // const modData = await this.getModDataByFileName(path.basename(file))
+            // console.log(modData);
+            this.getModDataByFileName(path.basename(file), id)
+
             let mod: IModInfo = {
                 id: id,
                 modName: path.basename(file),
@@ -549,6 +553,69 @@ export const useManager = defineStore('Manager', {
                 }
             }
             // console.log(this.runing);
+        },
+        async getModDataByFileName(fileName: string, id: number) {
+            try {
+                // 正则匹配 3dmmods_id220433_fid307323_战场决斗.zip_by_将和.zip 中的 220433
+                let reg = fileName.match(/3dmmods_id(\d+)_fid\d+_.*/);
+                let modId;
+                if (reg) {
+                    modId = reg[1];
+                }
+                if (modId) {
+                    const content = useContent()
+                    const data = await content.getModDataByID(modId)
+                    console.log(data);
+
+                    if (data) {
+
+                        const mod = this.getModInfoById(id)
+
+                        if (mod) {
+                            mod.modName = data.mods_title
+                            mod.webId = data.id
+                            mod.modVersion = data.mods_version || "1.0.0"
+                            mod.cover = `https://mod.3dmgame.com${data.mods_image_url}`
+                            mod.from = 'GlossMod'
+                        }
+                    }
+                    return
+                }
+
+                // 正则匹配 Yeon Yi's Simple Makeup-35445-1-0-0-1751962473.zip 中的 35445
+                // Revenant Moveset V2.1-8263-1-16-V1-1751834995.zip 中的 8263
+                let reg2 = fileName.match(/^.+-(\d+)-\d+-\d+-\w+-\d+.*/)
+
+                if (reg2) {
+                    modId = reg2[1];
+                }
+                if (modId) {
+                    const nexusmods = useNexusMods()
+                    const settings = useSettings()
+                    if (settings.settings.managerGame?.nexusMods?.game_domain_name) {
+                        const data = await nexusmods.getModData(modId, settings.settings.managerGame?.nexusMods?.game_domain_name)
+
+                        if (data && data.status == 'published') {
+                            console.log(data);
+
+                            const mod = this.getModInfoById(id)
+                            if (mod) {
+                                mod.webId = data.modId
+                                mod.from = 'NexusMods'
+                                mod.modName = data.name
+                                mod.modVersion = data.version
+                                mod.cover = data.picture_url
+                            }
+
+                        }
+
+                        return
+                    }
+                }
+
+            } catch (error) {
+                return undefined
+            }
 
         }
     }

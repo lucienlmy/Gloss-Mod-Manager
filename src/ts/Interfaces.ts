@@ -933,6 +933,7 @@ declare global {
         viewerUpdateAvailable: boolean | null;
         version: string;
         author: string;
+        picture_url: string
     }
 
     interface INexusModsFile {
