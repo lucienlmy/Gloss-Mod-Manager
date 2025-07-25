@@ -428,6 +428,7 @@ const Games = {
     "Sid Meier's Civilization VII": "Sid Meier's Civilization VII",
     "FINAL FANTASY VII REBIRTH": "FINAL FANTASY VII REBIRTH",
     "Stellar Blade": "Stellar Blade",
+    "Wuchang Fallen Feathers": "Wuchang Fallen Feathers",
 }
 
 const Other = {

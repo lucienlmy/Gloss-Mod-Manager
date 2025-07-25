@@ -437,6 +437,7 @@ const Games = {
     "Sid Meier's Civilization VII": "席德·梅尔的文明7",
     "FINAL FANTASY VII REBIRTH": "最终幻想7 重生",
     "Stellar Blade": "剑星",
+    "Wuchang Fallen Feathers": "明末：渊虚之羽",
 }
 
 const Other = {

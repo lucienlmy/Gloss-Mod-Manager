@@ -413,7 +413,7 @@ export const useDownload = defineStore('Download', {
 
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
-                webId: modId,
+                webId: `${modId}_${fileId}`,
                 from: "NexusMods",
                 name: modName,
                 version: version,
