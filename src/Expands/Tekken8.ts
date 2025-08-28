@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "TEKKEN 8", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65b9e69f3b61b.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65b9e69f3b61b.webp",
     modType: UnrealEngine.modType("Polaris", false),
     checkModType: UnrealEngine.checkModType
 }

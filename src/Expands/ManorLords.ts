@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "ManorLords.exe",
     archivePath: join(FileHandler.GetAppData(), "Local", "ManorLords", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/662db2a8b4521.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/662db2a8b4521.webp",
     modType: UnrealEngine.modType("ManorLords", false),
     checkModType: UnrealEngine.checkModType
 }

@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "Hellblade2", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/181.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/181.jpg",
     modType: UnrealEngine.modType("Hellblade2", false),
     checkModType: UnrealEngine.checkModType
 }

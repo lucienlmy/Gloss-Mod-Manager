@@ -85,7 +85,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Fallout4"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6b.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6b.png",
     modType: [
         {
             id: 1,

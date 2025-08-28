@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "ff7rebirth.exe",
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "FINAL FANTASY VII REBIRTH"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_683582d5e4a77.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_683582d5e4a77.jpg",
     modType: UnrealEngine.modType("End", false),
     checkModType: UnrealEngine.checkModType
 }

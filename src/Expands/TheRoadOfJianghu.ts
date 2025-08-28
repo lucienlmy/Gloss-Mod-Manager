@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     // archivePath: join(FileHandler.GetAppData(), "LocalLow", "BadMudStudio", "daojianjianghulu"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202409/MOD66ee9421978bf.jpg@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202409/MOD66ee9421978bf.jpg@webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

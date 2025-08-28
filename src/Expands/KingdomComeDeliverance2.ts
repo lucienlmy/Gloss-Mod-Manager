@@ -31,7 +31,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "..", "Saved Games", "kingdomcome"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202502/MOD67a1ffc3c7198.jpg@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202502/MOD67a1ffc3c7198.jpg@webp",
     modType: [
         {
             id: 1,

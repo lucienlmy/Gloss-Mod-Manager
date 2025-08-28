@@ -66,7 +66,7 @@ export const supportedGames: ISupportedGames = {
             exePath: 'MonsterHunterWorld.exe'
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/161b.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/161b.png",
     archivePath: join(Steam.getSteamInstallPath() || "", "userdata", Steam.GetLastSteamId32(), "582010", "remote"),
     modType: [
         {

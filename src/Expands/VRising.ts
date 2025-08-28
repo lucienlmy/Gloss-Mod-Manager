@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Stunlock Studios", "VRising"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/632f15e51ee2c.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/632f15e51ee2c.png",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

@@ -24,7 +24,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     // archivePath: join(FileHandler.GetAppData(), "Local", "SparkingZERO", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202410/MOD6721f29b85384.jpg@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202410/MOD6721f29b85384.jpg@webp",
     modType: [
         {
             id: 1,

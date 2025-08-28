@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Endnight", "SonsOfTheForest"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63fc08e3ef48b.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/63fc08e3ef48b.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

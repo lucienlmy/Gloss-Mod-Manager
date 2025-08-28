@@ -46,7 +46,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Euro Truck Simulator 2"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/15.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/15.jpg",
     modType: [
         {
             id: 1,

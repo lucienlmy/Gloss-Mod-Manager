@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "Saltpeter.exe",
     archivePath: join(FileHandler.GetAppData(), "Local", "Saltpeter", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202407/MOD669a223b01b15.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202407/MOD669a223b01b15.webp@webp",
     modType: UnrealEngine.modType("Saltpeter", false),
     checkModType: UnrealEngine.checkModType
 }

@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "FNGameX", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/66447d161b2ff.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/66447d161b2ff.webp",
     modType: UnrealEngine.modType("FNGameX", false),
     checkModType: UnrealEngine.checkModType
 }

@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "..", "Saved Games", "Frontier Developments", "Planet Zoo"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/653a085c9ddd7.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/653a085c9ddd7.webp",
     modType: [
         {
             id: 1,

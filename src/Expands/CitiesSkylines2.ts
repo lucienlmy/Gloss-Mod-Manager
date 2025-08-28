@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Colossal Order", "Cities Skylines II"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6535dbba96ba3.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6535dbba96ba3.webp",
     modType: [
         {
             id: 4,

@@ -55,7 +55,7 @@ export const useDownload = defineStore('Download', {
             // data = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
             let resource = data.mods_resource.filter(item => {
                 item.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
-                return item.mods_resource_url.includes("https://mod.3dmgame.com")
+                return item.mods_resource_url.includes("mod.3dmgame.com")
             })
 
             if (fid) {
@@ -68,9 +68,8 @@ export const useDownload = defineStore('Download', {
                 return
             }
 
-            let link = resource[0].mods_resource_url
-
-            // let link = resource[0].mods_resource_url.replace("https://mod.3dmgame.com", "https://dmod.3dmgame.com")
+            // let link = resource[0].mods_resource_url
+            let link = resource[0].mods_resource_url.replace("https://mod.3dmgame.com", "https://dmod.3dmgame.com")
 
             const { host } = useMain()
 

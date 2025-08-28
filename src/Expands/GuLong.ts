@@ -21,7 +21,7 @@
 //             exePath: join("GuLong.exe")
 //         }
 //     ],
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65bef978b5da4.webp",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65bef978b5da4.webp",
 //     modType: [
 //         {
 //             id: 4,

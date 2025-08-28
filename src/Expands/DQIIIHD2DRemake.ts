@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "SparkingZERO", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202412/MOD675a59d27912a.png@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202412/MOD675a59d27912a.png@webp",
     modType: UnrealEngine.modType("Game", true),
     checkModType: UnrealEngine.checkModType
 }

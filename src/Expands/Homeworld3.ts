@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "Homeworld3", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6423ab827ad41.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6423ab827ad41.webp",
     modType: UnrealEngine.modType("Homeworld3", false),
     checkModType: UnrealEngine.checkModType
 }

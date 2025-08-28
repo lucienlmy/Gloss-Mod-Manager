@@ -33,7 +33,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Anno 1800"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/189.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/189.png",
     modType: [
         {
             id: 1,

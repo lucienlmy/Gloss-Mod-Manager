@@ -23,7 +23,7 @@
 //         }
 //     ],
 //     archivePath: join(FileHandler.getMyDocuments(), "My Games", "FarmingSimulator2022"),
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/61a9e018c601c.png",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/61a9e018c601c.png",
 //     modType: [
 //         {
 //             id: 1,

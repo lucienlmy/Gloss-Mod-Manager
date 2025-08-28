@@ -54,7 +54,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Larian Studios", "Divinity Original Sin 2 Definitive Edition"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/34.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/34.jpg",
     modType: [
         {
             id: 1,

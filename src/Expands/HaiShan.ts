@@ -23,7 +23,7 @@ export const supportedGames: ISupportedGames = {
             exePath: join("海山.exe")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202407/MOD669638c34fae8.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202407/MOD669638c34fae8.webp@webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Two Point Studios", "Two Point Campus"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65a74761bb3fe.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65a74761bb3fe.webp",
     modType: [
         {
             id: 1,

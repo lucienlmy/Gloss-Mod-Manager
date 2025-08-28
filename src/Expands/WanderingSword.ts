@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "JH.exe",
     archivePath: join(FileHandler.GetAppData(), "Local", "Wandering_Sword", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/656d920e5f559.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/656d920e5f559.webp",
     modType: UnrealEngine.modType("Wandering_Sword", false),
     checkModType: UnrealEngine.checkModType
 }

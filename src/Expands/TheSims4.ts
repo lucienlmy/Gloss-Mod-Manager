@@ -46,7 +46,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Electronic Arts", "The Sims 4"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/8a.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/8a.jpg",
     modType: [
         {
             id: 1,

@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "inmotiongame", "下一站江湖Ⅱ"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6629b6eff3688.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6629b6eff3688.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

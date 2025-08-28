@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "ZeekerssRBLX"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65a0f0fb13a40.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65a0f0fb13a40.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

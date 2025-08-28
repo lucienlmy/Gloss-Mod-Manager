@@ -43,7 +43,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "American Truck Simulator"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/52.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/52.jpg",
     modType: [
         {
             id: 1,

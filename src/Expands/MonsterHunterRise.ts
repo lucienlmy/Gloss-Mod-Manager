@@ -120,7 +120,7 @@ export const supportedGames: ISupportedGames = {
             exePath: 'MonsterHunterRise.exe'
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/61dbdb30cdbce.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/61dbdb30cdbce.png",
     archivePath: join(Steam.getSteamInstallPath() || "", "userdata", Steam.GetLastSteamId32(), "1446780", "remote"),
     modType: [
         {

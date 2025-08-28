@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "Hinterland", "TheLongDark"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65.png",
     modType: UnityGameILCPP2.modType,
     checkModType: UnityGameILCPP2.checkModType
 }

@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "TheLostVillage", "Saved"),
     gameExe: "TheLostVillage.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6629bb7235d50.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6629bb7235d50.webp",
     modType: UnrealEngine.modType("TheLostVillage", false),
     checkModType: UnrealEngine.checkModType
 }

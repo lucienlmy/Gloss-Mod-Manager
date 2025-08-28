@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Terraria"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/64cc631c336ce.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/64cc631c336ce.webp",
     modType: [
         {
             id: 1,

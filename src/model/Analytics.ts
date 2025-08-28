@@ -32,7 +32,7 @@ export class AppAnalytics {
         const version = (await useMain().getVersion())[0]
         const language = useSettings().settings.language
 
-        fetch(`https://mod.3dmgame.com/gmm/send`, {
+        fetch(`https://assets-mod.3dmgame.com/gmm/send`, {
             method: "POST",
             body: JSON.stringify({
                 event_name, event_value, user_id, gmm_login, version, language

@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "CrazyRocks", "ContrabandPolice"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65f1169237040.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65f1169237040.webp",
     modType: [
         ...UnityGame.modType
     ],

@@ -30,7 +30,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Respawn", "Titanfall2"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65a9d3b2453ae.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65a9d3b2453ae.webp",
     modType: [
         {
             id: 1,

@@ -25,7 +25,7 @@
 //             exePath: join("DOA6.exe")
 //         }
 //     ],
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/182.jpg",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/182.jpg",
 //     modType: [
 //         {
 //             id: 1,

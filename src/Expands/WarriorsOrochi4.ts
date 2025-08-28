@@ -24,7 +24,7 @@ export const supportedGames: ISupportedGames = {
             exePath: join("WO4.exe")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/168.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/168.jpg",
     modType: [
         {
             id: 1,

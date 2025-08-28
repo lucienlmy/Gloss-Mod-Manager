@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
             exePath: join("7DaysToDie.exe")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/40.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/40.jpg",
     modType: [
         {
             id: 1,

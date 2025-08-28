@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Massive Monster", "Cult Of The Lamb"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65f2c99bb3e08.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65f2c99bb3e08.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

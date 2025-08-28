@@ -28,7 +28,7 @@ export const supportedGames: ISupportedGames = {
             exePath: 'tlou-ii.exe'
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_67fdc9247cc4b.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_67fdc9247cc4b.jpg",
     modType: [
         {
             id: 1,

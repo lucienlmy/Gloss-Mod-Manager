@@ -219,7 +219,7 @@ export const supportedGames: ISupportedGames = {
         },
     ],
     archivePath: join(FileHandler.GetAppData(), 'Local', 'Larian Studios', "Baldur's Gate 3"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/5f9fc80ea912c.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/5f9fc80ea912c.png",
     modType: [
         {
             id: 1,

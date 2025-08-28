@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "StateOfDecay2.exe",
     archivePath: join(FileHandler.GetAppData(), "Local", "StateOfDecay2", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/238.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/238.png",
     modType: UnrealEngine.modType("StateOfDecay2", false),
     checkModType: UnrealEngine.checkModType
 }

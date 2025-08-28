@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "Pal7", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6256729d72a41.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6256729d72a41.png",
     modType: UnrealEngine.modType("Pal7", false),
     checkModType: UnrealEngine.checkModType
 }

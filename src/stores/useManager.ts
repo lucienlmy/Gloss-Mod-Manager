@@ -575,7 +575,7 @@ export const useManager = defineStore('Manager', {
                             mod.modName = data.mods_title
                             mod.webId = data.id
                             mod.modVersion = data.mods_version || "1.0.0"
-                            mod.cover = `https://mod.3dmgame.com${data.mods_image_url}`
+                            mod.cover = `https://assets-mod.3dmgame.com${data.mods_image_url}`
                             mod.from = 'GlossMod'
                         }
                     }

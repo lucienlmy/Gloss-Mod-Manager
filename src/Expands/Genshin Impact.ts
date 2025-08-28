@@ -40,7 +40,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     // archivePath: join(FileHandler.GetAppData(), "Local", "b1", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/66da7e920f43e.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/66da7e920f43e.webp",
     modType: [
         {
             id: 1,

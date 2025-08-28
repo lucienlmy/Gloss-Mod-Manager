@@ -37,7 +37,7 @@
 //             exePath: join("Binaries", "Win64", "XCom2.exe")
 //         }
 //     ],
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/38.jpg",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/38.jpg",
 //     modType: [
 //         {
 //             id: 1,

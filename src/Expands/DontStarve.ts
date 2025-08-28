@@ -64,7 +64,7 @@ export const supportedGames: ISupportedGames = {
         },
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Klei"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/14.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/14.jpg",
     modType: [
         {
             id: 1,

@@ -54,7 +54,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     gameExe: "KSP_x64.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/62.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/62.jpg",
     modType: [
         {
             id: 1,

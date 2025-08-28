@@ -55,7 +55,7 @@ export const supportedGames: ISupportedGames = {
             cmd: 'steam://rungameid/838350'
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/167.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/167.png",
     modType: [
         {
             id: 1,

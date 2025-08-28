@@ -196,7 +196,7 @@ export const supportedGames: ISupportedGames = {
         },
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Starfield"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/64db454e9f5c4.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/64db454e9f5c4.webp",
     modType: [
         {
             id: 1,

@@ -21,7 +21,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     gameExe: "inZOI.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202503/MOD67c7ff0ec9f40.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202503/MOD67c7ff0ec9f40.webp@webp",
     modType: [
         ...UnrealEngine.modType("BlueClient", false),
         {

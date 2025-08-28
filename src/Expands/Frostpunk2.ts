@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "11bitstudios", "Frostpunk2"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202410/MOD6706347b70717.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202410/MOD6706347b70717.webp@webp",
     modType: UnrealEngine.modType("Frostpunk2", false),
     checkModType: UnrealEngine.checkModType
 }

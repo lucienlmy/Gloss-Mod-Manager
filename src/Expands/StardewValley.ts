@@ -65,7 +65,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Roaming", "StardewValley"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/10.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/10.jpg",
     modType: [
         {
             id: 1,

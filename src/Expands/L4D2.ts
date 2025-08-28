@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
             exePath: 'left4dead2.exe'
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/12.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/12.jpg",
     modType: [
         {
             id: 1,

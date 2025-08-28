@@ -21,7 +21,7 @@ export const useNews = defineStore("News", {
         },
         async getNewMods() {
             const settings = useSettings()
-            const { data } = await axios.post(`https://mod.3dmgame.com/api/v2/GetModList`, {
+            const { data } = await axios.post(`https://assets-mod.3dmgame.com/api/v2/GetModList`, {
                 pageSize: 10,
                 game_id: settings.settings.managerGame?.GlossGameId
             }, {
@@ -36,7 +36,7 @@ export const useNews = defineStore("News", {
         },
         async getHotMods() {
             const settings = useSettings()
-            const { data } = await axios.post(`https://mod.3dmgame.com/api/v2/GetModList`, {
+            const { data } = await axios.post(`https://assets-mod.3dmgame.com/api/v2/GetModList`, {
                 pageSize: 10,
                 game_id: settings.settings.managerGame?.GlossGameId,
                 order: 1,

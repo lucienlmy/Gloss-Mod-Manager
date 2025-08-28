@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "DefaultCompany", "Wulin"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/641d08aca63ce.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/641d08aca63ce.webp",
     modType: [
         {
             id: 4,

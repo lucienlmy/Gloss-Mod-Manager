@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Darkest"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/664ef0d003b8a.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/664ef0d003b8a.webp",
     modType: [
         ...UnityGame.modType,
         {

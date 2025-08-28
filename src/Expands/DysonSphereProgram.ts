@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Dyson Sphere Program"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/60112fb1bdafa.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/60112fb1bdafa.png",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

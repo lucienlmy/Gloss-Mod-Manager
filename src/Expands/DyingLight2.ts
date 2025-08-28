@@ -160,7 +160,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "dying light 2", "out"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/61dbf5a660a03.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/61dbf5a660a03.png",
     modType: [
         {
             id: 1,

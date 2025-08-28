@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Ghost of Tsushima DIRECTOR'S CUT"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/664703cf381cf.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/664703cf381cf.webp",
     modType: [
         {
             id: 1,

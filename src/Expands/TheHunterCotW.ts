@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Avalanche Studios", "theHunter Call of the Wild", "Saves"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/64e2df9a8310c.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/64e2df9a8310c.webp",
     modType: [
         {
             id: 1,

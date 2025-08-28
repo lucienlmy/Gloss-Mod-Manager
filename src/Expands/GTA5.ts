@@ -813,7 +813,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Rockstar Games", "GTA V"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/616cd448533b9.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/616cd448533b9.png",
     modType: [
         {
             id: 1,

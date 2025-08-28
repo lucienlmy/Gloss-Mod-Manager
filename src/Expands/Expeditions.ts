@@ -31,7 +31,7 @@ export const supportedGames: ISupportedGames = {
             rootPath: join("..", "..")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6670007e442e8.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6670007e442e8.webp",
     modType: [
         {
             id: 1,

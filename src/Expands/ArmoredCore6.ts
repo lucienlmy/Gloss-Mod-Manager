@@ -75,7 +75,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), 'Roaming', 'ArmoredCore6'),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/64e5a555a4360.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/64e5a555a4360.webp",
     modType: [
         {
             id: 1,

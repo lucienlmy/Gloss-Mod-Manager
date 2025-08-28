@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "Obb Studio", "Mortal"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/667126e01ba80.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/667126e01ba80.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

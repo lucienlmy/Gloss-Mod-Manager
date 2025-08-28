@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Paradox Interactive", "Stellaris"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/21.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/21.jpg",
     modType: [
         {
             id: 1,

@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "GB4", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202410/MOD670635775ec6c.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202410/MOD670635775ec6c.webp@webp",
     modType: UnrealEngine.modType("GB4", false),
     checkModType: UnrealEngine.checkModType
 }

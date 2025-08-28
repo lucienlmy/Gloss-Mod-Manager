@@ -87,7 +87,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Roaming", "Sekiro"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/185.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/185.png",
     modType: [
         {
             id: 1,

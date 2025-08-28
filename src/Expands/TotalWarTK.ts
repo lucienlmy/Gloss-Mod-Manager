@@ -40,7 +40,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Roaming", "The Creative Assembly", "ThreeKingdoms"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/193.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/193.png",
     modType: [
         {
             id: 1,

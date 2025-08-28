@@ -28,7 +28,7 @@ export const supportedGames: ISupportedGames = {
     archivePath: (() => {
         return join(FileHandler.GetAppData(), "Local", "LOTF2", "Saved")
     })(),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/664db7b3148f8.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/664db7b3148f8.webp",
     modType: UnrealEngine.modType("LOTF2", false),
     checkModType: UnrealEngine.checkModType
 }

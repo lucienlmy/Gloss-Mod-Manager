@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "DBFighterZ", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/157.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/157.jpg",
     modType: UnrealEngine.modType("RED", false),
     checkModType: UnrealEngine.checkModType
 }

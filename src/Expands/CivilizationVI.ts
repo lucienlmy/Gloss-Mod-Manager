@@ -32,7 +32,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Sid Meier's Civilization VI"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/5.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/5.jpg",
     modType: [
         {
             id: 1,

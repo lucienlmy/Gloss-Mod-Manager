@@ -24,7 +24,7 @@
 //         }
 //     ],
 //     archivePath: join(FileHandler.getMyDocuments(), "Humankind"),
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65a7365985d61.webp",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65a7365985d61.webp",
 //     modType: [
 //         {
 //             id: 1,

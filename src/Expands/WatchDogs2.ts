@@ -112,7 +112,7 @@ export const supportedGames: ISupportedGames = {
             exePath: "EAC.exe"
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/176.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/176.jpg",
     modType: [
         {
             id: 1,

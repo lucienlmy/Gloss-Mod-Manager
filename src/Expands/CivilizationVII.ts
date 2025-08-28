@@ -40,7 +40,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Sid Meier's Civilization VII"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_681b310c641ef.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_681b310c641ef.jpg",
     modType: [
         {
             id: 1,

@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Roaming", "Jagged Alliance 3"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/64be23bb84fe3.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/64be23bb84fe3.webp",
     modType: [
         {
             id: 1,

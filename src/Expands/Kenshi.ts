@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "Kenshi", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/186.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/186.png",
     modType: [
         {
             id: 1,

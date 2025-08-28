@@ -20,7 +20,7 @@
 //             exePath: "granblue_fantasy_relink.exe"
 //         }
 //     ],
-//     gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65bb62a24e92f.webp",
+//     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65bb62a24e92f.webp",
 //     modType: UnrealEngine.modType("Polaris", false),
 //     checkModType: UnrealEngine.checkModType
 // }

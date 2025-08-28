@@ -29,7 +29,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "IronGate", "Valheim"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65f1415124b36.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65f1415124b36.webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

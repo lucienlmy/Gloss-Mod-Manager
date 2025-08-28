@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     gameExe: "Ace7Game.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65f174af429dd.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65f174af429dd.webp",
     modType: UnrealEngine.modType("Game", false),
     checkModType: UnrealEngine.checkModType
 }

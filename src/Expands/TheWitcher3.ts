@@ -80,7 +80,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "The Witcher 3"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/4a.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/4a.jpg",
     modType: [
         {
             id: 1,

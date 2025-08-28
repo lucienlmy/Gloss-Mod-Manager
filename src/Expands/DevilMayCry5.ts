@@ -34,7 +34,7 @@ export const supportedGames: ISupportedGames = {
             return join(FileHandler.GetAppData(), "Local", "SKIDROW", "220440", "Storage")
         }
     })(),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/183.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/183.jpg",
     modType: REEngine.modType,
     checkModType: REEngine.checkModType
 }

@@ -29,7 +29,7 @@ export const useGames = defineStore("Games", {
             }
 
             try {
-                const { data } = await axios.post('https://mod.3dmgame.com/api/v2/GetPluginsList', {}, {
+                const { data } = await axios.post('https://assets-mod.3dmgame.com/api/v2/GetPluginsList', {}, {
                     headers: {
                         "Authorization": "67d8667248a801ff6ddc74ac43016168"
                     }

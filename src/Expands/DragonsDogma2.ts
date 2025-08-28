@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(Steam.getSteamInstallPath() || "", "userdata", Steam.GetLastSteamId32(), "2054970", "remote"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65f8f21471754.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65f8f21471754.webp",
     modType: REEngine.modType,
     checkModType: REEngine.checkModType
 }

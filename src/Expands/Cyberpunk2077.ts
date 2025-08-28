@@ -91,7 +91,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "..", "Saved Games", "CD Projekt Red"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/195.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/195.png",
     modType: [
         {
             id: 1,

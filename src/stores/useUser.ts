@@ -27,7 +27,7 @@ export const useUser = defineStore('User', {
                 if (state.user.user_avatar.indexOf('my.3dmgame.com') != -1) {
                     return state.user.user_avatar
                 } else {
-                    return `https://mod.3dmgame.com${state.user.user_avatar}`
+                    return `https://assets-mod.3dmgame.com${state.user.user_avatar}`
                 }
             }
         },
@@ -112,7 +112,7 @@ export const useUser = defineStore('User', {
                 clearInterval(this.timer!)
             }
             let code = this.createCode()
-            fetch(`https://mod.3dmgame.com/gmm/checkLogin`, {
+            fetch(`https://assets-mod.3dmgame.com/gmm/checkLogin`, {
                 method: "POST",
                 body: JSON.stringify({ code })
             }).then(async (res) => {

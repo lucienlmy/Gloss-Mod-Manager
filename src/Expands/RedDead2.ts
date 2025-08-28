@@ -117,7 +117,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Rockstar Games", "Red Dead Redemption 2"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/208.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/208.png",
     modType: [
         {
             id: 1,

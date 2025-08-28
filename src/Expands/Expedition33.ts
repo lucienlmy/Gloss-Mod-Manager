@@ -36,7 +36,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     // archivePath: join(FileHandler.getMyDocuments(), "My Games", "FINAL FANTASY VII REMAKE"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_6809e94cd72e9.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_6809e94cd72e9.jpg",
     modType: UnrealEngine.modType("Sandfall", false),
     checkModType: UnrealEngine.checkModType
 }

@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "CallistoProtocol", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6605404b51bc3.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6605404b51bc3.webp",
     modType: UnrealEngine.modType("TheCallistoProtocol", false),
     checkModType: UnrealEngine.checkModType
 }

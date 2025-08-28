@@ -23,7 +23,7 @@ export const supportedGames: ISupportedGames = {
             exePath: join("shapez 2.exe")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/mod/202408/MOD66bf055eb2ba5.webp@webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202408/MOD66bf055eb2ba5.webp@webp",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

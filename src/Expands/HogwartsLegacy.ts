@@ -25,7 +25,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "Local", "HogwartsLegacy", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63e2f9656f092.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/63e2f9656f092.webp",
     modType: UnrealEngine.modType("Phoenix", false),
     checkModType: UnrealEngine.checkModType,
 }

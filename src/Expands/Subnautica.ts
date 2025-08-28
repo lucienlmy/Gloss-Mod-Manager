@@ -24,7 +24,7 @@ export const supportedGames: ISupportedGames = {
             exePath: join("Subnautica.exe")
         }
     ],
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/105a.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/105a.jpg",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

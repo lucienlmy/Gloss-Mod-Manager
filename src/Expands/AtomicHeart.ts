@@ -26,7 +26,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "..", "Saved Games", "AtomicHeart"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/63f5846644d4e.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/63f5846644d4e.webp",
     modType: UnrealEngine.modType("AtomicHeart", false),
     checkModType: UnrealEngine.checkModType
 }

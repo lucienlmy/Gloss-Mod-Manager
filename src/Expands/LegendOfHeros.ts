@@ -70,7 +70,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "FreeWing", "ThreeKingdom"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_67eca42846bf0.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_67eca42846bf0.jpg",
     modType: [
         ...UnityGameILCPP2.modType,
         {

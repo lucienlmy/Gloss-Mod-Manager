@@ -20,7 +20,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     gameExe: "LOP.exe",
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/65127b4a5041a.webp",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/65127b4a5041a.webp",
     modType: UnrealEngine.modType("LiesofP", false),
     checkModType: UnrealEngine.checkModType,
 }

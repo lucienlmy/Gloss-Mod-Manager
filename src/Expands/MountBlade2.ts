@@ -60,7 +60,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "Mount and Blade II Bannerlord"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/225.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/225.png",
     modType: [
         {
             id: 1,

@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     // archivePath: join(FileHandler.GetAppData(), "Local", "Stalker2", "Saved"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/logo/croppedImg_68818e5553d86.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/logo/croppedImg_68818e5553d86.jpg",
     modType: UnrealEngine.modType("Project_Plague", false),
     checkModType: UnrealEngine.checkModType
 }

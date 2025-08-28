@@ -42,7 +42,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "KoeiTecmo", "Nioh2"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/6041c647d7a35.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/6041c647d7a35.png",
     modType: [
         {
             id: 1,

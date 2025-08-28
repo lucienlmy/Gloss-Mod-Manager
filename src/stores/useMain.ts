@@ -4,7 +4,7 @@ export const useMain = defineStore('Main', {
     state: () => ({
         leftMenu: true,
         leftMenuRail: false,
-        host: 'https://mod.3dmgame.com',
+        host: 'https://assets-mod.3dmgame.com',
         version: "",
         webVersion: null as any,
         start: false

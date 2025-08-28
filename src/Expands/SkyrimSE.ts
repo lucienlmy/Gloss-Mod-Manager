@@ -77,7 +77,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "Skyrim Special Edition"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/2.jpg",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/2.jpg",
     modType: [
         {
             id: 1,

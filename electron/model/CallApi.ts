@@ -8,7 +8,7 @@ import { Config } from './Config'
  * @param data 
  * @returns 
  */
-async function callApi(path: string, data: any = {}, hostname: string = "mod.3dmgame.com"): Promise<any> {
+async function callApi(path: string, data: any = {}, hostname: string = "assets-mod.3dmgame.com"): Promise<any> {
     let version = app.getVersion()
     const options: https.RequestOptions = {
         hostname, path,

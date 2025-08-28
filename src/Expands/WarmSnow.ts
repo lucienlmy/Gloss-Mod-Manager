@@ -22,7 +22,7 @@ export const supportedGames: ISupportedGames = {
         }
     ],
     archivePath: join(FileHandler.GetAppData(), "LocalLow", "BadMudStudio", "WarmSnow"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/61eb6d1e3f646.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/61eb6d1e3f646.png",
     modType: UnityGame.modType,
     checkModType: UnityGame.checkModType
 }

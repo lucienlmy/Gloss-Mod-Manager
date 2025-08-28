@@ -27,7 +27,7 @@ export const supportedGames: ISupportedGames = {
     ],
     gameExe: "ff7remake.exe",
     archivePath: join(FileHandler.getMyDocuments(), "My Games", "FINAL FANTASY VII REMAKE"),
-    gameCoverImg: "https://mod.3dmgame.com/static/upload/game/61c027ed1cbc1.png",
+    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/61c027ed1cbc1.png",
     modType: UnrealEngine.modType("End", false),
     checkModType: UnrealEngine.checkModType
 }
