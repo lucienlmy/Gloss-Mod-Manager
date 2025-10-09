@@ -1,16 +1,15 @@
 import { defineStore } from "pinia";
 import { ipcRenderer } from "electron";
-export const useModView = defineStore('ModView', {
+import { _3DMApi } from "@/model/_3DMApi";
+export const useModView = defineStore("ModView", {
     state: () => ({
         mod: null as IMod | null,
-        id: 0
+        id: 0,
     }),
 
     actions: {
         GetModData() {
-            ipcRenderer.send("get-mod-data", {
-                id: this.id
-            })
+            _3DMApi.getModData(this.id);
         },
-    }
-})
+    },
+});

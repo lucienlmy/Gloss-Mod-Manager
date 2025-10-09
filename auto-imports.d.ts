@@ -29,6 +29,7 @@ declare global {
   const UnityGameILCPP2: typeof import('./src/model/UnityGame')['UnityGameILCPP2']
   const UnrealEngine: typeof import('./src/model/UnrealEngine')['UnrealEngine']
   const Unzipper: typeof import('./src/model/Unzipper')['Unzipper']
+  const _3DMApi: typeof import('./src/model/_3DMApi')['_3DMApi']
   const computed: typeof import('vue')['computed']
   const createApp: typeof import('vue')['createApp']
   const customRef: typeof import('vue')['customRef']
@@ -172,4 +173,7 @@ declare global {
   // @ts-ignore
   export type { Unzipper } from './src/model/Unzipper'
   import('./src/model/Unzipper')
+  // @ts-ignore
+  export type { _3DMApi } from './src/model/_3DMApi'
+  import('./src/model/_3DMApi')
 }

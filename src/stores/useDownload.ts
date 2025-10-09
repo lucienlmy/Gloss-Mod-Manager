@@ -4,86 +4,101 @@ import { useSettings } from "./useSettings";
 import { ElMessage } from "element-plus";
 import { ipcRenderer } from "electron";
 
-
 import axios from "axios";
-export const useDownload = defineStore('Download', {
+import { _3DMApi } from "@/model/_3DMApi";
+export const useDownload = defineStore("Download", {
     state: () => ({
-        tab: 'all' as 'all' | "active" | "waiting" | "paused" | "error" | "complete" | "removed",
-        downloadTaskList: [] as IDownloadTask[],    // 下载任务列表
+        tab: "all" as
+            | "all"
+            | "active"
+            | "waiting"
+            | "paused"
+            | "error"
+            | "complete"
+            | "removed",
+        downloadTaskList: [] as IDownloadTask[], // 下载任务列表
         // downloadProcessList: [] as Download[],      // 下载进程列表 进程列表会在重启软件后清空
         searchName: "",
         // aria2: new APIAria2(),
         showAddTaskDialog: false,
-        addTaskTab: 'GlossMod',
+        addTaskTab: "GlossMod",
         form: {
-            url: '',
-            id: '',
-            name: '',
-            link: '',
+            url: "",
+            id: "",
+            name: "",
+            link: "",
         },
         autoInstall: true,
         isInit: false,
     }),
     getters: {
         configPath(): string {
-            const settings = useSettings()
-            return `${settings.settings.modStorageLocation}\\cache\\download.json`
-        }
+            const settings = useSettings();
+            return `${settings.settings.modStorageLocation}\\cache\\download.json`;
+        },
     },
     actions: {
         async initialization() {
-            let config = await FileHandler.readFileSync(this.configPath, "[]")  // 读取文件
-            this.downloadTaskList = JSON.parse(config)    // 转换为对象
+            let config = await FileHandler.readFileSync(this.configPath, "[]"); // 读取文件
+            this.downloadTaskList = JSON.parse(config); // 转换为对象
         },
 
         /**
          * 通过ID添加下载任务
-         * @param id 
+         * @param id
          */
-        async addDownloadById(mod: IModInfo | IDownloadTask | number, fid?: string | null) {
-            let id: number
-            if (typeof mod == 'number') {
-                id = mod
+        async addDownloadById(
+            mod: IModInfo | IDownloadTask | number,
+            fid?: string | null
+        ) {
+            let id: number;
+            if (typeof mod == "number") {
+                id = mod;
             } else {
-                id = mod.webId as number
+                id = mod.webId as number;
             }
 
-            let data: IMod = await ipcRenderer.invoke("get-mod-data", { id })
+            let data: IMod = await _3DMApi.getModData(id);
             // 将 link.value 里面的 http://mod.3dmgame.com 换成 https://mod.3dmgame.com
             console.log(data);
 
             // data = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
-            let resource = data.mods_resource.filter(item => {
-                item.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
-                return item.mods_resource_url.includes("mod.3dmgame.com")
-            })
+            let resource = data.mods_resource.filter((item) => {
+                item.mods_resource_url.replace(
+                    "http://mod.3dmgame.com",
+                    "https://mod.3dmgame.com"
+                );
+                return item.mods_resource_url.includes("mod.3dmgame.com");
+            });
 
             if (fid) {
-                resource = data.mods_resource.filter(item => item.id == parseInt(fid))
+                resource = data.mods_resource.filter(
+                    (item) => item.id == parseInt(fid)
+                );
             }
 
-
             if (resource.length == 0) {
-                window.open(`https://mod.3dmgame.com/mod/${id}`)
-                return
+                window.open(`https://mod.3dmgame.com/mod/${id}`);
+                return;
             }
 
             // let link = resource[0].mods_resource_url
-            let link = resource[0].mods_resource_url.replace("https://mod.3dmgame.com", "https://dmod.3dmgame.com")
+            let link = resource[0].mods_resource_url.replace(
+                "https://mod.3dmgame.com",
+                "https://dmod.3dmgame.com"
+            );
 
-            const { host } = useMain()
+            const { host } = useMain();
 
-            let cover: string
+            let cover: string;
             if (data.mods_image_url) {
-                cover = host + data.mods_image_url
+                cover = host + data.mods_image_url;
             } else {
-                cover = host + data.game_imgUrl
+                cover = host + data.game_imgUrl;
             }
 
-
-
-            let fileExt = extname(link)
-            let fileName = data.id + fileExt
+            let fileExt = extname(link);
+            let fileName = data.id + fileExt;
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: data.id,
@@ -99,42 +114,46 @@ export const useDownload = defineStore('Download', {
                 fileName: fileName,
                 tags: (mod as IModInfo).tags,
                 modType: (mod as IModInfo).modType,
-                cover: cover
-            }
-            this.addDownloadTask(task)
+                cover: cover,
+            };
+            this.addDownloadTask(task);
         },
         /**
          * 通过ID获取任务
          * @param id 任务ID
-         * @returns 
+         * @returns
          */
         getTaskById(id: number | string) {
-            return this.downloadTaskList.find(item => item.webId == id)
+            return this.downloadTaskList.find((item) => item.webId == id);
         },
 
         /**
          * 保存任务配置
          */
         saveTaskConfig() {
-            let tasks: IDownloadTask[] = JSON.parse(JSON.stringify(this.downloadTaskList))
-            FileHandler.writeFile(this.configPath, JSON.stringify(tasks))
+            let tasks: IDownloadTask[] = JSON.parse(
+                JSON.stringify(this.downloadTaskList)
+            );
+            FileHandler.writeFile(this.configPath, JSON.stringify(tasks));
         },
 
         //#region 添加下载到任务
 
         /**
          * 通过网页添加下载任务
-         * @param url 
+         * @param url
          */
         async addDownloadByWeb(url: string) {
-            if (!url.startsWith("gmm://installmod")) return
+            if (!url.startsWith("gmm://installmod")) return;
             // let url = gmm://installmod/172999?fid=304507
-            const params = new URLSearchParams(url.replace("gmm://installmod/", ""));
+            const params = new URLSearchParams(
+                url.replace("gmm://installmod/", "")
+            );
             const id = params.get("id");
             const fid = params.get("fid");
             console.log(id, fid);
 
-            this.addDownloadById(Number(id), fid)
+            this.addDownloadById(Number(id), fid);
         },
 
         async addDownloadByThunderstore(mod: IThunderstoreMod, key?: string) {
@@ -143,8 +162,8 @@ export const useDownload = defineStore('Download', {
             //     // 如果已存在则移除
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.uuid4)
             // }
-            let fileExt = '.zip'
-            let fileName = mod.name + fileExt
+            let fileExt = ".zip";
+            let fileName = mod.name + fileExt;
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: mod.package_url,
@@ -163,11 +182,11 @@ export const useDownload = defineStore('Download', {
                 cover: mod.versions[0].icon,
                 other: {
                     namespace: mod.owner,
-                    name: mod.name
-                }
-            }
+                    name: mod.name,
+                },
+            };
 
-            this.addDownloadTask(task)
+            this.addDownloadTask(task);
         },
 
         async addDownloadByModIo(mod: IModIo) {
@@ -179,8 +198,8 @@ export const useDownload = defineStore('Download', {
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
             // }
 
-            let fileExt = '.zip'
-            let fileName = mod.id + fileExt
+            let fileExt = ".zip";
+            let fileName = mod.id + fileExt;
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: mod.id,
@@ -196,8 +215,8 @@ export const useDownload = defineStore('Download', {
                 modWebsite: mod.profile_url,
                 fileName: fileName,
                 cover: mod.logo.thumb_640x360,
-            }
-            this.addDownloadTask(task)
+            };
+            this.addDownloadTask(task);
 
             // let task = this.getTaskById(mod.id) as IDownloadTask
 
@@ -215,7 +234,6 @@ export const useDownload = defineStore('Download', {
             // task.gid = gid.result
 
             // ElMessage.success(`${task.name} 已添加到下载列表`)
-
         },
 
         async addDownloadByCurseForge(mod: ICurseForgeMod) {
@@ -226,9 +244,12 @@ export const useDownload = defineStore('Download', {
             // }
 
             // 将 mod.latestFiles[0].downloadUrl 里面的 edge.forgecdn.net 替换为 mediafilez.forgecdn.net
-            let downloadUrl = mod.latestFiles[0].downloadUrl.replace("edge.forgecdn.net", "mediafilez.forgecdn.net")
+            let downloadUrl = mod.latestFiles[0].downloadUrl.replace(
+                "edge.forgecdn.net",
+                "mediafilez.forgecdn.net"
+            );
 
-            let fileName = mod.latestFiles[0].fileName
+            let fileName = mod.latestFiles[0].fileName;
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: mod.id,
@@ -244,9 +265,9 @@ export const useDownload = defineStore('Download', {
                 status: "waiting",
                 fileName: fileName,
                 cover: mod.logo.thumbnailUrl,
-            }
+            };
 
-            this.addDownloadTask(task)
+            this.addDownloadTask(task);
 
             // let task = this.getTaskById(mod.id) as IDownloadTask
 
@@ -266,20 +287,23 @@ export const useDownload = defineStore('Download', {
             // task.gid = gid.result
 
             // ElMessage.success(`${task.name} 已添加到下载列表`)
-
         },
 
-        async addDownloadByGitHub(release: IGitHubRelease, website: string, fileName: string) {
+        async addDownloadByGitHub(
+            release: IGitHubRelease,
+            website: string,
+            fileName: string
+        ) {
             // // 判断是否已经存在
             // if (this.getTaskById(mod.id)) {
             //     // 如果已存在则移除
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod.id)
             // }
 
-            let _mod = release.assets.find(item => item.name == fileName)
+            let _mod = release.assets.find((item) => item.name == fileName);
             if (!_mod) {
-                ElMessage.warning("未找到对应文件")
-                return
+                ElMessage.warning("未找到对应文件");
+                return;
             }
 
             let task: IDownloadTask = {
@@ -295,10 +319,10 @@ export const useDownload = defineStore('Download', {
                 modAuthor: release.author.login,
                 modWebsite: website,
                 status: "waiting",
-                fileName: release.name
-            }
+                fileName: release.name,
+            };
 
-            this.addDownloadTask(task)
+            this.addDownloadTask(task);
 
             // let task = this.getTaskById(mod.id) as IDownloadTask
 
@@ -318,11 +342,12 @@ export const useDownload = defineStore('Download', {
             // task.gid = gid.result
 
             // ElMessage.success(`${task.name} 已添加到下载列表`)
-
         },
 
         async addDownloadByGameBanana(id: number) {
-            let { data: mod } = await axios.get<IGameBananaMod>(`https://gamebanana.com/apiv11/Mod/${id}/ProfilePage`)
+            let { data: mod } = await axios.get<IGameBananaMod>(
+                `https://gamebanana.com/apiv11/Mod/${id}/ProfilePage`
+            );
 
             // // 判断是否已经存在
             // if (this.getTaskById(mod._idRow)) {
@@ -330,15 +355,15 @@ export const useDownload = defineStore('Download', {
             //     this.downloadTaskList = this.downloadTaskList.filter(item => item.id != mod._idRow)
             // }
 
-            let { _sBaseUrl, _sFile530 } = mod._aPreviewMedia._aImages[0]
-            const cover = `${_sBaseUrl}/${_sFile530}`
+            let { _sBaseUrl, _sFile530 } = mod._aPreviewMedia._aImages[0];
+            const cover = `${_sBaseUrl}/${_sFile530}`;
 
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
                 webId: mod._idRow,
                 from: "GameBanana",
                 name: mod._sName,
-                version: mod._sVersion || '1.0.0',
+                version: mod._sVersion || "1.0.0",
                 speed: 0,
                 totalSize: 0,
                 downloadedSize: 0,
@@ -347,10 +372,10 @@ export const useDownload = defineStore('Download', {
                 modWebsite: mod._sProfileUrl,
                 status: "waiting",
                 fileName: mod._aFiles[0]._sFile,
-                cover: cover
-            }
+                cover: cover,
+            };
 
-            this.addDownloadTask(task)
+            this.addDownloadTask(task);
         },
 
         async addDownloadByCustomize(url: string, name: string) {
@@ -367,48 +392,63 @@ export const useDownload = defineStore('Download', {
                 modAuthor: "",
                 modWebsite: "",
                 status: "waiting",
-                fileName: name
-            }
-            this.addDownloadTask(task)
+                fileName: name,
+            };
+            this.addDownloadTask(task);
         },
 
-        async addDownloadByNexusMods(nexusmodsData: INexusModsDownloadData, cover?: string) {
-            const { domainName, modId, fileId, key, expires, version, author, modName } = nexusmodsData
+        async addDownloadByNexusMods(
+            nexusmodsData: INexusModsDownloadData,
+            cover?: string
+        ) {
+            const {
+                domainName,
+                modId,
+                fileId,
+                key,
+                expires,
+                version,
+                author,
+                modName,
+            } = nexusmodsData;
 
-            const nexusmods = useNexusMods()
-            let get_download_link = `https://api.nexusmods.com/v1/games/${domainName}/mods/${modId}/files/${fileId}/download_link.json`
+            const nexusmods = useNexusMods();
+            let get_download_link = `https://api.nexusmods.com/v1/games/${domainName}/mods/${modId}/files/${fileId}/download_link.json`;
 
             if (key) {
-                get_download_link = `${get_download_link}?key=${key}&expires=${expires}`
+                get_download_link = `${get_download_link}?key=${key}&expires=${expires}`;
             }
 
-            const { data } = await axios.get(get_download_link, {
-                headers: await nexusmods.getheader()
-            }).catch(err => ({
-                data: {
-                    err: true,
-                    ...err.response.data
-                }
-            }))
+            const { data } = await axios
+                .get(get_download_link, {
+                    headers: await nexusmods.getheader(),
+                })
+                .catch((err) => ({
+                    data: {
+                        err: true,
+                        ...err.response.data,
+                    },
+                }));
 
             // 没有权限, 打开网页 下载
             if (data.err) {
-                ElMessage.error(data.message)
-                window.open(`https://www.nexusmods.com/${domainName}/mods/${modId}?tab=files&file_id=${fileId}&nmm=1`)
-                return
+                ElMessage.error(data.message);
+                window.open(
+                    `https://www.nexusmods.com/${domainName}/mods/${modId}?tab=files&file_id=${fileId}&nmm=1`
+                );
+                return;
             }
 
             // 正常获取到下载地址
             console.log(data);
-            const { URI, name, short_name } = data[0]
+            const { URI, name, short_name } = data[0];
 
             // URL = https://supporter-files.nexus-cdn.com/3333/2380/RED4ext-2380-1-27-0-1737651915.zip?md5=VZ2VLjGLyXNYWI6HLJ5slA&expires=1743080796&user_id=48836423
             // 从 URL 获取文件后缀
-            let fileExt = extname(URI)
+            let fileExt = extname(URI);
             // 移除 ?md5=VZ2VLjGLyXNYWI6HLJ5slA&expires=1743080796&user_id=48836423
-            fileExt = fileExt.split("?")[0]
+            fileExt = fileExt.split("?")[0];
             console.log("fileExt", fileExt);
-
 
             let task: IDownloadTask = {
                 id: APIAria2.randomNumbers(),
@@ -425,105 +465,132 @@ export const useDownload = defineStore('Download', {
                 status: "waiting",
                 fileName: fileId + fileExt,
                 other: {
-                    domainName, modId, fileId, key, expires, version, author, modName
+                    domainName,
+                    modId,
+                    fileId,
+                    key,
+                    expires,
+                    version,
+                    author,
+                    modName,
                 },
-                cover: cover
-            }
-            this.addDownloadTask(task)
-
+                cover: cover,
+            };
+            this.addDownloadTask(task);
         },
 
         // 添加下载任务
         async addDownloadTask(task: IDownloadTask) {
-
-
             // 判断是否已经存在
             if (this.getTaskById(task.webId as string)) {
                 // 如果已存在则移除
-                this.downloadTaskList = this.downloadTaskList.filter(item => item.webId != task.webId)
+                this.downloadTaskList = this.downloadTaskList.filter(
+                    (item) => item.webId != task.webId
+                );
             }
-            this.downloadTaskList.unshift(task)
-            const settings = useSettings()
-            let dest = join(settings.settings.modStorageLocation, 'cache')
+            this.downloadTaskList.unshift(task);
+            const settings = useSettings();
+            let dest = join(settings.settings.modStorageLocation, "cache");
 
-            let gid = await APIAria2.addUri(task.link, task.fileName, dest).catch(err => {
-                ElMessage.error(`下载错误: ${err}`)
-            })
+            let gid = await APIAria2.addUri(
+                task.link,
+                task.fileName,
+                dest
+            ).catch((err) => {
+                ElMessage.error(`下载错误: ${err}`);
+            });
 
-            task.gid = gid.result
+            task.gid = gid.result;
             console.log(task.gid);
 
-            ElMessage.success(`${task.name} 已添加到下载列表`)
+            ElMessage.success(`${task.name} 已添加到下载列表`);
 
             if (!this.isInit) {
                 // 跳转到 /download 页面
-                const router = window.router || (window as any).$router
+                const router = window.router || (window as any).$router;
                 console.log(router);
 
                 if (router) {
-                    router.push('/download')
+                    router.push("/download");
                 }
             }
-
         },
 
         //#endregion
 
         //#region 重新下载
         async ReStart(mod: IModInfo | IDownloadTask, modStorage: string) {
-            FileHandler.deleteFile(modStorage)
+            FileHandler.deleteFile(modStorage);
             console.log(mod);
 
             switch (mod.from) {
                 case "GlossMod":
-                    this.addDownloadById(mod)
+                    this.addDownloadById(mod);
                     break;
                 case "Thunderstore":
-                    const thunderstore = useThunderstore()
+                    const thunderstore = useThunderstore();
                     if (mod.other) {
-                        let data = await thunderstore.getModData(mod.other.namespace, mod.other.name)
+                        let data = await thunderstore.getModData(
+                            mod.other.namespace,
+                            mod.other.name
+                        );
                         console.log(data);
                         if (!data.latest) {
-                            data.latest = await thunderstore.getModVersionData(mod.other.namespace, mod.other.name, data.versions[0].name)
+                            data.latest = await thunderstore.getModVersionData(
+                                mod.other.namespace,
+                                mod.other.name,
+                                data.versions[0].name
+                            );
                         }
 
-                        let key = `${data?.owner}-${data?.name}-${data?.latest.version_number}`
-                        this.addDownloadByThunderstore(data, key)
+                        let key = `${data?.owner}-${data?.name}-${data?.latest.version_number}`;
+                        this.addDownloadByThunderstore(data, key);
                     }
                     break;
-                case 'ModIo':
-                    const modio = useModIo()
-                    let modio_data = await modio.getModDataById(mod.webId as number)
+                case "ModIo":
+                    const modio = useModIo();
+                    let modio_data = await modio.getModDataById(
+                        mod.webId as number
+                    );
                     console.log(modio_data);
                     if (modio_data) {
-                        this.addDownloadByModIo(modio_data)
+                        this.addDownloadByModIo(modio_data);
                     }
-                    break
-                case 'CurseForge':
-                    const curseforge = useCurseForge()
-                    let cf_mod = await curseforge.GetModDataById(mod.webId as number)
+                    break;
+                case "CurseForge":
+                    const curseforge = useCurseForge();
+                    let cf_mod = await curseforge.GetModDataById(
+                        mod.webId as number
+                    );
                     console.log(cf_mod);
                     if (cf_mod) {
-                        this.addDownloadByCurseForge(cf_mod)
+                        this.addDownloadByCurseForge(cf_mod);
                     }
 
-                    break
-                case 'GitHub':
-                    const github = useGithub()
+                    break;
+                case "GitHub":
+                    const github = useGithub();
                     if (mod.modWebsite) {
-                        let release = await github.parse(mod.modWebsite)
+                        let release = await github.parse(mod.modWebsite);
                         if (release) {
                             console.log(mod.fileName);
-                            this.addDownloadByGitHub(release, mod.modWebsite, mod.fileName)
+                            this.addDownloadByGitHub(
+                                release,
+                                mod.modWebsite,
+                                mod.fileName
+                            );
                         }
                     }
-                    break
-                case 'GameBanana':
-                    this.addDownloadByGameBanana(mod.webId as number)
-                    break
-                case 'NexusMods':
-                    if (mod.other) this.addDownloadByNexusMods(mod.other as INexusModsDownloadData)
-                    break
+                    break;
+                case "GameBanana":
+                    this.addDownloadByGameBanana(mod.webId as number);
+                    break;
+                case "NexusMods":
+                    if (mod.other)
+                        this.addDownloadByNexusMods(
+                            mod.other as INexusModsDownloadData
+                        );
+                    break;
                 default:
                     break;
             }
@@ -531,4 +598,4 @@ export const useDownload = defineStore('Download', {
 
         //#endregion
     },
-})
+});

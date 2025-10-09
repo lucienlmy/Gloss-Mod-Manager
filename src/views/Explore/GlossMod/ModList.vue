@@ -1,83 +1,107 @@
-<script lang='ts' setup>
+<script lang="ts" setup>
 import { ref, computed } from "vue";
 
-
-import DownloadBtn from "@/views/Explore/GlossMod/DownloadBtn.vue"
+import DownloadBtn from "@/views/Explore/GlossMod/DownloadBtn.vue";
 const props = defineProps<{
-    mod: IMod
-}>()
-const explore = useExplore()
-const { getNumber, lazy_img, host } = useMain()
+    mod: IMod;
+}>();
+const explore = useExplore();
+const { getNumber, lazy_img, host, formatTime } = useMain();
 
 let mod = ref<IMod>(props.mod);
 
 // console.log('mod', mod.value);
 
 let mod_img = computed(() => {
-    let img = ''
+    let img = "";
     if (mod.value.mods_image_url) {
-        img = host + mod.value.mods_image_url
+        img = host + mod.value.mods_image_url;
     } else {
-        img = host + mod.value.game_imgUrl
+        img = host + mod.value.game_imgUrl;
     }
-    return img
-})
-
+    return img;
+});
 </script>
 <template>
     <v-card class="mod">
-        <router-link :to="{ name: 'GlossModContent', params: { modId: mod.id } }" :title="mod.mods_desc">
-            <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
+        <router-link
+            :to="{ name: 'GlossModContent', params: { modId: mod.id } }"
+            :title="mod.mods_desc"
+        >
+            <v-img
+                cover
+                :lazy-src="lazy_img"
+                :aspect-ratio="100 / 56"
+                :src="mod_img"
+            ></v-img>
         </router-link>
         <!-- <a :href="`https://mod.3dmgame.com/mod/${mod.id}`" :title="mod.mods_desc">
             <v-img cover :lazy-src="lazy_img" :aspect-ratio="100 / 56" :src="mod_img"></v-img>
         </a> -->
         <v-card-title :title="mod.mods_title">
-            <router-link :to="{ name: 'GlossModContent', params: { modId: mod.id } }" :title="mod.mods_desc">
+            <router-link
+                :to="{ name: 'GlossModContent', params: { modId: mod.id } }"
+                :title="mod.mods_desc"
+            >
                 {{ mod.mods_title }}
             </router-link>
             <!-- <a :href="`https://mod.3dmgame.com/mod/${mod.id}`">{{ mod.mods_title }}</a> -->
         </v-card-title>
         <v-card-subtitle>
             <v-icon icon="mdi-microsoft-xbox-controller"></v-icon>
-            <a :href="`https://mod.3dmgame.com/${mod.game_path}`" class="mod-game-name">
+            <a
+                :href="`https://mod.3dmgame.com/${mod.game_path}`"
+                class="mod-game-name"
+            >
                 {{ mod.game_name }}
             </a>
             <span> > </span>
-            <a :href="`https://mod.3dmgame.com/${mod.game_path}/${mod.mods_type_id}`">
+            <a
+                :href="`https://mod.3dmgame.com/${mod.game_path}/${mod.mods_type_id}`"
+            >
                 {{ mod.mods_type_name }}
             </a>
         </v-card-subtitle>
         <v-card-subtitle>
             <v-row class="mod-data">
-                <v-col cols="8" class="mod-data-time" :title="mod.mods_updateTime">
-                    <v-icon icon="mdi-clock-outline" /> {{ mod.mods_updateTime }}
+                <v-col
+                    cols="8"
+                    class="mod-data-time"
+                    :title="mod.mods_updateTime"
+                >
+                    <v-icon icon="mdi-clock-outline" />
+                    {{ formatTime(mod.mods_updateTime) }}
                 </v-col>
                 <v-col cols="4" class="mod-data-info">
                     <span v-if="explore.order == 2">
-                        <v-icon icon="mdi-download" /> {{ getNumber(mod.mods_download_cnt) }}
+                        <v-icon icon="mdi-download" />
+                        {{ getNumber(mod.mods_download_cnt) }}
                     </span>
                     <span v-else-if="explore.order == 3">
-                        <v-icon icon="mdi-thumb-up-outline" /> {{ getNumber(mod.mods_mark_cnt) }}
+                        <v-icon icon="mdi-thumb-up-outline" />
+                        {{ getNumber(mod.mods_mark_cnt) }}
                     </span>
                     <span v-else>
-                        <v-icon icon="mdi-eye-outline" /> {{ getNumber(mod.mods_click_cnt) }}
+                        <v-icon icon="mdi-eye-outline" />
+                        {{ getNumber(mod.mods_click_cnt) }}
                     </span>
                 </v-col>
             </v-row>
         </v-card-subtitle>
         <v-card-actions class="flex-row-reverse">
-            <DownloadBtn :id="mod.id" :size="(mod as any).mods_resource_size"></DownloadBtn>
+            <DownloadBtn
+                :id="mod.id"
+                :size="(mod as any).mods_resource[0].mods_resource_size"
+            ></DownloadBtn>
         </v-card-actions>
     </v-card>
 </template>
-<script lang='ts'>
-
+<script lang="ts">
 export default {
-    name: 'ExploreModList',
-}
+    name: "ExploreModList",
+};
 </script>
-<style lang='less' scoped>
+<style lang="less" scoped>
 .mod {
     position: relative;
 
@@ -92,10 +116,13 @@ export default {
 
     a {
         text-decoration: none;
-        color: rgba(var(--v-theme-on-background), var(--v-high-emphasis-opacity));
+        color: rgba(
+            var(--v-theme-on-background),
+            var(--v-high-emphasis-opacity)
+        );
 
         &:hover {
-            opacity: .8;
+            opacity: 0.8;
         }
     }
 
@@ -131,11 +158,11 @@ export default {
         }
 
         .mdi {
-            margin-right: .5rem;
+            margin-right: 0.5rem;
         }
 
         span {
-            margin: 0 .5rem;
+            margin: 0 0.5rem;
         }
     }
 
@@ -157,6 +184,5 @@ export default {
             white-space: nowrap;
         }
     }
-
 }
 </style>

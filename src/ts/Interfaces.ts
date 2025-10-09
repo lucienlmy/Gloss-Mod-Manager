@@ -1,61 +1,84 @@
 declare global {
-    type sourceType = "GlossMod" | "NexusMods" | "Thunderstore" | "ModIo" | "SteamWorkshop" | "CurseForge" | "GitHub" | "Customize" | "GameBanana"
-    type InstallUseFunction = "generalInstall" | "generalUninstall" | "installByFolder" | "installByFile" | "installByFileSibling" | "installByFolderParent" | "Unknown"
-    type TaskStatus = "active" | "waiting" | "paused" | "error" | "complete" | "removed"
+    type sourceType =
+        | "GlossMod"
+        | "NexusMods"
+        | "Thunderstore"
+        | "ModIo"
+        | "SteamWorkshop"
+        | "CurseForge"
+        | "GitHub"
+        | "Customize"
+        | "GameBanana";
+    type InstallUseFunction =
+        | "generalInstall"
+        | "generalUninstall"
+        | "installByFolder"
+        | "installByFile"
+        | "installByFileSibling"
+        | "installByFolderParent"
+        | "Unknown";
+    type TaskStatus =
+        | "active"
+        | "waiting"
+        | "paused"
+        | "error"
+        | "complete"
+        | "removed";
 
-    type install = ((mod: IModInfo) => Promise<IState[] | boolean>) | ITypeInstall
+    type install =
+        | ((mod: IModInfo) => Promise<IState[] | boolean>)
+        | ITypeInstall;
 
     //#region 基础Mod
 
     interface IMod {
-        id: number
-        mods_author: string
-        mods_content: string
-        mods_createTime: string
-        mods_desc?: string
-        mods_image_url?: string
-        mods_images_url?: string
-        mods_isRecommend: number
-        mods_original: number
-        mods_title: string
-        mods_updateTime: string
-        mods_version?: string
-        user_nickName: string
-        mods_credits?: number
-        mods_directions?: string
-        mods_key?: string
-        mods_original_url?: string
-        mods_publish: number
-        mods_state: number
-        mods_state_dec?: string
-        mods_type_id: number
-        mods_type_name: string
-        mods_showAD: number
-        mods_license?: string
-        game_inbbs?: string
+        id: number;
+        mods_author: string;
+        mods_content: string;
+        mods_createTime: string;
+        mods_desc?: string;
+        mods_image_url?: string;
+        mods_images_url?: string[];
+        mods_isRecommend: number;
+        mods_original: number;
+        mods_title: string;
+        mods_updateTime: string;
+        mods_version?: string;
+        user_nickName: string;
+        mods_credits?: number;
+        mods_directions?: string;
+        mods_key?: string;
+        mods_original_url?: string;
+        mods_publish: number;
+        mods_state: number;
+        mods_state_dec?: string;
+        mods_type_id: number;
+        mods_type_name: string;
+        mods_showAD: number;
+        mods_license?: string;
+        game_inbbs?: string;
 
-        mods_SilverSnakeCoin_cnt: number
-        mods_click_cnt: number
-        mods_collection_cnt: number
-        mods_download_cnt: number
-        mods_mark_cnt: number
+        mods_SilverSnakeCoin_cnt: number;
+        mods_click_cnt: number;
+        mods_collection_cnt: number;
+        mods_download_cnt: number;
+        mods_mark_cnt: number;
 
-        user_Intr?: string
-        user_avatar?: string
-        user_tag?: string
-        user_tag_colour?: string
-        user_fan: number
+        user_Intr?: string;
+        user_avatar?: string;
+        user_tag?: string;
+        user_tag_colour?: string;
+        user_fan: number;
 
-        game_cover_imgUrl?: string
-        game_name: string
-        game_id?: number
-        game_imgUrl?: string
-        game_path: string
-        gmm_gmm?: boolean
-        support_gmm?: boolean
+        game_cover_imgUrl?: string;
+        game_name: string;
+        game_id?: number;
+        game_imgUrl?: string;
+        game_path: string;
+        gmm_gmm?: boolean;
+        support_gmm?: boolean;
 
-        mods_resource: IResource[]
-
+        mods_resource: IResource[];
 
         // mods_resource_name: string
         // mods_resource_desc?: string
@@ -63,72 +86,70 @@ declare global {
         // mods_resource_createTime: string
         // mods_resource_size: string
 
-        mods_charge_content?: number
-        mods_adult_content?: number
-        mods_API?: number
+        mods_charge_content?: number;
+        mods_adult_content?: number;
+        mods_API?: number;
     }
 
     interface IResource {
-        id?: number
-        mods_id?: number
-        mods_resource_name: string
-        mods_resource_desc?: string
-        mods_resource_url: string
-        mods_resource_size: string
-        mods_resource_sort: number
-        mods_resource_latest_version: boolean
-        mods_resource_version: string
-        mods_resource_createTime?: string
-        mods_resource_formart?: string
+        id?: number;
+        mods_id?: number;
+        mods_resource_name: string;
+        mods_resource_desc?: string;
+        mods_resource_url: string;
+        mods_resource_size: string;
+        mods_resource_sort: number;
+        mods_resource_latest_version: boolean;
+        mods_resource_version: string;
+        mods_resource_createTime?: string;
+        mods_resource_formart?: string;
     }
 
-
     interface IModData {
-        webId?: number | string
-        from?: sourceType
-        modAuthor?: string
-        modWebsite?: string
-        tags?: ITag[]
-        modType?: number | string
+        webId?: number | string;
+        from?: sourceType;
+        modAuthor?: string;
+        modWebsite?: string;
+        tags?: ITag[];
+        modType?: number | string;
         other?: {
-            [key: string]: any
-        }
+            [key: string]: any;
+        };
     }
 
     interface IModInfo extends IModData {
-        id: number
-        modName: string
-        fileName: string
-        gameID?: number
-        md5: string
-        modVersion: string
-        isUpdate?: boolean
-        isInstalled: boolean
-        weight: number
-        modFiles: string[]
-        modDesc?: string
-        cover?: string
+        id: number;
+        modName: string;
+        fileName: string;
+        gameID?: number;
+        md5: string;
+        modVersion: string;
+        isUpdate?: boolean;
+        isInstalled: boolean;
+        weight: number;
+        modFiles: string[];
+        modDesc?: string;
+        cover?: string;
         advanced?: {
-            enabled: boolean
-            data: any
-        }
-        key?: string
-
+            enabled: boolean;
+            data: any;
+        };
+        key?: string;
     }
 
     interface IDownloadTask extends IModData {
-        id: number
-        gid?: string
-        key?: string
-        name: string
-        fileName: string
-        version: string
-        cover?: string
-        status: TaskStatus
-        speed: number
-        totalSize: number
-        downloadedSize: number
-        link: string
+        id: number;
+        gid?: string;
+        key?: string;
+        name: string;
+        fileName: string;
+        version: string;
+        cover?: string;
+        status: TaskStatus;
+        speed: number;
+        totalSize: number;
+        downloadedSize: number;
+        link: string;
     }
 
     //#endregion
@@ -136,178 +157,190 @@ declare global {
     //#endregion
 
     interface IUser {
-        id: number
-        user_Intr?: string
-        user_avatar?: string
-        user_fan?: number
-        user_gender?: number
-        user_nickName?: string
-        user_tag?: string
-        user_tag_colour?: string
-        user_silverSnakeCoin?: number
-        user_state?: number
-        user_p_show_adult?: -1 | 1
-        user_p_show_charge?: -1 | 1
-        user_tag_p?: -1 | 1
-        user_p_favor?: -1 | 1
-        user_p_tobbs?: -1 | 1
-        user_p_ckmsg?: -1 | 1
-        user_p_ctmsg?: -1 | 1
-        mod_count?: number
-        mod_original_conut?: number
-        mod_translate_conut?: number
-        user_protocol_time?: string
-        timeout?: number
+        id: number;
+        user_Intr?: string;
+        user_avatar?: string;
+        user_fan?: number;
+        user_gender?: number;
+        user_nickName?: string;
+        user_tag?: string;
+        user_tag_colour?: string;
+        user_silverSnakeCoin?: number;
+        user_state?: number;
+        user_p_show_adult?: -1 | 1;
+        user_p_show_charge?: -1 | 1;
+        user_tag_p?: -1 | 1;
+        user_p_favor?: -1 | 1;
+        user_p_tobbs?: -1 | 1;
+        user_p_ckmsg?: -1 | 1;
+        user_p_ctmsg?: -1 | 1;
+        mod_count?: number;
+        mod_original_conut?: number;
+        mod_translate_conut?: number;
+        user_protocol_time?: string;
+        timeout?: number;
     }
 
     //#region 游戏
 
     interface IGameExe {
-        name: string
-        rootPath: string
+        name: string;
+        rootPath: string;
     }
     interface IStartExe {
-        name: string
-        exePath?: string
-        options?: string
-        cmd?: string
+        name: string;
+        exePath?: string;
+        options?: string;
+        cmd?: string;
     }
 
     interface IGameInfo {
-        GlossGameId: number
-        steamAppID: number
-        SteamWorkshop?: boolean
-        installdir?: string
-        gameName: string
-        gameExe: string | IGameExe[]
-        startExe?: string | IStartExe[]
-        gamePath?: string
-        gameVersion?: string
-        gameCoverImg?: string
+        GlossGameId: number;
+        steamAppID: number;
+        SteamWorkshop?: boolean;
+        installdir?: string;
+        gameName: string;
+        gameExe: string | IGameExe[];
+        startExe?: string | IStartExe[];
+        gamePath?: string;
+        gameVersion?: string;
+        gameCoverImg?: string;
         nexusMods?: {
-            game_id: number
-            game_domain_name: string
-        },
+            game_id: number;
+            game_domain_name: string;
+        };
         Thunderstore?: {
-            community_identifier: string
-        },
-        mod_io?: number
-        gamebanana?: number
-        curseforge?: number
-        archivePath?: string
+            community_identifier: string;
+        };
+        mod_io?: number;
+        gamebanana?: number;
+        curseforge?: number;
+        archivePath?: string;
     }
 
     interface IState {
-        file: string,
-        state: boolean
+        file: string;
+        state: boolean;
     }
 
     interface IAdvancedItem {
-        type: "input" | "selects" | "switch"
-        label: string
-        key: string
-        selectItem?: { name: string, value: string }[]
-        defaultValue?: string | boolean
+        type: "input" | "selects" | "switch";
+        label: string;
+        key: string;
+        selectItem?: { name: string; value: string }[];
+        defaultValue?: string | boolean;
     }
 
     interface ITypeInstall {
-        UseFunction: InstallUseFunction
-        folderName?: string
-        isInstall?: boolean
-        fileName?: string
-        include?: boolean
-        spare?: boolean
-        keepPath?: boolean
-        isExtname?: boolean
-        inGameStorage: boolean
-        pass?: string[]
+        UseFunction: InstallUseFunction;
+        folderName?: string;
+        isInstall?: boolean;
+        fileName?: string;
+        include?: boolean;
+        spare?: boolean;
+        keepPath?: boolean;
+        isExtname?: boolean;
+        inGameStorage: boolean;
+        pass?: string[];
     }
 
     interface ICheckModType {
-        UseFunction: "extname" | "basename" | "inPath"
-        Keyword: string[]
-        TypeId?: number
+        UseFunction: "extname" | "basename" | "inPath";
+        Keyword: string[];
+        TypeId?: number;
     }
 
     interface IType {
-        id: number | string
-        name: string
-        installPath: string
+        id: number | string;
+        name: string;
+        installPath: string;
         advanced?: {
-            name: string
-            icon: string
-            item: IAdvancedItem[]
-        }
-        local?: boolean
-        install: install
-        uninstall: install
-        checkPlugin?: (plugin: IModInfo) => boolean
+            name: string;
+            icon: string;
+            item: IAdvancedItem[];
+        };
+        local?: boolean;
+        install: install;
+        uninstall: install;
+        checkPlugin?: (plugin: IModInfo) => boolean;
     }
 
     interface ISupportedGames extends IGameInfo {
-        modType: IType[]
-        from?: 'Local' | 'Internal'
-        checkModType: (((mod: IModInfo) => Promise<number> | number) | ICheckModType[])
-        sortMod?: (list: IModInfo[]) => boolean
+        modType: IType[];
+        from?: "Local" | "Internal";
+        checkModType:
+            | ((mod: IModInfo) => Promise<number> | number)
+            | ICheckModType[];
+        sortMod?: (list: IModInfo[]) => boolean;
     }
 
     interface IExpandsSupportedGames extends IGameInfo {
-        modType: IType[] | 'UnityGame.modType' | 'UnityGameILCPP2.modType' | 'UnrealEngine.modType' | 'Custom'
-        unrealEngineData: { bassPath: string, useUE4SS: boolean }
-        checkModType: (((mod: IModInfo) => number) | ICheckModType[]) | 'UnrealEngine.checkModType' | 'UnityGame.checkModType' | 'UnityGameILCPP2.checkModType' | 'Custom'
-        sortMod?: (list: IModInfo[]) => boolean
+        modType:
+            | IType[]
+            | "UnityGame.modType"
+            | "UnityGameILCPP2.modType"
+            | "UnrealEngine.modType"
+            | "Custom";
+        unrealEngineData: { bassPath: string; useUE4SS: boolean };
+        checkModType:
+            | (((mod: IModInfo) => number) | ICheckModType[])
+            | "UnrealEngine.checkModType"
+            | "UnityGame.checkModType"
+            | "UnityGameILCPP2.checkModType"
+            | "Custom";
+        sortMod?: (list: IModInfo[]) => boolean;
     }
 
     interface IExpandsType {
-        id?: string
-        name: string
-        installPath: string
-        local: boolean
-        install: install
-        uninstall: install
-        checkModType: ICheckModType
+        id?: string;
+        name: string;
+        installPath: string;
+        local: boolean;
+        install: install;
+        uninstall: install;
+        checkModType: ICheckModType;
     }
 
     interface IGamePlugins {
-        id: number
-        plugins_gameId: number
-        plugins_name: string
-        plugins_desc: string
-        plugins_version: string
-        plugins_website: string
-        plugins_from: string
-        plugins_author: string
-        plugins_creation_time: string
-        plugins_update_time: string
-        plugins_state: number
-        plugins_webId?: number
-        plugins_modIo_id?: number
-        plugins_Thunderstore_name?: string
-        plugins_Thunderstore_namespace?: string
+        id: number;
+        plugins_gameId: number;
+        plugins_name: string;
+        plugins_desc: string;
+        plugins_version: string;
+        plugins_website: string;
+        plugins_from: string;
+        plugins_author: string;
+        plugins_creation_time: string;
+        plugins_update_time: string;
+        plugins_state: number;
+        plugins_webId?: number;
+        plugins_modIo_id?: number;
+        plugins_Thunderstore_name?: string;
+        plugins_Thunderstore_namespace?: string;
     }
 
     //#endregion
 
     interface ISettings {
-        managerGame?: ISupportedGames
-        managerGameList: ISupportedGames[]
-        modStorageLocation: string
-        tourGameList: number[]
-        proxy: string
+        managerGame?: ISupportedGames;
+        managerGameList: ISupportedGames[];
+        modStorageLocation: string;
+        tourGameList: number[];
+        proxy: string;
         // UnzipPath: string
-        autoInstall: boolean
-        leftMenuRail: boolean
-        autoLaunch: boolean
-        language: string
-        theme: 'light' | 'dark' | 'system'
-        fold: boolean,
-        exploreType: sourceType
-        selectGameByFolder: boolean
-        showPakeMessage: boolean
-        changeInRun: boolean
-        defaultPage: string
-        showPlugins: boolean // 是否显示前置列表
-        downloadProxy: string // 下载代理
+        autoInstall: boolean;
+        leftMenuRail: boolean;
+        autoLaunch: boolean;
+        language: string;
+        theme: "light" | "dark" | "system";
+        fold: boolean;
+        exploreType: sourceType;
+        selectGameByFolder: boolean;
+        showPakeMessage: boolean;
+        changeInRun: boolean;
+        defaultPage: string;
+        showPlugins: boolean; // 是否显示前置列表
+        downloadProxy: string; // 下载代理
     }
 
     interface IFileTreeNode {
@@ -318,11 +351,11 @@ declare global {
     }
 
     interface IInfo {
-        name?: string
-        version: string
-        description?: string
-        gameID?: number
-        author?: string
+        name?: string;
+        version: string;
+        description?: string;
+        gameID?: number;
+        author?: string;
     }
 
     interface IAria2Request {
@@ -333,43 +366,43 @@ declare global {
     }
 
     interface ITag {
-        name: string
-        color: string
+        name: string;
+        color: string;
     }
 
     //#region Thunderstore
 
     interface IThunderstoreModVersions {
-        name: string
-        full_name: string
-        description: string
-        icon: string
-        version_number: string
-        dependencies: string[]
-        download_url: string
-        downloads: number
-        date_created: string
-        website_url: string
-        is_active: boolean
-        uuid4: string
-        file_size: number
+        name: string;
+        full_name: string;
+        description: string;
+        icon: string;
+        version_number: string;
+        dependencies: string[];
+        download_url: string;
+        downloads: number;
+        date_created: string;
+        website_url: string;
+        is_active: boolean;
+        uuid4: string;
+        file_size: number;
     }
 
     interface IThunderstoreMod {
-        name: string
-        full_name: string
-        owner: string
-        package_url: string
-        date_created: string
-        date_updated: string
-        uuid4: string
-        rating_score: number
-        is_pinned: boolean
-        is_deprecated: boolean
-        has_nsfw_content: boolean
-        categories: string[]
-        versions: IThunderstoreModVersions[]
-        latest: IThunderstoreModVersions
+        name: string;
+        full_name: string;
+        owner: string;
+        package_url: string;
+        date_created: string;
+        date_updated: string;
+        uuid4: string;
+        rating_score: number;
+        is_pinned: boolean;
+        is_deprecated: boolean;
+        has_nsfw_content: boolean;
+        categories: string[];
+        versions: IThunderstoreModVersions[];
+        latest: IThunderstoreModVersions;
     }
 
     //#endregion
@@ -745,12 +778,12 @@ declare global {
         total_count: number;
         "+1": number;
         "-1": number;
-        "laugh": number;
-        "hooray": number;
-        "confused": number;
-        "heart": number;
-        "rocket": number;
-        "eyes": number;
+        laugh: number;
+        hooray: number;
+        confused: number;
+        heart: number;
+        rocket: number;
+        eyes: number;
     }
 
     //#endregion
@@ -777,7 +810,7 @@ declare global {
         _nAllTodosCount?: number;
         _bHasTodos?: boolean;
         _nPostCount: number;
-        _aTags: Array<{ _sTitle: string; _sValue: string; }>;
+        _aTags: Array<{ _sTitle: string; _sValue: string }>;
         _bCreatedBySubmitter?: boolean;
         _bIsPorted?: boolean;
         _nThanksCount?: number;
@@ -820,7 +853,13 @@ declare global {
         _aRootCategory: IGameBananaRootCategory;
         _aCredits?: {
             _sGroupName: string;
-            _aAuthors: { _sRole: string; _idRow: number; _sName: string; _sProfileUrl: string; _bIsOnline: boolean; }[];
+            _aAuthors: {
+                _sRole: string;
+                _idRow: number;
+                _sName: string;
+                _sProfileUrl: string;
+                _bIsOnline: boolean;
+            }[];
         }[];
         _idAccessorSubscriptionRow?: number;
         _bAccessorIsSubscribed?: boolean;
@@ -894,9 +933,7 @@ declare global {
         _bHasSubmissionQueue: boolean;
     }
 
-
     //#endregion
-
 
     //#region NexusMods
 
@@ -933,7 +970,7 @@ declare global {
         viewerUpdateAvailable: boolean | null;
         version: string;
         author: string;
-        picture_url: string
+        picture_url: string;
     }
 
     interface INexusModsFile {
@@ -959,21 +996,21 @@ declare global {
     }
 
     interface INexusModsDownloadData {
-        domainName: string
-        modId: number
-        version: string
-        author: string
-        fileId: number
-        modName: string
-        key?: string
-        expires?: string
+        domainName: string;
+        modId: number;
+        version: string;
+        author: string;
+        fileId: number;
+        modName: string;
+        key?: string;
+        expires?: string;
     }
 
     interface INexusModsUser {
         user_id: number;
         key: string;
         name: string;
-        "is_premium?": boolean;  // 由于包含特殊字符，需要用引号包裹
+        "is_premium?": boolean; // 由于包含特殊字符，需要用引号包裹
         "is_supporter?": boolean;
         email: string;
         profile_url: string;
@@ -983,24 +1020,21 @@ declare global {
 
     //#endregion
 
-
-
     //#region 备份
 
     interface IArchive {
-        name: string
-        zipFile: string
-        files: string[]
-        size: number
-        time: number
+        name: string;
+        zipFile: string;
+        files: string[];
+        size: number;
+        time: number;
     }
 
     interface ITree {
-        label: string
-        filePath: string
-        children?: ITree[]
+        label: string;
+        filePath: string;
+        children?: ITree[];
     }
-
 }
 
 //#endregion
