@@ -1,5 +1,13 @@
 ## 更新日志
 
+1.60.0
+- 更新 适配新版Mod站的API
+- 新增 空洞骑士 丝之歌 的Mod支持
+- 新增 寂静岭 F 的Mod支持
+- 新增 无主之地4 的Mod支持
+- 修复 问题 [#47](https://github.com/GlossMod/Gloss-Mod-Manager/issues/47)
+- 修复 问题 [#48](https://github.com/GlossMod/Gloss-Mod-Manager/issues/48)
+
 1.59.1
 - 更新 适配新版本Mod站的API
 

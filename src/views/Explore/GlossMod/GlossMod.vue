@@ -8,9 +8,7 @@ import Filter from "@/views/Explore/GlossMod/Filter.vue";
 import TurnPage from "@/views/Explore/GlossMod/TurnPage.vue";
 const explore = useExplore();
 
-if (explore.mods.length == 0) {
-    explore.GetModList();
-}
+explore.GetModList();
 
 const settings = useSettings();
 
