@@ -119,3 +119,6 @@
 - FINAL FANTASY VII REBIRTH
 - Stellar Blade
 - Wuchang Fallen Feathers
+- Hollow Knight Silksong
+- Silent Hill f
+- Borderlands 4
