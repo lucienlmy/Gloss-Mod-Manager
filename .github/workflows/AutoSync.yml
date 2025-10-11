@@ -1,0 +1,16 @@
+﻿name: AutoSync
+
+on:
+  schedule:
+    - cron: '0 18 * * *'  # 每天 UTC 时间 18:00，即中国时间凌晨 2:00
+  workflow_dispatch:      # 支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Github Sync
+        uses: repo-sync/github-sync@v2.3.0
