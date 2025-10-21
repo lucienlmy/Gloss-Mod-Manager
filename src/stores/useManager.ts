@@ -119,15 +119,18 @@ export const useManager = defineStore("Manager", {
             const game = useGames();
             const settings = useSettings();
 
-            let plugins = game.GamePlugins.filter(
-                (item) =>
-                    item.game_id == settings.settings.managerGame?.GlossGameId
+            let plugins = game.GamePlugins.filter((item) =>
+                item.game_id.includes(
+                    settings.settings.managerGame?.GlossGameId || 0
+                )
             );
 
             plugins = plugins.filter((item) => {
                 // 判断是否已经添加
                 let mod = state.managerModList.filter(
-                    (m) => m.modName && m.modName == item.name
+                    (m) =>
+                        (m.modName && m.modName == item.name) ||
+                        m.webId == item.web_id
                 );
 
                 return mod.length == 0;

@@ -303,7 +303,7 @@ declare global {
 
     interface IGamePlugins {
         id: number;
-        game_id: number;
+        game_id: number[];
         name: string;
         from: sourceType;
         updated: string;
