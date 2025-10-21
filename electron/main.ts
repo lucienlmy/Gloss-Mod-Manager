@@ -34,16 +34,16 @@ const isFromMicrosoftStore = (() => {
         // 检查是否在微软应用商店的安装目录
         /WindowsApps.*?\.exe$/i.test(execPath);
 
-    console.log("检查更新来源:", {
-        isAppx,
-        execPath: execPath,
-        appName: appName,
-        windowsStore: process.windowsStore,
-        appxPackageName: process.env.APPX_PACKAGE_NAME,
-        appxPackageFullName: process.env.APPX_PACKAGE_FULL_NAME,
-        platform: process.platform,
-        arch: process.arch,
-    });
+    // console.log("检查更新来源:", {
+    //     isAppx,
+    //     execPath: execPath,
+    //     appName: appName,
+    //     windowsStore: process.windowsStore,
+    //     appxPackageName: process.env.APPX_PACKAGE_NAME,
+    //     appxPackageFullName: process.env.APPX_PACKAGE_FULL_NAME,
+    //     platform: process.platform,
+    //     arch: process.arch,
+    // });
 
     return isAppx;
 })();

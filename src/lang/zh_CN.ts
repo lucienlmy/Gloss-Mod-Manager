@@ -447,6 +447,8 @@ const Games = {
     "Hollow Knight Silksong": "空洞骑士：丝之歌",
     "Silent Hill f": "寂静岭 F",
     "Borderlands 4": "无主之地4",
+    "Dragon Cliff": "龙崖",
+    "Escape from Duckov": "逃离鸭科夫",
 };
 
 const Other = {

@@ -443,6 +443,8 @@ const Games = {
     "Hollow Knight Silksong": "Hollow Knight Silksong",
     "Silent Hill f": "Silent Hill f",
     "Borderlands 4": "Borderlands 4",
+    "Dragon Cliff": "Dragon Cliff",
+    "Escape from Duckov": "Escape from Duckov",
 };
 
 const Other = {

@@ -121,22 +121,14 @@ export const useManager = defineStore("Manager", {
 
             let plugins = game.GamePlugins.filter(
                 (item) =>
-                    item.plugins_gameId ==
-                    settings.settings.managerGame?.GlossGameId
+                    item.game_id == settings.settings.managerGame?.GlossGameId
             );
 
             plugins = plugins.filter((item) => {
                 // 判断是否已经添加
                 let mod = state.managerModList.filter(
-                    (m) =>
-                        (m.webId && m.webId == item.plugins_webId) ||
-                        (m.webId && m.webId == item.plugins_modIo_id) ||
-                        (m.other &&
-                            m.other.name == item.plugins_Thunderstore_name) ||
-                        (m.modWebsite && m.modWebsite == item.plugins_website)
+                    (m) => m.modName && m.modName == item.name
                 );
-                // 如果存在则从这里移除
-                // console.log(mod);
 
                 return mod.length == 0;
             });

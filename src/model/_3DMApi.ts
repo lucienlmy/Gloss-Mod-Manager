@@ -10,7 +10,6 @@ export class _3DMApi {
         return {
             authorization: key._3dm.api_key,
             "Content-Type": "application/json",
-            "User-Agent": `Gloss Mod Manager (gmm)/${version}`,
         };
     }
 
@@ -85,6 +84,22 @@ export class _3DMApi {
         });
         if (data.success) {
             return data.data;
+        } else {
+            return null;
+        }
+    }
+
+    public static async getplugins() {
+        const headers = await this.header();
+        const { data } = await axios.post(
+            `${this.baseUrl}/gmm/plugins`,
+            {},
+            {
+                headers,
+            }
+        );
+        if (data.success) {
+            return data;
         } else {
             return null;
         }

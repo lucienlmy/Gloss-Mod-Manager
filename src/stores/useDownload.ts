@@ -1,8 +1,7 @@
 import { defineStore } from "pinia";
 import { extname, join } from "node:path";
 import { useSettings } from "./useSettings";
-import { ElMessage } from "element-plus";
-import { ipcRenderer } from "electron";
+import { ElMessage, ElOption, ElSelect } from "element-plus";
 
 import axios from "axios";
 import { _3DMApi } from "@/model/_3DMApi";
@@ -63,27 +62,60 @@ export const useDownload = defineStore("Download", {
             console.log(data);
 
             // data = data.mods_resource_url.replace("http://mod.3dmgame.com", "https://mod.3dmgame.com")
-            let resource = data.mods_resource.filter((item) => {
-                item.mods_resource_url.replace(
-                    "http://mod.3dmgame.com",
-                    "https://mod.3dmgame.com"
-                );
-                return item.mods_resource_url.includes("mod.3dmgame.com");
-            });
+
+            let downloadFile: IResource | undefined = data.mods_resource.find(
+                (item) => {
+                    item.mods_resource_url.replace(
+                        "http://mod.3dmgame.com",
+                        "https://mod.3dmgame.com"
+                    );
+                    return item.mods_resource_url.includes("mod.3dmgame.com");
+                }
+            );
 
             if (fid) {
-                resource = data.mods_resource.filter(
+                downloadFile = data.mods_resource.find(
                     (item) => item.id == parseInt(fid)
+                );
+            } else if (data.mods_resource.length > 1) {
+                // 如果有多个资源，弹出选择资源窗口
+                const selectFile = ref(data.mods_resource[0].id);
+                await ElMessageBox({
+                    title: "选择资源",
+                    draggable: true,
+                    message: () =>
+                        h(
+                            ElSelect,
+                            {
+                                modelValue: selectFile.value,
+                                valueKey: "id",
+                                "onUpdate:modelValue": (val: number) => {
+                                    selectFile.value = val;
+                                },
+                                style: { width: "300px" },
+                            },
+                            [
+                                ...data.mods_resource.map((item) =>
+                                    h(ElOption, {
+                                        label: `${item.mods_resource_name} - ${item.mods_resource_size} | v${item.mods_resource_version}`,
+                                        value: item.id,
+                                    })
+                                ),
+                            ]
+                        ),
+                });
+                downloadFile = data.mods_resource.find(
+                    (item) => item.id == selectFile.value
                 );
             }
 
-            if (resource.length == 0) {
+            if (!downloadFile) {
                 window.open(`https://mod.3dmgame.com/mod/${id}`);
                 return;
             }
 
             // let link = resource[0].mods_resource_url
-            let link = resource[0].mods_resource_url.replace(
+            let link = downloadFile.mods_resource_url.replace(
                 "https://mod.3dmgame.com",
                 "https://dmod.3dmgame.com"
             );
@@ -115,6 +147,7 @@ export const useDownload = defineStore("Download", {
                 tags: (mod as IModInfo).tags,
                 modType: (mod as IModInfo).modType,
                 cover: cover,
+                other: { fid: downloadFile.id },
             };
             this.addDownloadTask(task);
         },
@@ -179,7 +212,7 @@ export const useDownload = defineStore("Download", {
                 modWebsite: mod.package_url,
                 fileName: fileName,
                 key: key,
-                cover: mod.versions[0].icon,
+                cover: mod.versions ? mod.versions[0].icon : mod.latest.icon,
                 other: {
                     namespace: mod.owner,
                     name: mod.name,
@@ -586,10 +619,88 @@ export const useDownload = defineStore("Download", {
                     this.addDownloadByGameBanana(mod.webId as number);
                     break;
                 case "NexusMods":
-                    if (mod.other)
-                        this.addDownloadByNexusMods(
-                            mod.other as INexusModsDownloadData
+                    const user = useUser();
+                    const settings = useSettings();
+
+                    if (!user.nexusModsUser.key) {
+                        ElMessage.error(
+                            "你需要先登录NexusMods账号 才能使用此功能下载"
                         );
+                        user.loginNexusModsUser();
+                        return;
+                    }
+
+                    const nexusmods = useNexusMods();
+                    const data: any = {
+                        game: {
+                            domainName:
+                                settings.settings.managerGame?.nexusMods
+                                    ?.game_domain_name || "",
+                        },
+                        modId: mod.other?.modId,
+                    };
+                    const filesList = ref<INexusModsFile[]>([]);
+
+                    filesList.value = await nexusmods.getFileList(data);
+
+                    if (filesList.value.length == 0) {
+                        ElMessage.error("未找到资源文件");
+                        return;
+                    }
+
+                    let downloadFile = filesList.value[0];
+
+                    if (mod.other?.fileId) {
+                        downloadFile = filesList.value.find(
+                            (item) => item.file_id == mod.other?.fileId
+                        ) as INexusModsFile;
+                    } else if (filesList.value.length > 1) {
+                        const selectFile = ref(filesList.value[0].file_id);
+                        await ElMessageBox({
+                            title: "选择资源",
+                            draggable: true,
+                            message: () =>
+                                h(
+                                    ElSelect,
+                                    {
+                                        modelValue: selectFile.value,
+                                        valueKey: "id",
+                                        "onUpdate:modelValue": (
+                                            val: number
+                                        ) => {
+                                            selectFile.value = val;
+                                        },
+                                        style: { width: "300px" },
+                                    },
+                                    [
+                                        ...filesList.value.map((item) =>
+                                            h(ElOption, {
+                                                label: `${item.name} | v${item.version} `,
+                                                value: item.file_id,
+                                            })
+                                        ),
+                                    ]
+                                ),
+                        });
+
+                        downloadFile =
+                            filesList.value.find(
+                                (item) => item.file_id == selectFile.value
+                            ) || filesList.value[0];
+                    }
+                    this.addDownloadByNexusMods({
+                        domainName:
+                            settings.settings.managerGame?.nexusMods
+                                ?.game_domain_name || "",
+                        modId: mod.other?.modId,
+                        author: "",
+                        modName:
+                            mod.other?.modName ||
+                            mod.fileName ||
+                            downloadFile.name,
+                        fileId: downloadFile.file_id,
+                        version: downloadFile.version,
+                    });
                     break;
                 default:
                     break;

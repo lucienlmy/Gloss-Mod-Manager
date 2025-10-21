@@ -122,3 +122,5 @@
 - Hollow Knight Silksong
 - Silent Hill f
 - Borderlands 4
+- Dragon Cliff
+- Escape from Duckov

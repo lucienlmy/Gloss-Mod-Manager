@@ -1,9 +1,8 @@
 import { defineStore } from "pinia";
-import { useI18n } from "vue-i18n";
-import axios from "axios";
+import { _3DMApi } from "@/model/_3DMApi";
 export const useGames = defineStore("Games", {
     state: () => ({
-        search: '',
+        search: "",
         showLst: false,
         GamePlugins: [] as IGamePlugins[],
         showExpandsGame: false,
@@ -16,33 +15,29 @@ export const useGames = defineStore("Games", {
         //     if (state.search != '') {
         //         list = list.filter(item => t(item.gameName).includes(state.search))
         //     }
-
         //     return list
         // }
     },
     actions: {
         async getGamePlugins() {
-            const settings = useSettings()
+            const settings = useSettings();
             if (!settings.settings.showPlugins) {
-                this.GamePlugins = []
-                return
+                this.GamePlugins = [];
+                return;
             }
 
             try {
-                const { data } = await axios.post('https://assets-mod.3dmgame.com/api/v2/GetPluginsList', {}, {
-                    headers: {
-                        "Authorization": "67d8667248a801ff6ddc74ac43016168"
-                    }
-                })
+                const data = await _3DMApi.getplugins();
+
                 if (data && data.data) {
-                    this.GamePlugins = data.data
+                    this.GamePlugins = data.data;
                 } else {
-                    this.GamePlugins = []
+                    this.GamePlugins = [];
                 }
             } catch (error) {
-                console.error('获取前置列表失败:', error)
-                this.GamePlugins = []
+                console.error("获取前置列表失败:", error);
+                this.GamePlugins = [];
             }
-        }
-    }
-})
+        },
+    },
+});

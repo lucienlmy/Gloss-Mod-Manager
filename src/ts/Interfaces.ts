@@ -92,8 +92,8 @@ declare global {
     }
 
     interface IResource {
-        id?: number;
-        mods_id?: number;
+        id: number;
+        mods_id: number;
         mods_resource_name: string;
         mods_resource_desc?: string;
         mods_resource_url: string;
@@ -303,20 +303,16 @@ declare global {
 
     interface IGamePlugins {
         id: number;
-        plugins_gameId: number;
-        plugins_name: string;
-        plugins_desc: string;
-        plugins_version: string;
-        plugins_website: string;
-        plugins_from: string;
-        plugins_author: string;
-        plugins_creation_time: string;
-        plugins_update_time: string;
-        plugins_state: number;
-        plugins_webId?: number;
-        plugins_modIo_id?: number;
-        plugins_Thunderstore_name?: string;
-        plugins_Thunderstore_namespace?: string;
+        game_id: number;
+        name: string;
+        from: sourceType;
+        updated: string;
+        state: number;
+        web_id: number;
+        desc: string;
+        other?: {
+            [key: string]: any;
+        };
     }
 
     //#endregion
