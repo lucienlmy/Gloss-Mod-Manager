@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const AIService: typeof import('./src/model/AIService')['AIService']
   const APIAria2: typeof import('./src/model/APIAria2')['APIAria2']
   const AppAnalytics: typeof import('./src/model/Analytics')['AppAnalytics']
   const Backup: typeof import('./src/model/Backup')['Backup']
@@ -20,6 +21,7 @@ declare global {
   const FileHandler: typeof import('./src/model/FileHandler')['FileHandler']
   const FormRules: typeof import('./src/model/FormRules')['FormRules']
   const LocalLang: typeof import('./src/model/LocalLang')['LocalLang']
+  const MCPServer: typeof import('./src/model/MCPServer')['MCPServer']
   const Manager: typeof import('./src/model/Manager')['Manager']
   const Package: typeof import('./src/model/Package')['Package']
   const ParsingGmm: typeof import('./src/model/ParsingGmm')['ParsingGmm']
@@ -76,6 +78,7 @@ declare global {
   const toValue: typeof import('vue')['toValue']
   const triggerRef: typeof import('vue')['triggerRef']
   const unref: typeof import('vue')['unref']
+  const useAI: typeof import('./src/stores/useAI')['useAI']
   const useArchive: typeof import('./src/stores/useArchive')['useArchive']
   const useAttrs: typeof import('vue')['useAttrs']
   const useBackupGame: typeof import('./src/stores/useBackupGame')['useBackupGame']
@@ -92,6 +95,7 @@ declare global {
   const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useLink: typeof import('vue-router')['useLink']
+  const useMCPServer: typeof import('./src/stores/useMCPServer')['useMCPServer']
   const useMain: typeof import('./src/stores/useMain')['useMain']
   const useManager: typeof import('./src/stores/useManager')['useManager']
   const useModIo: typeof import('./src/stores/useModIo')['useModIo']
@@ -152,6 +156,9 @@ declare global {
   // @ts-ignore
   export type { Manager } from './src/model/Manager'
   import('./src/model/Manager')
+  // @ts-ignore
+  export type { MCPServer } from './src/model/MCPServer'
+  import('./src/model/MCPServer')
   // @ts-ignore
   export type { Package } from './src/model/Package'
   import('./src/model/Package')

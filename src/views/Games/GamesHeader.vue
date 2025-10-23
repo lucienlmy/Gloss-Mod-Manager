@@ -1,26 +1,23 @@
-<script lang='ts' setup>
-
-import SelectGame from '@/components/Games/SelectGame.vue'
-import GameList from '@/views/Games/GamesList.vue'
-import { computed } from 'vue'
-import { useI18n } from 'vue-i18n';
-const games = useGames()
-const manager = useManager()
-const { t } = useI18n()
-const Settings = useSettings()
+<script lang="ts" setup>
+import SelectGame from "@/components/Games/SelectGame.vue";
+import GameList from "@/views/Games/GamesList.vue";
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
+const games = useGames();
+const manager = useManager();
+const { t } = useI18n();
+const Settings = useSettings();
 
 const gameList = computed(() => {
-
-    let list = Settings.settings.managerGameList
-    if (games.search != '') {
-        list = list.filter(item => t(item.gameName).includes(games.search))
+    let list = Settings.settings.managerGameList;
+    if (games.search != "") {
+        list = list.filter((item) => t(item.gameName).includes(games.search));
     }
 
-    console.log(list);
+    // console.log(list);
 
-    return list
-})
-
+    return list;
+});
 </script>
 <template>
     <v-app-bar :elevation="0" density="compact">
@@ -34,8 +31,13 @@ const gameList = computed(() => {
                     </v-btn>
                 </v-col>
                 <v-col cols="8">
-                    <v-text-field hide-details variant="solo" append-inner-icon="mdi-magnify" placeholder="搜索游戏"
-                        v-model="games.search">
+                    <v-text-field
+                        hide-details
+                        variant="solo"
+                        append-inner-icon="mdi-magnify"
+                        placeholder="搜索游戏"
+                        v-model="games.search"
+                    >
                     </v-text-field>
                 </v-col>
             </v-row>
@@ -46,21 +48,27 @@ const gameList = computed(() => {
         <v-card-text>
             <v-row>
                 <v-col cols="3" v-if="!games.showLst">
-                    <div class="add-game" @click="manager.selectGameDialog = true"></div>
+                    <div
+                        class="add-game"
+                        @click="manager.selectGameDialog = true"
+                    ></div>
                     <div class="add-game-text">{{ $t("Add Game") }}</div>
                 </v-col>
-                <GameList v-for="item in gameList" :key="item.GlossGameId" :item="item"></GameList>
+                <GameList
+                    v-for="item in gameList"
+                    :key="item.GlossGameId"
+                    :item="item"
+                ></GameList>
             </v-row>
         </v-card-text>
     </v-card>
 </template>
-<script lang='ts'>
-
+<script lang="ts">
 export default {
-    name: 'GamesHeader',
-}
+    name: "GamesHeader",
+};
 </script>
-<style lang='less' scoped>
+<style lang="less" scoped>
 .hader-lift {
     display: flex;
     align-items: center;
@@ -74,16 +82,15 @@ export default {
     margin: 50px auto;
     cursor: pointer;
 
-
     &::before,
     &::after {
-        content: '';
+        content: "";
         position: absolute;
         background: transparent;
         border-style: dashed;
         border-color: rgb(--v-theme-surface);
         // 动画时间 1s
-        transition: all .6s;
+        transition: all 0.6s;
     }
 
     &::before {
@@ -103,10 +110,9 @@ export default {
     }
 
     &:hover {
-
         &::before,
         &::after {
-            opacity: .5;
+            opacity: 0.5;
         }
     }
 }

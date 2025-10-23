@@ -30,34 +30,48 @@ const router = createRouter({
                 {
                     path: "GlossMod/:modId",
                     name: "GlossModContent",
-                    component: () => import("@/views/Explore/GlossMod/Content/Content.vue"),
+                    component: () =>
+                        import("@/views/Explore/GlossMod/Content/Content.vue"),
                 },
                 {
                     path: "ModIo/:modId",
                     name: "ModIoModsContent",
-                    component: () => import("@/views/Explore/ModIo/Content/Content.vue")
+                    component: () =>
+                        import("@/views/Explore/ModIo/Content/Content.vue"),
                 },
                 {
                     path: "Thunderstore/:namespace/:name/:version",
                     name: "ThunderstoreModsContent",
-                    component: () => import("@/views/Explore/Thunderstore/Content/Content.vue")
+                    component: () =>
+                        import(
+                            "@/views/Explore/Thunderstore/Content/Content.vue"
+                        ),
                 },
                 {
                     path: "SteamWorkshop/:workshopId",
                     name: "SteamWorkshop",
-                    component: () => import("@/views/Explore/SteamWorkshop/Content/Content.vue")
+                    component: () =>
+                        import(
+                            "@/views/Explore/SteamWorkshop/Content/Content.vue"
+                        ),
                 },
                 {
                     path: "CurseForge/:CurseForgeModId",
                     name: "CurseForgeContent",
-                    component: () => import("@/views/Explore/CurseForge/Content/Content.vue")
+                    component: () =>
+                        import(
+                            "@/views/Explore/CurseForge/Content/Content.vue"
+                        ),
                 },
                 {
                     path: "GameBanana/:GameBananaModId",
                     name: "GameBananaContent",
-                    component: () => import("@/views/Explore/GameBanana/Content/Content.vue")
-                }
-            ]
+                    component: () =>
+                        import(
+                            "@/views/Explore/GameBanana/Content/Content.vue"
+                        ),
+                },
+            ],
         },
         {
             path: "/Download",
@@ -78,8 +92,13 @@ const router = createRouter({
             path: "/User",
             name: "User",
             component: () => import("@/views/User/Index.vue"),
-        }
-    ]
+        },
+        {
+            path: "/MCPServer",
+            name: "MCPServer",
+            component: () => import("@/views/MCPServer/Index.vue"),
+        },
+    ],
 });
 
 // 切换路由时，滚动到顶部

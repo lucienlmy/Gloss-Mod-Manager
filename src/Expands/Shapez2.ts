@@ -1,14 +1,14 @@
 /**
- * @description 海山 支持
+ * @description 异形工厂2 支持
  */
 
-import { join } from "node:path"
+import { join } from "node:path";
 
 export const supportedGames: ISupportedGames = {
     GlossGameId: 378,
     steamAppID: 2162800,
     Thunderstore: {
-        community_identifier: 'dyson-sphere-program'
+        community_identifier: "dyson-sphere-program",
     },
     installdir: join("shapez 2"),
     gameName: "Shapez 2",
@@ -16,14 +16,15 @@ export const supportedGames: ISupportedGames = {
     startExe: [
         {
             name: "Steam 启动",
-            cmd: "steam://rungameid/2162800"
+            cmd: "steam://rungameid/2162800",
         },
         {
             name: "直接启动",
-            exePath: join("shapez 2.exe")
-        }
+            exePath: join("shapez 2.exe"),
+        },
     ],
-    gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/mod/202408/MOD66bf055eb2ba5.webp@webp",
+    gameCoverImg:
+        "https://assets-mod.3dmgame.com/static/upload/mod/202408/MOD66bf055eb2ba5.webp@webp",
     modType: UnityGame.modType,
-    checkModType: UnityGame.checkModType
-}
+    checkModType: UnityGame.checkModType,
+};
