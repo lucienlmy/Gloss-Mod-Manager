@@ -637,7 +637,7 @@ export const useDownload = defineStore("Download", {
                                 settings.settings.managerGame?.nexusMods
                                     ?.game_domain_name || "",
                         },
-                        modId: mod.other?.modId,
+                        modId: mod.webId,
                     };
                     const filesList = ref<INexusModsFile[]>([]);
 
@@ -692,7 +692,7 @@ export const useDownload = defineStore("Download", {
                         domainName:
                             settings.settings.managerGame?.nexusMods
                                 ?.game_domain_name || "",
-                        modId: mod.other?.modId,
+                        modId: mod.webId as number,
                         author: "",
                         modName:
                             mod.other?.modName ||
