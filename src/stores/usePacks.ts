@@ -40,6 +40,7 @@ export const usePacks = defineStore("Packs", {
                 4. 将 cache  文件压缩为压缩包, 并重命名
                 5. 将 cache  目录删除
              */
+            const manager = useManager();
 
             //#region 创建一个 cache 目录
             this.logText += "\n正在初始化.";
@@ -49,6 +50,19 @@ export const usePacks = defineStore("Packs", {
 
             //#region 将相关数据写入 info.json 文件
             this.logText += "\n正在写入info.json.";
+
+            this.packs.forEach((item) => {
+                // item.cover 是本地文件
+                if (item.cover && item.cover.startsWith("file:")) {
+                    const modStorage = path.join(
+                        manager.modStorage,
+                        item.id.toString()
+                    );
+
+                    item.cover = path.join(item.cover).replace(modStorage, "");
+                }
+            });
+
             let info = {
                 ...this.Info,
                 packs: this.packs,
@@ -61,7 +75,6 @@ export const usePacks = defineStore("Packs", {
 
             //#region 将选择的Mod文件复制到 cache/md5/ 目录中
             this.logText += "\n正在整理文件.";
-            const manager = useManager();
             for (let index = 0; index < this.packs.length; index++) {
                 const item = this.packs[index];
                 this.logText += `\n正在处理: ${item.modName} .`;
@@ -116,6 +129,18 @@ export const usePacks = defineStore("Packs", {
                     [`${item.md5}\\*`]
                 );
                 console.log(item);
+
+                if (item.cover && item.cover.startsWith("file:")) {
+                    const modStorage = path.join(
+                        manager.modStorage,
+                        item.id.toString()
+                    );
+                    const cover = path.join(
+                        modStorage,
+                        item.cover.replace("file:\\", "")
+                    );
+                    item.cover = `file:///${cover}`;
+                }
 
                 FileHandler.moveFolder(
                     path.join(manager.modStorage, item.id.toString(), item.md5),
