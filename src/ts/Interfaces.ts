@@ -200,6 +200,7 @@ declare global {
         SteamWorkshop?: boolean;
         installdir?: string;
         gameName: string;
+        gameShowName?: string;
         gameExe: string | IGameExe[];
         startExe?: string | IStartExe[];
         gamePath?: string;

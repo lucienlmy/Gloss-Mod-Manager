@@ -83,12 +83,30 @@ watch(
                 </v-col>
             </v-row>
             <v-row>
-                <v-col>
+                <v-col cols="12">
                     <v-btn
                         href="https://gmm.aoe.top/MCP.html"
                         append-icon="mdi-open-in-new"
                         >配置教程</v-btn
                     >
+                </v-col>
+                <v-col cols="12">
+                    <v-card title="相关视频">
+                        <v-card-text>
+                            <v-card
+                                href="https://www.bilibili.com/video/BV13K1YBtE6e/"
+                                target="_blank"
+                                class="video-card"
+                                rounded="lg"
+                                elevation="2"
+                            >
+                                <v-img
+                                    src="https://assets-mod.3dmgame.com/static/upload/mod/202511/MOD690873f6cb561.png@webp"
+                                    class="video-img"
+                                ></v-img>
+                            </v-card>
+                        </v-card-text>
+                    </v-card>
                 </v-col>
             </v-row>
         </v-card-text>
@@ -99,4 +117,26 @@ export default {
     name: "MCPServer",
 };
 </script>
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.video-card {
+    width: 350px;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+    }
+}
+
+.video-img {
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+
+    .video-card:hover & {
+        transform: scale(1.05);
+    }
+}
+</style>

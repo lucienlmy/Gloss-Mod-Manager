@@ -263,6 +263,9 @@ const GameManage = {
     Cover: "封面",
     "Upload cover": "上传封面",
     "Check type": "检查类型",
+    "Upload config": "上传配置",
+    "Game Show Name": "显示名称",
+    "Game Show Name Tip": "显示在管理器中的名称，可以使用中文",
 };
 
 const Settings = {

@@ -7,13 +7,9 @@ import { ElMessage } from "element-plus";
 const games = useGames();
 
 const InitialForm = {
-    unrealEngineData: {
-        bassPath: "",
-        useUE4SS: true,
-    },
-    Thunderstore: {
-        community_identifier: "",
-    },
+    unrealEngineData: {},
+    Thunderstore: {},
+    nexusMods: {},
 } as IExpandsSupportedGames;
 const form = ref<IExpandsSupportedGames>(
     JSON.parse(JSON.stringify(InitialForm))
@@ -24,6 +20,13 @@ const moreStarExe = ref(false);
 const gameVisible = ref(false);
 const starVisible = ref(false);
 const uploadCover = ref(false);
+
+// Mod平台开关
+const enableThunderstore = ref(false);
+const enableModIO = ref(false);
+const enableGameBanana = ref(false);
+const enableCurseForge = ref(false);
+const enableNexusMods = ref(false);
 
 const gameExe = ref({} as IGameExe);
 const startExe = ref({} as IStartExe);
@@ -244,6 +247,13 @@ function close() {
 
     modType.value = "";
     checkModType.value = "";
+
+    // 重置Mod平台开关
+    enableThunderstore.value = false;
+    enableModIO.value = false;
+    enableGameBanana.value = false;
+    enableCurseForge.value = false;
+    enableNexusMods.value = false;
 }
 
 function check() {
@@ -287,6 +297,17 @@ function setForm(item: IExpandsSupportedGames) {
     form.value = item;
     modType.value = item.modType as string;
     checkModType.value = item.checkModType as string;
+
+    // 根据数据设置Mod平台开关
+    enableThunderstore.value = !!(
+        item.Thunderstore && Object.keys(item.Thunderstore).length > 0
+    );
+    enableModIO.value = !!item.mod_io;
+    enableGameBanana.value = !!item.gamebanana;
+    enableCurseForge.value = !!item.curseforge;
+    enableNexusMods.value = !!(
+        item.nexusMods && Object.keys(item.nexusMods).length > 0
+    );
 }
 
 defineExpose({
@@ -303,15 +324,21 @@ defineExpose({
     >
         <template #header>
             <div class="header">
-                <h3>
+                <div>
                     {{ $t("Add Game") }}
-                    <el-link
-                        href="https://gmm.aoe.top/Expands/README.html"
-                        :underline="false"
-                        target="_blank"
-                        ><v-icon>mdi-help</v-icon></el-link
-                    >
-                </h3>
+                </div>
+                <v-btn
+                    variant="text"
+                    href="https://gmm.aoe.top/Expands/README.html"
+                    target="_blank"
+                    >{{ $t("Help") }}</v-btn
+                >
+                <v-btn
+                    variant="text"
+                    href="https://github.com/GlossMod/Gloss-Mod-Manager/discussions/51"
+                    target="_blank"
+                    >{{ $t("Upload config") }}</v-btn
+                >
             </div>
         </template>
         <v-card color="#0000">
@@ -332,33 +359,6 @@ defineExpose({
                             :placeholder="$t('Steam Id Tip')"
                         ></el-input>
                     </el-form-item>
-                    <el-form-item label="Thunderstore">
-                        <el-input
-                            v-model="form.Thunderstore!.community_identifier"
-                            :placeholder="$t('Thunderstore Tip')"
-                        ></el-input>
-                    </el-form-item>
-                    <el-form-item label="Mod.Io Id">
-                        <el-input
-                            type="number"
-                            v-model="form.mod_io"
-                            :placeholder="$t('Mod.Io Tip')"
-                        ></el-input>
-                    </el-form-item>
-                    <el-form-item label="GameBanana">
-                        <el-input
-                            type="number"
-                            v-model="form.gamebanana"
-                            :placeholder="$t('Gamebanana Tip')"
-                        ></el-input>
-                    </el-form-item>
-                    <el-form-item label="CurseForge">
-                        <el-input
-                            type="number"
-                            v-model="form.curseforge"
-                            :placeholder="$t('CurseForge Tip')"
-                        ></el-input>
-                    </el-form-item>
 
                     <el-form-item
                         :label="$t('Installation Directory')"
@@ -375,6 +375,93 @@ defineExpose({
                             :placeholder="$t('Game Name Tip')"
                         ></el-input>
                     </el-form-item>
+                    <el-form-item :label="$t('Game Show Name')" required>
+                        <el-input
+                            v-model="form.gameShowName"
+                            :placeholder="$t('Game Show Name Tip')"
+                        ></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="Mod平台">
+                        <el-row :gutter="15">
+                            <el-col :span="12">
+                                <el-checkbox v-model="enableThunderstore">
+                                    Thunderstore
+                                </el-checkbox>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-checkbox v-model="enableModIO">
+                                    Mod.Io
+                                </el-checkbox>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-checkbox v-model="enableGameBanana">
+                                    GameBanana
+                                </el-checkbox>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-checkbox v-model="enableCurseForge">
+                                    CurseForge
+                                </el-checkbox>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-checkbox v-model="enableNexusMods">
+                                    NexusMods
+                                </el-checkbox>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                    <el-form-item
+                        v-if="enableThunderstore"
+                        label="Thunderstore"
+                    >
+                        <el-input
+                            v-if="form.Thunderstore"
+                            v-model="form.Thunderstore.community_identifier"
+                            :placeholder="$t('Thunderstore Tip')"
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="enableModIO" label="Mod.Io Id">
+                        <el-input
+                            type="number"
+                            v-model="form.mod_io"
+                            :placeholder="$t('Mod.Io Tip')"
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="enableGameBanana" label="GameBanana">
+                        <el-input
+                            type="number"
+                            v-model="form.gamebanana"
+                            :placeholder="$t('Gamebanana Tip')"
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="enableCurseForge" label="CurseForge">
+                        <el-input
+                            type="number"
+                            v-model="form.curseforge"
+                            :placeholder="$t('CurseForge Tip')"
+                        ></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="enableNexusMods" label="NexusMods">
+                        <el-form v-if="form.nexusMods" label-width="120">
+                            <el-form-item label="Domain Name">
+                                <el-input
+                                    v-model="form.nexusMods.game_domain_name"
+                                    :placeholder="
+                                        $t('NexusMods game domain name Tip')
+                                    "
+                                ></el-input>
+                            </el-form-item>
+                            <el-form-item label="Game Id">
+                                <el-input
+                                    type="number"
+                                    v-model="form.nexusMods.game_id"
+                                    :placeholder="$t('NexusMods game id Tip')"
+                                ></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-form-item>
+
                     <el-form-item :label="$t('Exe Name')" required>
                         <el-row>
                             <el-col :span="24">
@@ -714,8 +801,8 @@ export default {
 <style lang="less" scoped>
 .header {
     display: flex;
+    justify-content: flex-start;
     align-items: center;
-    justify-content: space-between;
 }
 
 .star-exe {

@@ -11,7 +11,11 @@ const Settings = useSettings();
 const gameList = computed(() => {
     let list = Settings.settings.managerGameList;
     if (games.search != "") {
-        list = list.filter((item) => t(item.gameName).includes(games.search));
+        list = list.filter(
+            (item) =>
+                t(item.gameName).includes(games.search) ||
+                item.gameShowName?.includes(games.search)
+        );
     }
 
     // console.log(list);

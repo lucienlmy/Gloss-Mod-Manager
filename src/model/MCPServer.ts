@@ -1,7 +1,4 @@
-import {
-    McpServer,
-    ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import path from "path";
 import express from "express";
@@ -12,7 +9,7 @@ import { getLangAll } from "@/lang";
 export class MCPServer {
     public server = new McpServer({
         name: "gloss-mod-manager",
-        version: "1.0.0",
+        version: "1.62.1",
     });
 
     public app = express();
@@ -1114,9 +1111,13 @@ export class MCPServer {
             },
             async () => {
                 const manager = useManager();
-                const gamesList: ISupportedGames[] = JSON.parse(
-                    JSON.stringify(manager.supportedGames)
-                );
+                const gamesList = manager.supportedGames.map((item) => ({
+                    GlossGameId: item.GlossGameId,
+                    steamAppID: item.steamAppID,
+                    gameName: item.gameName,
+                    installdir: item.installdir,
+                }));
+
                 return {
                     contents: [
                         {
@@ -1162,11 +1163,20 @@ export class MCPServer {
             },
             async () => {
                 const manager = useManager();
+                const list: any[] = JSON.parse(
+                    JSON.stringify(manager.managerModList)
+                );
+
+                // 移除 list. modFiles
+                list.forEach((mod) => {
+                    delete mod.modFiles;
+                });
+
                 return {
                     contents: [
                         {
                             uri: "mods://mod-list",
-                            text: JSON.stringify(manager.managerModList),
+                            text: JSON.stringify(list),
                             mimeType: "application/json",
                         },
                     ],
@@ -1248,7 +1258,7 @@ export class MCPServer {
     }
 
     private registerPrompt() {
-        //#region 获取所有游戏列表
+        //#region 提示词
         this.server.registerPrompt(
             "get-all-games-list",
             {
@@ -1267,9 +1277,7 @@ export class MCPServer {
                 ],
             })
         );
-        //#endregion
 
-        //#region 整理Mod
         this.server.registerPrompt(
             "organize-mods",
             {
@@ -1288,9 +1296,7 @@ export class MCPServer {
                 ],
             })
         );
-        //#endregion
 
-        //#region 下载Mod
         this.server.registerPrompt(
             "download-mod-prompt",
             {
