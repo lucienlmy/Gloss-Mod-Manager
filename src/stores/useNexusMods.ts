@@ -106,8 +106,8 @@ export const useNexusMods = defineStore("NexusMods", {
 
             let primary_files = files.filter(
                 (item) =>
-                    item.category_name != "OLD_VERSION" &&
-                    item.category_name != "ARCHIVED"
+                    item.category_name == "MAIN" ||
+                    item.category_name == "OPTIONAL"
             );
 
             if (primary_files.length == 0) {

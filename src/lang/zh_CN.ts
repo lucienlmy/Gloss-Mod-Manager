@@ -452,6 +452,7 @@ const Games = {
     "Borderlands 4": "无主之地4",
     "Dragon Cliff": "龙崖",
     "Escape from Duckov": "逃离鸭科夫",
+    "Anno 117 - Pax Romana": "纪元117：罗马和平",
 };
 
 const Other = {

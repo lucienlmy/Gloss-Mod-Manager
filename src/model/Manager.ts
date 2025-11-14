@@ -415,13 +415,19 @@ export class Manager {
             : installPath;
         let folder: string[] = [];
         mod.modFiles.forEach((item) => {
-            if (basename(item).toLowerCase() == folderName.toLowerCase()) {
-                folder.push(dirname(join(modStorage, item)));
+            const parts = item.split(sep).filter((p) => p !== "");
+            const index = parts.findIndex(
+                (part) => part.toLowerCase() === folderName.toLowerCase()
+            );
+            if (index !== -1) {
+                const targetPath = parts.slice(0, index).join(sep);
+                folder.push(join(modStorage, targetPath));
             }
         });
 
         // folder 去重
         folder = [...new Set(folder)];
+        console.log(folder);
 
         if (folder.length > 0) {
             folder.forEach((item) => {
