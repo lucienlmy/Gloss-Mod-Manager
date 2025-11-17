@@ -37,3 +37,5 @@ docs/.vitepress/cache
 electron-builder.json5
 /electron/model/Config.ts
 /.vs
+
+docs\.vitepress\cache

@@ -1,27 +1,67 @@
-## MCP 服务器使用教程
+# MCP 服务器使用教程
 
 MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与 Gloss Mod Manager 进行交互，从而实现自动化管理 Mod 的功能。
 
-### 快速开始
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=115485010168640&bvid=BV13K1YBtE6e&cid=33655555232&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="width: 100%; height: 400px;"></iframe>
 
-#### 1. 配置
-在支持 MCP 的应用中配置如下：
 
-```json
-"gloss-mod-manager": {
-    "type": "http",
-    "url": "http://localhost:{port}/mcp"
-}
-```
-
-#### 2. 启用服务器
+## 服务端配置
 - 在本页面打开 **启用 MCP 服务器** 开关
 - 确认服务器状态显示为 **服务器运行中**（绿色）
 - 默认端口为 **36412**（支持自定义）
 
-### 可用工具 (Tools)
+## 客户端配置
 
-#### 游戏管理
+> 以 使用 [vscode](https://code.visualstudio.com/) 为例
+
+点击 **扩展**，搜索 Copilot , 安装 GitHub Copilot、 Copilot MCP、GitHub Copilot Chat 插件
+
+![](https://assets-mod.3dmgame.com/static/upload/mod/202511/MOD691a8dad326bd.png@webp)
+
+然后打开一个空的文件夹，在里面新建文件 `.vscode/mcp.json`, 内容如下:
+::: code-group
+```jsonc [.vscode/mcp.json]
+{
+    "servers": {
+        // Gloss Mod Manager MCP 服务器配置
+        "gloss-mod-manager": {
+            "type": "http",
+            "url": "http://localhost:36412/mcp"
+        },
+        // (可选) Mod站 MCP 服务器配置
+        // 用于从 Mod站搜索/下载Mod
+        "glossmod-mcp": {
+            "type": "stdio",
+            "command": "uvx",
+            "args": ["glossmod-mcp"],
+            "env": {
+                "GLOSSMOD_API_KEY": "${input:GLOSSMOD_API_KEY}"
+            }
+        }
+    },
+    "inputs": [
+        {
+            "type": "promptString",
+            "id": "GLOSSMOD_API_KEY",
+            // 在 https://mod.3dmgame.com/Workshop/Api 获取你的 Mod 站 API Key
+            "description": "输入你的Mod站 API",
+            "default": "",
+            "password": true
+        }
+    ]
+}
+
+```
+:::
+
+如果配置正确，那么能看到这里显示的: `正在运行|停止|重启|N 个工具|N 个提示|更多...`
+![](https://assets-mod.3dmgame.com/static/upload/mod/202511/MOD691a8f201a884.png@webp)
+
+接下来就可以使用 MCP 工具来管理 Mod 了。
+
+## 可用工具 (Tools)
+
+### 游戏管理
 - **get-supported-games-list** - 获取支持的游戏列表
 - **get-manager-games-list** - 获取已添加到管理器的游戏列表
 - **get-current-managed-game** - 获取当前正在管理的游戏
@@ -30,7 +70,7 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - **remove-game-from-manager** - 从管理器中移除游戏
 - **fetch-steam-installed-games** - 从 Steam 获取已安装的游戏
 
-#### Mod 管理
+### Mod 管理
 - **get-current-mod-list** - 获取当前游戏的 Mod 列表
 - **install-mod-by-id** - 安装或卸载指定 Mod
 - **remove-mod-by-id** - 移除指定 Mod
@@ -38,13 +78,13 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - **sort-mods** - 对 Mod 列表排序
 - **download-mod** - 下载指定 Mod
 
-#### Mod 标签和依赖
+### Mod 标签和依赖
 - **add-tag-to-mod** - 为 Mod 添加标签
 - **remove-tag-from-mod** - 移除 Mod 标签
 - **get-mod-dependencies** - 获取前置依赖列表
 - **translate-game-name** - 翻译游戏名称
 
-#### 文件操作
+### 文件操作
 - **get-directory-contents** - 获取目录下的所有文件夹
 - **get-files-in-directory** - 获取目录下的所有文件
 
@@ -54,15 +94,15 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - **mods://mod-list** - 当前游戏的 Mod 列表（JSON 格式）
 - **mods://mod-dependencies** - Mod 前置依赖列表（JSON 格式）
 
-### 使用示例
+## 使用示例
 
-#### 示例 1: 获取所有支持的游戏
+### 示例 1: 获取所有支持的游戏
 ```md
 工具: get-supported-games-list
 返回: { games: [...], count: N }
 ```
 
-#### 示例 2: 切换到特定游戏并安装 Mod
+### 示例 2: 切换到特定游戏并安装 Mod
 ```md
 1. 工具: get-supported-games-list (获取游戏 ID)
 2. 工具: switch-managed-game { GlossGameId: 123 }
@@ -83,7 +123,7 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - **SteamWorkshop** - Steam 创意工坊
 - **Customize** - 自定义 URL
 
-### 注意事项
+## 注意事项
 
 ⚠️ **重要提示**
 - 服务器启动后，端口号无法修改，需要先停止服务器再修改
@@ -91,7 +131,7 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - 某些操作可能需要检查前置依赖（GamePlugins）
 - 下载 Mod 时需要确保已添加目标游戏到管理器
 
-### 常见问题
+## 常见问题
 
 **Q: 为什么连接失败？**
 - 确保服务器已启用（状态为绿色）
