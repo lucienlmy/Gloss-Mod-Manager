@@ -96,7 +96,9 @@ export const useNexusMods = defineStore("NexusMods", {
             }
         },
         async getFileList(mod: INexusMods) {
-            let url = `https://api.nexusmods.com/v1/games/${mod.game.domainName}/mods/${mod.modId}/files.json`;
+            // mod.modId = 635_11673, id = 635
+            const id = mod.modId.toString().split("_")[0];
+            let url = `https://api.nexusmods.com/v1/games/${mod.game.domainName}/mods/${id}/files.json`;
 
             const { data } = await axios.get(url, {
                 headers: await this.getheader(),

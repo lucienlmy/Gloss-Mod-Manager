@@ -38,7 +38,7 @@ const content = useContent();
             <!-- <DownloadBtn :id="content.modData.id" :size="content.modData.mods_resource_size"></DownloadBtn> -->
             <DownloadBtn
                 :id="content.modData.id"
-                :size="content.modData.mods_resource[0].mods_resource_size"
+                :size="content.modData.mods_resource[0]?.mods_resource_size"
             ></DownloadBtn>
         </v-col>
     </v-row>

@@ -427,7 +427,7 @@ export class Manager {
 
         // folder 去重
         folder = [...new Set(folder)];
-        console.log(folder);
+        // console.log(folder);
 
         if (folder.length > 0) {
             folder.forEach((item) => {

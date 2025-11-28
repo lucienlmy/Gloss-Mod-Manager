@@ -91,7 +91,7 @@ let mod_img = computed(() => {
         <v-card-actions class="flex-row-reverse">
             <DownloadBtn
                 :id="mod.id"
-                :size="(mod as any).mods_resource[0].mods_resource_size"
+                :size="mod.mods_resource[0]?.mods_resource_size"
             ></DownloadBtn>
         </v-card-actions>
     </v-card>

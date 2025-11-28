@@ -446,7 +446,8 @@ export const useDownload = defineStore("Download", {
             } = nexusmodsData;
 
             const nexusmods = useNexusMods();
-            let get_download_link = `https://api.nexusmods.com/v1/games/${domainName}/mods/${modId}/files/${fileId}/download_link.json`;
+            const id = modId.toString().split("_")[0];
+            let get_download_link = `https://api.nexusmods.com/v1/games/${domainName}/mods/${id}/files/${fileId}/download_link.json`;
 
             if (key) {
                 get_download_link = `${get_download_link}?key=${key}&expires=${expires}`;
