@@ -12,7 +12,10 @@ export class GTA5Handler {
      * @param arg 参数对象
      * @returns Promise<any> 操作结果
      */
-    public static RpfHeader(methodName: "Read" | "Write" | "Create", arg: any) {
+    public static RpfHeader(
+        methodName: "Read" | "Write" | "Create" | "GetFiles",
+        arg: any
+    ) {
         const edge = require("electron-edge-js-39-only");
         let assemblyFile = join(GTA5Handler.getToolsPath(), "rpf.dll");
 
@@ -61,21 +64,111 @@ export class GTA5Handler {
     }
 
     /**
-     * 获取车辆模型名称
+     * 设置车辆模型名称
      * @param dlc
+     * @param mod
+     * @param isInstall
      */
-    public static async GetVehModelName(dlc: string) {
-        /** dlc.rpf\x64\vehicles.rpf
-         *  |- bolide.yft
-         *  |- bolide.ytd
-         *  |- bolide_hi.yft
-         *  那么车辆模型名称就是 bolide
-         *  根据这个规律来获取车辆模型名称
-         */
-        const data = await GTA5Handler.RpfHeader("Read", {
+    public static async SetVehModelName(
+        dlc: string,
+        mod: IModInfo,
+        isInstall: boolean
+    ) {
+        const data = await GTA5Handler.RpfHeader("GetFiles", {
             rpf: dlc,
-            filename: "x64/vehicles.rpf",
+            // Level2RPF: "x64/vehicles.rpf",
         });
+
+        const modelFiles = new Map<string, Set<string>>();
+
+        for (const file of data) {
+            const filename = basename(file);
+            const ext = extname(filename);
+            if (ext === ".yft" || ext === ".ytd") {
+                let name = filename.replace(ext, "");
+                if (name.endsWith("_hi")) {
+                    name = name.slice(0, -3);
+                }
+                if (!modelFiles.has(name)) {
+                    modelFiles.set(name, new Set());
+                }
+                modelFiles.get(name)!.add(ext);
+            }
+        }
+
+        const models: string[] = [];
+        for (const [name, exts] of modelFiles) {
+            if (exts.has(".yft") && exts.has(".ytd")) {
+                models.push(name);
+            }
+        }
+
+        console.log({ dlc, data, models });
+
+        if (models.length > 0) {
+            const manager = useManager();
+            // menyooStuff\AddedVehicleModels.xml
+            const addedVehicleModelsPath = join(
+                manager.gameStorage ?? "",
+                "menyooStuff",
+                "AddedVehicleModels.xml"
+            );
+            let xmlContent = FileHandler.readFile(
+                addedVehicleModelsPath,
+                `<?xml version="1.0" encoding="UTF-8"?>
+<AddedVehicleModels>
+</AddedVehicleModels>`
+            );
+            const xmlData: convert.ElementCompact = convert.xml2js(xmlContent, {
+                compact: true,
+            });
+
+            if (isInstall) {
+                // 追加 	<VehModel modelName="BOLIDE" customName="BOLIDE" />
+                if (!xmlData.AddedVehicleModels.VehModel) {
+                    xmlData.AddedVehicleModels.VehModel = [];
+                }
+                if (!Array.isArray(xmlData.AddedVehicleModels.VehModel)) {
+                    xmlData.AddedVehicleModels.VehModel = [
+                        xmlData.AddedVehicleModels.VehModel,
+                    ];
+                }
+                for (const model of models) {
+                    // 检查是否已存在
+                    const exists = (
+                        xmlData.AddedVehicleModels.VehModel as any[]
+                    ).some((item: any) => item._attributes.modelName === model);
+                    if (!exists) {
+                        (xmlData.AddedVehicleModels.VehModel as any[]).push({
+                            _attributes: {
+                                modelName: model,
+                                customName: mod.modName,
+                            },
+                        });
+                    }
+                }
+            } else {
+                // 根据 modelName 判断移除
+                if (xmlData.AddedVehicleModels.VehModel) {
+                    if (!Array.isArray(xmlData.AddedVehicleModels.VehModel)) {
+                        xmlData.AddedVehicleModels.VehModel = [
+                            xmlData.AddedVehicleModels.VehModel,
+                        ];
+                    }
+                    xmlData.AddedVehicleModels.VehModel = (
+                        xmlData.AddedVehicleModels.VehModel as any[]
+                    ).filter(
+                        (item: any) =>
+                            !models.includes(item._attributes.modelName)
+                    );
+                }
+            }
+            const newXmlContent = convert.js2xml(xmlData, {
+                compact: true,
+                spaces: 4,
+            });
+            FileHandler.writeFile(addedVehicleModelsPath, newXmlContent);
+        }
     }
 
     /**
@@ -165,6 +258,11 @@ export class GTA5Handler {
             if (basename(item) == "dlc.rpf") {
                 let name = await GTA5Handler.GetDlcName(join(modStorage, item));
                 await GTA5Handler.writeDlcName(name, isInstall);
+                GTA5Handler.SetVehModelName(
+                    join(modStorage, item),
+                    mod,
+                    isInstall
+                );
                 if (isInstall) {
                     FileHandler.copyFile(
                         join(modStorage, item),

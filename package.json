@@ -1,6 +1,6 @@
 {
   "name": "gmm",
-  "version": "1.64.0",
+  "version": "1.65.0",
   "main": "dist-electron/main.js",
   "description": "Gloss Mod Manager",
   "author": "小莫sky <xm@aoe.top>",
@@ -48,7 +48,7 @@
     "axios": "^1.7.8",
     "cropperjs": "^1.6.2",
     "electron": "39.2.7",
-    "electron-builder": "26.0.12",
+    "electron-builder": "^26.0.12",
     "electron-updater": "6.6.2",
     "element-plus": "^2.9.0",
     "fast-xml-parser": "^4.5.1",
@@ -78,12 +78,15 @@
     "xml-js": "^1.6.11"
   },
   "dependencies": {
+    "@electron/rebuild": "^4.0.2",
+    "app-builder-lib": "^26.0.12",
     "auto-launch": "^5.0.5",
     "cheerio": "^1.0.0-rc.12",
     "electron-edge-js-39-only": "^39.0.1",
     "electron-log": "^5.2.3",
     "electron-store": "^10.0.0",
     "express": "^5.1.0",
+    "node-abi": "^4.24.0",
     "request": "^2.88.2",
     "rxjs": "^7.8.1",
     "xml2js": "^0.6.2"
