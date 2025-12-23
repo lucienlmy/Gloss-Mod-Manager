@@ -20,6 +20,7 @@ declare global {
   const ExpandsType: typeof import('./src/model/ExpandsType')['ExpandsType']
   const FileHandler: typeof import('./src/model/FileHandler')['FileHandler']
   const FormRules: typeof import('./src/model/FormRules')['FormRules']
+  const GTA5Handler: typeof import('./src/model/GTA5Handler')['GTA5Handler']
   const LocalLang: typeof import('./src/model/LocalLang')['LocalLang']
   const MCPServer: typeof import('./src/model/MCPServer')['MCPServer']
   const Manager: typeof import('./src/model/Manager')['Manager']
@@ -72,6 +73,8 @@ declare global {
   const shallowReactive: typeof import('vue')['shallowReactive']
   const shallowReadonly: typeof import('vue')['shallowReadonly']
   const shallowRef: typeof import('vue')['shallowRef']
+  const supportedGamesGTA5: typeof import('./src/model/GTA5Handler')['supportedGamesGTA5']
+  const supportedGamesGTA5Enhanced: typeof import('./src/model/GTA5Handler')['supportedGamesGTA5Enhanced']
   const toRaw: typeof import('vue')['toRaw']
   const toRef: typeof import('vue')['toRef']
   const toRefs: typeof import('vue')['toRefs']
@@ -150,6 +153,9 @@ declare global {
   // @ts-ignore
   export type { FileHandler } from './src/model/FileHandler'
   import('./src/model/FileHandler')
+  // @ts-ignore
+  export type { GTA5Handler } from './src/model/GTA5Handler'
+  import('./src/model/GTA5Handler')
   // @ts-ignore
   export type { LocalLang } from './src/model/LocalLang'
   import('./src/model/LocalLang')
