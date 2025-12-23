@@ -4,6 +4,8 @@ titleTemplate: Gloss Mod Manager
 
 # GTA5 Mod 安装教程
 
+> 最新版本以将增强版和传承版 分开处理, 请根据自己的游戏版本选择对应的游戏和前置包
+
 ## 前置工作
 
 1. 下载并安装 [Gloss Mod Manager](https://mod.3dmgame.com/mod/197445)
@@ -13,7 +15,7 @@ titleTemplate: Gloss Mod Manager
 ## 选择游戏
 
 在安装完 Gloss Mod Manager 后, 启动程序, 然后找到 GTA , 选择游戏运行程序:
-![](https://mod.3dmgame.com/static/upload/mod/202401/MOD659f911cf0842.png@webp)
+![](https://assets-mod.3dmgame.com/static/upload/mod/202512/MOD694a5737e9bf0.png@webp)
 ![](https://mod.3dmgame.com/static/upload/mod/202401/MOD659f911cd5b92.png@webp)
 
 ## 安装前置
@@ -39,11 +41,10 @@ titleTemplate: Gloss Mod Manager
 
 ### 获取载具
 
-定位到 "Vehicle Option (载具选项)" -> "Vehicel Spawner(生成载具)" -> "Input Model (输入模型) (在最下面)"
+定位到 "Vehicle Option (载具选项)" -> "Vehicel Spawner(生成载具)" -> "我的收藏"
+即可在这里看到已安装的载具列表
+![](https://assets-mod.3dmgame.com/static/upload/mod/202512/MOD694a667749588.png@webp)
 
-在输入框中输入 载具代码，然后回车即可获刷出载具.
-> 载具代码是什么？  
-> 正常情况下, 一般作者会告诉你代码是什么，但也有部分转载的人， 以为那串代码是乱码，从而没有 转载过来， 如果作者并没有告诉你代码，那么你可以在 [这篇文章](https://mod.3dmgame.com/wiki/GTA5Mod_Tutorial/s3o4wvaky8#:~:text=%E5%88%B7%E8%BD%A6%E4%BB%A3%E7%A0%81-,%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8B%E5%88%B7%E8%BD%A6%E4%BB%A3%E7%A0%81,-%E4%B8%80%E8%88%AC%EF%BC%8CMod%E4%BD%9C%E8%80%85) 中查看如何获取 刷车代码
 
 ### 获取角色
 
