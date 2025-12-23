@@ -446,6 +446,7 @@ const Games = {
     "Dragon Cliff": "Dragon Cliff",
     "Escape from Duckov": "Escape from Duckov",
     "Anno 117 - Pax Romana": "Anno 117 - Pax Romana",
+    "Grand Theft Auto V Enhanced": "Grand Theft Auto V Enhanced",
 };
 
 const Other = {
