@@ -2,21 +2,25 @@
  * @description 全面战争 三国 支持
  */
 
-import { basename, join, extname } from "node:path"
+import { basename, join, extname } from "node:path";
 import { statSync } from "fs";
 import { ElMessage } from "element-plus";
 function handlePack(mod: IModInfo, installPath: string, install: boolean) {
-    const manager = useManager()
-    const modStorage = join(manager.modStorage ?? "", mod.id.toString())
-    mod.modFiles.forEach(item => {
+    const manager = useManager();
+    const modStorage = join(manager.modStorage ?? "", mod.id.toString());
+    mod.modFiles.forEach((item) => {
         if (extname(item) === ".pack") {
-            let source = join(modStorage, item)
-            let target = join(manager.gameStorage, installPath ?? "", basename(item))
-            if (install) FileHandler.copyFile(source, target)
-            else FileHandler.deleteFile(target)
+            let source = join(modStorage, item);
+            let target = join(
+                manager.gameStorage,
+                installPath ?? "",
+                basename(item)
+            );
+            if (install) FileHandler.copyFile(source, target);
+            else FileHandler.deleteFile(target);
         }
-    })
-    return true
+    });
+    return true;
 }
 
 export const supportedGames: ISupportedGames = {
@@ -24,7 +28,7 @@ export const supportedGames: ISupportedGames = {
     steamAppID: 779340,
     nexusMods: {
         game_domain_name: "totalwarthreekingdoms",
-        game_id: 2847
+        game_id: 2847,
     },
     installdir: join("Total War THREE KINGDOMS"),
     gameName: "Total War THREE KINGDOMS",
@@ -32,67 +36,82 @@ export const supportedGames: ISupportedGames = {
     startExe: [
         {
             name: "Steam 启动",
-            cmd: "steam://rungameid/779340"
+            cmd: "steam://rungameid/779340",
         },
         {
             name: "直接启动",
-            exePath: join("Three_Kingdoms.exe")
-        }
+            exePath: join("Three_Kingdoms.exe"),
+        },
     ],
-    archivePath: join(FileHandler.GetAppData(), "Roaming", "The Creative Assembly", "ThreeKingdoms"),
+    archivePath: join(
+        FileHandler.GetAppData(),
+        "Roaming",
+        "The Creative Assembly",
+        "ThreeKingdoms"
+    ),
     gameCoverImg: "https://assets-mod.3dmgame.com/static/upload/game/193.png",
     modType: [
         {
             id: 1,
             name: "pack",
-            installPath: "data",
+            installPath: "mods",
             async install(mod) {
-
-                return handlePack(mod, this.installPath ?? "", true)
+                return handlePack(mod, this.installPath ?? "", true);
             },
             async uninstall(mod) {
-
-                return handlePack(mod, this.installPath ?? "", false)
-            }
+                return handlePack(mod, this.installPath ?? "", false);
+            },
         },
         {
             id: 2,
             name: "UI",
-            installPath: join('data', 'UI'),
+            installPath: join("data", "UI"),
             async install(mod) {
-
-                return Manager.installByFolder(mod, this.installPath ?? "", "ui", true, false, true)
+                return Manager.installByFolder(
+                    mod,
+                    this.installPath ?? "",
+                    "ui",
+                    true,
+                    false,
+                    true
+                );
             },
             async uninstall(mod) {
-
-                return Manager.installByFolder(mod, this.installPath ?? "", "ui", false, false, true)
-            }
+                return Manager.installByFolder(
+                    mod,
+                    this.installPath ?? "",
+                    "ui",
+                    false,
+                    false,
+                    true
+                );
+            },
         },
         {
             id: 99,
             name: "未知",
             installPath: "",
             async install(mod) {
-                ElMessage.warning("未知类型, 请手动安装")
-                return false
+                ElMessage.warning("未知类型, 请手动安装");
+                return false;
             },
             async uninstall(mod) {
-                return true
-            }
-        }
+                return true;
+            },
+        },
     ],
     checkModType(mod) {
-        let pack = false
-        let ui = false
+        let pack = false;
+        let ui = false;
 
-        mod.modFiles.forEach(item => {
-            if (extname(item) === ".pack") pack = true
-            if (item.toLowerCase().includes('ui')) ui = true
-        })
+        mod.modFiles.forEach((item) => {
+            if (extname(item) === ".pack") pack = true;
+            if (item.toLowerCase().includes("ui")) ui = true;
+        });
 
-        if (pack) return 1
-        if (ui) return 2
+        if (pack) return 1;
+        if (ui) return 2;
 
-        return 99
-    }
-}
+        return 99;
+    },
+};

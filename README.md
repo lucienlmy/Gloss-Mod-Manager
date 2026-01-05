@@ -93,3 +93,14 @@ Contact us on Discord.
 [typescript]: https://p.aoe.top/shields/badge/TypeScript-5.0.4-3178C6?logo=typescript
 [GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager?style=social
 [version]: https://p.aoe.top/shields/github/package-json/v/GlossMod/Gloss-Mod-Manager
+
+
+### Star History
+
+<a href="https://www.star-history.com/#GlossMod/Gloss-Mod-Manager&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&legend=top-left" />
+ </picture>
+</a>

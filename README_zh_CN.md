@@ -96,3 +96,13 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 [GitHub]: https://p.aoe.top/shields/github/stars/GlossMod/Gloss-Mod-Manager?style=social
 [version]: https://p.aoe.top/shields/github/package-json/v/GlossMod/Gloss-Mod-Manager
 
+### 标星历史
+
+
+<a href="https://www.star-history.com/#GlossMod/Gloss-Mod-Manager&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=GlossMod/Gloss-Mod-Manager&type=date&legend=top-left" />
+ </picture>
+</a>
