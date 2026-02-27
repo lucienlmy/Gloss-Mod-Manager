@@ -10,9 +10,26 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
 - 确认服务器状态显示为 **服务器运行中**（绿色）
 - 默认端口为 **36412**（支持自定义）
 
-## 客户端配置
+![](https://assets-mod.3dmgame.com/static/upload/mod/202602/MOD69a153ef60af6.png@webp)
 
-> 以 使用 [vscode](https://code.visualstudio.com/) 为例
+
+## 客户端配置 (Glosc Copilot)
+> 使用 [Glosc Copilot](https://www.glosc.ai/) 客户端 + [Gloss Mod Manager](https://www.glosc.ai/store/plugins/gloss-mod-manager) 插件
+
+下载并安装 Glosc Copilot, 找到 选项->工具->从 Glosc Store 安装，找到 “loss Mod Manager”，点击安装
+![](https://assets-mod.3dmgame.com/static/upload/mod/202602/MOD69a1530021fa4.png@webp)
+![](https://assets-mod.3dmgame.com/static/upload/mod/202602/MOD69a153baabf1e.png@webp)
+
+
+可以在编辑中的 url 编辑相关的配置
+![](https://assets-mod.3dmgame.com/static/upload/mod/202602/MOD69a1542eda282.png@webp)
+
+点击 “测试”， 如果提示 “连接 Gloss Mod Manager 成功” ，并在会话中能正常看到 工具列表，证明配置成功了。
+![](https://assets-mod.3dmgame.com/static/upload/mod/202602/MOD69a15486043f6.png@webp)
+
+## 客户端配置 (vs code)
+
+> 使用 [vscode](https://code.visualstudio.com/)
 
 点击 **扩展**，搜索 Copilot , 安装 GitHub Copilot、 Copilot MCP、GitHub Copilot Chat 插件
 
