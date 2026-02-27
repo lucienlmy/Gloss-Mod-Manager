@@ -52,12 +52,10 @@ export class Unzipper {
         return new Promise(async (resolve, reject) => {
             try {
                 let _7z = await this.get7zip()
-                exec(`"${_7z}" x "${source}" -o"${target}" ${files.join(' ')} -y`, (err, stdout, stderr) => {
-                    if (err) reject(err)
-                    if (stderr) reject(stderr)
-                    if (stdout) {
-                        resolve(stdout)
-                    }
+                exec(`"${_7z}" x "${source}" -o"${target}" ${files.join(' ')} -y -bso0 -bse0`, (err, stdout, stderr) => {
+                    if (err) return reject(err)
+                    if (stderr) return reject(stderr)
+                    resolve(stdout ?? '')
                 })
             } catch (error) {
                 reject(error)
@@ -74,12 +72,10 @@ export class Unzipper {
     public static async zip(source: string, target: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             let _7z = await this.get7zip()
-            exec(`"${_7z}" a "${target}" "${source}\\*"`, (err, stdout, stderr) => {
-                if (err) reject(err)
-                if (stderr) reject(stderr)
-                if (stdout) {
-                    resolve(stdout)
-                }
+            exec(`"${_7z}" a "${target}" "${source}\\*" -bso0 -bse0`, (err, stdout, stderr) => {
+                if (err) return reject(err)
+                if (stderr) return reject(stderr)
+                resolve(stdout ?? '')
             })
         })
     }
@@ -95,14 +91,14 @@ export class Unzipper {
             let target = path.join(settings.settings.modStorageLocation, 'temp')
             console.log(target);
             let _7z = await this.get7zip()
-            exec(`"${_7z}" x "${zipPath}" -o"${target}" i ${file}`, (err, stdout, stderr) => {
-                if (err) reject(err)
-                if (stderr) reject(stderr)
-                if (stdout) {
-                    let data = FileHandler.readFile(path.join(target, file))
-                    FileHandler.deleteFolder(target)
-                    resolve(data ?? "")
-                }
+            FileHandler.deleteFolder(target)
+            FileHandler.createDirectory(target)
+            exec(`"${_7z}" x "${zipPath}" -o"${target}" -i!${file} -y -bso0 -bse0`, (err, stdout, stderr) => {
+                if (err) return reject(err)
+                if (stderr) return reject(stderr)
+                let data = FileHandler.readFile(path.join(target, file))
+                FileHandler.deleteFolder(target)
+                resolve(data ?? "")
             })
         })
     }
