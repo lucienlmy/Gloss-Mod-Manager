@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { onActivated, onDeactivated, onUnmounted } from "vue";
 import { ElMessage } from "element-plus";
 import ContentPack from "@/components/Manager/Pack/Pack.vue";
 import ManagerSort from "@/views/Manager/Sort.vue";
@@ -46,10 +47,35 @@ function openGameFolder() {
     FileHandler.openFolder(settings.settings.managerGame?.gamePath ?? "");
 }
 
-// 每秒检查游戏是否在运行中
-setInterval(() => {
-    manager.checkRuning();
-}, 1000);
+let checkRuningTimer: number | null = null;
+let isCheckingRuning = false;
+
+async function checkRuningSafe() {
+    if (isCheckingRuning) return;
+    isCheckingRuning = true;
+    try {
+        await manager.checkRuning();
+    } finally {
+        isCheckingRuning = false;
+    }
+}
+
+function startCheckRuning() {
+    if (checkRuningTimer !== null) return;
+    checkRuningSafe();
+    checkRuningTimer = window.setInterval(checkRuningSafe, 3000);
+}
+
+function stopCheckRuning() {
+    if (checkRuningTimer !== null) {
+        window.clearInterval(checkRuningTimer);
+        checkRuningTimer = null;
+    }
+}
+
+onActivated(startCheckRuning);
+onDeactivated(stopCheckRuning);
+onUnmounted(stopCheckRuning);
 </script>
 <template>
     <v-app-bar :elevation="0" density="compact">
