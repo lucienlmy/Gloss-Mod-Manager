@@ -24,7 +24,7 @@ export class Manager {
     public static saveModInfo(
         modList: IModInfo[] | ITag[],
         savePath: string,
-        fileName: string = "mod.json"
+        fileName: string = "mod.json",
     ) {
         let configPath = join(savePath, fileName);
         // console.log(fileName, configPath);
@@ -35,7 +35,7 @@ export class Manager {
     // 获取Mod信息
     public static async getModInfo(
         savePath: string,
-        fileName = "mod.json"
+        fileName = "mod.json",
     ): Promise<IModInfo[] | ITag[]> {
         let configPath = join(savePath, fileName);
         FileHandler.createDirectory(savePath); // 创建目录
@@ -63,7 +63,7 @@ export class Manager {
         mod: IModInfo,
         installPath: string,
         keepPath: boolean = false,
-        inGameStorage: boolean = true
+        inGameStorage: boolean = true,
     ): IState[] {
         // FileHandler.writeLog(`安装mod: ${mod.modName}`)
         const manager = useManager();
@@ -96,7 +96,7 @@ export class Manager {
         mod: IModInfo,
         installPath: string,
         keepPath: boolean = false,
-        inGameStorage: boolean = true
+        inGameStorage: boolean = true,
     ): IState[] {
         // FileHandler.writeLog(`卸载mod: ${mod.modName}`);
         const manager = useManager();
@@ -164,7 +164,7 @@ export class Manager {
         folderName: string | string[],
         isInstall: boolean,
         include: boolean = false,
-        spare: boolean = false
+        spare: boolean = false,
     ) {
         const manager = useManager();
         let res: IState[] = [];
@@ -175,7 +175,7 @@ export class Manager {
                 let modStorage = join(
                     manager.modStorage ?? "",
                     mod.id.toString(),
-                    item
+                    item,
                 );
                 if (statSync(modStorage).isFile()) {
                     // 检查是否匹配任意一个文件夹名
@@ -187,7 +187,7 @@ export class Manager {
                             const tempPath = FileHandler.getFolderFromPath(
                                 modStorage,
                                 folder,
-                                include
+                                include,
                             );
                             if (tempPath) {
                                 path = tempPath;
@@ -199,7 +199,7 @@ export class Manager {
                         path = FileHandler.getFolderFromPath(
                             modStorage,
                             folderName,
-                            include
+                            include,
                         );
                     }
 
@@ -207,13 +207,13 @@ export class Manager {
                         let gameStorage = join(
                             manager.gameStorage ?? "",
                             installPath,
-                            path
+                            path,
                         );
 
                         if (isInstall) {
                             let state = await FileHandler.copyFile(
                                 modStorage,
-                                gameStorage
+                                gameStorage,
                             );
                             res.push({ file: item, state: state });
                         } else {
@@ -225,12 +225,12 @@ export class Manager {
                         let gameStorage = join(
                             manager.gameStorage ?? "",
                             installPath,
-                            item
+                            item,
                         );
                         if (isInstall) {
                             let state = await FileHandler.copyFile(
                                 modStorage,
-                                gameStorage
+                                gameStorage,
                             );
                             res.push({ file: item, state: state });
                         } else {
@@ -266,7 +266,7 @@ export class Manager {
         isExtname: boolean = false,
         inGameStorage: boolean = true,
         isLink: boolean = true,
-        commonParent: boolean = false
+        commonParent: boolean = false,
     ) {
         const manager = useManager();
         let modStorage = join(manager.modStorage, mod.id.toString());
@@ -296,14 +296,21 @@ export class Manager {
         }
 
         if (folder.length > 0) {
+            const settings = useSettings();
             folder.forEach((item) => {
                 let target = join(gameStorage, basename(item));
                 if (isInstall) {
-                    if (isLink) FileHandler.createLink(item, target, true);
-                    else FileHandler.copyFolder(item, target);
+                    if (isLink && !settings.settings.closeSoftLinks) {
+                        FileHandler.createLink(item, target, true);
+                    } else {
+                        FileHandler.copyFolder(item, target);
+                    }
                 } else {
-                    if (isLink) FileHandler.removeLink(target, true);
-                    else FileHandler.deleteFolder(target);
+                    if (isLink && !settings.settings.closeSoftLinks) {
+                        FileHandler.removeLink(target, true);
+                    } else {
+                        FileHandler.deleteFolder(target);
+                    }
                     this.deleteEmptyFolders(dirname(target));
                 }
             });
@@ -329,7 +336,7 @@ export class Manager {
         isInstall: boolean,
         isExtname: boolean = false,
         inGameStorage: boolean = true,
-        pass: string[] = []
+        pass: string[] = [],
     ) {
         const manager = useManager();
         let modStorage = join(manager.modStorage, mod.id.toString());
@@ -362,7 +369,7 @@ export class Manager {
         // 通过 files 去重
         folders = folders.filter((item, index) => {
             let indexs = folders.findIndex(
-                (i) => i.files.toString() == item.files.toString()
+                (i) => i.files.toString() == item.files.toString(),
             );
             return indexs == index;
         });
@@ -406,7 +413,7 @@ export class Manager {
         installPath: string,
         folderName: string,
         isInstall: boolean,
-        inGameStorage: boolean = true
+        inGameStorage: boolean = true,
     ) {
         const manager = useManager();
         let modStorage = join(manager.modStorage, mod.id.toString());
@@ -417,7 +424,7 @@ export class Manager {
         mod.modFiles.forEach((item) => {
             const parts = item.split(sep).filter((p) => p !== "");
             const index = parts.findIndex(
-                (part) => part.toLowerCase() === folderName.toLowerCase()
+                (part) => part.toLowerCase() === folderName.toLowerCase(),
             );
             if (index !== -1) {
                 const targetPath = parts.slice(0, index).join(sep);
@@ -445,7 +452,7 @@ export class Manager {
 
     static getCommonParentFolder(
         modStorage: string,
-        paths: string[]
+        paths: string[],
     ): string[] {
         /**
          * 将下面这段数组，

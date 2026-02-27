@@ -99,6 +99,7 @@ export const zh = defineConfig({
                                 link: "/Use/RedDeadRedemption2.md",
                             },
                             { text: "幻兽帕鲁", link: "/Use/Palworld.md" },
+                            { text: "正当防卫3", link: "/Use/JustCause3.md" },
                         ],
                     },
                     { text: "合作", link: "/Cooperation.md" },

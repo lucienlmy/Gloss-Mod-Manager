@@ -287,6 +287,8 @@ const Settings = {
     Document: "Document",
     "Change in Game run": "Change in Game run",
     "Default Page": "Default Page",
+    "Show Plugins List": "Show Plugins List",
+    "Close soft links": "Close soft links",
 };
 
 const Backup = {
@@ -447,6 +449,10 @@ const Games = {
     "Escape from Duckov": "Escape from Duckov",
     "Anno 117 - Pax Romana": "Anno 117 - Pax Romana",
     "Grand Theft Auto V Enhanced": "Grand Theft Auto V Enhanced",
+    "Nioh 3": "Nioh 3",
+    "Just Cause 3": "Just Cause 3",
+    "Darkest Dungeon": "Darkest Dungeon",
+    "X4 Foundations": "X4 Foundations",
 };
 
 const Other = {

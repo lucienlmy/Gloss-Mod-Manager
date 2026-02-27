@@ -54,6 +54,7 @@ export class Config {
             defaultPage: settings.defaultPage,
             showPlugins: settings.showPlugins,
             downloadProxy: settings.downloadProxy,
+            closeSoftLinks: settings.closeSoftLinks,
         };
     }
     // 保存配置文件
@@ -73,7 +74,7 @@ export class Config {
                 if (err) {
                     console.log(err);
                 }
-            }
+            },
         );
     }
 
@@ -105,6 +106,7 @@ export class Config {
             defaultPage: data.defaultPage ?? "Home",
             showPlugins: data.showPlugins ?? true, // 添加这一行
             downloadProxy: data.downloadProxy ?? "", // 添加这一行
+            closeSoftLinks: data.closeSoftLinks ?? false, // 添加这一行
         };
 
         // 初始化游戏
@@ -115,7 +117,7 @@ export class Config {
                     settings.settings.managerGame = Object.assign(
                         {},
                         settings.settings.managerGame,
-                        item
+                        item,
                     );
                     // console.log(settings.settings.managerGame);
                 }

@@ -298,6 +298,7 @@ const Settings = {
         "连接网络时显示必需的前置插件列表",
     "Download Proxy": "下载代理",
     "Restore Aria2": "重启 Aria2",
+    "Close soft links": "关闭软链安装",
 };
 
 const Backup = {
@@ -454,6 +455,10 @@ const Games = {
     "Escape from Duckov": "逃离鸭科夫",
     "Anno 117 - Pax Romana": "纪元117：罗马和平",
     "Grand Theft Auto V Enhanced": "侠盗猎车手5 增强版",
+    "Nioh 3": "仁王3",
+    "Just Cause 3": "正当防卫3",
+    "Darkest Dungeon": "黑暗地牢",
+    "X4 Foundations": "X4 基石",
 };
 
 const Other = {

@@ -338,6 +338,7 @@ declare global {
         defaultPage: string;
         showPlugins: boolean; // 是否显示前置列表
         downloadProxy: string; // 下载代理
+        closeSoftLinks: boolean; // 关闭软链接
     }
 
     interface IFileTreeNode {
