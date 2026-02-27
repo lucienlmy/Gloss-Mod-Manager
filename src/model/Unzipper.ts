@@ -4,7 +4,7 @@
 
 import { extractFull, type Data, add, rename } from 'node-7z'
 import { ipcRenderer } from 'electron'
-import { exec, execSync } from 'child_process';
+import { exec, execFile, execSync } from 'child_process';
 import path from 'path'
 import { ElMessage } from 'element-plus';
 export class Unzipper {
@@ -52,12 +52,10 @@ export class Unzipper {
         return new Promise(async (resolve, reject) => {
             try {
                 let _7z = await this.get7zip()
-                exec(`"${_7z}" x "${source}" -o"${target}" ${files.join(' ')} -y`, (err, stdout, stderr) => {
-                    if (err) reject(err)
-                    if (stderr) reject(stderr)
-                    if (stdout) {
-                        resolve(stdout)
-                    }
+                exec(`"${_7z}" x "${source}" -o"${target}" ${files.join(' ')} -y -bso0 -bse0`, (err, stdout, stderr) => {
+                    if (err) return reject(err)
+                    if (stderr) return reject(stderr)
+                    resolve(stdout ?? '')
                 })
             } catch (error) {
                 reject(error)
@@ -74,12 +72,10 @@ export class Unzipper {
     public static async zip(source: string, target: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
             let _7z = await this.get7zip()
-            exec(`"${_7z}" a "${target}" "${source}\\*"`, (err, stdout, stderr) => {
-                if (err) reject(err)
-                if (stderr) reject(stderr)
-                if (stdout) {
-                    resolve(stdout)
-                }
+            exec(`"${_7z}" a "${target}" "${source}\\*" -bso0 -bse0`, (err, stdout, stderr) => {
+                if (err) return reject(err)
+                if (stderr) return reject(stderr)
+                resolve(stdout ?? '')
             })
         })
     }
@@ -91,18 +87,23 @@ export class Unzipper {
      */
     public static async readZipFile(zipPath: string, file: string): Promise<string> {
         return new Promise(async (resolve, reject) => {
+            const normalizedFile = file.replace(/\\/g, '/').trim()
+            const isSafeFile = /^[\w .-]+(?:\/[\w .-]+)*$/.test(normalizedFile)
+                && !normalizedFile.startsWith('/')
+                && !normalizedFile.includes('../')
+                && !normalizedFile.includes('/..')
+            if (!isSafeFile) return reject(new Error(`Invalid zip file path: ${file}`))
             const settings = useSettings()
             let target = path.join(settings.settings.modStorageLocation, 'temp')
-            console.log(target);
             let _7z = await this.get7zip()
-            exec(`"${_7z}" x "${zipPath}" -o"${target}" i ${file}`, (err, stdout, stderr) => {
-                if (err) reject(err)
-                if (stderr) reject(stderr)
-                if (stdout) {
-                    let data = FileHandler.readFile(path.join(target, file))
-                    FileHandler.deleteFolder(target)
-                    resolve(data ?? "")
-                }
+            FileHandler.deleteFolder(target)
+            FileHandler.createDirectory(target)
+            execFile(_7z, ["x", zipPath, `-o${target}`, `-i!${normalizedFile}`, "-y", "-bso0", "-bse0"], (err, stdout, stderr) => {
+                if (err) return reject(err)
+                if (stderr) return reject(stderr)
+                let data = FileHandler.readFile(path.join(target, normalizedFile))
+                FileHandler.deleteFolder(target)
+                resolve(data ?? "")
             })
         })
     }
