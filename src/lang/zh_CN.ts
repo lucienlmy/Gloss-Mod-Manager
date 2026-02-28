@@ -459,6 +459,7 @@ const Games = {
     "Just Cause 3": "正当防卫3",
     "Darkest Dungeon": "黑暗地牢",
     "X4 Foundations": "X4 基石",
+    "Resident Evil Requiem": "生化危机9 安魂曲",
 };
 
 const Other = {

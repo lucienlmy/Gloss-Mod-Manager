@@ -8,10 +8,10 @@ import { REEngine } from "@/model/REEngine";
 export const supportedGames: ISupportedGames = {
     GlossGameId: 488,
     steamAppID: 3764200,
-    // nexusMods: {
-    //     game_domain_name: "residentevil42023",
-    //     game_id: 5195
-    // },
+    nexusMods: {
+        game_domain_name: "residentevilrequiem",
+        game_id: 8863,
+    },
     installdir: "RESIDENT EVIL requiem BIOHAZARD requiem",
     gameName: "Resident Evil Requiem",
     gameExe: "re9.exe",

@@ -453,6 +453,7 @@ const Games = {
     "Just Cause 3": "Just Cause 3",
     "Darkest Dungeon": "Darkest Dungeon",
     "X4 Foundations": "X4 Foundations",
+    "Resident Evil Requiem": "Resident Evil Requiem",
 };
 
 const Other = {
