@@ -48,9 +48,8 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
         // (可选) Mod站 MCP 服务器配置
         // 用于从 Mod站搜索/下载Mod
         "glossmod-mcp": {
-            "type": "stdio",
-            "command": "uvx",
-            "args": ["glossmod-mcp"],
+            "type": "http",
+            "url": "https://mod.3dmgame.com/mcp",
             "env": {
                 "GLOSSMOD_API_KEY": "${input:GLOSSMOD_API_KEY}"
             }
@@ -61,7 +60,7 @@ MCP (Model Context Protocol) 服务器允许第三方应用通过 HTTP 接口与
             "type": "promptString",
             "id": "GLOSSMOD_API_KEY",
             // 在 https://mod.3dmgame.com/Workshop/Api 获取你的 Mod 站 API Key
-            "description": "输入你的Mod站 API",
+            "description": "输入你的Mod站 API Key",
             "default": "",
             "password": true
         }
