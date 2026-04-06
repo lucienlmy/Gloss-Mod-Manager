@@ -36,7 +36,16 @@ export const shared = defineConfig({
         [
             "script",
             {},
-            "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-L04H04RSS7');",
+            // "window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-L04H04RSS7');",
+            ` 
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date()), gtag("config", "G-L04H04RSS7",{
+                "content_group":"Gloss-Mod-Manager"
+            });
+            `
         ],
         [
             "script",
@@ -49,13 +58,13 @@ export const shared = defineConfig({
               s.parentNode.insertBefore(hm, s);
             })();`,
         ],
-        // [
-        //     'script',
-        //     {
-        //         "async": "true",
-        //         'src': 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5978423097771370',
-        //     }
-        // ],
+        [
+            'script',
+            {
+                "async": "true",
+                'src': 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5978423097771370',
+            }
+        ],
         ["meta", { name: "og:site_name", content: "Gloss Mod Manager" }],
         ["meta", { name: "og:locale", content: "zh" }],
         ["meta", { name: "og:type", content: "website" }],
