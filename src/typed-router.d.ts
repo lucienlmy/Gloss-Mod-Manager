@@ -34,6 +34,69 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/about': RouteRecordInfo<
+      '/about',
+      '/about',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/backup': RouteRecordInfo<
+      '/backup',
+      '/backup',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/download': RouteRecordInfo<
+      '/download',
+      '/download',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/explore': RouteRecordInfo<
+      '/explore',
+      '/explore',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/games': RouteRecordInfo<
+      '/games',
+      '/games',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/manager': RouteRecordInfo<
+      '/manager',
+      '/manager',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/mcp': RouteRecordInfo<
+      '/mcp',
+      '/mcp',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/settings': RouteRecordInfo<
+      '/settings',
+      '/settings',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
+    '/user': RouteRecordInfo<
+      '/user',
+      '/user',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -50,6 +113,60 @@ declare module 'vue-router/auto-routes' {
     'src/pages/index.vue': {
       routes:
         | '/'
+      views:
+        | never
+    }
+    'src/pages/about.vue': {
+      routes:
+        | '/about'
+      views:
+        | never
+    }
+    'src/pages/backup.vue': {
+      routes:
+        | '/backup'
+      views:
+        | never
+    }
+    'src/pages/download.vue': {
+      routes:
+        | '/download'
+      views:
+        | never
+    }
+    'src/pages/explore.vue': {
+      routes:
+        | '/explore'
+      views:
+        | never
+    }
+    'src/pages/games.vue': {
+      routes:
+        | '/games'
+      views:
+        | never
+    }
+    'src/pages/manager.vue': {
+      routes:
+        | '/manager'
+      views:
+        | never
+    }
+    'src/pages/mcp.vue': {
+      routes:
+        | '/mcp'
+      views:
+        | never
+    }
+    'src/pages/settings.vue': {
+      routes:
+        | '/settings'
+      views:
+        | never
+    }
+    'src/pages/user.vue': {
+      routes:
+        | '/user'
       views:
         | never
     }

@@ -5,7 +5,7 @@
         <Sidebar />
         <main class="flex-1 flex flex-col min-w-0 bg-background">
             <div
-                class="flex-1 h-screen overflow-y-auto overflow-x-hidden p-6 md:p-10 scroll-smooth">
+                class="flex-1 h-screen overflow-y-auto overflow-x-hidden p-6 scroll-smooth">
                 <slot />
             </div>
         </main>
