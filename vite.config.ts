@@ -20,6 +20,7 @@ export default defineConfig(async () => ({
         AutoImport({
             imports: ["vue", "vue-router", "@vueuse/core", "pinia"],
             dts: "src/auto-imports.d.ts",
+            dirs: ["src/lib"],
         }),
         Components({
             dirs: ["src/components/ui", "src/components"],

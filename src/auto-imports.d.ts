@@ -6,10 +6,28 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const Aria2: typeof import('./lib/aria2').Aria2
+  const EMBEDDED_TOOL_VERSIONS: typeof import('./lib/native-tools-manifest').EMBEDDED_TOOL_VERSIONS
   const EffectScope: typeof import('vue').EffectScope
+  const FileHandler: typeof import('./lib/FileHandler').FileHandler
+  const Manager: typeof import('./lib/Manager').Manager
+  const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
+  const SIDECAR_BASE_NAMES: typeof import('./lib/native-tools-manifest').SIDECAR_BASE_NAMES
+  const SIDECAR_COMMANDS: typeof import('./lib/native-tools-manifest').SIDECAR_COMMANDS
+  const SevenZip: typeof import('./lib/sevenZip').SevenZip
+  const Sidecar: typeof import('./lib/sidecar').Sidecar
+  const SidecarExecutionError: typeof import('./lib/sidecar').SidecarExecutionError
+  const Theme: typeof import('./lib/theme').Theme
+  const UnityGame: typeof import('./lib/UnityGame').UnityGame
+  const UnityGameILCPP2: typeof import('./lib/UnityGame').UnityGameILCPP2
+  const UnrealEngine: typeof import('./lib/UnrealEngine').UnrealEngine
+  const WINDOWS_SEVEN_ZIP_SUPPORT_FILES: typeof import('./lib/native-tools-manifest').WINDOWS_SEVEN_ZIP_SUPPORT_FILES
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
+  const buildAria2DownloadArgs: typeof import('./lib/aria2').buildAria2DownloadArgs
+  const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
+  const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
   const computedEager: typeof import('@vueuse/core').computedEager
@@ -18,6 +36,7 @@ declare global {
   const controlledComputed: typeof import('@vueuse/core').controlledComputed
   const controlledRef: typeof import('@vueuse/core').controlledRef
   const createApp: typeof import('vue').createApp
+  const createArchiveWithSevenZip: typeof import('./lib/sevenZip').createArchiveWithSevenZip
   const createEventHook: typeof import('@vueuse/core').createEventHook
   const createGlobalState: typeof import('@vueuse/core').createGlobalState
   const createInjectionState: typeof import('@vueuse/core').createInjectionState
@@ -34,15 +53,21 @@ declare global {
   const defineAsyncComponent: typeof import('vue').defineAsyncComponent
   const defineComponent: typeof import('vue').defineComponent
   const defineStore: typeof import('pinia').defineStore
+  const downloadWithAria2: typeof import('./lib/aria2').downloadWithAria2
   const eagerComputed: typeof import('@vueuse/core').eagerComputed
   const effectScope: typeof import('vue').effectScope
+  const executeAria2Sidecar: typeof import('./lib/sidecar').executeAria2Sidecar
+  const executeSevenZipSidecar: typeof import('./lib/sidecar').executeSevenZipSidecar
+  const executeSidecar: typeof import('./lib/sidecar').executeSidecar
   const extendRef: typeof import('@vueuse/core').extendRef
+  const extractArchiveWithSevenZip: typeof import('./lib/sevenZip').extractArchiveWithSevenZip
   const getActivePinia: typeof import('pinia').getActivePinia
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const h: typeof import('vue').h
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
+  const initializeTheme: typeof import('./lib/theme').initializeTheme
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
   const isDefined: typeof import('@vueuse/core').isDefined
@@ -51,6 +76,7 @@ declare global {
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
+  const listArchiveWithSevenZip: typeof import('./lib/sevenZip').listArchiveWithSevenZip
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const mapActions: typeof import('pinia').mapActions
   const mapGetters: typeof import('pinia').mapGetters
@@ -99,15 +125,22 @@ declare global {
   const refWithControl: typeof import('@vueuse/core').refWithControl
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveRef: typeof import('@vueuse/core').resolveRef
+  const runAria2Command: typeof import('./lib/aria2').runAria2Command
   const setActivePinia: typeof import('pinia').setActivePinia
   const setMapStoreSuffix: typeof import('pinia').setMapStoreSuffix
+  const setTheme: typeof import('./lib/theme').setTheme
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
+  const spawnAria2Download: typeof import('./lib/aria2').spawnAria2Download
+  const spawnAria2Sidecar: typeof import('./lib/sidecar').spawnAria2Sidecar
+  const spawnSidecar: typeof import('./lib/sidecar').spawnSidecar
+  const startAria2RpcServer: typeof import('./lib/aria2').startAria2RpcServer
   const storeToRefs: typeof import('pinia').storeToRefs
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
   const templateRef: typeof import('@vueuse/core').templateRef
+  const testArchiveWithSevenZip: typeof import('./lib/sevenZip').testArchiveWithSevenZip
   const throttledRef: typeof import('@vueuse/core').throttledRef
   const throttledWatch: typeof import('@vueuse/core').throttledWatch
   const toRaw: typeof import('vue').toRaw
@@ -265,6 +298,7 @@ declare global {
   const useTextDirection: typeof import('@vueuse/core').useTextDirection
   const useTextSelection: typeof import('@vueuse/core').useTextSelection
   const useTextareaAutosize: typeof import('@vueuse/core').useTextareaAutosize
+  const useTheme: typeof import('./lib/theme').useTheme
   const useThrottle: typeof import('@vueuse/core').useThrottle
   const useThrottleFn: typeof import('@vueuse/core').useThrottleFn
   const useThrottledRefHistory: typeof import('@vueuse/core').useThrottledRefHistory
@@ -315,4 +349,31 @@ declare global {
   // @ts-ignore
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
+  // @ts-ignore
+  export type { FileHandler } from './lib/FileHandler'
+  import('./lib/FileHandler')
+  // @ts-ignore
+  export type { Manager } from './lib/Manager'
+  import('./lib/Manager')
+  // @ts-ignore
+  export type { UnityGame, UnityGameILCPP2 } from './lib/UnityGame'
+  import('./lib/UnityGame')
+  // @ts-ignore
+  export type { UnrealEngine } from './lib/UnrealEngine'
+  import('./lib/UnrealEngine')
+  // @ts-ignore
+  export type { Aria2, Aria2DownloadOptions, Aria2RpcServerOptions } from './lib/aria2'
+  import('./lib/aria2')
+  // @ts-ignore
+  export type { NativeToolsManifest, EmbeddedToolName, EmbeddedSidecarCommand } from './lib/native-tools-manifest'
+  import('./lib/native-tools-manifest')
+  // @ts-ignore
+  export type { SevenZip, SevenZipOverwriteMode, SevenZipArchiveFormat, SevenZipExtractOptions, SevenZipCreateOptions, SevenZipListOptions, SevenZipTestOptions, SevenZipArchiveEntry, SevenZipListResult } from './lib/sevenZip'
+  import('./lib/sevenZip')
+  // @ts-ignore
+  export type { SidecarExecutionError, Sidecar, SidecarCommandOptions, SidecarResult, SpawnedSidecarProcess } from './lib/sidecar'
+  import('./lib/sidecar')
+  // @ts-ignore
+  export type { Theme, ThemeMode } from './lib/theme'
+  import('./lib/theme')
 }
