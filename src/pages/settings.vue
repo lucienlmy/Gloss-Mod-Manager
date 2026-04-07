@@ -1,5 +1,13 @@
 <script setup lang="ts">
-const theme = ref("system");
+import type { ThemeMode } from "../lib/theme";
+import { useTheme } from "../lib/theme";
+
+const { theme, setTheme } = useTheme();
+
+const themeModel = computed<ThemeMode>({
+    get: () => theme.value,
+    set: (value) => setTheme(value),
+});
 </script>
 <template>
     <Card>
@@ -18,16 +26,14 @@ const theme = ref("system");
                 <CardContent class="flex">
                     <div class="flex gap-2 items-center">
                         <div class="text-sm font-medium">主题</div>
-                        <Select v-model="theme">
+                        <Select v-model="themeModel">
                             <SelectTrigger>
                                 <SelectValue placeholder="选择主题" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem ionItem value="light">
-                                    浅色
-                                </SelectItem>
-                                <SelectItem value="dark">深色</SelectItem>
                                 <SelectItem value="system">跟随系统</SelectItem>
+                                <SelectItem value="light"> 浅色 </SelectItem>
+                                <SelectItem value="dark">深色</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

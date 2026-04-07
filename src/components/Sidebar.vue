@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
 import {
-    Activity,
     Box,
     CircleUser,
     Gamepad2,
-    ListTodo,
-    Network,
     Settings,
-    Wrench,
     Home,
     GamepadDirectional,
-    // arrow-down-to-line
     ArrowDownToLine,
     Bot,
     Archive,

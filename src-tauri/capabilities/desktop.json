@@ -1,15 +1,40 @@
 {
-  "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
-  "permissions": [
-    "autostart:default",
-    "positioner:default"
-  ]
+    "identifier": "desktop-capability",
+    "platforms": ["macOS", "windows", "linux"],
+    "windows": ["main"],
+    "permissions": [
+        "autostart:default",
+        "positioner:default",
+        "cli:default",
+        "updater:default",
+        "window-state:default",
+        {
+            "identifier": "opener:allow-open-path",
+            "allow": [
+                {
+                    "path": "*/*"
+                }
+            ]
+        },
+        {
+            "identifier": "fs:allow-exists",
+            "allow": [{ "path": "*/*" }]
+        },
+        {
+            "identifier": "fs:allow-read",
+            "allow": [{ "path": "*/*" }]
+        },
+        {
+            "identifier": "fs:allow-write",
+            "allow": [{ "path": "*/*" }]
+        },
+        {
+            "identifier": "fs:allow-mkdir",
+            "allow": [{ "path": "*/*" }]
+        },
+        {
+            "identifier": "fs:allow-remove",
+            "allow": [{ "path": "*/*" }]
+        }
+    ]
 }

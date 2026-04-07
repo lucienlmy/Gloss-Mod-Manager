@@ -11,7 +11,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AppHeader: typeof import('./components/AppHeader.vue')['default']
     Button: typeof import('./components/ui/button/Button.vue')['default']
     Card: typeof import('./components/ui/card/Card.vue')['default']
     CardAction: typeof import('./components/ui/card/CardAction.vue')['default']
@@ -20,6 +19,7 @@ declare module 'vue' {
     CardFooter: typeof import('./components/ui/card/CardFooter.vue')['default']
     CardHeader: typeof import('./components/ui/card/CardHeader.vue')['default']
     CardTitle: typeof import('./components/ui/card/CardTitle.vue')['default']
+    CurseForge: typeof import('./components/Home/CurseForge.vue')['default']
     Field: typeof import('./components/ui/field/Field.vue')['default']
     FieldContent: typeof import('./components/ui/field/FieldContent.vue')['default']
     FieldDescription: typeof import('./components/ui/field/FieldDescription.vue')['default']
@@ -49,6 +49,8 @@ declare module 'vue' {
     ItemTitle: typeof import('./components/ui/item/ItemTitle.vue')['default']
     Label: typeof import('./components/ui/label/Label.vue')['default']
     Layout: typeof import('./components/Layout.vue')['default']
+    ModIo: typeof import('./components/Home/ModIo.vue')['default']
+    NexusMods: typeof import('./components/Home/NexusMods.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('./components/ui/select/Select.vue')['default']
@@ -65,5 +67,6 @@ declare module 'vue' {
     Separator: typeof import('./components/ui/separator/Separator.vue')['default']
     Sidebar: typeof import('./components/Sidebar.vue')['default']
     Textarea: typeof import('./components/ui/textarea/Textarea.vue')['default']
+    Thunderstore: typeof import('./components/Home/Thunderstore.vue')['default']
   }
 }
