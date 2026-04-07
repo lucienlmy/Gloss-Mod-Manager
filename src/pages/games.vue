@@ -1,4 +1,8 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const manager = useManager();
+
+console.log(manager.supportedGames);
+</script>
 <template>
     <Card>
         <CardHeader>

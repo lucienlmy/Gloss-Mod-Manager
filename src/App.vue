@@ -4,12 +4,15 @@ import { isTauri } from "@tauri-apps/api/core";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { useManager } from "@/stores/manager";
 
-const TRAY_ID = "main-tray";
+// const TRAY_ID = "main-tray";
 
 let tray: TrayIcon | null = null;
 let unlistenCloseRequested: (() => void) | null = null;
 let isQuitting = false;
+
+useManager();
 
 async function showMainWindow() {
     const appWindow = getCurrentWindow();
@@ -65,10 +68,10 @@ async function setupTray() {
         ],
     });
 
-    await TrayIcon.removeById(TRAY_ID);
+    // await TrayIcon.removeById(TRAY_ID);
 
     tray = await TrayIcon.new({
-        id: TRAY_ID,
+        // id: TRAY_ID,
         icon: icon ?? undefined,
         menu,
         showMenuOnLeftClick: false,
