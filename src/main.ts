@@ -1,24 +1,15 @@
-import { createApp } from 'vue'
-import App from '@/App.vue'
-// import '@/samples/node-api'
-// import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/dark/css-vars.css'
-import '@/assets/main.less'
-import { vuetify } from '@/plugins/vuetify'
-import router from '@/router'
-import { createPinia } from 'pinia'
-import i18n from '@/lang'
+import { createApp } from "vue";
+import App from "./App.vue";
+import { routes } from "vue-router/auto-routes";
+import { createWebHashHistory, createRouter } from "vue-router";
+import "./style.css";
 
+const app = createApp(App);
+app.use(
+    createRouter({
+        history: createWebHashHistory(),
+        routes,
+    }),
+);
 
-const app = createApp(App)
-app.use(router)
-app.use(vuetify)
-app.use(i18n)
-app.use(createPinia())
-
-window.router = router;
-
-
-// app.use(ElementPlus, { size: 'small', zIndex: 3000 })
-app.mount('#app')
+app.mount("#app");

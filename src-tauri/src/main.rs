@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    gloss_mod_manage_lib::run()
+    gloss_mod_manager_lib::run()
 }
