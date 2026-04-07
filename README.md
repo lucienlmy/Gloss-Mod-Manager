@@ -1,7 +1,13 @@
-# Tauri + Vue + TypeScript
+# Gloss Mod Manager
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+### 这是什么？
+Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
+它为游戏玩家提供了一个简单易用的方式来管理和安装各种游戏Mod.
+安全无毒, 简单易用, 可帮助您快捷的 下载、安装、卸载 Mod.
+无论你是新手还是老手,使用GMM都会让你的Mod安装和管理更加轻松和快捷.
 
-## Recommended IDE Setup
+### 兼容平台
+- Windows 
+- macOS 
+- Linux 
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)

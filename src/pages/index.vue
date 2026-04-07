@@ -5,6 +5,7 @@ import {
     GamepadDirectional,
     ArrowDownToLine,
     Info,
+    Settings,
 } from "lucide-vue-next";
 const list = [
     {
@@ -26,6 +27,11 @@ const list = [
         title: "下载",
         icon: ArrowDownToLine,
         to: "/download",
+    },
+    {
+        title: "设置",
+        icon: Settings,
+        to: "/settings",
     },
     {
         title: "关于",
@@ -64,7 +70,7 @@ const list = [
             </CardHeader>
             <CardContent>
                 <div
-                    class="grid grid-cols-3 items-center gap-4 justify-items-center">
+                    class="grid grid-cols-3 items-center gap-4 justify-items-center links">
                     <a
                         href="https://mod.3dmgame.com/"
                         target="_blank"
@@ -105,4 +111,9 @@ const list = [
         </Card>
     </div>
 </template>
-<style scoped></style>
+<style scoped>
+.links a:hover {
+    transition: all 0.5s;
+    transform: scale(1.05);
+}
+</style>

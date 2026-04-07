@@ -4,7 +4,6 @@ import { isTauri } from "@tauri-apps/api/core";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { onBeforeUnmount, onMounted } from "vue";
 
 const TRAY_ID = "main-tray";
 
@@ -97,21 +96,7 @@ async function setupTray() {
     }
 }
 
-onMounted(() => {
-    void setupTray();
-});
-
-onBeforeUnmount(() => {
-    if (unlistenCloseRequested) {
-        unlistenCloseRequested();
-        unlistenCloseRequested = null;
-    }
-
-    if (tray) {
-        void tray.close();
-        tray = null;
-    }
-});
+setupTray();
 </script>
 <template>
     <Layout>
