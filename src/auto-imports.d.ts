@@ -7,13 +7,16 @@
 export {}
 declare global {
   const Aria2: typeof import('./lib/aria2').Aria2
+  const AutoStart: typeof import('./lib/auto-start').AutoStart
   const EMBEDDED_TOOL_VERSIONS: typeof import('./lib/native-tools-manifest').EMBEDDED_TOOL_VERSIONS
   const EffectScope: typeof import('vue').EffectScope
   const FileHandler: typeof import('./lib/FileHandler').FileHandler
   const Manager: typeof import('./lib/Manager').Manager
   const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
+  const PersistentStore: typeof import('./lib/persistent-store').PersistentStore
   const SIDECAR_BASE_NAMES: typeof import('./lib/native-tools-manifest').SIDECAR_BASE_NAMES
   const SIDECAR_COMMANDS: typeof import('./lib/native-tools-manifest').SIDECAR_COMMANDS
+  const ScanGame: typeof import('./lib/scan-game').ScanGame
   const SevenZip: typeof import('./lib/sevenZip').SevenZip
   const Sidecar: typeof import('./lib/sidecar').Sidecar
   const SidecarExecutionError: typeof import('./lib/sidecar').SidecarExecutionError
@@ -67,6 +70,8 @@ declare global {
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const h: typeof import('vue').h
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
+  const init: typeof import('./lib/global').init
+  const initializeAutoStart: typeof import('./lib/auto-start').initializeAutoStart
   const initializeTheme: typeof import('./lib/theme').initializeTheme
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
@@ -174,6 +179,7 @@ declare global {
   const useAsyncQueue: typeof import('@vueuse/core').useAsyncQueue
   const useAsyncState: typeof import('@vueuse/core').useAsyncState
   const useAttrs: typeof import('vue').useAttrs
+  const useAutoStart: typeof import('./lib/auto-start').useAutoStart
   const useBase64: typeof import('@vueuse/core').useBase64
   const useBattery: typeof import('@vueuse/core').useBattery
   const useBluetooth: typeof import('@vueuse/core').useBluetooth
@@ -367,8 +373,17 @@ declare global {
   export type { Aria2, Aria2DownloadOptions, Aria2RpcServerOptions } from './lib/aria2'
   import('./lib/aria2')
   // @ts-ignore
+  export type { AutoStart } from './lib/auto-start'
+  import('./lib/auto-start')
+  // @ts-ignore
   export type { NativeToolsManifest, EmbeddedToolName, EmbeddedSidecarCommand } from './lib/native-tools-manifest'
   import('./lib/native-tools-manifest')
+  // @ts-ignore
+  export type { PersistentStore } from './lib/persistent-store'
+  import('./lib/persistent-store')
+  // @ts-ignore
+  export type { ScanGame } from './lib/scan-game'
+  import('./lib/scan-game')
   // @ts-ignore
   export type { SevenZip, SevenZipOverwriteMode, SevenZipArchiveFormat, SevenZipExtractOptions, SevenZipCreateOptions, SevenZipListOptions, SevenZipTestOptions, SevenZipArchiveEntry, SevenZipListResult } from './lib/sevenZip'
   import('./lib/sevenZip')

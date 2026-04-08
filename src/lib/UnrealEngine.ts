@@ -1,6 +1,7 @@
 import { ElMessage } from "element-plus-message";
 import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
+import { dirname, extname, join } from "path-browserify";
 
 export class UnrealEngine {
     public static modType(
@@ -11,7 +12,7 @@ export class UnrealEngine {
             {
                 id: 1,
                 name: "pak",
-                installPath: FileHandler.joinPath(bassPath, "Content", "Paks"),
+                installPath: join(bassPath, "Content", "Paks"),
                 advanced: {
                     name: "配置",
                     icon: "mdi-align-horizontal-center",
@@ -28,10 +29,7 @@ export class UnrealEngine {
                     const subPath = mod.advanced?.enabled
                         ? String(mod.advanced?.data.installPath ?? "")
                         : String(this.advanced?.item[0]?.defaultValue ?? "");
-                    const installPath = FileHandler.joinPath(
-                        this.installPath ?? "",
-                        subPath,
-                    );
+                    const installPath = join(this.installPath ?? "", subPath);
 
                     return Manager.generalInstall(mod, installPath);
                 },
@@ -39,10 +37,7 @@ export class UnrealEngine {
                     const subPath = mod.advanced?.enabled
                         ? String(mod.advanced?.data.installPath ?? "")
                         : String(this.advanced?.item[0]?.defaultValue ?? "");
-                    const installPath = FileHandler.joinPath(
-                        this.installPath ?? "",
-                        subPath,
-                    );
+                    const installPath = join(this.installPath ?? "", subPath);
 
                     return Manager.generalUninstall(mod, installPath);
                 },
@@ -50,11 +45,7 @@ export class UnrealEngine {
             {
                 id: 2,
                 name: "UE4SS",
-                installPath: FileHandler.joinPath(
-                    bassPath,
-                    "Binaries",
-                    "Win64",
-                ),
+                installPath: join(bassPath, "Binaries", "Win64"),
                 async install(mod) {
                     for (const item of mod.modFiles) {
                         if (FileHandler.compareFileName(item, "dwmapi.dll")) {
@@ -117,7 +108,7 @@ export class UnrealEngine {
             {
                 id: 3,
                 name: "mods",
-                installPath: FileHandler.joinPath(
+                installPath: join(
                     bassPath,
                     "Binaries",
                     "Win64",
@@ -144,12 +135,7 @@ export class UnrealEngine {
             {
                 id: 4,
                 name: "LogicMods",
-                installPath: FileHandler.joinPath(
-                    bassPath,
-                    "Content",
-                    "Paks",
-                    "LogicMods",
-                ),
+                installPath: join(bassPath, "Content", "Paks", "LogicMods"),
                 async install(mod) {
                     return Manager.generalInstall(mod, this.installPath ?? "");
                 },
@@ -163,7 +149,7 @@ export class UnrealEngine {
             {
                 id: 5,
                 name: "Scripts",
-                installPath: FileHandler.joinPath(
+                installPath: join(
                     bassPath,
                     "Binaries",
                     "Win64",
@@ -177,17 +163,13 @@ export class UnrealEngine {
                         const parts = FileHandler.pathToArray(element);
 
                         if (parts.includes("Scripts")) {
-                            parent = FileHandler.dirname(element);
+                            parent = dirname(element);
                             break;
                         }
                     }
 
                     const modStorage = await Manager.getModStoragePath(mod.id);
-                    const enableFile = FileHandler.joinPath(
-                        modStorage,
-                        parent,
-                        "Enabled.txt",
-                    );
+                    const enableFile = join(modStorage, parent, "Enabled.txt");
 
                     await FileHandler.ensureDirectoryExistence(enableFile);
 
@@ -250,7 +232,7 @@ export class UnrealEngine {
         let scripts = false;
 
         mod.modFiles.forEach((item) => {
-            if (FileHandler.extname(item) === ".pak") pak = true;
+            if (extname(item) === ".pak") pak = true;
             if (FileHandler.compareFileName(item, "Enabled.txt")) mods = true;
 
             if (FileHandler.compareFileName(item, "ue4ss.dll")) ue4ss = true;
@@ -281,7 +263,7 @@ export class UnrealEngine {
             return;
         }
 
-        const filePath = FileHandler.joinPath(
+        const filePath = join(
             gameStorage,
             bassPath,
             "Binaries",

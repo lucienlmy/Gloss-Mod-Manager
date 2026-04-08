@@ -3,8 +3,8 @@
  */
 
 import { ElMessage } from "element-plus-message";
-import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
+import { basename, extname, join } from "path-browserify";
 
 export class UnityGame {
     static modType: ISupportedGames["modType"] = [
@@ -32,7 +32,7 @@ export class UnityGame {
         {
             id: 2,
             name: "plugins",
-            installPath: FileHandler.joinPath("BepInEx", "plugins"),
+            installPath: join("BepInEx", "plugins"),
             async install(mod) {
                 return Manager.installByFolder(
                     mod,
@@ -92,11 +92,11 @@ export class UnityGame {
         let plugins = false;
 
         mod.modFiles.forEach((item) => {
-            if (FileHandler.basename(item).toLowerCase() === "winhttp.dll") {
+            if (basename(item).toLowerCase() === "winhttp.dll") {
                 bepinEx = true;
             }
 
-            if (FileHandler.extname(item) === ".dll") {
+            if (extname(item) === ".dll") {
                 plugins = true;
             }
 
@@ -196,11 +196,11 @@ export class UnityGameILCPP2 {
         let mods = false;
 
         mod.modFiles.forEach((item) => {
-            if (FileHandler.basename(item).toLowerCase() === "version.dll") {
+            if (basename(item).toLowerCase() === "version.dll") {
                 melonLoader = true;
             }
 
-            if (FileHandler.extname(item) === ".dll") {
+            if (extname(item) === ".dll") {
                 mods = true;
             }
         });

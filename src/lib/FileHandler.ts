@@ -2,6 +2,7 @@
  * 文件相关操作
  */
 
+import { invoke } from "@tauri-apps/api/core";
 import { documentDir, localDataDir, resourceDir } from "@tauri-apps/api/path";
 import {
     copyFile as copyFileByFs,
@@ -21,49 +22,201 @@ import {
 import { openPath } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
 import { md5 } from "js-md5";
+import { dirname, join, basename, sep } from "path-browserify";
 
 type BinaryLike = Uint8Array | ArrayBuffer;
 
+interface IFileSystemEntry {
+    isDirectory: boolean;
+    isFile: boolean;
+    isSymlink: boolean;
+    name: string;
+    path: string;
+}
+
+interface IFileSystemMetadata {
+    isDirectory: boolean;
+    isFile: boolean;
+    isSymlink: boolean;
+    size: number;
+}
+
 export class FileHandler {
-    private static readonly pathSeparator = "/";
+    private static readonly pathSeparator = sep;
+
+    /**
+     * 绝对路径走 Rust 命令，规避 plugin-fs 对绝对路径的限制。
+     */
+    private static isAbsolutePath(filePath: string) {
+        const normalizedPath = FileHandler.normalizePath(filePath.trim());
+
+        if (!normalizedPath) {
+            return false;
+        }
+
+        return (
+            /^[A-Za-z]:\//u.test(normalizedPath) ||
+            normalizedPath.startsWith(FileHandler.pathSeparator)
+        );
+    }
+
+    private static shouldUseNativeFs(
+        ...paths: Array<string | null | undefined>
+    ) {
+        return paths.some(
+            (path) => !!path && FileHandler.isAbsolutePath(String(path)),
+        );
+    }
+
+    private static async invokeNativeFs<T>(
+        command: string,
+        payload: Record<string, unknown>,
+    ): Promise<T> {
+        return invoke<T>(command, payload);
+    }
+
+    private static async getMetadata(
+        filePath: string,
+        followSymlink: boolean = true,
+    ): Promise<IFileSystemMetadata> {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            return FileHandler.invokeNativeFs<IFileSystemMetadata>(
+                followSymlink ? "native_fs_stat" : "native_fs_lstat",
+                { path: filePath },
+            );
+        }
+
+        return followSymlink
+            ? ((await stat(filePath)) as IFileSystemMetadata)
+            : ((await lstat(filePath)) as IFileSystemMetadata);
+    }
+
+    private static async getDirectoryEntries(
+        dirPath: string,
+    ): Promise<IFileSystemEntry[]> {
+        if (FileHandler.shouldUseNativeFs(dirPath)) {
+            return FileHandler.invokeNativeFs<IFileSystemEntry[]>(
+                "native_fs_read_dir",
+                { path: dirPath },
+            );
+        }
+
+        return (await readDir(dirPath)) as IFileSystemEntry[];
+    }
+
+    private static async pathExists(filePath: string) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            return FileHandler.invokeNativeFs<boolean>("native_fs_exists", {
+                path: filePath,
+            });
+        }
+
+        return exists(filePath);
+    }
+
+    private static async readText(filePath: string) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            return FileHandler.invokeNativeFs<string>(
+                "native_fs_read_text_file",
+                { path: filePath },
+            );
+        }
+
+        return readTextFile(filePath);
+    }
+
+    private static async writeText(filePath: string, data: string) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            await FileHandler.invokeNativeFs<void>(
+                "native_fs_write_text_file",
+                {
+                    path: filePath,
+                    contents: data,
+                },
+            );
+            return;
+        }
+
+        await writeTextFile(filePath, data);
+    }
+
+    private static async readBinary(filePath: string) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            const data = await FileHandler.invokeNativeFs<number[]>(
+                "native_fs_read_binary_file",
+                { path: filePath },
+            );
+
+            return new Uint8Array(data);
+        }
+
+        return readBinaryFile(filePath);
+    }
+
+    private static async writeBinary(filePath: string, data: Uint8Array) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            await FileHandler.invokeNativeFs<void>(
+                "native_fs_write_binary_file",
+                {
+                    path: filePath,
+                    contents: Array.from(data),
+                },
+            );
+            return;
+        }
+
+        await writeBinaryFile(filePath, data);
+    }
+
+    private static async copySingleFile(source: string, target: string) {
+        if (FileHandler.shouldUseNativeFs(source, target)) {
+            await FileHandler.invokeNativeFs<void>("native_fs_copy_file", {
+                source,
+                target,
+            });
+            return;
+        }
+
+        await copyFileByFs(source, target);
+    }
+
+    private static async renamePath(source: string, target: string) {
+        if (FileHandler.shouldUseNativeFs(source, target)) {
+            await FileHandler.invokeNativeFs<void>("native_fs_rename", {
+                source,
+                target,
+            });
+            return;
+        }
+
+        await rename(source, target);
+    }
+
+    private static async removePath(
+        filePath: string,
+        recursive: boolean = false,
+    ) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            await FileHandler.invokeNativeFs<void>("native_fs_remove", {
+                path: filePath,
+                recursive,
+            });
+            return;
+        }
+
+        if (recursive) {
+            await remove(filePath, { recursive: true });
+            return;
+        }
+
+        await remove(filePath);
+    }
 
     /**
      * 统一路径分隔符，避免旧工程里混用 \ 和 /。
      */
     public static normalizePath(filePath: string) {
         return filePath.replace(/[\\/]+/gu, FileHandler.pathSeparator);
-    }
-
-    private static splitRoot(filePath: string) {
-        const normalizedPath = FileHandler.normalizePath(filePath.trim());
-
-        if (!normalizedPath) {
-            return {
-                root: "",
-                segments: [] as string[],
-            };
-        }
-
-        let root = "";
-        let rest = normalizedPath;
-        const driveMatch = rest.match(/^[A-Za-z]:/u);
-
-        if (driveMatch) {
-            root = driveMatch[0];
-            rest = rest.slice(root.length);
-        }
-
-        if (rest.startsWith(FileHandler.pathSeparator)) {
-            root = `${root}${FileHandler.pathSeparator}`;
-            rest = rest.replace(/^\/+/, "");
-        }
-
-        return {
-            root,
-            segments: rest
-                .split(FileHandler.pathSeparator)
-                .filter((segment) => segment !== ""),
-        };
     }
 
     private static trimLeadingSeparators(filePath: string) {
@@ -83,7 +236,7 @@ export class FileHandler {
     }
 
     private static async ensureParentDirectory(filePath: string) {
-        const parentDirectory = FileHandler.dirname(filePath);
+        const parentDirectory = dirname(filePath);
 
         if (parentDirectory) {
             await FileHandler.createDirectory(parentDirectory);
@@ -92,116 +245,18 @@ export class FileHandler {
 
     private static async isFile(filePath: string) {
         try {
-            return (await stat(filePath)).isFile;
+            return (await FileHandler.getMetadata(filePath)).isFile;
         } catch {
             return false;
         }
     }
 
     /**
-     * 同步拼接路径字符串，并自动归一化 . / .. 片段。
-     */
-    public static joinPath(...paths: Array<string | null | undefined>) {
-        let root = "";
-        const segments: string[] = [];
-
-        for (const item of paths) {
-            if (!item) {
-                continue;
-            }
-
-            const { root: nextRoot, segments: nextSegments } =
-                FileHandler.splitRoot(String(item));
-
-            if (nextRoot) {
-                root = nextRoot;
-                segments.length = 0;
-            }
-
-            for (const segment of nextSegments) {
-                if (segment === ".") {
-                    continue;
-                }
-
-                if (segment === "..") {
-                    if (
-                        segments.length > 0 &&
-                        segments[segments.length - 1] !== ".."
-                    ) {
-                        segments.pop();
-                    } else if (!root) {
-                        segments.push(segment);
-                    }
-                    continue;
-                }
-
-                segments.push(segment);
-            }
-        }
-
-        const joinedSegments = segments.join(FileHandler.pathSeparator);
-
-        if (!root) {
-            return joinedSegments;
-        }
-
-        if (!joinedSegments) {
-            return root;
-        }
-
-        return root.endsWith(FileHandler.pathSeparator)
-            ? `${root}${joinedSegments}`
-            : `${root}${FileHandler.pathSeparator}${joinedSegments}`;
-    }
-
-    /**
-     * 返回路径的父级目录。
-     */
-    public static dirname(filePath: string) {
-        const { root, segments } = FileHandler.splitRoot(filePath);
-
-        if (segments.length <= 1) {
-            return root;
-        }
-
-        return FileHandler.joinPath(root, ...segments.slice(0, -1));
-    }
-
-    /**
-     * 返回路径最后一段。
-     */
-    public static basename(filePath: string) {
-        const normalizedPath = FileHandler.normalizePath(filePath).replace(
-            /\/+$/u,
-            "",
-        );
-        const parts = normalizedPath
-            .split(FileHandler.pathSeparator)
-            .filter((segment) => segment !== "");
-
-        return parts.length > 0 ? parts[parts.length - 1] : "";
-    }
-
-    /**
-     * 返回文件扩展名。
-     */
-    public static extname(filePath: string) {
-        const fileName = FileHandler.basename(filePath);
-        const dotIndex = fileName.lastIndexOf(".");
-
-        if (dotIndex <= 0) {
-            return "";
-        }
-
-        return fileName.slice(dotIndex);
-    }
-
-    /**
      * 计算 target 相对于 base 的相对路径。
      */
     public static relativePath(basePath: string, targetPath: string) {
-        const normalizedBase = FileHandler.joinPath(basePath);
-        const normalizedTarget = FileHandler.joinPath(targetPath);
+        const normalizedBase = join(basePath);
+        const normalizedTarget = join(targetPath);
 
         if (!normalizedBase) {
             return FileHandler.trimLeadingSeparators(normalizedTarget);
@@ -231,7 +286,7 @@ export class FileHandler {
      */
     public static async fileExists(filePath: string): Promise<boolean> {
         try {
-            return await exists(filePath);
+            return await FileHandler.pathExists(filePath);
         } catch {
             return false;
         }
@@ -243,6 +298,14 @@ export class FileHandler {
      */
     public static async createDirectory(dirPath: string) {
         if (!dirPath) {
+            return;
+        }
+
+        if (FileHandler.shouldUseNativeFs(dirPath)) {
+            await FileHandler.invokeNativeFs<void>("native_fs_mkdir", {
+                path: dirPath,
+                recursive: true,
+            });
             return;
         }
 
@@ -260,7 +323,7 @@ export class FileHandler {
         await FileHandler.ensureParentDirectory(filePath);
 
         if (!(await FileHandler.fileExists(filePath))) {
-            await writeTextFile(filePath, defaultValue);
+            await FileHandler.writeText(filePath, defaultValue);
         }
     }
 
@@ -279,7 +342,7 @@ export class FileHandler {
                 await FileHandler.copyFile(target, backFile);
             }
 
-            await copyFileByFs(source, target);
+            await FileHandler.copySingleFile(source, target);
             return true;
         } catch (error) {
             ElMessage.error(`复制文件失败：${error}`);
@@ -296,11 +359,11 @@ export class FileHandler {
     public static async copyFolder(srcPath: string, target: string) {
         try {
             await FileHandler.createDirectory(target);
-            const entries = await readDir(srcPath);
+            const entries = await FileHandler.getDirectoryEntries(srcPath);
 
             for (const entry of entries) {
-                const sourcePath = FileHandler.joinPath(srcPath, entry.name);
-                const targetPath = FileHandler.joinPath(target, entry.name);
+                const sourcePath = join(srcPath, entry.name);
+                const targetPath = join(target, entry.name);
 
                 if (entry.isDirectory) {
                     await FileHandler.copyFolder(sourcePath, targetPath);
@@ -320,7 +383,7 @@ export class FileHandler {
     public static async moveFile(srcPath: string, destPath: string) {
         try {
             await FileHandler.ensureParentDirectory(destPath);
-            await rename(srcPath, destPath);
+            await FileHandler.renamePath(srcPath, destPath);
             return true;
         } catch (error) {
             FileHandler.writeLog(String(error), true);
@@ -337,7 +400,7 @@ export class FileHandler {
     public static async moveFolder(srcPath: string, destPath: string) {
         try {
             await FileHandler.ensureParentDirectory(destPath);
-            await rename(srcPath, destPath);
+            await FileHandler.renamePath(srcPath, destPath);
             return true;
         } catch (error) {
             FileHandler.writeLog(String(error), true);
@@ -356,7 +419,7 @@ export class FileHandler {
                 return true;
             }
 
-            await remove(folderPath, { recursive: true });
+            await FileHandler.removePath(folderPath, true);
             return true;
         } catch (error) {
             FileHandler.writeLog(String(error), true);
@@ -372,7 +435,7 @@ export class FileHandler {
     public static async deleteFile(filePath: string) {
         try {
             if (await FileHandler.fileExists(filePath)) {
-                await remove(filePath);
+                await FileHandler.removePath(filePath);
                 const backFile = `${filePath}.gmmback`;
 
                 if (await FileHandler.fileExists(backFile)) {
@@ -398,7 +461,7 @@ export class FileHandler {
         defaultValue: string = "",
     ): Promise<string> {
         await FileHandler.ensureDirectoryExistence(filePath, defaultValue);
-        return readTextFile(filePath);
+        return FileHandler.readText(filePath);
     }
 
     /**
@@ -411,7 +474,7 @@ export class FileHandler {
             await FileHandler.ensureDirectoryExistence(filePath, defaultValue);
         }
 
-        return readTextFile(filePath);
+        return FileHandler.readText(filePath);
     }
 
     /**
@@ -425,9 +488,12 @@ export class FileHandler {
             await FileHandler.ensureParentDirectory(filePath);
 
             if (typeof data === "string") {
-                await writeTextFile(filePath, data);
+                await FileHandler.writeText(filePath, data);
             } else {
-                await writeBinaryFile(filePath, FileHandler.toUint8Array(data));
+                await FileHandler.writeBinary(
+                    filePath,
+                    FileHandler.toUint8Array(data),
+                );
             }
 
             return true;
@@ -461,7 +527,7 @@ export class FileHandler {
      */
     public static async getFileMd5(filePath: string): Promise<string> {
         try {
-            const data = await readBinaryFile(filePath);
+            const data = await FileHandler.readBinary(filePath);
             return md5(data);
         } catch (error) {
             ElMessage.error(`获取文件MD5失败:${error}`);
@@ -524,7 +590,7 @@ export class FileHandler {
     public static async renameFile(filePath: string, newName: string) {
         try {
             await FileHandler.ensureParentDirectory(newName);
-            await rename(filePath, newName);
+            await FileHandler.renamePath(filePath, newName);
             return true;
         } catch (error) {
             ElMessage.error(`错误: ${error}`);
@@ -537,6 +603,10 @@ export class FileHandler {
      * @param filePath 文件路径
      */
     public static async getFileSize(filePath: string) {
+        if (FileHandler.shouldUseNativeFs(filePath)) {
+            return (await FileHandler.getMetadata(filePath)).size;
+        }
+
         return size(filePath);
     }
 
@@ -594,7 +664,7 @@ export class FileHandler {
     // 判断路径是否是软链
     public static async isSymlink(filePath: string): Promise<boolean> {
         try {
-            return (await lstat(filePath)).isSymlink;
+            return (await FileHandler.getMetadata(filePath, false)).isSymlink;
         } catch {
             return false;
         }
@@ -740,10 +810,10 @@ export class FileHandler {
         }
 
         let result: string[] = [];
-        const entries = await readDir(folderPath);
+        const entries = await FileHandler.getDirectoryEntries(folderPath);
 
         for (const entry of entries) {
-            const entryPath = FileHandler.joinPath(folderPath, entry.name);
+            const entryPath = join(folderPath, entry.name);
 
             if (entry.isFile) {
                 result.push(includepath ? entryPath : entry.name);
@@ -786,14 +856,14 @@ export class FileHandler {
         }
 
         let result: string[] = [];
-        const entries = await readDir(folderPath);
+        const entries = await FileHandler.getDirectoryEntries(folderPath);
 
         for (const entry of entries) {
             if (!entry.isDirectory) {
                 continue;
             }
 
-            const entryPath = FileHandler.joinPath(folderPath, entry.name);
+            const entryPath = join(folderPath, entry.name);
             result.push(entryPath);
 
             if (subdirectory) {
@@ -819,7 +889,7 @@ export class FileHandler {
      */
     public static async isDir(filePath: string) {
         try {
-            return (await stat(filePath)).isDirectory;
+            return (await FileHandler.getMetadata(filePath)).isDirectory;
         } catch {
             return false;
         }
@@ -832,10 +902,7 @@ export class FileHandler {
      * @returns
      */
     public static compareFileName(name1: string, name2: string) {
-        return (
-            FileHandler.basename(name1).toLowerCase() ===
-            FileHandler.basename(name2).toLowerCase()
-        );
+        return basename(name1).toLowerCase() === basename(name2).toLowerCase();
     }
 
     /**
@@ -843,8 +910,6 @@ export class FileHandler {
      * @returns 返回 C:/Users/[用户名]/AppData
      */
     public static async GetAppData() {
-        return FileHandler.dirname(
-            FileHandler.normalizePath(await localDataDir()),
-        );
+        return dirname(FileHandler.normalizePath(await localDataDir()));
     }
 }

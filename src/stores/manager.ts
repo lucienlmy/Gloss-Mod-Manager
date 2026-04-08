@@ -1,5 +1,6 @@
 import { getAllExpands } from "@/Expands";
 import { Manager } from "@/lib/Manager";
+import { PersistentStore } from "@/lib/persistent-store";
 
 const SELECTED_GAME_STORAGE_KEY = "gmm:selected-game-id";
 const MOD_STORAGE_LOCATION_KEY = "gmm:mod-storage-location";
@@ -55,19 +56,22 @@ export const useManager = defineStore("Manager", () => {
         } as IExpandsType,
     });
 
-    const selectedGameId = useLocalStorage<number | null>(
+    const selectedGameId = PersistentStore.useValue<number | null>(
         SELECTED_GAME_STORAGE_KEY,
         supportedGames.value[0]?.GlossGameId ?? null,
     );
-    const modStorageLocation = useLocalStorage<string>(
+    const modStorageLocation = PersistentStore.useValue<string>(
         MOD_STORAGE_LOCATION_KEY,
         "",
     );
-    const gameStorageMap = useLocalStorage<Record<string, string>>(
+    const gameStorageMap = PersistentStore.useValue<Record<string, string>>(
         GAME_STORAGE_MAP_KEY,
         {},
     );
-    const closeSoftLinks = useLocalStorage<boolean>(CLOSE_SOFT_LINKS_KEY, true);
+    const closeSoftLinks = PersistentStore.useValue<boolean>(
+        CLOSE_SOFT_LINKS_KEY,
+        true,
+    );
 
     const managerGameList = computed(() => supportedGames.value);
     const managerGame = computed(() => {
@@ -150,23 +154,34 @@ export const useManager = defineStore("Manager", () => {
         closeSoftLinks.value = value;
     }
 
+    function ensureSelectedGameValid(games = supportedGames.value) {
+        if (games.length === 0) {
+            if (selectedGameId.value !== null) {
+                selectedGameId.value = null;
+            }
+
+            return;
+        }
+
+        if (
+            selectedGameId.value === null ||
+            !games.some((item) => item.GlossGameId === selectedGameId.value)
+        ) {
+            selectedGameId.value = games[0].GlossGameId;
+        }
+    }
+
     watch(
         supportedGames,
         (games) => {
-            if (games.length === 0) {
-                selectedGameId.value = null;
-                return;
-            }
-
-            if (
-                selectedGameId.value === null ||
-                !games.some((item) => item.GlossGameId === selectedGameId.value)
-            ) {
-                selectedGameId.value = games[0].GlossGameId;
-            }
+            ensureSelectedGameValid(games);
         },
         { immediate: true },
     );
+
+    watch(selectedGameId, () => {
+        ensureSelectedGameValid();
+    });
 
     watch(
         [managerGameStorage, modStorageLocation, closeSoftLinks],

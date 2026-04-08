@@ -1,4 +1,5 @@
 import { computed, readonly, ref } from "vue";
+import { PersistentStore } from "@/lib/persistent-store";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -7,6 +8,7 @@ export class Theme {
     private static readonly themeState = ref<ThemeMode>("system");
 
     private static initialized = false;
+    private static initializationPromise: Promise<void> | null = null;
     private static mediaQueryBound = false;
 
     /**
@@ -60,12 +62,22 @@ export class Theme {
     /**
      * 将用户选择的主题写入本地存储。
      */
-    private static persist(mode: ThemeMode) {
-        if (typeof window === "undefined") {
-            return;
-        }
+    private static async persist(mode: ThemeMode) {
+        await PersistentStore.set(Theme.STORAGE_KEY, mode);
+    }
 
-        window.localStorage.setItem(Theme.STORAGE_KEY, mode);
+    /**
+     * 绑定系统主题变化监听，避免重复注册。
+     */
+    private static bindMediaQueryListener() {
+        const mediaQuery = Theme.getMediaQuery();
+        if (mediaQuery && !Theme.mediaQueryBound) {
+            mediaQuery.addEventListener(
+                "change",
+                Theme.handleSystemThemeChange,
+            );
+            Theme.mediaQueryBound = true;
+        }
     }
 
     /**
@@ -80,29 +92,38 @@ export class Theme {
     /**
      * 初始化主题状态，并绑定系统主题变化监听。
      */
-    public static initialize() {
+    public static async initialize() {
         if (Theme.initialized) {
             return;
         }
 
-        Theme.initialized = true;
-
-        if (typeof window !== "undefined") {
-            Theme.themeState.value = Theme.normalize(
-                window.localStorage.getItem(Theme.STORAGE_KEY),
-            );
+        if (Theme.initializationPromise) {
+            return Theme.initializationPromise;
         }
 
         Theme.apply(Theme.themeState.value);
+        Theme.bindMediaQueryListener();
 
-        const mediaQuery = Theme.getMediaQuery();
-        if (mediaQuery && !Theme.mediaQueryBound) {
-            mediaQuery.addEventListener(
-                "change",
-                Theme.handleSystemThemeChange,
-            );
-            Theme.mediaQueryBound = true;
-        }
+        Theme.initializationPromise = (async () => {
+            try {
+                const storedTheme = await PersistentStore.get<ThemeMode>(
+                    Theme.STORAGE_KEY,
+                    Theme.themeState.value,
+                );
+
+                Theme.themeState.value = Theme.normalize(storedTheme);
+            } catch (error: unknown) {
+                console.error("读取主题设置失败");
+                console.error(error);
+            } finally {
+                Theme.apply(Theme.themeState.value);
+                Theme.bindMediaQueryListener();
+                Theme.initialized = true;
+                Theme.initializationPromise = null;
+            }
+        })();
+
+        return Theme.initializationPromise;
     }
 
     /**
@@ -112,15 +133,18 @@ export class Theme {
         const nextTheme = Theme.normalize(mode);
 
         Theme.themeState.value = nextTheme;
-        Theme.persist(nextTheme);
         Theme.apply(nextTheme);
+        void Theme.persist(nextTheme).catch((error: unknown) => {
+            console.error("保存主题设置失败");
+            console.error(error);
+        });
     }
 
     /**
      * 暴露给组件使用的主题响应式状态。
      */
     public static use() {
-        Theme.initialize();
+        void Theme.initialize();
 
         return {
             theme: readonly(Theme.themeState),

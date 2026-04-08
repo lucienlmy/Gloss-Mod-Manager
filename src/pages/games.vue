@@ -1,12 +1,10 @@
-<script setup lang="ts">
-const manager = useManager();
-
-console.log(manager.supportedGames);
-</script>
+<script setup lang="ts"></script>
 <template>
     <Card>
         <CardHeader>
-            <CardTitle>游戏库</CardTitle>
+            <CardTitle class="flex items-center gap-4">
+                游戏库 <SelectGame />
+            </CardTitle>
         </CardHeader>
         <CardContent> </CardContent>
     </Card>
