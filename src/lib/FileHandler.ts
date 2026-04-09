@@ -2,8 +2,15 @@
  * 文件相关操作
  */
 
-import { invoke } from "@tauri-apps/api/core";
-import { documentDir, localDataDir, resourceDir } from "@tauri-apps/api/path";
+import {
+    basename,
+    dirname,
+    documentDir,
+    join,
+    localDataDir,
+    resourceDir,
+    sep,
+} from "@tauri-apps/api/path";
 import {
     copyFile as copyFileByFs,
     exists,
@@ -22,9 +29,9 @@ import {
 import { openPath } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
 import { md5 } from "js-md5";
-import { dirname, join, basename, sep } from "@tauri-apps/api/path";
 
 type BinaryLike = Uint8Array | ArrayBuffer;
+type FsPath = string | URL;
 
 interface IFileSystemEntry {
     isDirectory: boolean;
@@ -45,7 +52,7 @@ export class FileHandler {
     private static readonly pathSeparator = sep();
 
     /**
-     * 绝对路径走 Rust 命令，规避 plugin-fs 对绝对路径的限制。
+     * plugin-fs 在 Tauri 2 中支持 file URL，这里把绝对路径统一转为 file URL。
      */
     private static isAbsolutePath(filePath: string) {
         const normalizedPath = FileHandler.normalizePath(filePath.trim());
@@ -60,156 +67,97 @@ export class FileHandler {
         );
     }
 
-    private static shouldUseNativeFs(
-        ...paths: Array<string | null | undefined>
-    ) {
-        return paths.some(
-            (path) => !!path && FileHandler.isAbsolutePath(String(path)),
-        );
+    private static toFileUrl(filePath: string): URL {
+        const normalizedPath = FileHandler.normalizePath(filePath.trim());
+
+        if (normalizedPath.startsWith("//")) {
+            return new URL(`file:${normalizedPath}`);
+        }
+
+        if (/^[A-Za-z]:\//u.test(normalizedPath)) {
+            return new URL(`file:///${normalizedPath}`);
+        }
+
+        return new URL(`file://${normalizedPath}`);
     }
 
-    private static async invokeNativeFs<T>(
-        command: string,
-        payload: Record<string, unknown>,
-    ): Promise<T> {
-        return invoke<T>(command, payload);
+    private static toFsPath(filePath: string): FsPath {
+        const normalizedPath = FileHandler.normalizePath(filePath.trim());
+
+        if (!normalizedPath) {
+            return normalizedPath;
+        }
+
+        return FileHandler.isAbsolutePath(normalizedPath)
+            ? FileHandler.toFileUrl(normalizedPath)
+            : normalizedPath;
     }
 
     private static async getMetadata(
         filePath: string,
         followSymlink: boolean = true,
     ): Promise<IFileSystemMetadata> {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            return FileHandler.invokeNativeFs<IFileSystemMetadata>(
-                followSymlink ? "native_fs_stat" : "native_fs_lstat",
-                { path: filePath },
-            );
-        }
-
         return followSymlink
-            ? ((await stat(filePath)) as IFileSystemMetadata)
-            : ((await lstat(filePath)) as IFileSystemMetadata);
+            ? ((await stat(
+                  FileHandler.toFsPath(filePath),
+              )) as IFileSystemMetadata)
+            : ((await lstat(
+                  FileHandler.toFsPath(filePath),
+              )) as IFileSystemMetadata);
     }
 
     private static async getDirectoryEntries(
         dirPath: string,
     ): Promise<IFileSystemEntry[]> {
-        if (FileHandler.shouldUseNativeFs(dirPath)) {
-            return FileHandler.invokeNativeFs<IFileSystemEntry[]>(
-                "native_fs_read_dir",
-                { path: dirPath },
-            );
-        }
-
-        return (await readDir(dirPath)) as IFileSystemEntry[];
+        return (await readDir(
+            FileHandler.toFsPath(dirPath),
+        )) as IFileSystemEntry[];
     }
 
     private static async pathExists(filePath: string) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            return FileHandler.invokeNativeFs<boolean>("native_fs_exists", {
-                path: filePath,
-            });
-        }
-
-        return exists(filePath);
+        return exists(FileHandler.toFsPath(filePath));
     }
 
     private static async readText(filePath: string) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            return FileHandler.invokeNativeFs<string>(
-                "native_fs_read_text_file",
-                { path: filePath },
-            );
-        }
-
-        return readTextFile(filePath);
+        return readTextFile(FileHandler.toFsPath(filePath));
     }
 
     private static async writeText(filePath: string, data: string) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            await FileHandler.invokeNativeFs<void>(
-                "native_fs_write_text_file",
-                {
-                    path: filePath,
-                    contents: data,
-                },
-            );
-            return;
-        }
-
-        await writeTextFile(filePath, data);
+        await writeTextFile(FileHandler.toFsPath(filePath), data);
     }
 
     private static async readBinary(filePath: string) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            const data = await FileHandler.invokeNativeFs<number[]>(
-                "native_fs_read_binary_file",
-                { path: filePath },
-            );
-
-            return new Uint8Array(data);
-        }
-
-        return readBinaryFile(filePath);
+        return readBinaryFile(FileHandler.toFsPath(filePath));
     }
 
     private static async writeBinary(filePath: string, data: Uint8Array) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            await FileHandler.invokeNativeFs<void>(
-                "native_fs_write_binary_file",
-                {
-                    path: filePath,
-                    contents: Array.from(data),
-                },
-            );
-            return;
-        }
-
-        await writeBinaryFile(filePath, data);
+        await writeBinaryFile(FileHandler.toFsPath(filePath), data);
     }
 
     private static async copySingleFile(source: string, target: string) {
-        if (FileHandler.shouldUseNativeFs(source, target)) {
-            await FileHandler.invokeNativeFs<void>("native_fs_copy_file", {
-                source,
-                target,
-            });
-            return;
-        }
-
-        await copyFileByFs(source, target);
+        await copyFileByFs(
+            FileHandler.toFsPath(source),
+            FileHandler.toFsPath(target),
+        );
     }
 
     private static async renamePath(source: string, target: string) {
-        if (FileHandler.shouldUseNativeFs(source, target)) {
-            await FileHandler.invokeNativeFs<void>("native_fs_rename", {
-                source,
-                target,
-            });
-            return;
-        }
-
-        await rename(source, target);
+        await rename(
+            FileHandler.toFsPath(source),
+            FileHandler.toFsPath(target),
+        );
     }
 
     private static async removePath(
         filePath: string,
         recursive: boolean = false,
     ) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            await FileHandler.invokeNativeFs<void>("native_fs_remove", {
-                path: filePath,
-                recursive,
-            });
-            return;
-        }
-
         if (recursive) {
-            await remove(filePath, { recursive: true });
+            await remove(FileHandler.toFsPath(filePath), { recursive: true });
             return;
         }
 
-        await remove(filePath);
+        await remove(FileHandler.toFsPath(filePath));
     }
 
     /**
@@ -301,15 +249,7 @@ export class FileHandler {
             return;
         }
 
-        if (FileHandler.shouldUseNativeFs(dirPath)) {
-            await FileHandler.invokeNativeFs<void>("native_fs_mkdir", {
-                path: dirPath,
-                recursive: true,
-            });
-            return;
-        }
-
-        await mkdir(dirPath, { recursive: true });
+        await mkdir(FileHandler.toFsPath(dirPath), { recursive: true });
     }
 
     /**
@@ -470,10 +410,12 @@ export class FileHandler {
      * @returns
      */
     public static async readFile(filePath: string, defaultValue: string = "") {
-        if (!(await FileHandler.fileExists(filePath))) {
+        const hasFile = await FileHandler.fileExists(filePath);
+        console.log({ hasFile });
+
+        if (!hasFile) {
             await FileHandler.ensureDirectoryExistence(filePath, defaultValue);
         }
-
         return FileHandler.readText(filePath);
     }
 
@@ -603,11 +545,7 @@ export class FileHandler {
      * @param filePath 文件路径
      */
     public static async getFileSize(filePath: string) {
-        if (FileHandler.shouldUseNativeFs(filePath)) {
-            return (await FileHandler.getMetadata(filePath)).size;
-        }
-
-        return size(filePath);
+        return size(FileHandler.toFsPath(filePath));
     }
 
     /**

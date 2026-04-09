@@ -1,15 +1,40 @@
 {
-    "identifier": "desktop-capability",
-    "platforms": ["macOS", "windows", "linux"],
-    "windows": ["main"],
-    "permissions": [
-        "autostart:default",
-        "positioner:default",
-        "cli:default",
-        "updater:default",
-        "window-state:default",
-        "dialog:default",
-        "fs:allow-mkdir",
-        "fs:default"
-    ]
+  "identifier": "desktop-capability",
+  "platforms": [
+    "macOS",
+    "windows",
+    "linux"
+  ],
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "autostart:default",
+    "positioner:default",
+    "cli:default",
+    "updater:default",
+    "window-state:default",
+    "dialog:default",
+    "opener:allow-open-path",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    "fs:read-all",
+    "fs:write-all",
+    "fs:allow-size",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
+    },
+    "http:default"
+  ]
 }

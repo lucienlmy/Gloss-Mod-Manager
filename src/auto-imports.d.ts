@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const AppAnalytics: typeof import('./lib/Analytics').AppAnalytics
   const Aria2: typeof import('./lib/aria2').Aria2
   const AutoStart: typeof import('./lib/auto-start').AutoStart
   const EMBEDDED_TOOL_VERSIONS: typeof import('./lib/native-tools-manifest').EMBEDDED_TOOL_VERSIONS
@@ -357,6 +358,9 @@ declare global {
   // @ts-ignore
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, ShallowRef, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
+  // @ts-ignore
+  export type { AppAnalytics } from './lib/Analytics'
+  import('./lib/Analytics')
   // @ts-ignore
   export type { FileHandler } from './lib/FileHandler'
   import('./lib/FileHandler')

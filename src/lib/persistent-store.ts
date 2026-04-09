@@ -1,4 +1,5 @@
 import { LazyStore } from "@tauri-apps/plugin-store";
+import { isProxy, toRaw } from "vue";
 import { ref } from "vue";
 import type { Ref } from "vue";
 import { watch } from "vue";
@@ -88,15 +89,39 @@ export class PersistentStore {
      * 避免对象类型默认值在多个引用之间共享同一个实例。
      */
     private static cloneValue<T>(value: T): T {
+        const normalizedValue = PersistentStore.unwrapProxy(value);
         if (typeof structuredClone === "function") {
-            return structuredClone(value);
+            return structuredClone(normalizedValue);
+        }
+        return normalizedValue;
+    }
+
+    /**
+     * 持久化前先移除 Vue 响应式代理，避免 structuredClone 直接克隆 Proxy 时报错。
+     */
+    private static unwrapProxy<T>(value: T): T {
+        if (!isProxy(value)) {
+            return value;
+        }
+        if (typeof value === "object") {
+            return JSON.parse(JSON.stringify(value)) as T;
         }
 
-        return value;
+        return toRaw(value) as T;
     }
 
     private static logError(action: string, key: string, error: unknown) {
         console.error(`PersistentStore ${action}失败: ${key}`);
         console.error(error);
+    }
+
+    public static async getAllKeys() {
+        const allkeys = await PersistentStore.store.keys();
+        const data = [];
+        for (const key of allkeys) {
+            const value = await PersistentStore.get(key, null);
+            data.push({ key, value });
+        }
+        return data;
     }
 }

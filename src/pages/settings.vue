@@ -3,9 +3,13 @@ import { ElMessage } from "element-plus-message";
 import { AutoStart } from "@/lib/auto-start";
 import { PersistentStore } from "@/lib/persistent-store";
 import { Theme, type ThemeMode } from "@/lib/theme";
+import { open } from "@tauri-apps/plugin-dialog";
+import { appDataDir, documentDir } from "@tauri-apps/api/path";
 
 const { theme, setTheme } = Theme.use();
 const { autoStart, autoStartLoading, setAutoStart } = AutoStart.use();
+
+const debugInfo = ref({});
 
 const themeModel = computed<ThemeMode>({
     get: () => theme.value,
@@ -29,6 +33,8 @@ const defaultStartPage = PersistentStore.useValue<string>(
     "/",
 );
 
+const storagePath = PersistentStore.useValue<string>("storagePath", "");
+
 const autoAddAfterDownload = PersistentStore.useValue<boolean>(
     "autoAddAfterDownload",
     true,
@@ -50,6 +56,24 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
     "disableSymlinkInstall",
     false,
 );
+
+watch(debugMode, async (newValue) => {
+    if (newValue) {
+        debugInfo.value = await PersistentStore.getAllKeys();
+    }
+});
+
+async function selectStoragePath() {
+    const selected = await open({
+        directory: true,
+        defaultPath:
+            storagePath.value || (await documentDir()) + "/Gloss Mod Manager",
+        title: "选择储存路径",
+    });
+    if (selected) {
+        storagePath.value = selected;
+    }
+}
 </script>
 <template>
     <div class="flex flex-col gap-6">
@@ -68,6 +92,29 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
                     </CardHeader>
                     <CardContent class="flex flex-col gap-8">
                         <div class="grid grid-cols-4 items-center gap-8">
+                            <!-- 这个站两格 -->
+                            <div class="col-span-2 items-center">
+                                <InputGroup>
+                                    <InputGroupInput
+                                        id="storage-path"
+                                        v-model="storagePath"
+                                        disabled></InputGroupInput>
+                                    <InputGroupAddon>
+                                        <Label
+                                            for="storage-path"
+                                            class="text-sm font-medium"
+                                            >储存路径</Label
+                                        >
+                                    </InputGroupAddon>
+                                    <InputGroupAddon align="inline-end">
+                                        <Button
+                                            variant="secondary"
+                                            @click="selectStoragePath">
+                                            选择
+                                        </Button>
+                                    </InputGroupAddon>
+                                </InputGroup>
+                            </div>
                             <div class="flex gap-2 items-center">
                                 <Label
                                     for="theme-model"
@@ -223,7 +270,9 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
                 </CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col gap-4">
-                <pre>{{ JSON.stringify(PersistentStore.store, null, 2) }}</pre>
+                <pre class="max-h-75 overflow-auto p-4 rounded text-sm">{{
+                    JSON.stringify(debugInfo, null, 2)
+                }}</pre>
             </CardContent>
         </Card>
     </div>

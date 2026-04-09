@@ -272,6 +272,10 @@ interface ISupportedGames extends IGameInfo {
     sortMod?: (list: IModInfo[]) => boolean;
 }
 
+interface IPersistedManagerGame extends IGameInfo {
+    from?: "Local" | "Internal";
+}
+
 interface IExpandsSupportedGames extends IGameInfo {
     modType:
         | IType[]
@@ -316,8 +320,8 @@ interface IGamePlugins {
 //#endregion
 
 interface ISettings {
-    managerGame?: ISupportedGames;
-    managerGameList: ISupportedGames[];
+    managerGame?: IPersistedManagerGame;
+    managerGameList: IPersistedManagerGame[];
     modStorageLocation: string;
     tourGameList: number[];
     proxy: string;

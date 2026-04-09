@@ -7,7 +7,6 @@
         "core:default",
         "core:app:allow-default-window-icon",
         "opener:default",
-        "fs:default",
         "notification:default",
         "os:default",
         "clipboard-manager:allow-read-text",
@@ -61,6 +60,7 @@
         "store:allow-set",
         "store:allow-save",
         "store:allow-load",
+        "store:allow-keys",
         "stronghold:default",
         "dialog:default",
         "shell:default",
@@ -68,6 +68,15 @@
         "core:window:allow-unminimize",
         "core:window:allow-hide",
         "core:window:allow-show",
-        "core:window:allow-set-focus"
+        "core:window:allow-set-focus",
+        {
+            "identifier": "http:default",
+            "allow": [
+                {
+                    "url": "https://*.3dmgame.com"
+                }
+            ]
+        },
+        "http:default"
     ]
 }

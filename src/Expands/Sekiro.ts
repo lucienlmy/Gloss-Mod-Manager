@@ -16,7 +16,7 @@ export const supportedGames = async () =>
             game_id: 2763,
         },
         installdir: "Sekiro",
-        gameName: "Sekiro™ Shadows Die Twice",
+        gameName: "sekiro",
         gameExe: "sekiro.exe",
         startExe: [
             {

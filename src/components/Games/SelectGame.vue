@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { open } from "@tauri-apps/plugin-dialog";
-import { appDataDir, dirname } from "@tauri-apps/api/path";
+import { dirname, join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
 
 const manager = useManager();
@@ -11,6 +11,7 @@ async function select(item: ISupportedGames) {
         item.steamAppID,
         item.installdir,
     );
+    console.log({ item, path });
 
     const selectGameByFolder = await PersistentStore.get(
         "selectGameByFolder",
@@ -20,33 +21,62 @@ async function select(item: ISupportedGames) {
         directory: selectGameByFolder,
         title: `请选择 ${item.gameExe} 所在位置`,
         filters: [{ name: "游戏主程序", extensions: ["exe"] }],
-        defaultPath: path || (await appDataDir()),
+        defaultPath: path,
     });
 
     if (selected) {
         const folder = selectGameByFolder ? selected : await dirname(selected);
         const files = await FileHandler.getAllFilesInFolder(folder);
-        console.log({
-            files,
-            folder,
-            selected,
-            dirname: await dirname(selected),
-        });
 
         if (typeof item.gameExe == "string") {
             // 判断 item.gameExe 是否存在于 files 中
             if (files.includes(item.gameExe)) {
-                const managerGame = item;
+                const managerGame = JSON.parse(
+                    JSON.stringify(item),
+                ) as ISupportedGames;
                 managerGame.gamePath = folder;
-                PersistentStore.set("managerGame", managerGame);
-                console.log(managerGame);
+                manager.managerGame = managerGame;
+                // console.log(manager.managerGame);
             } else {
                 ElMessage.error(`请选择 ${item.gameExe} 所在目录.`);
                 return;
             }
+        } else {
+            // 判断 item.gameExe 是否存在于 files 中
+            let exe = item.gameExe.find((item) => files.includes(item.name));
+            if (exe) {
+                // console.log(exe);
+                const managerGame = item;
+                managerGame.gamePath = await join(folder, exe.rootPath);
+                manager.managerGame = managerGame;
+            } else {
+                let exename = item.gameExe
+                    .map((item) => item.name)
+                    .join(" 或 ");
+                ElMessage.error(`请选择 ${exename} 所在目录.`);
+                return;
+            }
         }
+
+        AppAnalytics.sendEvent(`switch_game`, item.gameName);
+
+        const game = manager.managerGameList.find(
+            (g) => g.gameName === item.gameName,
+        );
+
+        if (game) {
+            manager.managerGameList = manager.managerGameList.map((g) => {
+                if (g.gameName === item.gameName && manager.managerGame) {
+                    return manager.managerGame;
+                } else {
+                    return g;
+                }
+            });
+        } else {
+            manager.managerGameList.push(manager.managerGame);
+        }
+        showSelectDialog.value = false;
     }
-    // showSelectDialog.value = false;
 }
 </script>
 <template>
@@ -66,7 +96,7 @@ async function select(item: ISupportedGames) {
                                 }}款游戏)</small
                             >
                         </div>
-                        <div class="flex-1">
+                        <div class="flex-1 max-w-[75%]">
                             <InputGroup>
                                 <InputGroupInput
                                     placeholder="搜索游戏"></InputGroupInput>
