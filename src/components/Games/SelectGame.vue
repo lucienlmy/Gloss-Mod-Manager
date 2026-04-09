@@ -31,11 +31,10 @@ async function select(item: ISupportedGames) {
         if (typeof item.gameExe == "string") {
             // 判断 item.gameExe 是否存在于 files 中
             if (files.includes(item.gameExe)) {
-                const managerGame = JSON.parse(
-                    JSON.stringify(item),
-                ) as ISupportedGames;
-                managerGame.gamePath = folder;
-                manager.managerGame = managerGame;
+                manager.managerGame = {
+                    ...item,
+                    gamePath: folder,
+                };
                 // console.log(manager.managerGame);
             } else {
                 ElMessage.error(`请选择 ${item.gameExe} 所在目录.`);
@@ -46,9 +45,10 @@ async function select(item: ISupportedGames) {
             let exe = item.gameExe.find((item) => files.includes(item.name));
             if (exe) {
                 // console.log(exe);
-                const managerGame = item;
-                managerGame.gamePath = await join(folder, exe.rootPath);
-                manager.managerGame = managerGame;
+                manager.managerGame = {
+                    ...item,
+                    gamePath: await join(folder, exe.rootPath),
+                };
             } else {
                 let exename = item.gameExe
                     .map((item) => item.name)
@@ -83,7 +83,9 @@ async function select(item: ISupportedGames) {
     <div class="select-game">
         <Dialog with-backdrop v-model:open="showSelectDialog">
             <DialogTrigger as-child>
-                <Button variant="outline" size="sm">选择游戏</Button>
+                <Button variant="outline" size="sm">
+                    <IconPlus /> 选择游戏
+                </Button>
             </DialogTrigger>
             <DialogContent class="w-225 max-w-[70%]!">
                 <DialogHeader>

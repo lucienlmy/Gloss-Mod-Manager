@@ -4,7 +4,7 @@ import { AutoStart } from "@/lib/auto-start";
 import { PersistentStore } from "@/lib/persistent-store";
 import { Theme, type ThemeMode } from "@/lib/theme";
 import { open } from "@tauri-apps/plugin-dialog";
-import { appDataDir, documentDir } from "@tauri-apps/api/path";
+import { documentDir } from "@tauri-apps/api/path";
 
 const { theme, setTheme } = Theme.use();
 const { autoStart, autoStartLoading, setAutoStart } = AutoStart.use();

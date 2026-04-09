@@ -52,11 +52,11 @@ export const supportedGames = async () =>
                 id: 99,
                 name: "未知",
                 installPath: "",
-                async install(mod) {
+                async install(_mod) {
                     ElMessage.warning("未知类型, 请手动安装");
                     return false;
                 },
-                async uninstall(mod) {
+                async uninstall(_mod) {
                     return true;
                 },
             },

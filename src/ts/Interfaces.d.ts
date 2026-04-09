@@ -1036,3 +1036,12 @@ interface ITree {
 }
 
 //#endregion
+
+type ManagerSortKey =
+    | "weight"
+    | "name"
+    | "type"
+    | "author"
+    | "version"
+    | "state"
+    | "tag";
