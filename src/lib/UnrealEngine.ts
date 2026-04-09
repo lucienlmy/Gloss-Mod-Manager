@@ -1,18 +1,18 @@
 import { ElMessage } from "element-plus-message";
 import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
-import { dirname, extname, join } from "path-browserify";
+import { dirname, extname, join } from "@tauri-apps/api/path";
 
 export class UnrealEngine {
-    public static modType(
+    public static async modType(
         bassPath: string = "",
         useUE4SS: boolean = false,
-    ): ISupportedGames["modType"] {
+    ): Promise<ISupportedGames["modType"]> {
         return [
             {
                 id: 1,
                 name: "pak",
-                installPath: join(bassPath, "Content", "Paks"),
+                installPath: await join(bassPath, "Content", "Paks"),
                 advanced: {
                     name: "配置",
                     icon: "mdi-align-horizontal-center",
@@ -29,7 +29,10 @@ export class UnrealEngine {
                     const subPath = mod.advanced?.enabled
                         ? String(mod.advanced?.data.installPath ?? "")
                         : String(this.advanced?.item[0]?.defaultValue ?? "");
-                    const installPath = join(this.installPath ?? "", subPath);
+                    const installPath = await join(
+                        this.installPath ?? "",
+                        subPath,
+                    );
 
                     return Manager.generalInstall(mod, installPath);
                 },
@@ -37,7 +40,10 @@ export class UnrealEngine {
                     const subPath = mod.advanced?.enabled
                         ? String(mod.advanced?.data.installPath ?? "")
                         : String(this.advanced?.item[0]?.defaultValue ?? "");
-                    const installPath = join(this.installPath ?? "", subPath);
+                    const installPath = await join(
+                        this.installPath ?? "",
+                        subPath,
+                    );
 
                     return Manager.generalUninstall(mod, installPath);
                 },
@@ -45,10 +51,15 @@ export class UnrealEngine {
             {
                 id: 2,
                 name: "UE4SS",
-                installPath: join(bassPath, "Binaries", "Win64"),
+                installPath: await join(bassPath, "Binaries", "Win64"),
                 async install(mod) {
                     for (const item of mod.modFiles) {
-                        if (FileHandler.compareFileName(item, "dwmapi.dll")) {
+                        if (
+                            await FileHandler.compareFileName(
+                                item,
+                                "dwmapi.dll",
+                            )
+                        ) {
                             return Manager.installByFileSibling(
                                 mod,
                                 this.installPath ?? "",
@@ -58,7 +69,10 @@ export class UnrealEngine {
                         }
 
                         if (
-                            FileHandler.compareFileName(item, "xinput1_3.dll")
+                            await FileHandler.compareFileName(
+                                item,
+                                "xinput1_3.dll",
+                            )
                         ) {
                             return Manager.installByFileSibling(
                                 mod,
@@ -77,7 +91,12 @@ export class UnrealEngine {
                 },
                 async uninstall(mod) {
                     for (const item of mod.modFiles) {
-                        if (FileHandler.compareFileName(item, "dwmapi.dll")) {
+                        if (
+                            await FileHandler.compareFileName(
+                                item,
+                                "dwmapi.dll",
+                            )
+                        ) {
                             return Manager.installByFileSibling(
                                 mod,
                                 this.installPath ?? "",
@@ -87,7 +106,10 @@ export class UnrealEngine {
                         }
 
                         if (
-                            FileHandler.compareFileName(item, "xinput1_3.dll")
+                            await FileHandler.compareFileName(
+                                item,
+                                "xinput1_3.dll",
+                            )
                         ) {
                             return Manager.installByFileSibling(
                                 mod,
@@ -108,7 +130,7 @@ export class UnrealEngine {
             {
                 id: 3,
                 name: "mods",
-                installPath: join(
+                installPath: await join(
                     bassPath,
                     "Binaries",
                     "Win64",
@@ -135,7 +157,12 @@ export class UnrealEngine {
             {
                 id: 4,
                 name: "LogicMods",
-                installPath: join(bassPath, "Content", "Paks", "LogicMods"),
+                installPath: await join(
+                    bassPath,
+                    "Content",
+                    "Paks",
+                    "LogicMods",
+                ),
                 async install(mod) {
                     return Manager.generalInstall(mod, this.installPath ?? "");
                 },
@@ -149,7 +176,7 @@ export class UnrealEngine {
             {
                 id: 5,
                 name: "Scripts",
-                installPath: join(
+                installPath: await join(
                     bassPath,
                     "Binaries",
                     "Win64",
@@ -163,13 +190,17 @@ export class UnrealEngine {
                         const parts = FileHandler.pathToArray(element);
 
                         if (parts.includes("Scripts")) {
-                            parent = dirname(element);
+                            parent = await dirname(element);
                             break;
                         }
                     }
 
                     const modStorage = await Manager.getModStoragePath(mod.id);
-                    const enableFile = join(modStorage, parent, "Enabled.txt");
+                    const enableFile = await join(
+                        modStorage,
+                        parent,
+                        "Enabled.txt",
+                    );
 
                     await FileHandler.ensureDirectoryExistence(enableFile);
 
@@ -225,25 +256,26 @@ export class UnrealEngine {
         ];
     }
 
-    public static checkModType(mod: IModInfo) {
+    public static async checkModType(mod: IModInfo) {
         let pak = false;
         let ue4ss = false;
         let mods = false;
         let scripts = false;
 
-        mod.modFiles.forEach((item) => {
-            if (extname(item) === ".pak") pak = true;
-            if (FileHandler.compareFileName(item, "Enabled.txt")) mods = true;
-
-            if (FileHandler.compareFileName(item, "ue4ss.dll")) ue4ss = true;
-            if (FileHandler.compareFileName(item, "dwmapi.dll")) ue4ss = true;
-            if (FileHandler.compareFileName(item, "xinput1_3.dll"))
+        for (const item of mod.modFiles) {
+            if ((await extname(item)) === ".pak") pak = true;
+            if (await FileHandler.compareFileName(item, "Enabled.txt"))
+                mods = true;
+            if (await FileHandler.compareFileName(item, "ue4ss.dll"))
                 ue4ss = true;
-
+            if (await FileHandler.compareFileName(item, "dwmapi.dll"))
+                ue4ss = true;
+            if (await FileHandler.compareFileName(item, "xinput1_3.dll"))
+                ue4ss = true;
             if (FileHandler.pathToArray(item).includes("Scripts")) {
                 scripts = true;
             }
-        });
+        }
 
         if (ue4ss) return 2;
         if (pak) return 1;
@@ -263,7 +295,7 @@ export class UnrealEngine {
             return;
         }
 
-        const filePath = join(
+        const filePath = await join(
             gameStorage,
             bassPath,
             "Binaries",

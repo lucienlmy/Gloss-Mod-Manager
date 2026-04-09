@@ -309,25 +309,3 @@ export class SevenZip {
         return Sidecar.executeSevenZip(args, options);
     }
 }
-
-export async function extractArchiveWithSevenZip(
-    options: SevenZipExtractOptions,
-) {
-    return SevenZip.extractArchive(options);
-}
-
-export async function createArchiveWithSevenZip(
-    options: SevenZipCreateOptions,
-) {
-    return SevenZip.createArchive(options);
-}
-
-export async function listArchiveWithSevenZip(
-    options: SevenZipListOptions,
-): Promise<SevenZipListResult> {
-    return SevenZip.listArchive(options);
-}
-
-export async function testArchiveWithSevenZip(options: SevenZipTestOptions) {
-    return SevenZip.testArchive(options);
-}

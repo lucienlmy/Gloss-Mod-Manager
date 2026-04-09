@@ -1,6 +1,6 @@
 import { Command } from "@tauri-apps/plugin-shell";
 import { parse } from "vdf-parser";
-import path from "path-browserify";
+import { join } from "@tauri-apps/api/path";
 import { FileHandler } from "@/lib/FileHandler";
 
 export class ScanGame {
@@ -36,7 +36,7 @@ export class ScanGame {
             // console.log(steamPath);
             // C:\Program Files (x86)\Steam\steamapps\libraryfolders.vdf
             let fileData = await FileHandler.readFile(
-                path.join(steamPath, "steamapps", "libraryfolders.vdf"),
+                await join(steamPath, "steamapps", "libraryfolders.vdf"),
             );
             // console.log(fileData);
 
@@ -53,7 +53,7 @@ export class ScanGame {
                     }
                 }
                 if (gameRootPath != "") {
-                    return path.join(
+                    return await join(
                         gameRootPath,
                         "steamapps",
                         "common",
@@ -81,7 +81,7 @@ export class ScanGame {
 
             // 读取 libraryfolders.vdf 文件
             let fileData = await FileHandler.readFile(
-                path.join(steamPath, "steamapps", "libraryfolders.vdf"),
+                await join(steamPath, "steamapps", "libraryfolders.vdf"),
             );
 
             if (!fileData) return [];
@@ -99,7 +99,7 @@ export class ScanGame {
                     const appIdNum = parseInt(appid);
 
                     // 尝试从 appmanifest 文件读取游戏名称
-                    const manifestPath = path.join(
+                    const manifestPath = await join(
                         folder.path,
                         "steamapps",
                         `appmanifest_${appid}.acf`,
@@ -154,7 +154,7 @@ export class ScanGame {
             if (steamPath) {
                 try {
                     let loginusers = await FileHandler.readFile(
-                        path.join(steamPath, "config", "loginusers.vdf"),
+                        await join(steamPath, "config", "loginusers.vdf"),
                     );
                     let data: any = parse(loginusers);
 

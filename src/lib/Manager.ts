@@ -5,7 +5,7 @@
 import { appLocalDataDir } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
 import { FileHandler } from "@/lib/FileHandler";
-import { basename, dirname, extname, join } from "path-browserify";
+import { basename, dirname, extname, join } from "@tauri-apps/api/path";
 
 interface IManagerContext {
     modStorage: string;
@@ -41,7 +41,7 @@ export class Manager {
         return {
             modStorage:
                 Manager.context.modStorage ||
-                join(await appLocalDataDir(), "mods"),
+                (await join(await appLocalDataDir(), "mods")),
             gameStorage: Manager.context.gameStorage || "",
             closeSoftLinks: Manager.context.closeSoftLinks ?? true,
         };
@@ -93,7 +93,7 @@ export class Manager {
         savePath: string,
         fileName: string = "mod.json",
     ) {
-        const configPath = join(savePath, fileName);
+        const configPath = await join(savePath, fileName);
         const config = JSON.stringify(JSON.parse(JSON.stringify(modList)));
 
         await FileHandler.writeFile(configPath, config);
@@ -104,7 +104,7 @@ export class Manager {
         savePath: string,
         fileName = "mod.json",
     ): Promise<IModInfo[] | ITag[]> {
-        const configPath = join(savePath, fileName);
+        const configPath = await join(savePath, fileName);
         await FileHandler.createDirectory(savePath);
         const config = await FileHandler.readFileSync(configPath, "[]");
         return JSON.parse(config) as IModInfo[] | ITag[];
@@ -146,7 +146,7 @@ export class Manager {
 
         for (const item of mod.modFiles) {
             try {
-                const source = join(modStorage, item);
+                const source = await join(modStorage, item);
 
                 if (!(await FileHandler.fileExists(source))) {
                     result.push({ file: item, state: false });
@@ -154,8 +154,8 @@ export class Manager {
                 }
 
                 const target = keepPath
-                    ? join(targetRoot, item)
-                    : join(targetRoot, basename(item));
+                    ? await join(targetRoot, item)
+                    : await join(targetRoot, await basename(item));
                 const state = await FileHandler.copyFile(source, target);
 
                 result.push({ file: item, state });
@@ -188,7 +188,7 @@ export class Manager {
 
         for (const item of mod.modFiles) {
             try {
-                const source = join(modStorage, item);
+                const source = await join(modStorage, item);
 
                 if (!(await FileHandler.fileExists(source))) {
                     result.push({ file: item, state: false });
@@ -196,12 +196,12 @@ export class Manager {
                 }
 
                 const target = keepPath
-                    ? join(targetRoot, item)
-                    : join(targetRoot, basename(item));
+                    ? await join(targetRoot, item)
+                    : await join(targetRoot, await basename(item));
                 const state = await FileHandler.deleteFile(target);
 
                 result.push({ file: item, state });
-                await Manager.deleteEmptyFolders(dirname(target));
+                await Manager.deleteEmptyFolders(await dirname(target));
             } catch {
                 result.push({ file: item, state: false });
             }
@@ -245,11 +245,11 @@ export class Manager {
 
         for (const item of mod.modFiles) {
             try {
-                if (Manager.passFiles.includes(basename(item))) {
+                if (Manager.passFiles.includes(await basename(item))) {
                     continue;
                 }
 
-                const source = join(modStorage, item);
+                const source = await join(modStorage, item);
 
                 if (!(await FileHandler.fileExists(source))) {
                     continue;
@@ -279,9 +279,9 @@ export class Manager {
                 }
 
                 const target = relativeInstallPath
-                    ? join(targetRoot, relativeInstallPath)
+                    ? await join(targetRoot, relativeInstallPath)
                     : spare
-                      ? join(targetRoot, item)
+                      ? await join(targetRoot, item)
                       : "";
 
                 if (!target) {
@@ -294,7 +294,7 @@ export class Manager {
                 } else {
                     const state = await FileHandler.deleteFile(target);
                     result.push({ file: item, state });
-                    await Manager.deleteEmptyFolders(dirname(target));
+                    await Manager.deleteEmptyFolders(await dirname(target));
                 }
             } catch (error) {
                 ElMessage.error(`错误: ${error}`);
@@ -340,22 +340,22 @@ export class Manager {
 
         for (const item of mod.modFiles) {
             const matched = isExtname
-                ? extname(item) === fileName
+                ? (await extname(item)) === fileName
                 : FileHandler.compareFileName(item, fileName);
 
             if (matched) {
-                folders.push(dirname(join(modStorage, item)));
+                folders.push(await dirname(await join(modStorage, item)));
             }
         }
 
         folders = [...new Set(folders)];
 
         if (commonParent) {
-            folders = Manager.getCommonParentFolder(modStorage, folders);
+            folders = await Manager.getCommonParentFolder(modStorage, folders);
         }
 
         for (const folder of folders) {
-            const target = join(targetRoot, basename(folder));
+            const target = await join(targetRoot, await basename(folder));
 
             if (isInstall) {
                 if (isLink && !closeSoftLinks) {
@@ -370,7 +370,7 @@ export class Manager {
                     await FileHandler.deleteFolder(target);
                 }
 
-                await Manager.deleteEmptyFolders(dirname(target));
+                await Manager.deleteEmptyFolders(await dirname(target));
             }
         }
 
@@ -414,18 +414,18 @@ export class Manager {
 
         for (const item of mod.modFiles) {
             const matched = isExtname
-                ? extname(item) === fileName
-                : FileHandler.compareFileName(item, fileName);
+                ? (await extname(item)) === fileName
+                : await FileHandler.compareFileName(item, fileName);
 
             if (!matched) {
                 continue;
             }
 
-            if (pass.includes(basename(item).toLowerCase())) {
+            if (pass.includes((await basename(item)).toLowerCase())) {
                 continue;
             }
 
-            const folder = dirname(join(modStorage, item));
+            const folder = await dirname(await join(modStorage, item));
 
             folders.push({
                 folder,
@@ -452,21 +452,21 @@ export class Manager {
 
         for (const folder of folders) {
             for (const file of folder.files) {
-                if (Manager.passFiles.includes(basename(file))) {
+                if (Manager.passFiles.includes(await basename(file))) {
                     continue;
                 }
 
-                const relativeFile = FileHandler.relativePath(
+                const relativeFile = await FileHandler.relativePath(
                     folder.folder,
                     file,
                 );
-                const target = join(targetRoot, relativeFile);
+                const target = await join(targetRoot, relativeFile);
 
                 if (isInstall) {
                     await FileHandler.copyFile(file, target);
                 } else {
                     await FileHandler.deleteFile(target);
-                    await Manager.deleteEmptyFolders(dirname(target));
+                    await Manager.deleteEmptyFolders(await dirname(target));
                 }
             }
         }
@@ -510,34 +510,41 @@ export class Manager {
 
             if (index !== -1) {
                 const targetPath = parts.slice(0, index).join("/");
-                folders.push(join(modStorage, targetPath));
+                folders.push(await join(modStorage, targetPath));
             }
         }
 
         folders = [...new Set(folders)];
 
         for (const folder of folders) {
-            const target = join(targetRoot, basename(folder));
+            const target = await join(targetRoot, await basename(folder));
 
             if (isInstall) {
                 await FileHandler.createLink(folder, target, true);
             } else {
                 await FileHandler.removeLink(target, true);
-                await Manager.deleteEmptyFolders(dirname(target));
+                await Manager.deleteEmptyFolders(await dirname(target));
             }
         }
 
         return true;
     }
 
-    public static getCommonParentFolder(modStorage: string, paths: string[]) {
-        const topLevelFolderNames = paths
-            .map((item) => FileHandler.relativePath(modStorage, item))
+    public static async getCommonParentFolder(
+        modStorage: string,
+        paths: string[],
+    ) {
+        const relativePaths = await Promise.all(
+            paths.map((item) => FileHandler.relativePath(modStorage, item)),
+        );
+        const topLevelFolderNames = relativePaths
             .map((item) => FileHandler.pathToArray(item)[0])
             .filter((item): item is string => Boolean(item));
 
-        return [...new Set(topLevelFolderNames)].map((item) =>
-            join(modStorage, item),
+        return Promise.all(
+            [...new Set(topLevelFolderNames)].map(
+                async (item) => await join(modStorage, item),
+            ),
         );
     }
 
@@ -567,7 +574,7 @@ export class Manager {
                 return;
             }
 
-            const parentPath = dirname(currentPath);
+            const parentPath = await dirname(currentPath);
 
             if (!parentPath || parentPath === currentPath) {
                 return;

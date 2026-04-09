@@ -81,11 +81,3 @@ export class AutoStart {
         };
     }
 }
-
-export function initializeAutoStart() {
-    return AutoStart.initialize();
-}
-
-export function useAutoStart() {
-    return AutoStart.use();
-}

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { open } from "@tauri-apps/plugin-dialog";
-import { appDataDir } from "@tauri-apps/api/path";
+import { appDataDir, dirname } from "@tauri-apps/api/path";
+import { ElMessage } from "element-plus-message";
 
 const manager = useManager();
 const showSelectDialog = ref(false);
@@ -11,15 +12,41 @@ async function select(item: ISupportedGames) {
         item.installdir,
     );
 
+    const selectGameByFolder = await PersistentStore.get(
+        "selectGameByFolder",
+        false,
+    );
     const selected = await open({
-        directory: false,
+        directory: selectGameByFolder,
         title: `请选择 ${item.gameExe} 所在位置`,
         filters: [{ name: "游戏主程序", extensions: ["exe"] }],
         defaultPath: path || (await appDataDir()),
     });
 
-    console.log(selected);
-    showSelectDialog.value = false;
+    if (selected) {
+        const folder = selectGameByFolder ? selected : await dirname(selected);
+        const files = await FileHandler.getAllFilesInFolder(folder);
+        console.log({
+            files,
+            folder,
+            selected,
+            dirname: await dirname(selected),
+        });
+
+        if (typeof item.gameExe == "string") {
+            // 判断 item.gameExe 是否存在于 files 中
+            if (files.includes(item.gameExe)) {
+                const managerGame = item;
+                managerGame.gamePath = folder;
+                PersistentStore.set("managerGame", managerGame);
+                console.log(managerGame);
+            } else {
+                ElMessage.error(`请选择 ${item.gameExe} 所在目录.`);
+                return;
+            }
+        }
+    }
+    // showSelectDialog.value = false;
 }
 </script>
 <template>

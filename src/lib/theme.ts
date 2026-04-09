@@ -155,15 +155,3 @@ export class Theme {
         };
     }
 }
-
-export function initializeTheme() {
-    return Theme.initialize();
-}
-
-export function setTheme(mode: ThemeMode) {
-    return Theme.set(mode);
-}
-
-export function useTheme() {
-    return Theme.use();
-}

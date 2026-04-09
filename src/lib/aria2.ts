@@ -169,30 +169,3 @@ export class Aria2 {
         return Sidecar.executeAria2(args, options);
     }
 }
-
-export function buildAria2DownloadArgs(options: Aria2DownloadOptions) {
-    return Aria2.buildDownloadArgs(options);
-}
-
-export function buildAria2RpcServerArgs(options: Aria2RpcServerOptions = {}) {
-    return Aria2.buildRpcServerArgs(options);
-}
-
-export async function downloadWithAria2(options: Aria2DownloadOptions) {
-    return Aria2.download(options);
-}
-
-export async function spawnAria2Download(options: Aria2DownloadOptions) {
-    return Aria2.spawnDownload(options);
-}
-
-export async function startAria2RpcServer(options: Aria2RpcServerOptions = {}) {
-    return Aria2.startRpcServer(options);
-}
-
-export async function runAria2Command(
-    args: readonly string[],
-    options: SidecarCommandOptions = {},
-) {
-    return Aria2.runCommand(args, options);
-}

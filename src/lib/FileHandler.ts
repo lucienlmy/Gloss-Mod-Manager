@@ -22,7 +22,7 @@ import {
 import { openPath } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
 import { md5 } from "js-md5";
-import { dirname, join, basename, sep } from "path-browserify";
+import { dirname, join, basename, sep } from "@tauri-apps/api/path";
 
 type BinaryLike = Uint8Array | ArrayBuffer;
 
@@ -42,7 +42,7 @@ interface IFileSystemMetadata {
 }
 
 export class FileHandler {
-    private static readonly pathSeparator = sep;
+    private static readonly pathSeparator = sep();
 
     /**
      * 绝对路径走 Rust 命令，规避 plugin-fs 对绝对路径的限制。
@@ -236,7 +236,7 @@ export class FileHandler {
     }
 
     private static async ensureParentDirectory(filePath: string) {
-        const parentDirectory = dirname(filePath);
+        const parentDirectory = await dirname(filePath);
 
         if (parentDirectory) {
             await FileHandler.createDirectory(parentDirectory);
@@ -254,9 +254,9 @@ export class FileHandler {
     /**
      * 计算 target 相对于 base 的相对路径。
      */
-    public static relativePath(basePath: string, targetPath: string) {
-        const normalizedBase = join(basePath);
-        const normalizedTarget = join(targetPath);
+    public static async relativePath(basePath: string, targetPath: string) {
+        const normalizedBase = await join(basePath);
+        const normalizedTarget = await join(targetPath);
 
         if (!normalizedBase) {
             return FileHandler.trimLeadingSeparators(normalizedTarget);
@@ -362,8 +362,8 @@ export class FileHandler {
             const entries = await FileHandler.getDirectoryEntries(srcPath);
 
             for (const entry of entries) {
-                const sourcePath = join(srcPath, entry.name);
-                const targetPath = join(target, entry.name);
+                const sourcePath = await join(srcPath, entry.name);
+                const targetPath = await join(target, entry.name);
 
                 if (entry.isDirectory) {
                     await FileHandler.copyFolder(sourcePath, targetPath);
@@ -813,7 +813,7 @@ export class FileHandler {
         const entries = await FileHandler.getDirectoryEntries(folderPath);
 
         for (const entry of entries) {
-            const entryPath = join(folderPath, entry.name);
+            const entryPath = await join(folderPath, entry.name);
 
             if (entry.isFile) {
                 result.push(includepath ? entryPath : entry.name);
@@ -863,7 +863,7 @@ export class FileHandler {
                 continue;
             }
 
-            const entryPath = join(folderPath, entry.name);
+            const entryPath = await join(folderPath, entry.name);
             result.push(entryPath);
 
             if (subdirectory) {
@@ -901,8 +901,11 @@ export class FileHandler {
      * @param name2
      * @returns
      */
-    public static compareFileName(name1: string, name2: string) {
-        return basename(name1).toLowerCase() === basename(name2).toLowerCase();
+    public static async compareFileName(name1: string, name2: string) {
+        return (
+            (await basename(name1)).toLowerCase() ===
+            (await basename(name2)).toLowerCase()
+        );
     }
 
     /**

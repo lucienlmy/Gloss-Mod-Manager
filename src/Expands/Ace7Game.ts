@@ -2,30 +2,31 @@
  * @description 皇牌空战 支持
  */
 import { UnrealEngine } from "@/lib/UnrealEngine";
-import { join } from "path-browserify";
+import { join } from "@tauri-apps/api/path";
 
-export const supportedGames: ISupportedGames = {
-    GlossGameId: 341,
-    steamAppID: 502500,
-    nexusMods: {
-        game_domain_name: "acecombat7skiesunknown",
-        game_id: 2777,
-    },
-    installdir: join("ACE COMBAT 7"),
-    gameName: "ACE COMBAT 7",
-    startExe: [
-        {
-            name: "Steam 启动",
-            cmd: "steam://rungameid/502500",
+export const supportedGames = async () =>
+    ({
+        GlossGameId: 341,
+        steamAppID: 502500,
+        nexusMods: {
+            game_domain_name: "acecombat7skiesunknown",
+            game_id: 2777,
         },
-        {
-            name: "直接启动",
-            exePath: "Ace7Game.exe",
-        },
-    ],
-    gameExe: "Ace7Game.exe",
-    gameCoverImg:
-        "https://assets-mod.3dmgame.com/static/upload/game/65f174af429dd.webp",
-    modType: UnrealEngine.modType("Game", false),
-    checkModType: UnrealEngine.checkModType,
-};
+        installdir: await join("ACE COMBAT 7"),
+        gameName: "ACE COMBAT 7",
+        startExe: [
+            {
+                name: "Steam 启动",
+                cmd: "steam://rungameid/502500",
+            },
+            {
+                name: "直接启动",
+                exePath: "Ace7Game.exe",
+            },
+        ],
+        gameExe: "Ace7Game.exe",
+        gameCoverImg:
+            "https://assets-mod.3dmgame.com/static/upload/game/65f174af429dd.webp",
+        modType: await UnrealEngine.modType("Game", false),
+        checkModType: UnrealEngine.checkModType,
+    }) as ISupportedGames;
