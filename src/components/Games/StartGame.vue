@@ -59,7 +59,7 @@ async function launchGame(startItem?: string | IStartExe) {
         v-if="typeof game.startExe === 'string'"
         variant="outline"
         @click="launchGame(game.startExe)">
-        <Play class="h-4 w-4" />
+        <IconPlay class="h-4 w-4" />
         启动游戏
     </Button>
     <DropdownMenu v-else-if="Array.isArray(game.startExe)">
@@ -74,7 +74,7 @@ async function launchGame(startItem?: string | IStartExe) {
                 v-for="item in game.startExe as IStartExe[]"
                 :key="item.name"
                 @click="launchGame(item as IStartExe)">
-                <Play class="h-4 w-4" />
+                <IconPlay class="h-4 w-4" />
                 {{ item.name }}
             </DropdownMenuItem>
         </DropdownMenuContent>

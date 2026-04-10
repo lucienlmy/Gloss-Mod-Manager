@@ -18,11 +18,10 @@ export const useManager = defineStore("Manager", () => {
 
     const selectedType = ref<number | string | 0>(0);
     const selectedTag = ref("全部");
-    const sortKey = ref<ManagerSortKey>("weight");
     const tags = ref<ITag[]>([]);
-    const filterInstalled = ref(false);
+    const managerRoot = ref("");
 
-    const filteredMods = computed(() => {
+    const filteredMods = computed<IModInfo[]>(() => {
         const keyword = search.value.trim().toLowerCase();
 
         return [...managerModList.value]
@@ -41,13 +40,6 @@ export const useManager = defineStore("Manager", () => {
                 return (mod.tags ?? []).some(
                     (tag) => tag.name === selectedTag.value,
                 );
-            })
-            .filter((mod) => {
-                if (!filterInstalled.value) {
-                    return true;
-                }
-
-                return mod.isInstalled;
             })
             .filter((mod) => {
                 if (!keyword) {
@@ -88,6 +80,15 @@ export const useManager = defineStore("Manager", () => {
         return type?.name ?? "未分类";
     }
 
+    async function saveManagerData() {
+        if (!managerRoot.value) {
+            return;
+        }
+
+        await Manager.saveModInfo(managerModList.value, managerRoot.value);
+        await Manager.saveModInfo(tags.value, managerRoot.value, "tags.json");
+    }
+
     void Promise.all(getAllExpands())
         .then((games) => {
             supportedGames.value = games;
@@ -106,11 +107,11 @@ export const useManager = defineStore("Manager", () => {
         search,
         selectedType,
         selectedTag,
-        sortKey,
         tags,
         textCollator,
-        filterInstalled,
         availableTypes,
         getTypeName,
+        managerRoot,
+        saveManagerData,
     };
 });

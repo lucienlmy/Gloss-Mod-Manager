@@ -853,4 +853,10 @@ export class FileHandler {
     public static async GetAppData() {
         return dirname(FileHandler.normalizePath(await localDataDir()));
     }
+
+    public static async readFileAsBase64(image: string) {
+        const data = await FileHandler.readBinary(image);
+        const base64 = btoa(String.fromCharCode(...data));
+        return `data:image/${image.split(".").pop()};base64,${base64}`;
+    }
 }

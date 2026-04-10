@@ -11,7 +11,7 @@ async function select(item: ISupportedGames) {
         item.steamAppID,
         item.installdir,
     );
-    console.log({ item, path });
+    // console.log({ item, path });
 
     const selectGameByFolder = await PersistentStore.get(
         "selectGameByFolder",

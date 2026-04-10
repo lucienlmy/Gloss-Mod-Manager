@@ -10,10 +10,13 @@ export class PersistentStore {
     /**
      * 读取指定键的持久化值；未命中时返回默认值副本。
      */
-    public static async get<T>(key: string, fallback: T): Promise<T> {
+    public static async get<T>(
+        key: string,
+        fallback?: T,
+    ): Promise<T | undefined> {
         const value = await PersistentStore.store.get<T>(key);
 
-        if (value === undefined) {
+        if (value === undefined && fallback) {
             return PersistentStore.cloneValue(fallback);
         }
 
@@ -43,7 +46,7 @@ export class PersistentStore {
                 }
 
                 hydrating = true;
-                state.value = value;
+                state.value = value as T;
                 hydrating = false;
             })
             .catch((error: unknown) => {

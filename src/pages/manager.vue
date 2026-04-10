@@ -6,11 +6,9 @@ import {
     FolderOpen,
     FolderPlus,
     Gamepad2,
-    PencilLine,
     RefreshCw,
     Search,
     Settings2,
-    Trash2,
 } from "lucide-vue-next";
 
 interface IBatchEditForm {
@@ -32,17 +30,11 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
     false,
 );
 
-const managerRoot = ref("");
 const loading = ref(false);
 const importLoading = ref(false);
 const loadError = ref("");
-const search = ref("");
 const selectedIds = ref<number[]>([]);
 const actioningIds = ref<number[]>([]);
-const tagName = ref("");
-const tagColor = ref("#14F7D8");
-const showTagEditDialog = ref(false);
-const editingTagName = ref("");
 
 const showBatchEditDialog = ref(false);
 const batchEditForm = reactive<IBatchEditForm>({
@@ -148,7 +140,7 @@ function collectModTags(modList: IModInfo[]) {
 
 async function syncManagerContext() {
     if (!manager.managerGame || !storagePath.value) {
-        managerRoot.value = "";
+        manager.managerRoot = "";
         Manager.configureContext({
             modStorage: "",
             gameStorage: manager.managerGame?.gamePath ?? "",
@@ -157,13 +149,13 @@ async function syncManagerContext() {
         return;
     }
 
-    managerRoot.value = await join(
+    manager.managerRoot = await join(
         storagePath.value,
         "mods",
         manager.managerGame?.gameName ?? "",
     );
     Manager.configureContext({
-        modStorage: managerRoot.value,
+        modStorage: manager.managerRoot,
         gameStorage: manager.managerGame?.gamePath ?? "",
         closeSoftLinks: disableSymlinkInstall.value,
     });
@@ -257,7 +249,7 @@ async function loadManagerData() {
         return;
     }
 
-    if (!storagePath.value || !managerRoot.value) {
+    if (!storagePath.value || !manager.managerRoot) {
         manager.managerModList = [];
         manager.tags = [];
         return;
@@ -267,10 +259,10 @@ async function loadManagerData() {
 
     try {
         const storedMods = (await Manager.getModInfo(
-            managerRoot.value,
+            manager.managerRoot,
         )) as IModInfo[];
         const storedTags = (await Manager.getModInfo(
-            managerRoot.value,
+            manager.managerRoot,
             "tags.json",
         )) as ITag[];
 
@@ -328,15 +320,6 @@ async function loadManagerData() {
     }
 }
 
-async function saveManagerData() {
-    if (!managerRoot.value) {
-        return;
-    }
-
-    await Manager.saveModInfo(manager.managerModList, managerRoot.value);
-    await Manager.saveModInfo(manager.tags, managerRoot.value, "tags.json");
-}
-
 function syncTagsFromMods() {
     manager.tags = dedupeTags([
         ...manager.tags,
@@ -353,7 +336,7 @@ async function applyBatchEdit() {
     );
 
     syncTagsFromMods();
-    await saveManagerData();
+    await manager.saveManagerData();
     showBatchEditDialog.value = false;
     ElMessage.success("已更新所选 Mod 信息。");
 }
@@ -477,7 +460,7 @@ async function toggleInstall(mod: IModInfo, install: boolean) {
         }
 
         mod.isInstalled = install;
-        await saveManagerData();
+        await manager.saveManagerData();
         ElMessage.success(
             install ? `已安装 ${mod.modName}` : `已卸载 ${mod.modName}`,
         );
@@ -495,12 +478,12 @@ async function toggleInstall(mod: IModInfo, install: boolean) {
 }
 
 async function openModRootFolder() {
-    if (!managerRoot.value) {
+    if (!manager.managerRoot) {
         ElMessage.warning("请先配置储存路径并选择游戏。");
         return;
     }
 
-    await FileHandler.openFolder(managerRoot.value);
+    await FileHandler.openFolder(manager.managerRoot);
 }
 
 async function openGameFolder() {
@@ -513,7 +496,7 @@ async function openGameFolder() {
 }
 
 async function importModFolder() {
-    if (!manager.managerGame || !managerRoot.value) {
+    if (!manager.managerGame || !manager.managerRoot) {
         ElMessage.warning("请先选择游戏并配置储存路径。");
         return;
     }
@@ -533,7 +516,7 @@ async function importModFolder() {
 }
 
 async function importModArchive() {
-    if (!manager.managerGame || !managerRoot.value) {
+    if (!manager.managerGame || !manager.managerRoot) {
         ElMessage.warning("请先选择游戏并配置储存路径。");
         return;
     }
@@ -562,7 +545,7 @@ async function importSources(
     sources: string[],
     sourceType: "archive" | "folder",
 ) {
-    if (!managerRoot.value) {
+    if (!manager.managerRoot) {
         return;
     }
 
@@ -579,7 +562,7 @@ async function importSources(
             const modId = nextId;
             nextId += 1;
 
-            const targetFolder = await join(managerRoot.value, String(modId));
+            const targetFolder = await join(manager.managerRoot, String(modId));
             await FileHandler.createDirectory(targetFolder);
 
             const imported =
@@ -637,7 +620,7 @@ async function importSources(
         }
 
         syncTagsFromMods();
-        await saveManagerData();
+        await manager.saveManagerData();
         ElMessage.success(
             importedCount > 0
                 ? `成功导入 ${importedCount} 个 Mod。`
@@ -668,120 +651,6 @@ function openSettingsPage() {
 
 function openGamesPage() {
     void router.push("/games");
-}
-
-function resetTagEditor() {
-    editingTagName.value = "";
-    tagName.value = "";
-    tagColor.value = "#14F7D8";
-}
-
-function openCreateTagDialog() {
-    resetTagEditor();
-}
-
-function openEditTagDialog(tag: ITag) {
-    editingTagName.value = tag.name;
-    tagName.value = tag.name;
-    tagColor.value = tag.color;
-    showTagEditDialog.value = true;
-}
-
-async function submitTag() {
-    const name = tagName.value.trim();
-
-    if (!name) {
-        ElMessage.warning("标签名称不能为空。");
-        return;
-    }
-
-    if (
-        manager.tags.some(
-            (tag) => tag.name === name && tag.name !== editingTagName.value,
-        )
-    ) {
-        ElMessage.warning("标签已存在。");
-        return;
-    }
-
-    if (editingTagName.value) {
-        manager.tags = dedupeTags(
-            manager.tags.map((tag) => {
-                if (tag.name !== editingTagName.value) {
-                    return tag;
-                }
-
-                return {
-                    name,
-                    color: tagColor.value,
-                };
-            }),
-        );
-
-        manager.managerModList = manager.managerModList.map((mod) => ({
-            ...mod,
-            tags: dedupeTags(
-                (mod.tags ?? []).map((tag) => {
-                    if (tag.name !== editingTagName.value) {
-                        return tag;
-                    }
-
-                    return {
-                        name,
-                        color: tagColor.value,
-                    };
-                }),
-            ),
-        }));
-
-        if (manager.selectedTag === editingTagName.value) {
-            manager.selectedTag = name;
-        }
-
-        await saveManagerData();
-        ElMessage.success("标签已更新。");
-    } else {
-        manager.tags = dedupeTags([
-            ...manager.tags,
-            {
-                name,
-                color: tagColor.value,
-            },
-        ]);
-        await saveManagerData();
-        ElMessage.success("标签已添加。");
-    }
-
-    resetTagEditor();
-    showTagEditDialog.value = false;
-}
-
-async function deleteTag(tag: ITag) {
-    const confirmed = window.confirm(
-        `确定删除标签 ${tag.name} 吗？这会同时把它从所有 Mod 上移除。`,
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    manager.tags = manager.tags.filter((item) => item.name !== tag.name);
-    manager.managerModList = manager.managerModList.map((mod) => ({
-        ...mod,
-        tags: (mod.tags ?? []).filter((item) => item.name !== tag.name),
-    }));
-
-    if (manager.selectedTag === tag.name) {
-        manager.selectedTag = "全部";
-    }
-
-    if (editingTagName.value === tag.name) {
-        resetTagEditor();
-        showTagEditDialog.value = false;
-    }
-
-    await saveManagerData();
-    ElMessage.success("标签已删除。");
 }
 </script>
 <template>
@@ -837,7 +706,7 @@ async function deleteTag(tag: ITag) {
                     </CardTitle>
                 </CardHeader>
                 <CardContent class="flex flex-col gap-4">
-                    <div class="flex flex-col">
+                    <div class="flex flex-wrap items-center gap-4">
                         <div class="flex flex-wrap items-center gap-2">
                             <SelectGame />
                             <DropdownMenu>
@@ -883,42 +752,15 @@ async function deleteTag(tag: ITag) {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
-                    </div>
-                    <div
-                        class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
-                        <div class="relative">
-                            <Search
-                                class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                v-model="search"
-                                class="pl-9"
+                        <InputGroup>
+                            <InputGroupInput
+                                v-model="manager.search"
                                 placeholder="搜索名称、作者、版本、标签或类型" />
-                        </div>
-                        <Select v-model="manager.sortKey">
-                            <SelectTrigger class="min-w-38">
-                                <SelectValue placeholder="排序方式" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="weight">默认排序</SelectItem>
-                                <SelectItem value="name">按名称</SelectItem>
-                                <SelectItem value="type">按类型</SelectItem>
-                                <SelectItem value="author">按作者</SelectItem>
-                                <SelectItem value="version">按版本</SelectItem>
-                                <SelectItem value="state"
-                                    >按安装状态</SelectItem
-                                >
-                                <SelectItem value="tag">按标签</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <div
-                            class="flex items-center gap-2 rounded-md border px-3 py-2">
-                            <Label for="filter-installed">仅看已安装</Label>
-                            <Switch
-                                id="filter-installed"
-                                v-model="manager.filterInstalled" />
-                        </div>
+                            <InputGroupAddon>
+                                <Search />
+                            </InputGroupAddon>
+                        </InputGroup>
                     </div>
-
                     <div class="flex flex-wrap items-center gap-2 text-sm">
                         <Button
                             :variant="
@@ -943,83 +785,7 @@ async function deleteTag(tag: ITag) {
                             {{ item.name }} ({{ getTypeCount(item.id) }})
                         </Button>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 text-sm">
-                        <ToggleGroup
-                            type="single"
-                            v-model="manager.selectedTag">
-                            <ToggleGroupItem value="全部">
-                                全部标签
-                            </ToggleGroupItem>
-                            <ToggleGroupItem
-                                v-for="tag in manager.tags"
-                                :key="tag.name"
-                                :value="tag.name">
-                                <ContextMenu>
-                                    <ContextMenuTrigger
-                                        class="flex items-center gap-2">
-                                        <div
-                                            class="h-2.5 w-2.5 rounded-full"
-                                            :style="{
-                                                backgroundColor: tag.color,
-                                            }"></div>
-                                        {{ tag.name }}
-                                    </ContextMenuTrigger>
-                                    <ContextMenuContent class="w-2">
-                                        <ContextMenuItem
-                                            @select="openEditTagDialog(tag)">
-                                            <IconEdit class="h-4 w-4" />
-                                            编辑
-                                        </ContextMenuItem>
-                                        <ContextMenuItem
-                                            @select="deleteTag(tag)">
-                                            <IconTrash class="h-4 w-4" />
-                                            删除</ContextMenuItem
-                                        >
-                                    </ContextMenuContent>
-                                </ContextMenu>
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                        <Dialog v-model:open="showTagEditDialog" modal>
-                            <DialogTrigger>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    @click="openCreateTagDialog">
-                                    <IconPlus />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        {{
-                                            editingTagName
-                                                ? "编辑标签"
-                                                : "添加标签"
-                                        }}
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <DialogDescription class="flex flex-col gap-2">
-                                    <InputGroup>
-                                        <InputGroupInput
-                                            v-model="tagName"
-                                            placeholder="标签名称" />
-                                        <InputGroupAddon align="inline-end">
-                                            <input
-                                                type="color"
-                                                v-model="tagColor" />
-                                        </InputGroupAddon>
-                                    </InputGroup>
-                                    <Button
-                                        size="sm"
-                                        class="self-end"
-                                        @click="submitTag">
-                                        <IconPlus class="h-4 w-4" />
-                                        {{ editingTagName ? "保存" : "添加" }}
-                                    </Button>
-                                </DialogDescription>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
+                    <ManagerTags />
                 </CardContent>
             </Card>
             <ManagerList />
@@ -1043,80 +809,6 @@ async function deleteTag(tag: ITag) {
                 </p>
             </div>
         </template>
-
-        <Dialog v-model:open="showBatchEditDialog">
-            <DialogContent class="sm:max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>批量编辑 Mod 信息</DialogTitle>
-                    <DialogDescription>
-                        仅会更新你填写的字段，留空的字段会保持原值不变。
-                    </DialogDescription>
-                </DialogHeader>
-                <div class="grid gap-4 py-2">
-                    <div class="grid gap-2">
-                        <Label for="batch-version">版本</Label>
-                        <Input
-                            id="batch-version"
-                            v-model="batchEditForm.modVersion" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="batch-author">作者</Label>
-                        <Input
-                            id="batch-author"
-                            v-model="batchEditForm.modAuthor" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="batch-website">主页</Label>
-                        <Input
-                            id="batch-website"
-                            v-model="batchEditForm.modWebsite" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="batch-type">类型</Label>
-                        <Select id="batch-type" v-model="batchEditForm.modType">
-                            <SelectTrigger>
-                                <SelectValue placeholder="不修改类型" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="">不修改</SelectItem>
-                                <SelectItem
-                                    v-for="item in manager.availableTypes"
-                                    :key="item.id"
-                                    :value="item.id">
-                                    {{ item.name }}
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="batch-tags">标签</Label>
-                        <Textarea
-                            id="batch-tags"
-                            v-model="batchEditForm.tagsText"
-                            rows="3"
-                            placeholder="使用英文逗号分隔多个标签，例如：画质, 角色, 平衡性" />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button
-                        variant="outline"
-                        @click="showBatchEditDialog = false">
-                        取消
-                    </Button>
-                    <Button @click="applyBatchEdit">保存修改</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
     </div>
 </template>
-<style scoped>
-.grid-enter-active,
-.grid-leave-active {
-    transition: opacity 0.2s ease;
-}
-
-.grid-enter-from,
-.grid-leave-to {
-    opacity: 0;
-}
-</style>
+<style scoped></style>

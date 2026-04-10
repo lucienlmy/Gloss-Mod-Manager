@@ -1,81 +1,130 @@
 <script setup lang="ts">
+import { join } from "@tauri-apps/api/path";
+
 const manager = useManager();
+
+async function open(item: IModInfo) {
+    const storagePath = await PersistentStore.get("storagePath", "");
+    const path = await join(
+        storagePath || "",
+        "mods",
+        manager.managerGame?.gameName || "",
+        item.id.toString(),
+    );
+    FileHandler.openFolder(path);
+}
 </script>
 <template>
-    <div class="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-        <Card
-            v-for="mod in manager.filteredMods"
-            :key="mod.id"
-            class="transition-colors border-border">
-            <CardHeader class="gap-4">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="space-y-2">
-                        <CardTitle class="text-lg leading-tight">
-                            {{ mod.modName }}
-                        </CardTitle>
-                        <CardDescription>
-                            {{ mod.fileName }}
-                        </CardDescription>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="rounded-full px-2.5 py-1 text-xs font-medium"
-                            :class="
-                                mod.isInstalled
-                                    ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
-                                    : 'bg-muted text-muted-foreground'
-                            ">
-                            {{ mod.isInstalled ? "已安装" : "未安装" }}
-                        </span>
-                        <span
-                            class="rounded-full bg-accent px-2.5 py-1 text-xs font-medium">
-                            {{ manager.getTypeName(mod.modType) }}
-                        </span>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent class="space-y-4">
-                <div class="grid gap-3 text-sm sm:grid-cols-2">
-                    <div>
-                        <div class="text-muted-foreground">版本</div>
-                        <div class="mt-1 font-medium">
-                            {{ mod.modVersion }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted-foreground">作者</div>
-                        <div class="mt-1 font-medium">
-                            {{ mod.modAuthor || "未填写" }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted-foreground">文件数</div>
-                        <div class="mt-1 font-medium">
-                            {{ mod.modFiles.length }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-muted-foreground">优先级</div>
-                        <div class="mt-1 font-medium">
-                            {{ mod.weight }}
-                        </div>
-                    </div>
-                </div>
-
-                <div v-if="mod.tags?.length" class="flex flex-wrap gap-2">
-                    <span
-                        v-for="tag in mod.tags"
-                        :key="tag.name"
-                        class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium text-white"
-                        :style="{ backgroundColor: tag.color }">
-                        <span
-                            class="h-1.5 w-1.5 rounded-full bg-white/80"></span>
-                        {{ tag.name }}
-                    </span>
-                </div>
-                <p v-else class="text-sm text-muted-foreground">暂无标签</p>
-            </CardContent>
-        </Card>
-    </div>
+    <Card>
+        <CardContent class="max-h-[calc(100vh-430px)] overflow-auto">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>名称</TableHead>
+                        <TableHead class="w-30">版本</TableHead>
+                        <TableHead class="w-30">类型</TableHead>
+                        <TableHead class="w-30">状态</TableHead>
+                        <TableHead class="w-30">预览</TableHead>
+                        <TableHead class="w-30">操作</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <TableRow
+                        v-for="item in manager.filteredMods"
+                        :key="item.id">
+                        <TableCell>
+                            <div class="flex items-center gap-2">
+                                <IconGripVertical class="w-4 h-4 cursor-move" />
+                                <Badge
+                                    variant="outline"
+                                    v-for="tag in item.tags"
+                                    :key="tag.name">
+                                    <div
+                                        class="h-2.5 w-2.5 rounded-full"
+                                        :style="{
+                                            backgroundColor: tag.color,
+                                        }"></div>
+                                    {{ tag.name }}
+                                </Badge>
+                                {{ item.modName }}
+                            </div>
+                        </TableCell>
+                        <TableCell>{{ item.modVersion }}</TableCell>
+                        <TableCell>
+                            <Select v-model="item.modType">
+                                <SelectTrigger>
+                                    <SelectValue></SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="type in manager.managerGame
+                                            ?.modType"
+                                        :key="type.id"
+                                        :value="type.id"
+                                        >{{ type.name }}</SelectItem
+                                    >
+                                </SelectContent>
+                            </Select>
+                        </TableCell>
+                        <TableCell>
+                            <div class="flex items-center gap-2">
+                                <Switch
+                                    :id="`is-installed-${item.id}`"
+                                    v-model="item.isInstalled" />
+                                <Label :for="`is-installed-${item.id}`">
+                                    {{ item.isInstalled ? "已安装" : "未安装" }}
+                                </Label>
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <HoverCard v-if="item.cover">
+                                <HoverCardTrigger as-child>
+                                    <Button variant="ghost" size="icon">
+                                        <IconEye class="w-4 h-4" />
+                                    </Button>
+                                </HoverCardTrigger>
+                                <HoverCardContent>
+                                    <AsyncImage :src="item.cover" />
+                                </HoverCardContent>
+                            </HoverCard>
+                            <IconEyeOff
+                                v-else
+                                class="w-4 h-4 text-muted-foreground" />
+                        </TableCell>
+                        <TableCell>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <Button variant="ghost" size="icon">
+                                        <IconMenu class="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        >编辑
+                                        <DropdownMenuShortcut
+                                            ><IconSquarePen />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem @click="open(item)">
+                                        打开
+                                        <DropdownMenuShortcut>
+                                            <IconFolderOpen />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        删除
+                                        <DropdownMenuShortcut>
+                                            <IconTrash
+                                                class="text-destructive" />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+        </CardContent>
+    </Card>
 </template>
 <style scoped></style>
