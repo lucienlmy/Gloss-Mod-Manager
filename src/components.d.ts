@@ -142,7 +142,6 @@ declare module 'vue' {
     TableHead: typeof import('./components/ui/table/TableHead.vue')['default']
     TableHeader: typeof import('./components/ui/table/TableHeader.vue')['default']
     TableRow: typeof import('./components/ui/table/TableRow.vue')['default']
-    Tags: typeof import('./components/Manager.vue/Tags.vue')['default']
     Textarea: typeof import('./components/ui/textarea/Textarea.vue')['default']
     Thunderstore: typeof import('./components/Home/Thunderstore.vue')['default']
     Toggle: typeof import('./components/ui/toggle/Toggle.vue')['default']

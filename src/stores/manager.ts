@@ -6,6 +6,10 @@ export const useManager = defineStore("Manager", () => {
     const supportedGames = ref<ISupportedGames[]>([]);
     const managerModList = ref<IModInfo[]>([]);
     const search = ref("");
+    const textCollator = new Intl.Collator("zh-CN", {
+        numeric: true,
+        sensitivity: "base",
+    });
 
     const managerGame = PersistentStore.useValue<ISupportedGames | null>(
         "managerGame",
@@ -21,10 +25,30 @@ export const useManager = defineStore("Manager", () => {
     const tags = ref<ITag[]>([]);
     const managerRoot = ref("");
 
+    function sortModsByWeight(list: IModInfo[]) {
+        return list
+            .map((mod, index) => ({
+                mod,
+                index,
+            }))
+            .sort((left, right) => {
+                const weightDiff =
+                    Number(left.mod.weight ?? 0) -
+                    Number(right.mod.weight ?? 0);
+
+                if (weightDiff !== 0) {
+                    return weightDiff;
+                }
+
+                return left.index - right.index;
+            })
+            .map(({ mod }) => mod);
+    }
+
     const filteredMods = computed<IModInfo[]>(() => {
         const keyword = search.value.trim().toLowerCase();
 
-        return [...managerModList.value]
+        return sortModsByWeight(managerModList.value)
             .filter((mod) => {
                 if (selectedType.value === 0) {
                     return true;
@@ -67,11 +91,6 @@ export const useManager = defineStore("Manager", () => {
 
     const availableTypes = computed(() => managerGame.value?.modType ?? []);
 
-    const textCollator = new Intl.Collator("zh-CN", {
-        numeric: true,
-        sensitivity: "base",
-    });
-
     function getTypeName(typeId: IModInfo["modType"]) {
         const type = availableTypes.value.find(
             (item) => String(item.id) === String(typeId ?? ""),
@@ -85,7 +104,15 @@ export const useManager = defineStore("Manager", () => {
             return;
         }
 
-        await Manager.saveModInfo(managerModList.value, managerRoot.value);
+        const normalizedMods = sortModsByWeight(managerModList.value).map(
+            (mod, index) => ({
+                ...mod,
+                weight: index + 1,
+            }),
+        );
+
+        managerModList.value = normalizedMods;
+        await Manager.saveModInfo(normalizedMods, managerRoot.value);
         await Manager.saveModInfo(tags.value, managerRoot.value, "tags.json");
     }
 

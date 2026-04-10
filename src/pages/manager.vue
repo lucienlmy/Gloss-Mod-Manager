@@ -334,6 +334,7 @@ async function applyBatchEdit() {
             .map((item) => item.trim())
             .filter(Boolean),
     );
+    void parsedTags;
 
     syncTagsFromMods();
     await manager.saveManagerData();
@@ -476,6 +477,10 @@ async function toggleInstall(mod: IModInfo, install: boolean) {
         finishAction(mod.id);
     }
 }
+
+void applyBatchEdit;
+void isActioning;
+void toggleInstall;
 
 async function openModRootFolder() {
     if (!manager.managerRoot) {

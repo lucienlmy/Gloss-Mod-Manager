@@ -14,15 +14,12 @@
             {
                 "title": "Gloss Mod Manager",
                 "width": 1280,
-                "height": 720
+                "height": 720,
+                "dragDropEnabled": false
             }
         ],
         "security": {
-            "csp": null,
-            "assetProtocol": {
-                "enable": true,
-                "scope": ["**"]
-            }
+            "csp": null
         }
     },
     "bundle": {

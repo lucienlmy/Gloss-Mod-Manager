@@ -22,7 +22,7 @@ function openGameFolder(item: ISupportedGames) {
 }
 
 async function openModFolder(item: ISupportedGames) {
-    const storagePath = await PersistentStore.get("storagePath", "");
+    const storagePath = (await PersistentStore.get("storagePath", "")) || "";
     const modFolder = await join(storagePath, "mods", item.gameName);
     FileHandler.openFolder(modFolder);
 }

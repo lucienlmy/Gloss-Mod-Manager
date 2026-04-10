@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { convertFileSrc } from "@tauri-apps/api/core";
 const props = defineProps<{
     src: string;
 }>();
@@ -6,7 +7,7 @@ const props = defineProps<{
 const imageSrc = ref("");
 
 async function getImageSrc() {
-    const base64 = await FileHandler.readFileAsBase64(props.src);
+    const base64 = convertFileSrc(props.src);
     imageSrc.value = base64;
 }
 getImageSrc();

@@ -32,11 +32,12 @@ export class AutoStart {
                 console.error("读取开机自启状态失败");
                 console.error(error);
 
-                AutoStart.enabledState.value =
+                AutoStart.enabledState.value = Boolean(
                     await PersistentStore.get<boolean>(
                         AutoStart.STORAGE_KEY,
                         false,
-                    );
+                    ),
+                );
             } finally {
                 AutoStart.loadingState.value = false;
                 AutoStart.initialized = true;
