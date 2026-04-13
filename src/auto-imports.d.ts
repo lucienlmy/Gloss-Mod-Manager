@@ -6,6 +6,7 @@
 // biome-ignore lint: disable
 export {}
 declare global {
+  const ARCHIVE_EXTENSIONS: typeof import('./lib/local-mod-import').ARCHIVE_EXTENSIONS
   const AppAnalytics: typeof import('./lib/Analytics').AppAnalytics
   const Aria2: typeof import('./lib/aria2').Aria2
   const Aria2Rpc: typeof import('./lib/aria2-rpc').Aria2Rpc
@@ -32,6 +33,7 @@ declare global {
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const buildAria2DownloadArgs: typeof import('./lib/aria2').buildAria2DownloadArgs
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
+  const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
   const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
@@ -66,12 +68,17 @@ declare global {
   const executeSidecar: typeof import('./lib/sidecar').executeSidecar
   const extendRef: typeof import('@vueuse/core').extendRef
   const extractArchiveWithSevenZip: typeof import('./lib/sevenZip').extractArchiveWithSevenZip
+  const findGlossDuplicateLocalMods: typeof import('./lib/gloss-download').findGlossDuplicateLocalMods
+  const findGlossDuplicateTasks: typeof import('./lib/gloss-download').findGlossDuplicateTasks
   const getActivePinia: typeof import('pinia').getActivePinia
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
+  const getGlossModPresence: typeof import('./lib/gloss-download').getGlossModPresence
   const h: typeof import('vue').h
+  const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
+  const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
   const init: typeof import('./lib/global').init
   const initializeAutoStart: typeof import('./lib/auto-start').initializeAutoStart
   const initializeTheme: typeof import('./lib/theme').initializeTheme
@@ -92,6 +99,7 @@ declare global {
   const mapWritableState: typeof import('pinia').mapWritableState
   const markRaw: typeof import('vue').markRaw
   const nextTick: typeof import('vue').nextTick
+  const normalizeCompareText: typeof import('./lib/gloss-download').normalizeCompareText
   const onActivated: typeof import('vue').onActivated
   const onBeforeMount: typeof import('vue').onBeforeMount
   const onBeforeRouteLeave: typeof import('vue-router').onBeforeRouteLeave
@@ -131,11 +139,13 @@ declare global {
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
   const resolveComponent: typeof import('vue').resolveComponent
+  const resolveLocalModImportSourceType: typeof import('./lib/local-mod-import').resolveLocalModImportSourceType
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const runAria2Command: typeof import('./lib/aria2').runAria2Command
   const setActivePinia: typeof import('pinia').setActivePinia
   const setMapStoreSuffix: typeof import('pinia').setMapStoreSuffix
   const setTheme: typeof import('./lib/theme').setTheme
+  const settingsStartPageOptions: typeof import('./stores/settings').settingsStartPageOptions
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
   const shallowRef: typeof import('vue').shallowRef
@@ -144,6 +154,7 @@ declare global {
   const spawnSidecar: typeof import('./lib/sidecar').spawnSidecar
   const startAria2RpcServer: typeof import('./lib/aria2').startAria2RpcServer
   const storeToRefs: typeof import('pinia').storeToRefs
+  const syncManagerRuntimeContext: typeof import('./lib/manager-context').syncManagerRuntimeContext
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
   const templateRef: typeof import('@vueuse/core').templateRef
@@ -292,6 +303,7 @@ declare global {
   const useScroll: typeof import('@vueuse/core').useScroll
   const useScrollLock: typeof import('@vueuse/core').useScrollLock
   const useSessionStorage: typeof import('@vueuse/core').useSessionStorage
+  const useSettings: typeof import('./stores/settings').useSettings
   const useShare: typeof import('@vueuse/core').useShare
   const useSlots: typeof import('vue').useSlots
   const useSorted: typeof import('@vueuse/core').useSorted
@@ -383,6 +395,12 @@ declare global {
   // @ts-ignore
   export type { AutoStart } from './lib/auto-start'
   import('./lib/auto-start')
+  // @ts-ignore
+  export type { IGlossDownloadTaskMeta, GlossDownloadPresence, IGlossDuplicateCriteria, IGlossDuplicateTaskMatch, IGlossDuplicateLocalModMatch } from './lib/gloss-download'
+  import('./lib/gloss-download')
+  // @ts-ignore
+  export type { LocalModImportSourceType, LocalModImportDuplicateStrategy, ILocalModImportSource } from './lib/local-mod-import'
+  import('./lib/local-mod-import')
   // @ts-ignore
   export type { NativeToolsManifest, EmbeddedToolName, EmbeddedSidecarCommand } from './lib/native-tools-manifest'
   import('./lib/native-tools-manifest')

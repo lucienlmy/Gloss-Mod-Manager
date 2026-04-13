@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { fetch as httpFetch } from "@tauri-apps/plugin-http";
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
 
 const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
@@ -80,6 +79,7 @@ interface IPageItem {
 }
 
 const manager = useManager();
+const router = useRouter();
 
 const mods = ref<IGlossExploreMod[]>([]);
 const loading = ref(false);
@@ -468,10 +468,15 @@ function resetFilters() {
 
 async function openModDetail(item: IGlossExploreMod) {
     try {
-        await openUrl(`${GLOSS_MOD_WEB_BASE_URL}/mod/${item.id}`);
+        await router.push({
+            path: "/download",
+            query: {
+                modId: String(item.id),
+            },
+        });
     } catch (error) {
         console.error(error);
-        ElMessage.error("打开 Mod 详情失败。",);
+        ElMessage.error("打开内置 Mod 详情失败。",);
     }
 }
 
@@ -484,10 +489,17 @@ async function openLatestResource(item: IGlossExploreMod) {
     }
 
     try {
-        await openUrl(latestResource.mods_resource_url);
+        await router.push({
+            path: "/download",
+            query: {
+                modId: String(item.id),
+                resourceId: String(latestResource.id ?? "latest"),
+                autoDownload: "1",
+            },
+        });
     } catch (error) {
         console.error(error);
-        ElMessage.error("打开下载资源失败。");
+        ElMessage.error("提交下载任务失败。",);
     }
 }
 
@@ -819,7 +831,7 @@ function goToPage(targetPage: number) {
                             </Button>
                             <Button class="flex-1" size="sm" variant="outline" @click="openLatestResource(item)">
                                 <IconDownload />
-                                打开资源
+                                加入下载
                             </Button>
                         </div>
                     </div>

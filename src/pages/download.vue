@@ -10,8 +10,27 @@ import {
     type IAria2RpcTask,
     type IAria2RuntimeSettings,
 } from "@/lib/aria2-rpc";
+import {
+    importLocalModSources,
+    resolveLocalModImportSourceType,
+    type ILocalModImportSource,
+} from "@/lib/local-mod-import";
+import {
+    buildUniqueGlossFileName,
+    findGlossDuplicateLocalMods,
+    findGlossDuplicateTasks,
+    getGlossModPresence,
+    type IGlossDownloadTaskMeta,
+} from "@/lib/gloss-download";
+import { syncManagerRuntimeContext } from "@/lib/manager-context";
+import { hydrateManagerRuntimeData } from "@/lib/manager-runtime-data";
 
 type QueueFilter = "all" | "active" | "waiting" | "paused" | "stopped";
+type DuplicateDecisionAction =
+    | "cancel"
+    | "continue"
+    | "overwrite"
+    | "keep-both";
 
 interface IGlossApiResponse<T> {
     success: boolean;
@@ -19,17 +38,37 @@ interface IGlossApiResponse<T> {
     data: T | null;
 }
 
-interface IAria2TaskMeta {
-    modId?: number;
-    modTitle?: string;
-    gameName?: string;
-    resourceName?: string;
-    fileName?: string;
-    author?: string;
-    version?: string;
-    cover?: string;
-    content?: string;
-    sourceUrl?: string;
+interface IDuplicateDialogItem {
+    title: string;
+    description: string;
+    badges: string[];
+}
+
+interface IDuplicateDialogOption {
+    value: DuplicateDecisionAction;
+    label: string;
+    description: string;
+    variant?: "default" | "outline" | "destructive";
+}
+
+interface IDuplicateDialogState {
+    open: boolean;
+    title: string;
+    description: string;
+    note: string;
+    items: IDuplicateDialogItem[];
+    options: IDuplicateDialogOption[];
+}
+
+interface IAddResourceTaskResult {
+    handled: boolean;
+    gid: string | null;
+}
+
+interface IResourceDuplicateTask {
+    task: IAria2RpcTask;
+    meta: IGlossDownloadTaskMeta;
+    score: number;
 }
 
 const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
@@ -85,9 +124,15 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
 });
 
 const manager = useManager();
+const settings = useSettings();
 const route = useRoute();
+const router = useRouter();
 
 const storagePath = PersistentStore.useValue<string>("storagePath", "");
+const disableSymlinkInstall = PersistentStore.useValue<boolean>(
+    "disableSymlinkInstall",
+    false,
+);
 const downloadDirectory = PersistentStore.useValue<string>(
     "downloadDirectory",
     "",
@@ -97,7 +142,7 @@ const aria2Settings = PersistentStore.useValue<IAria2RuntimeSettings>(
     "aria2Settings",
     Aria2Rpc.getDefaultSettings(),
 );
-const taskMetaMap = PersistentStore.useValue<Record<string, IAria2TaskMeta>>(
+const taskMetaMap = PersistentStore.useValue<Record<string, IGlossDownloadTaskMeta>>(
     "aria2TaskMetaMap",
     {},
 );
@@ -110,6 +155,7 @@ const activeTasks = ref<IAria2RpcTask[]>([]);
 const waitingTasks = ref<IAria2RpcTask[]>([]);
 const stoppedTasks = ref<IAria2RpcTask[]>([]);
 const taskOperatingIds = ref<string[]>([]);
+const taskImportingIds = ref<string[]>([]);
 
 const modLookupInput = ref("");
 const modLookupLoading = ref(false);
@@ -123,6 +169,14 @@ const defaultDownloadDirectory = ref("");
 const showAddModDialog = ref(false);
 const showTaskDetailDialog = ref(false);
 const showAria2SettingsDialog = ref(false);
+const duplicateDialog = reactive<IDuplicateDialogState>({
+    open: false,
+    title: "",
+    description: "",
+    note: "",
+    items: [],
+    options: [],
+});
 const aria2SettingsDraft = ref<IAria2RuntimeSettings>(
     Aria2Rpc.getDefaultSettings(),
 );
@@ -130,6 +184,9 @@ const downloadProxyDraft = ref("");
 
 let refreshSequence = 0;
 let detailSequence = 0;
+let duplicateDialogResolver: ((action: DuplicateDecisionAction) => void) | null =
+    null;
+let hasCompletedInitialTaskSync = false;
 
 const normalizedAria2Settings = computed(() =>
     Aria2Rpc.normalizeSettings(aria2Settings.value),
@@ -169,6 +226,9 @@ const selectedTask = computed(
 );
 const selectedTaskMeta = computed(
     () => taskMetaMap.value[selectedTaskGid.value] ?? null,
+);
+const canImportToLocalManager = computed(
+    () => Boolean(storagePath.value && manager.managerGame),
 );
 const taskSummaryCards = computed(() => [
     {
@@ -255,31 +315,35 @@ watch(
 );
 
 watch(
-    [storagePath, () => manager.managerGame?.gameName],
+    [storagePath, () => manager.managerGame?.gameName, disableSymlinkInstall],
     () => {
         void refreshDefaultDownloadDirectory();
+        void syncManagerContext();
     },
     { immediate: true },
 );
 
 watch(
-    () => route.query.modId,
-    (value) => {
-        if (typeof value !== "string") {
-            return;
-        }
-
-        const modId = extractModId(value);
-
-        if (!modId || modId === String(selectedMod.value?.id ?? "")) {
-            return;
-        }
-
-        showAddModDialog.value = true;
-        modLookupInput.value = modId;
-        void loadModDetail(modId);
+    () =>
+        [route.query.modId, route.query.resourceId, route.query.autoDownload]
+            .map((item) => (typeof item === "string" ? item : ""))
+            .join("|"),
+    () => {
+        void handleRouteModIntent();
     },
     { immediate: true },
+);
+
+watch(
+    () => duplicateDialog.open,
+    (open) => {
+        if (!open && duplicateDialogResolver) {
+            const resolver = duplicateDialogResolver;
+
+            duplicateDialogResolver = null;
+            resolver("cancel");
+        }
+    },
 );
 
 onMounted(() => {
@@ -325,7 +389,7 @@ function openTaskDetail(task: IAria2RpcTask) {
 
 function openAria2SettingsDialog() {
     aria2SettingsDraft.value = Aria2Rpc.normalizeSettings(aria2Settings.value);
-    downloadProxyDraft.value = downloadProxy.value;
+    downloadProxyDraft.value = downloadProxy.value ?? "";
     showAria2SettingsDialog.value = true;
 }
 
@@ -354,6 +418,14 @@ async function refreshDefaultDownloadDirectory() {
         baseDirectory,
         "downloads",
     );
+}
+
+async function syncManagerContext() {
+    await syncManagerRuntimeContext(manager, {
+        storagePath: storagePath.value,
+        closeSoftLinks: disableSymlinkInstall.value,
+    });
+    await hydrateManagerRuntimeData(manager);
 }
 
 async function ensureDownloadDirectoryReady() {
@@ -390,14 +462,84 @@ async function initializeDownloadPage() {
         rpcState.value = "error";
         rpcErrorMessage.value = getErrorMessage(error);
     }
-    const initialModId =
+}
+
+function shouldAutoDownloadFromRoute() {
+    const flag =
+        typeof route.query.autoDownload === "string"
+            ? route.query.autoDownload.trim().toLowerCase()
+            : "";
+
+    return ["1", "true", "yes"].includes(flag);
+}
+
+function getLatestResource(mod?: IMod | null) {
+    return (
+        mod?.mods_resource.find((resource) => resource.mods_resource_latest_version) ??
+        mod?.mods_resource[0] ??
+        null
+    );
+}
+
+async function clearRouteDownloadIntent(modId: string) {
+    if (
+        typeof route.query.resourceId !== "string" &&
+        typeof route.query.autoDownload !== "string"
+    ) {
+        return;
+    }
+
+    await router.replace({
+        path: route.path,
+        query: modId ? { modId } : {},
+    });
+}
+
+async function handleRouteModIntent() {
+    const modId =
         typeof route.query.modId === "string"
             ? extractModId(route.query.modId)
             : "";
 
-    if (initialModId) {
-        modLookupInput.value = initialModId;
-        void loadModDetail(initialModId);
+    if (!modId) {
+        return;
+    }
+
+    // showAddModDialog.value = true;
+    modLookupInput.value = modId;
+
+    const mod = await loadModDetail(modId);
+
+    if (!mod || !shouldAutoDownloadFromRoute()) {
+        return;
+    }
+
+    const routeResourceId =
+        typeof route.query.resourceId === "string"
+            ? route.query.resourceId.trim()
+            : "";
+
+    if (!routeResourceId) {
+        return;
+    }
+
+    const resource =
+        routeResourceId === "latest"
+            ? getLatestResource(mod)
+            : mod.mods_resource.find(
+                (item) => String(item.id) === routeResourceId,
+            ) ?? null;
+
+    if (!resource) {
+        ElMessage.warning("未找到要下载的资源。",);
+        await clearRouteDownloadIntent(modId);
+        return;
+    }
+
+    const result = await addResourceTask(resource);
+
+    if (result.handled) {
+        await clearRouteDownloadIntent(modId);
     }
 }
 
@@ -422,12 +564,24 @@ async function refreshTaskLists(silent: boolean = false) {
             return;
         }
 
+        const allLatestTasks = [...active, ...waiting, ...stopped];
+        const newlyCompletedTaskGids = syncTaskMetaStatuses(allLatestTasks);
+
         globalStat.value = stat;
         activeTasks.value = active;
         waitingTasks.value = waiting;
         stoppedTasks.value = stopped;
         rpcState.value = "ready";
         rpcErrorMessage.value = "";
+
+        if (!hasCompletedInitialTaskSync) {
+            hasCompletedInitialTaskSync = true;
+            return;
+        }
+
+        if (newlyCompletedTaskGids.length > 0) {
+            void autoImportCompletedTasks(newlyCompletedTaskGids, allLatestTasks);
+        }
     } catch (error: unknown) {
         if (currentSequence !== refreshSequence) {
             return;
@@ -487,25 +641,25 @@ async function restartAria2Service(successMessage?: string) {
 
 async function saveAria2Settings() {
     aria2Settings.value = Aria2Rpc.normalizeSettings(aria2SettingsDraft.value);
-    downloadProxy.value = downloadProxyDraft.value.trim();
+    downloadProxy.value = (downloadProxyDraft.value ?? "").trim();
     showAria2SettingsDialog.value = false;
 
     await restartAria2Service("Aria2 配置已保存。");
 }
 
-async function loadModDetail(explicitModId?: string) {
+async function loadModDetail(explicitModId?: string): Promise<IMod | null> {
     const modId = explicitModId ?? extractModId(modLookupInput.value);
 
     if (!modId) {
         modLookupError.value = "请输入有效的 3DM Mod ID 或详情链接。";
         selectedMod.value = null;
-        return;
+        return null;
     }
 
     if (!GLOSS_MOD_KEY) {
         modLookupError.value = "未读取到 GLOSS_MOD_KEY，请检查 .env 配置。";
         selectedMod.value = null;
-        return;
+        return null;
     }
 
     const currentSequence = ++detailSequence;
@@ -523,7 +677,7 @@ async function loadModDetail(explicitModId?: string) {
         const payload = (await response.json()) as IGlossApiResponse<IMod>;
 
         if (currentSequence !== detailSequence) {
-            return;
+            return null;
         }
 
         if (!response.ok || !payload.success || !payload.data) {
@@ -532,13 +686,15 @@ async function loadModDetail(explicitModId?: string) {
 
         selectedMod.value = payload.data;
         modLookupInput.value = String(payload.data.id);
+        return payload.data;
     } catch (error: unknown) {
         if (currentSequence !== detailSequence) {
-            return;
+            return null;
         }
 
         selectedMod.value = null;
         modLookupError.value = getErrorMessage(error);
+        return null;
     } finally {
         if (currentSequence === detailSequence) {
             modLookupLoading.value = false;
@@ -730,10 +886,244 @@ function buildOutputFileName(resource: IResource) {
     return `${resourceName}${extension}`;
 }
 
-function setTaskMeta(gid: string, metadata: IAria2TaskMeta) {
+function syncTaskMetaStatuses(tasks: IAria2RpcTask[]) {
+    const nextMap = { ...taskMetaMap.value };
+    let changed = false;
+    const newlyCompletedTaskGids: string[] = [];
+
+    for (const task of tasks) {
+        const currentMeta = nextMap[task.gid];
+
+        if (!currentMeta) {
+            continue;
+        }
+
+        const nextMeta: IGlossDownloadTaskMeta = {
+            ...currentMeta,
+            taskStatus: task.status as TaskStatus,
+            updatedAt: new Date().toISOString(),
+        };
+
+        if (task.status === "complete" && currentMeta.taskStatus !== "complete") {
+            newlyCompletedTaskGids.push(task.gid);
+        }
+
+        if (task.status === "complete" && !currentMeta.downloadedAt) {
+            nextMeta.downloadedAt = new Date().toISOString();
+        }
+
+        if (
+            nextMeta.taskStatus !== currentMeta.taskStatus ||
+            nextMeta.downloadedAt !== currentMeta.downloadedAt
+        ) {
+            nextMap[task.gid] = nextMeta;
+            changed = true;
+        }
+    }
+
+    if (changed) {
+        taskMetaMap.value = nextMap;
+    }
+
+    return newlyCompletedTaskGids;
+}
+
+async function autoImportCompletedTasks(
+    completedTaskGids: string[],
+    tasks: IAria2RpcTask[],
+) {
+    if (!settings.autoAddAfterDownload || completedTaskGids.length === 0) {
+        return;
+    }
+
+    if (!storagePath.value || !manager.managerGame) {
+        return;
+    }
+
+    for (const gid of completedTaskGids) {
+        const task = tasks.find((item) => item.gid === gid);
+        const metadata = taskMetaMap.value[gid];
+
+        if (!task || !metadata || metadata.localModId || isTaskImporting(gid)) {
+            continue;
+        }
+
+        await importTaskToLocalManager(task);
+    }
+}
+
+function getDuplicateDialogItemBadges(
+    task: IAria2RpcTask,
+    metadata: IGlossDownloadTaskMeta,
+) {
+    const badges = [getTaskStatusLabel(task.status)];
+
+    if (metadata.resourceName) {
+        badges.push(metadata.resourceName);
+    }
+
+    if (metadata.fileName) {
+        badges.push(metadata.fileName);
+    }
+
+    return badges;
+}
+
+function resolveDuplicateDialog(action: DuplicateDecisionAction) {
+    const resolver = duplicateDialogResolver;
+
+    duplicateDialogResolver = null;
+    duplicateDialog.open = false;
+    duplicateDialog.title = "";
+    duplicateDialog.description = "";
+    duplicateDialog.note = "";
+    duplicateDialog.items = [];
+    duplicateDialog.options = [];
+    resolver?.(action);
+}
+
+function promptDuplicateDecision(options: {
+    title: string;
+    description: string;
+    note?: string;
+    items: IDuplicateDialogItem[];
+    actions: IDuplicateDialogOption[];
+}) {
+    if (duplicateDialogResolver) {
+        resolveDuplicateDialog("cancel");
+    }
+
+    duplicateDialog.title = options.title;
+    duplicateDialog.description = options.description;
+    duplicateDialog.note = options.note ?? "";
+    duplicateDialog.items = options.items;
+    duplicateDialog.options = options.actions;
+    duplicateDialog.open = true;
+
+    return new Promise<DuplicateDecisionAction>((resolve) => {
+        duplicateDialogResolver = resolve;
+    });
+}
+
+function findResourceDuplicateTasks(resource: IResource) {
+    if (!selectedMod.value) {
+        return [] as IResourceDuplicateTask[];
+    }
+
+    return findGlossDuplicateTasks(taskMetaMap.value, {
+        modId: selectedMod.value.id,
+        resourceId: resource.id,
+        downloadUrl: resource.mods_resource_url,
+        fileName: buildOutputFileName(resource),
+        modTitle: selectedMod.value.mods_title,
+    })
+        .map((item) => {
+            const task = allTasks.value.find((current) => current.gid === item.gid);
+
+            if (!task) {
+                return null;
+            }
+
+            return {
+                task,
+                meta: item.meta,
+                score: item.score,
+            };
+        })
+        .filter((item): item is IResourceDuplicateTask => item !== null)
+        .filter((item) => item.task.status !== "removed");
+}
+
+function getResourcePresence(resource: IResource) {
+    if (!selectedMod.value) {
+        return getGlossModPresence(taskMetaMap.value, manager.managerModList, {});
+    }
+
+    return getGlossModPresence(taskMetaMap.value, manager.managerModList, {
+        modId: selectedMod.value.id,
+        resourceId: resource.id,
+        downloadUrl: resource.mods_resource_url,
+        fileName: buildOutputFileName(resource),
+        modTitle: selectedMod.value.mods_title,
+    });
+}
+
+function getResourceActionLabel(resource: IResource) {
+    const presence = getResourcePresence(resource);
+
+    switch (presence.state) {
+        case "active":
+            return "查看下载";
+        case "waiting":
+            return "已在队列";
+        case "paused":
+            return "继续处理";
+        case "error":
+            return "重试或处理";
+        case "complete":
+            return "已下载";
+        case "imported":
+            return "已在本地";
+        default:
+            return "添加到下载队列";
+    }
+}
+
+function getAllDuplicateTaskFileNames(resource: IResource) {
+    const fileNames = findResourceDuplicateTasks(resource)
+        .map((item) => item.meta.fileName || getTaskDisplayName(item.task))
+        .filter(Boolean);
+
+    fileNames.push(buildOutputFileName(resource));
+    return fileNames;
+}
+
+function getTaskRetryUris(task: IAria2RpcTask) {
+    const uriSet = new Set<string>();
+    const metadataDownloadUrl = taskMetaMap.value[task.gid]?.downloadUrl?.trim();
+
+    if (metadataDownloadUrl) {
+        uriSet.add(metadataDownloadUrl);
+    }
+
+    for (const file of task.files) {
+        for (const item of file.uris ?? []) {
+            const normalizedUri = item.uri?.trim();
+
+            if (!normalizedUri) {
+                continue;
+            }
+
+            uriSet.add(normalizedUri);
+        }
+    }
+
+    return [...uriSet];
+}
+
+function getTaskOutputFileName(task: IAria2RpcTask) {
+    const metadata = taskMetaMap.value[task.gid];
+
+    if (metadata?.fileName) {
+        return metadata.fileName;
+    }
+
+    const primaryFile = getTaskPrimaryFile(task);
+
+    if (primaryFile?.path) {
+        return getBaseName(primaryFile.path);
+    }
+
+    return "download.bin";
+}
+
+function setTaskMeta(gid: string, metadata: IGlossDownloadTaskMeta) {
     taskMetaMap.value = {
         ...taskMetaMap.value,
-        [gid]: metadata,
+        [gid]: {
+            ...taskMetaMap.value[gid],
+            ...metadata,
+        },
     };
 }
 
@@ -763,9 +1153,12 @@ function isTaskOperating(gid: string) {
     return taskOperatingIds.value.includes(gid);
 }
 
-async function addResourceTask(resource: IResource) {
+async function createResourceTask(
+    resource: IResource,
+    outputFileName: string,
+) {
     if (!selectedMod.value) {
-        return;
+        return null;
     }
 
     const resourceKey = `${selectedMod.value.id}-${resource.id ?? resource.mods_resource_name}`;
@@ -774,10 +1167,11 @@ async function addResourceTask(resource: IResource) {
     try {
         const outputDirectory = await ensureRpcReady();
         const settings = normalizedAria2Settings.value;
+        const trimmedProxy = (downloadProxy.value ?? "").trim();
 
         const options: Record<string, string> = {
             dir: outputDirectory,
-            out: buildOutputFileName(resource),
+            out: outputFileName,
             continue: "true",
             "allow-overwrite": "true",
             split: String(settings.split),
@@ -790,35 +1184,414 @@ async function addResourceTask(resource: IResource) {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         };
 
-        if (downloadProxy.value.trim()) {
-            options["all-proxy"] = downloadProxy.value.trim();
+        if (trimmedProxy) {
+            options["all-proxy"] = trimmedProxy;
         }
 
         const gid = await Aria2Rpc.addUri([resource.mods_resource_url], options);
 
         setTaskMeta(gid, {
             modId: selectedMod.value.id,
+            resourceId: resource.id,
             modTitle: selectedMod.value.mods_title,
             gameName: selectedMod.value.game_name,
             resourceName: resource.mods_resource_name,
-            fileName: buildOutputFileName(resource),
+            fileName: outputFileName,
             author: selectedMod.value.mods_author,
             version:
                 resource.mods_resource_version || selectedMod.value.mods_version,
             cover: resolveGlossAssetUrl(selectedMod.value.mods_image_url),
             content: selectedMod.value.mods_content,
             sourceUrl: `${GLOSS_MOD_WEB_BASE_URL}/mod/${selectedMod.value.id}`,
+            downloadUrl: resource.mods_resource_url,
+            taskStatus: "waiting",
+            updatedAt: new Date().toISOString(),
         });
 
         ElMessage.success(`已添加 ${resource.mods_resource_name} 到下载队列。`);
         await refreshTaskLists();
         selectedTaskGid.value = gid;
+        showAddModDialog.value = false;
+        return gid;
     } catch (error: unknown) {
         console.error("添加下载任务失败");
         console.error(error);
         ElMessage.error(getErrorMessage(error));
+        return null;
     } finally {
         addingResourceKey.value = "";
+    }
+}
+
+async function continueExistingTask(task: IAria2RpcTask) {
+    showAddModDialog.value = false;
+
+    if (task.status === "paused") {
+        await resumeTask(task);
+        selectedTaskGid.value = task.gid;
+        showTaskDetailDialog.value = true;
+        ElMessage.success(`已继续现有任务：${getTaskDisplayName(task)}`);
+        return task.gid;
+    }
+
+    if (task.status === "error") {
+        const retriedGid = await retryTask(task);
+
+        if (retriedGid) {
+            showTaskDetailDialog.value = true;
+        }
+
+        return retriedGid;
+    }
+
+    selectedTaskGid.value = task.gid;
+    showAddModDialog.value = false;
+    showTaskDetailDialog.value = true;
+    ElMessage.info(`已定位到现有任务：${getTaskDisplayName(task)}`);
+    return task.gid;
+}
+
+async function addResourceTask(
+    resource: IResource,
+): Promise<IAddResourceTaskResult> {
+    if (!selectedMod.value) {
+        return {
+            handled: false,
+            gid: null,
+        };
+    }
+
+    const duplicateTasks = findResourceDuplicateTasks(resource);
+
+    if (duplicateTasks.length > 0) {
+        const decision = await promptDuplicateDecision({
+            title: "发现重复下载任务",
+            description: `${selectedMod.value.mods_title} 已经存在相同下载记录。`,
+            note: "继续会优先沿用当前最接近的任务；覆盖会删除现有记录后重新下载；同时存在会自动改一个新文件名。",
+            items: duplicateTasks.map((item) => ({
+                title: item.meta.modTitle || getTaskDisplayName(item.task),
+                description:
+                    item.task.errorMessage ||
+                    `保存到 ${item.task.dir || resolvedDownloadDirectory.value || "当前下载目录"}`,
+                badges: getDuplicateDialogItemBadges(item.task, item.meta),
+            })),
+            actions: [
+                {
+                    value: "cancel",
+                    label: "取消",
+                    description: "保留现状，不再添加新任务。",
+                    variant: "outline",
+                },
+                {
+                    value: "continue",
+                    label: "继续",
+                    description: "优先复用或恢复现有任务。",
+                },
+                {
+                    value: "overwrite",
+                    label: "覆盖",
+                    description: "移除现有任务，按原文件名重新下载。",
+                    variant: "destructive",
+                },
+                {
+                    value: "keep-both",
+                    label: "同时存在",
+                    description: "自动改名后另存一份。",
+                    variant: "outline",
+                },
+            ],
+        });
+
+        if (decision === "cancel") {
+            ElMessage.info("已取消重复下载。");
+            return {
+                handled: true,
+                gid: null,
+            };
+        }
+
+        if (decision === "continue") {
+            return {
+                handled: true,
+                gid: await continueExistingTask(duplicateTasks[0].task),
+            };
+        }
+
+        if (decision === "overwrite") {
+            for (const item of duplicateTasks) {
+                await removeTask(item.task);
+            }
+
+            const gid = await createResourceTask(
+                resource,
+                buildOutputFileName(resource),
+            );
+
+            return {
+                handled: gid !== null,
+                gid,
+            };
+        }
+
+        const gid = await createResourceTask(
+            resource,
+            buildUniqueGlossFileName(
+                buildOutputFileName(resource),
+                getAllDuplicateTaskFileNames(resource),
+            ),
+        );
+
+        return {
+            handled: gid !== null,
+            gid,
+        };
+    }
+
+    const gid = await createResourceTask(resource, buildOutputFileName(resource));
+
+    return {
+        handled: gid !== null,
+        gid,
+    };
+}
+
+async function retryTask(task: IAria2RpcTask) {
+    startTaskOperation(task.gid);
+
+    try {
+        const uris = getTaskRetryUris(task);
+
+        if (!uris.length) {
+            throw new Error("当前任务没有可重试的下载地址。");
+        }
+
+        const outputDirectory = task.dir || (await ensureRpcReady());
+        const settings = normalizedAria2Settings.value;
+        const trimmedProxy = (downloadProxy.value ?? "").trim();
+        const metadata = taskMetaMap.value[task.gid] ?? null;
+        const options: Record<string, string> = {
+            dir: outputDirectory,
+            out: getTaskOutputFileName(task),
+            continue: "true",
+            "allow-overwrite": "true",
+            split: String(settings.split),
+            "max-connection-per-server": String(
+                settings.maxConnectionPerServer,
+            ),
+            "min-split-size": settings.minSplitSize,
+            referer:
+                metadata?.sourceUrl ||
+                (metadata?.modId
+                    ? `${GLOSS_MOD_WEB_BASE_URL}/mod/${metadata.modId}`
+                    : `${GLOSS_MOD_WEB_BASE_URL}`),
+            "user-agent":
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        };
+
+        if (trimmedProxy) {
+            options["all-proxy"] = trimmedProxy;
+        }
+
+        const gid = await Aria2Rpc.addUri(uris, options);
+
+        setTaskMeta(gid, {
+            ...(metadata ?? {}),
+            fileName: getTaskOutputFileName(task),
+            downloadUrl: metadata?.downloadUrl || uris[0],
+        });
+
+        await refreshTaskLists();
+        selectedTaskGid.value = gid;
+        ElMessage.success(`已重新加入下载队列：${getTaskDisplayName(task)}`);
+        return gid;
+    } catch (error: unknown) {
+        ElMessage.error(getErrorMessage(error));
+        return null;
+    } finally {
+        finishTaskOperation(task.gid);
+    }
+}
+
+function startTaskImport(gid: string) {
+    if (taskImportingIds.value.includes(gid)) {
+        return;
+    }
+
+    taskImportingIds.value = [...taskImportingIds.value, gid];
+}
+
+function finishTaskImport(gid: string) {
+    taskImportingIds.value = taskImportingIds.value.filter((item) => item !== gid);
+}
+
+function isTaskImporting(gid: string) {
+    return taskImportingIds.value.includes(gid);
+}
+
+async function importTaskToLocalManager(task?: IAria2RpcTask | null) {
+    const targetTask = task ?? selectedTask.value;
+
+    if (!targetTask) {
+        return;
+    }
+
+    if (targetTask.status !== "complete") {
+        ElMessage.warning("请先等待任务下载完成。",);
+        return;
+    }
+
+    startTaskImport(targetTask.gid);
+
+    try {
+        await syncManagerContext();
+
+        if (!manager.managerGame || !manager.managerRoot) {
+            throw new Error("请先选择游戏并配置储存路径。",);
+        }
+
+        const primaryFile = getTaskPrimaryFile(targetTask);
+
+        if (!primaryFile?.path) {
+            throw new Error("当前任务没有可导入的文件。",);
+        }
+
+        if (!(await FileHandler.fileExists(primaryFile.path))) {
+            throw new Error("下载文件不存在，请先检查输出目录。",);
+        }
+
+        const metadata = taskMetaMap.value[targetTask.gid] ?? null;
+        const importMetadata = {
+            modName:
+                metadata?.modTitle ||
+                metadata?.resourceName ||
+                getTaskDisplayName(targetTask),
+            fileName: metadata?.fileName || getBaseName(primaryFile.path),
+            modVersion: metadata?.version || "1.0.0",
+            modAuthor: metadata?.author || "",
+            modWebsite: metadata?.sourceUrl || "",
+            modDesc: metadata?.content || "",
+            cover: metadata?.cover,
+            from: (metadata?.modId ? "GlossMod" : "Customize") as sourceType,
+            webId: metadata?.modId,
+            gameID: manager.managerGame.GlossGameId,
+            other: {
+                downloadTaskGid: targetTask.gid,
+                sourceUrl: metadata?.sourceUrl || "",
+            },
+        };
+        const importSource: ILocalModImportSource = {
+            path: primaryFile.path,
+            sourceType: resolveLocalModImportSourceType(primaryFile.path),
+            metadata: importMetadata,
+        };
+        const duplicateLocalMods = findGlossDuplicateLocalMods(
+            manager.managerModList,
+            {
+                modId: metadata?.modId,
+                fileName: importMetadata.fileName,
+                modTitle: importMetadata.modName,
+            },
+        ).sort((left, right) => {
+            if (
+                metadata?.localModId &&
+                Number(left.mod.id) === Number(metadata.localModId)
+            ) {
+                return -1;
+            }
+
+            if (
+                metadata?.localModId &&
+                Number(right.mod.id) === Number(metadata.localModId)
+            ) {
+                return 1;
+            }
+
+            return right.score - left.score;
+        });
+
+        if (duplicateLocalMods.length > 0) {
+            const targetLocalMod = duplicateLocalMods[0].mod;
+            const decision = await promptDuplicateDecision({
+                title: "发现重复的本地 Mod",
+                description: `${importMetadata.modName} 已经存在于本地管理器中。`,
+                note: `继续会保留当前本地条目 #${targetLocalMod.id}；覆盖会替换该条目的文件；同时存在会新建一个本地条目。`,
+                items: duplicateLocalMods.map((item) => ({
+                    title: `${item.mod.modName} #${item.mod.id}`,
+                    description:
+                        item.mod.modDesc ||
+                        item.mod.fileName ||
+                        "已有本地 Mod 记录",
+                    badges: [
+                        item.reason,
+                        item.mod.modVersion || "未知版本",
+                        item.mod.fileName,
+                    ].filter(Boolean),
+                })),
+                actions: [
+                    {
+                        value: "cancel",
+                        label: "取消",
+                        description: "保持当前本地管理器不变。",
+                        variant: "outline",
+                    },
+                    {
+                        value: "continue",
+                        label: "继续",
+                        description: "沿用当前最接近的本地条目。",
+                    },
+                    {
+                        value: "overwrite",
+                        label: "覆盖",
+                        description: "用新下载的内容替换现有本地条目。",
+                        variant: "destructive",
+                    },
+                    {
+                        value: "keep-both",
+                        label: "同时存在",
+                        description: "保留旧条目，同时新增一个本地条目。",
+                        variant: "outline",
+                    },
+                ],
+            });
+
+            if (decision === "cancel") {
+                ElMessage.info("已取消重复导入。");
+                return;
+            }
+
+            if (decision === "continue") {
+                setTaskMeta(targetTask.gid, {
+                    ...(metadata ?? {}),
+                    localModId: targetLocalMod.id,
+                    importedAt: new Date().toISOString(),
+                });
+                ElMessage.success(`已保留现有本地 Mod：${targetLocalMod.modName}`);
+                return;
+            }
+
+            if (decision === "overwrite") {
+                importSource.duplicateStrategy = "overwrite";
+                importSource.targetMod = targetLocalMod;
+            }
+        }
+
+        const result = await importLocalModSources(manager, [importSource]);
+        const importedMod = result.importedMods[0];
+
+        if (!importedMod) {
+            throw new Error("没有导入任何 Mod，请检查下载文件内容。",);
+        }
+
+        setTaskMeta(targetTask.gid, {
+            ...(metadata ?? {}),
+            localModId: importedMod.id,
+            importedAt: new Date().toISOString(),
+        });
+        ElMessage.success(`已导入到本地管理器：${importedMod.modName}`);
+    } catch (error: unknown) {
+        ElMessage.error(getErrorMessage(error));
+    } finally {
+        finishTaskImport(targetTask.gid);
     }
 }
 
@@ -896,7 +1669,7 @@ async function purgeStoppedTasks() {
             ...activeTasks.value.map((task) => task.gid),
             ...waitingTasks.value.map((task) => task.gid),
         ]);
-        const nextMap: Record<string, IAria2TaskMeta> = {};
+        const nextMap: Record<string, IGlossDownloadTaskMeta> = {};
 
         for (const gid of Object.keys(taskMetaMap.value)) {
             if (activeGids.has(gid)) {
@@ -1063,20 +1836,23 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                         class="cursor-pointer rounded-xl border px-4 py-4 transition-colors hover:border-primary/40"
                         :class="selectedTaskGid === task.gid ? 'border-primary/50 bg-primary/5' : ''"
                         @click="openTaskDetail(task)">
-                        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div class="flex  gap-3 flex-row items-center justify-between">
                             <div class="min-w-0 flex-1 space-y-2">
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <div class="truncate text-sm font-medium">
-                                        {{ getTaskDisplayName(task) }}
+                                    <div v-if="taskMetaMap[task.gid]?.modTitle" class="truncate text-sm font-medium">
+                                        {{ taskMetaMap[task.gid]?.modTitle }}
                                     </div>
                                     <Badge class="rounded-full" :class="getTaskStatusClass(task.status)"
                                         variant="outline">
                                         {{ getTaskStatusLabel(task.status) }}
                                     </Badge>
-                                    <Badge v-if="taskMetaMap[task.gid]?.modTitle" class="rounded-full"
-                                        variant="outline">
-                                        {{ taskMetaMap[task.gid]?.modTitle }}
+                                    <Badge class="rounded-full" variant="outline">
+                                        {{ getTaskDisplayName(task) }}
                                     </Badge>
+                                    <!-- <Badge v-if="taskMetaMap[task.gid]?.localModId" class="rounded-full"
+                                        variant="secondary">
+                                        已导入本地
+                                    </Badge> -->
                                 </div>
 
                                 <div class="h-2 overflow-hidden rounded-full bg-muted">
@@ -1094,6 +1870,18 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                             </div>
 
                             <div class="flex flex-wrap gap-2" @click.stop>
+                                <Button v-if="task.status === 'complete'" size="sm" variant="outline"
+                                    :disabled="!canImportToLocalManager || isTaskImporting(task.gid)"
+                                    @click="importTaskToLocalManager(task)">
+                                    <IconFileUp />
+                                    {{ isTaskImporting(task.gid) ? "导入中" : taskMetaMap[task.gid]?.localModId ?
+                                        "重新导入" : "一键导入" }}
+                                </Button>
+                                <Button v-if="task.status === 'error'" size="sm" variant="outline"
+                                    :disabled="isTaskOperating(task.gid)" @click="retryTask(task)">
+                                    <IconRefreshCw />
+                                    重试
+                                </Button>
                                 <Button v-if="task.status === 'active' || task.status === 'waiting'" size="sm"
                                     variant="outline" :disabled="isTaskOperating(task.gid)" @click="pauseTask(task)">
                                     <IconPause />
@@ -1257,6 +2045,16 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                                 <span v-if="resource.mods_resource_formart">格式：{{
                                                     resource.mods_resource_formart }}</span>
                                             </div>
+                                            <div v-if="getResourcePresence(resource).state !== 'none'"
+                                                class="flex flex-wrap gap-2 text-xs">
+                                                <Badge class="rounded-full" variant="outline">
+                                                    {{ getResourcePresence(resource).label }}
+                                                </Badge>
+                                                <Badge v-if="getResourcePresence(resource).localCount > 0"
+                                                    class="rounded-full" variant="secondary">
+                                                    已在本地管理器
+                                                </Badge>
+                                            </div>
                                             <p v-if="resource.mods_resource_desc" class="text-sm text-muted-foreground">
                                                 {{ resource.mods_resource_desc }}
                                             </p>
@@ -1267,7 +2065,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                             @click="addResourceTask(resource)">
                                             <IconPlus />
                                             {{ addingResourceKey === `${selectedMod.id}-${resource.id ??
-                                                resource.mods_resource_name}` ? "添加中" : "添加到下载队列" }}
+                                                resource.mods_resource_name}` ? "添加中" : getResourceActionLabel(resource) }}
                                         </Button>
                                     </div>
                                 </div>
@@ -1349,6 +2147,58 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
             </DialogContent>
         </Dialog>
 
+        <Dialog v-model:open="duplicateDialog.open" modal>
+            <DialogContent class="sm:max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>{{ duplicateDialog.title }}</DialogTitle>
+                    <DialogDescription>
+                        {{ duplicateDialog.description }}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="space-y-4">
+                    <div v-if="duplicateDialog.note"
+                        class="rounded-xl border border-border/70 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+                        {{ duplicateDialog.note }}
+                    </div>
+
+                    <div class="max-h-[40vh] space-y-3 overflow-y-auto pr-1">
+                        <div v-for="(item, index) in duplicateDialog.items" :key="`${duplicateDialog.title}-${index}`"
+                            class="rounded-xl border px-4 py-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="text-sm font-medium">
+                                    {{ item.title }}
+                                </div>
+                                <Badge v-for="badge in item.badges" :key="`${item.title}-${badge}`" class="rounded-full"
+                                    variant="outline">
+                                    {{ badge }}
+                                </Badge>
+                            </div>
+                            <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                                {{ item.description }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2 sm:grid-cols-2">
+                        <Button v-for="option in duplicateDialog.options" :key="option.value"
+                            :variant="option.variant ?? 'default'"
+                            class="h-auto items-start justify-start px-4 py-3 text-left"
+                            @click="resolveDuplicateDialog(option.value)">
+                            <div>
+                                <div class="text-sm font-medium">
+                                    {{ option.label }}
+                                </div>
+                                <div class="mt-1 text-xs text-muted-foreground">
+                                    {{ option.description }}
+                                </div>
+                            </div>
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+
         <Dialog v-model:open="showTaskDetailDialog" modal>
             <DialogScrollContent class="sm:max-w-5xl">
                 <DialogHeader>
@@ -1416,10 +2266,22 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                     <IconFolderOpen />
                                     打开目录
                                 </Button>
+                                <Button v-if="selectedTask.status === 'error'" size="sm" variant="outline"
+                                    :disabled="isTaskOperating(selectedTask.gid)" @click="retryTask(selectedTask)">
+                                    <IconRefreshCw />
+                                    重试下载
+                                </Button>
                                 <Button size="sm" variant="outline" :disabled="selectedTask.status !== 'complete'"
                                     @click="openTaskFile(selectedTask)">
                                     <IconFileUp />
                                     打开文件
+                                </Button>
+                                <Button size="sm" variant="outline"
+                                    :disabled="selectedTask.status !== 'complete' || !canImportToLocalManager || isTaskImporting(selectedTask.gid)"
+                                    @click="importTaskToLocalManager(selectedTask)">
+                                    <IconFileUp />
+                                    {{ isTaskImporting(selectedTask.gid) ? "导入中" : selectedTaskMeta?.localModId ?
+                                        "重新导入本地" : "导入到本地管理器" }}
                                 </Button>
                                 <Button v-if="selectedTaskMeta?.modId" size="sm" variant="outline"
                                     @click="loadRelatedModDetail(selectedTask)">
@@ -1451,6 +2313,8 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                             <div class="mt-1 text-xs text-muted-foreground leading-6">
                                 {{ selectedTaskMeta.gameName || "未记录游戏" }}
                                 <span v-if="selectedTaskMeta.version">· 版本 {{ selectedTaskMeta.version }}</span>
+                                <span v-if="selectedTaskMeta.localModId">· 已导入本地 #{{ selectedTaskMeta.localModId
+                                }}</span>
                             </div>
                             <p v-if="selectedTaskMeta.content" class="mt-3 line-clamp-6 text-sm text-muted-foreground">
                                 {{ selectedTaskMeta.content }}

@@ -131,6 +131,6 @@ async function setupDefaultRoute() {
 
     await router.replace(targetRoute.path);
 }
-void setupDefaultRoute();
 
+setupDefaultRoute();
 //#endregion

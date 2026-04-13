@@ -70,6 +70,9 @@ export const supportedGames = async () =>
             },
         ],
         async checkModType(mod) {
+            console.log(mod);
+            
+
             let mods = false;
 
             for (const item of mod.modFiles) {

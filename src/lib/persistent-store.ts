@@ -16,7 +16,7 @@ export class PersistentStore {
     ): Promise<T | undefined> {
         const value = await PersistentStore.store.get<T>(key);
 
-        if (value === undefined && fallback) {
+        if (value === undefined && fallback !== undefined) {
             return PersistentStore.cloneValue(fallback);
         }
 

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { basename, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { ElMessage } from "element-plus-message";
+import {
+    ARCHIVE_EXTENSIONS,
+    importLocalModSources,
+} from "@/lib/local-mod-import";
+import { syncManagerRuntimeContext } from "@/lib/manager-context";
 import {
     FolderOpen,
     FolderPlus,
@@ -18,8 +22,6 @@ interface IBatchEditForm {
     modWebsite: string;
     tagsText: string;
 }
-
-const ARCHIVE_EXTENSIONS = ["zip", "7z", "rar", "tar", "gz", "xz", "bz2"];
 
 const manager = useManager();
 const router = useRouter();
@@ -81,10 +83,6 @@ function getFileExtension(filePath: string) {
     return fileName.slice(index).toLowerCase();
 }
 
-function stripArchiveExtension(fileName: string) {
-    return fileName.replace(/\.(zip|7z|rar|tar|gz|xz|bz2)$/iu, "");
-}
-
 function createTagColor(tagName: string) {
     let hash = 0;
 
@@ -139,24 +137,8 @@ function collectModTags(modList: IModInfo[]) {
 }
 
 async function syncManagerContext() {
-    if (!manager.managerGame || !storagePath.value) {
-        manager.managerRoot = "";
-        Manager.configureContext({
-            modStorage: "",
-            gameStorage: manager.managerGame?.gamePath ?? "",
-            closeSoftLinks: disableSymlinkInstall.value,
-        });
-        return;
-    }
-
-    manager.managerRoot = await join(
-        storagePath.value,
-        "mods",
-        manager.managerGame?.gameName ?? "",
-    );
-    Manager.configureContext({
-        modStorage: manager.managerRoot,
-        gameStorage: manager.managerGame?.gamePath ?? "",
+    await syncManagerRuntimeContext(manager, {
+        storagePath: storagePath.value,
         closeSoftLinks: disableSymlinkInstall.value,
     });
 }
@@ -185,9 +167,7 @@ async function detectModType(mod: IModInfo) {
                     }
 
                     if (rule.UseFunction === "basename") {
-                        return (
-                            getBaseName(normalizedFile) === normalizedKeyword
-                        );
+                        return getBaseName(normalizedFile) === normalizedKeyword;
                     }
 
                     return [
@@ -334,7 +314,21 @@ async function applyBatchEdit() {
             .map((item) => item.trim())
             .filter(Boolean),
     );
-    void parsedTags;
+
+    manager.managerModList = manager.managerModList.map((mod) => {
+        if (!selectedIds.value.includes(mod.id)) {
+            return mod;
+        }
+
+        return normalizeMod({
+            ...mod,
+            modAuthor: batchEditForm.modAuthor || mod.modAuthor,
+            modType: batchEditForm.modType || mod.modType,
+            modVersion: batchEditForm.modVersion || mod.modVersion,
+            modWebsite: batchEditForm.modWebsite || mod.modWebsite,
+            tags: parsedTags.length ? parsedTags : mod.tags,
+        });
+    });
 
     syncTagsFromMods();
     await manager.saveManagerData();
@@ -533,7 +527,7 @@ async function importModArchive() {
         filters: [
             {
                 name: "压缩包",
-                extensions: ARCHIVE_EXTENSIONS,
+                extensions: [...ARCHIVE_EXTENSIONS],
             },
         ],
     });
@@ -555,80 +549,19 @@ async function importSources(
     }
 
     importLoading.value = true;
-    let nextId =
-        manager.managerModList.reduce(
-            (currentMax, mod) => Math.max(currentMax, Number(mod.id) || 0),
-            0,
-        ) + 1;
-    let importedCount = 0;
 
     try {
-        for (const source of sources) {
-            const modId = nextId;
-            nextId += 1;
+        const result = await importLocalModSources(
+            manager,
+            sources.map((source) => ({
+                path: source,
+                sourceType,
+            })),
+        );
 
-            const targetFolder = await join(manager.managerRoot, String(modId));
-            await FileHandler.createDirectory(targetFolder);
-
-            const imported =
-                sourceType === "folder"
-                    ? await FileHandler.copyFolder(source, targetFolder)
-                    : await SevenZip.extractArchive({
-                          archivePath: source,
-                          outputDirectory: targetFolder,
-                      }).then(() => true);
-
-            if (!imported) {
-                await Manager.deleteMod(targetFolder);
-                continue;
-            }
-
-            const absoluteFiles = await FileHandler.getAllFilesInFolder(
-                targetFolder,
-                true,
-                true,
-            );
-
-            if (absoluteFiles.length === 0) {
-                await Manager.deleteMod(targetFolder);
-                continue;
-            }
-
-            const modFiles = await Promise.all(
-                absoluteFiles.map(
-                    async (filePath) =>
-                        await FileHandler.relativePath(targetFolder, filePath),
-                ),
-            );
-
-            const originalName = await basename(source);
-            const modName =
-                sourceType === "archive"
-                    ? stripArchiveExtension(originalName)
-                    : originalName;
-
-            const mod = normalizeMod({
-                id: modId,
-                modName,
-                fileName: originalName,
-                modFiles,
-                modVersion: "1.0.0",
-                modAuthor: "",
-                modWebsite: "",
-                isInstalled: false,
-                weight: manager.managerModList.length + importedCount + 1,
-                from: "Customize",
-            });
-            mod.modType = await detectModType(mod);
-            manager.managerModList = [...manager.managerModList, mod];
-            importedCount += 1;
-        }
-
-        syncTagsFromMods();
-        await manager.saveManagerData();
         ElMessage.success(
-            importedCount > 0
-                ? `成功导入 ${importedCount} 个 Mod。`
+            result.importedCount > 0
+                ? `成功导入 ${result.importedCount} 个 Mod。`
                 : "没有导入任何 Mod，请检查源文件内容。",
         );
     } catch (error: unknown) {
@@ -697,8 +630,7 @@ function openGamesPage() {
         <template v-else>
             <Card>
                 <CardHeader>
-                    <CardTitle
-                        class="flex flex-wrap justify-between items-center gap-3">
+                    <CardTitle class="flex flex-wrap justify-between items-center gap-3">
                         <h3 class="text-2xl">Mod 管理</h3>
                         <div>
                             当前游戏『
@@ -744,8 +676,7 @@ function openGamesPage() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" class="w-56">
-                                    <DropdownMenuItem
-                                        @click="openModRootFolder">
+                                    <DropdownMenuItem @click="openModRootFolder">
                                         <FolderOpen class="h-4 w-4" />
                                         打开 Mod 目录
                                     </DropdownMenuItem>
@@ -758,35 +689,23 @@ function openGamesPage() {
                             </DropdownMenu>
                         </div>
                         <InputGroup>
-                            <InputGroupInput
-                                v-model="manager.search"
-                                placeholder="搜索名称、作者、版本、标签或类型" />
+                            <InputGroupInput v-model="manager.search" placeholder="搜索名称、作者、版本、标签或类型" />
                             <InputGroupAddon>
                                 <Search />
                             </InputGroupAddon>
                         </InputGroup>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 text-sm">
-                        <Button
-                            :variant="
-                                manager.selectedType === 0
-                                    ? 'default'
-                                    : 'outline'
-                            "
-                            size="sm"
-                            @click="manager.selectedType = 0">
+                        <Button :variant="manager.selectedType === 0
+                                ? 'default'
+                                : 'outline'
+                            " size="sm" @click="manager.selectedType = 0">
                             全部 ({{ getTypeCount(0) }})
                         </Button>
-                        <Button
-                            v-for="item in manager.availableTypes"
-                            :key="item.id"
-                            :variant="
-                                manager.selectedType === item.id
-                                    ? 'default'
-                                    : 'outline'
-                            "
-                            size="sm"
-                            @click="manager.selectedType = item.id">
+                        <Button v-for="item in manager.availableTypes" :key="item.id" :variant="manager.selectedType === item.id
+                                ? 'default'
+                                : 'outline'
+                            " size="sm" @click="manager.selectedType = item.id">
                             {{ item.name }} ({{ getTypeCount(item.id) }})
                         </Button>
                     </div>
@@ -796,16 +715,12 @@ function openGamesPage() {
             <ManagerList />
 
             <Card v-if="loadError">
-                <CardContent
-                    class="flex items-center justify-between gap-4 py-6">
+                <CardContent class="flex items-center justify-between gap-4 py-6">
                     <p class="text-sm text-destructive">{{ loadError }}</p>
-                    <Button variant="outline" @click="loadManagerData"
-                        >重试</Button
-                    >
+                    <Button variant="outline" @click="loadManagerData">重试</Button>
                 </CardContent>
             </Card>
-            <div
-                v-else-if="manager.filteredMods.length === 0"
+            <div v-else-if="manager.filteredMods.length === 0"
                 class="rounded-lg border border-dashed px-6 py-16 text-center text-sm text-muted-foreground">
                 <p>当前没有匹配的 Mod。</p>
                 <p class="mt-2">
