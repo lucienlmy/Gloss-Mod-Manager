@@ -3,6 +3,7 @@ import { createPinia } from "pinia";
 import App from "@/App.vue";
 import router from "@/routes";
 import "@/style.css";
+import { Aria2Rpc } from "@/lib/aria2-rpc";
 import { Theme } from "@/lib/theme";
 
 import "element-plus-message/dist/index.css"; // 主要样式
@@ -16,6 +17,8 @@ async function bootstrap() {
     app.use(createPinia());
 
     app.mount("#app");
+
+    void Aria2Rpc.autoStartFromSettings();
 }
 
 void bootstrap();

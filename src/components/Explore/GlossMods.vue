@@ -1,0 +1,872 @@
+<script setup lang="ts">
+import { fetch as httpFetch } from "@tauri-apps/plugin-http";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { ElMessage } from "element-plus-message";
+
+const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
+const GLOSS_MOD_WEB_BASE_URL = "https://mod.3dmgame.com";
+const GLOSS_MOD_KEY = (import.meta.env.GLOSS_MOD_KEY ?? "").trim();
+const DEFAULT_PAGE_SIZE = "12";
+const PAGE_SIZE_OPTIONS = ["12", "20", "36", "48"];
+const EMPTY_POSTER =
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(`
+		<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+			<defs>
+				<linearGradient id="gloss-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+					<stop offset="0%" stop-color="#231815" />
+					<stop offset="50%" stop-color="#8a4b08" />
+					<stop offset="100%" stop-color="#f1c27d" />
+				</linearGradient>
+			</defs>
+			<rect width="640" height="360" rx="24" fill="url(#gloss-gradient)" />
+			<circle cx="120" cy="90" r="72" fill="rgba(255,255,255,0.12)" />
+			<circle cx="540" cy="290" r="96" fill="rgba(255,255,255,0.08)" />
+			<text x="48" y="210" fill="#fff5df" font-size="42" font-family="Arial, sans-serif">Gloss Mod</text>
+			<text x="48" y="254" fill="#ffe0a3" font-size="22" font-family="Arial, sans-serif">暂无可用封面</text>
+		</svg>
+	`);
+const numberFormatter = new Intl.NumberFormat("zh-CN");
+const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+});
+const originalFilterOptions = [
+    { label: "全部来源", value: "all" },
+    { label: "原创", value: "1" },
+    { label: "二创", value: "2" },
+    { label: "翻译", value: "3" },
+    { label: "精华", value: "4" },
+];
+const timeFilterOptions = [
+    { label: "全部时间", value: "all" },
+    { label: "今天", value: "1" },
+    { label: "最近一周", value: "2" },
+    { label: "最近一月", value: "3" },
+    { label: "最近三月", value: "4" },
+];
+const originalLabelMap: Record<string, string> = {
+    "1": "原创",
+    "2": "二创",
+    "3": "翻译",
+    "4": "精华",
+};
+
+interface IGlossModListData {
+    data: IGlossExploreMod[];
+    count: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+interface IGlossModApiResponse<T> {
+    success: boolean;
+    msg: string;
+    data: T | null;
+}
+
+interface IGlossExploreMod extends Omit<IMod, "mods_key" | "mods_showAD"> {
+    mods_key?: string[] | string;
+    mods_showAD?: boolean | number;
+}
+
+interface IPageItem {
+    key: string;
+    label: string;
+    page?: number;
+    ellipsis?: boolean;
+}
+
+const manager = useManager();
+
+const mods = ref<IGlossExploreMod[]>([]);
+const loading = ref(false);
+const errorMessage = ref("");
+const totalCount = ref(0);
+const totalPages = ref(0);
+const page = ref(1);
+const pageSize = ref(DEFAULT_PAGE_SIZE);
+const searchKeyword = ref("");
+const tagKeyword = ref("");
+const selectedOriginal = ref("all");
+const selectedTime = ref("all");
+const selectedType = ref("all");
+const onlySupportGmm = ref(false);
+const onlyLocal = ref(false);
+const followCurrentGame = ref(true);
+
+// 用请求序号兜住并发搜索，避免慢请求把新结果覆盖掉。
+let requestSequence = 0;
+
+const currentGame = computed(() => manager.managerGame);
+const currentGameName = computed(
+    () => currentGame.value?.gameShowName ?? currentGame.value?.gameName ?? "",
+);
+const currentGameId = computed<number | null>(() => {
+    if (!followCurrentGame.value) {
+        return null;
+    }
+
+    return currentGame.value?.GlossGameId ?? null;
+});
+
+// 跟随当前已选游戏时，直接复用本地游戏扩展里提供的类型定义。
+const currentTypeOptions = computed(() => {
+    if (!followCurrentGame.value || !currentGame.value?.modType?.length) {
+        return [] as Array<{ label: string; value: string }>;
+    }
+
+    return currentGame.value.modType.map((item) => ({
+        label: item.name,
+        value: String(item.id),
+    }));
+});
+const parsedTags = computed(() =>
+    tagKeyword.value
+        .split(/[，,\s]+/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+);
+const hasActiveFilters = computed(() => {
+    return Boolean(
+        searchKeyword.value.trim() ||
+        parsedTags.value.length ||
+        selectedOriginal.value !== "all" ||
+        selectedTime.value !== "all" ||
+        selectedType.value !== "all" ||
+        onlySupportGmm.value ||
+        onlyLocal.value ||
+        currentGameId.value,
+    );
+});
+const paginationItems = computed<IPageItem[]>(() => {
+    if (totalPages.value <= 1) {
+        return [];
+    }
+
+    const pages = new Set<number>([
+        1,
+        totalPages.value,
+        page.value - 1,
+        page.value,
+        page.value + 1,
+    ]);
+
+    if (page.value <= 3) {
+        pages.add(2);
+        pages.add(3);
+        pages.add(4);
+    }
+
+    if (page.value >= totalPages.value - 2) {
+        pages.add(totalPages.value - 1);
+        pages.add(totalPages.value - 2);
+        pages.add(totalPages.value - 3);
+    }
+
+    const sortedPages = Array.from(pages)
+        .filter((value) => value >= 1 && value <= totalPages.value)
+        .sort((left, right) => left - right);
+
+    const items: IPageItem[] = [];
+    let previousPage = 0;
+
+    for (const value of sortedPages) {
+        if (value - previousPage > 1) {
+            items.push({
+                key: `ellipsis-${previousPage}-${value}`,
+                label: "...",
+                ellipsis: true,
+            });
+        }
+
+        items.push({
+            key: `page-${value}`,
+            label: String(value),
+            page: value,
+        });
+        previousPage = value;
+    }
+
+    return items;
+});
+const summaryCards = computed(() => [
+    {
+        label: "结果总数",
+        value: formatNumber(totalCount.value),
+    },
+    {
+        label: "当前页",
+        value: String(totalPages.value > 0 ? page.value : 0),
+    },
+    {
+        label: "总页数",
+        value: String(totalPages.value),
+    },
+    {
+        label: "标签条件",
+        value: String(parsedTags.value.length),
+    },
+]);
+
+watch(
+    currentTypeOptions,
+    (list) => {
+        if (selectedType.value === "all") {
+            return;
+        }
+
+        if (!list.some((item) => item.value === selectedType.value)) {
+            selectedType.value = "all";
+        }
+    },
+    { immediate: true },
+);
+
+watchDebounced(
+    () => [
+        searchKeyword.value.trim(),
+        parsedTags.value.join("|"),
+        selectedOriginal.value,
+        selectedTime.value,
+        selectedType.value,
+        onlySupportGmm.value,
+        onlyLocal.value,
+        followCurrentGame.value,
+        currentGameId.value,
+    ],
+    () => {
+        if (page.value !== 1) {
+            page.value = 1;
+            return;
+        }
+
+        void fetchMods();
+    },
+    {
+        debounce: 350,
+        maxWait: 1000,
+        immediate: true,
+    },
+);
+
+watch(page, () => {
+    void fetchMods();
+});
+
+watch(pageSize, () => {
+    if (page.value !== 1) {
+        page.value = 1;
+        return;
+    }
+
+    void fetchMods();
+});
+
+function buildListUrl() {
+    const url = new URL(`${GLOSS_MOD_API_BASE_URL}/mods`);
+
+    url.searchParams.set("page", String(page.value));
+    url.searchParams.set("pageSize", pageSize.value);
+
+    if (searchKeyword.value.trim()) {
+        url.searchParams.set("search", searchKeyword.value.trim());
+    }
+
+    if (selectedOriginal.value !== "all") {
+        url.searchParams.set("original", selectedOriginal.value);
+    }
+
+    if (selectedTime.value !== "all") {
+        url.searchParams.set("time", selectedTime.value);
+    }
+
+    if (selectedType.value !== "all") {
+        url.searchParams.set("gameType", selectedType.value);
+    }
+
+    if (currentGameId.value) {
+        url.searchParams.set("gameId", String(currentGameId.value));
+    }
+
+    for (const tag of parsedTags.value) {
+        url.searchParams.append("key", tag);
+    }
+
+    if (onlySupportGmm.value) {
+        url.searchParams.set("support_gmm", "1");
+    }
+
+    if (onlyLocal.value) {
+        url.searchParams.set("local", "1");
+    }
+
+    return url.toString();
+}
+
+async function fetchMods() {
+    if (!GLOSS_MOD_KEY) {
+        mods.value = [];
+        totalCount.value = 0;
+        totalPages.value = 0;
+        errorMessage.value = "未读取到 GLOSS_MOD_KEY，请检查 .env 配置。";
+        return;
+    }
+
+    const currentRequestSequence = ++requestSequence;
+
+    loading.value = true;
+    errorMessage.value = "";
+
+    try {
+        const response = await httpFetch(buildListUrl(), {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                Authorization: GLOSS_MOD_KEY,
+            },
+        });
+        const payload =
+            (await response.json()) as IGlossModApiResponse<IGlossModListData>;
+
+        if (currentRequestSequence !== requestSequence) {
+            return;
+        }
+
+        if (!response.ok || !payload.success || !payload.data) {
+            const message = payload.msg || "获取 Gloss Mods 失败";
+
+            throw new Error(
+                message.includes("无权访问")
+                    ? "接口鉴权失败，请检查 .env 中的 GLOSS_MOD_KEY。"
+                    : message,
+            );
+        }
+
+        mods.value = payload.data.data ?? [];
+        totalCount.value = payload.data.count ?? 0;
+        totalPages.value = payload.data.totalPages ?? 0;
+
+        if (payload.data.totalPages > 0 && page.value > payload.data.totalPages) {
+            page.value = payload.data.totalPages;
+        }
+    } catch (error: unknown) {
+        if (currentRequestSequence !== requestSequence) {
+            return;
+        }
+
+        mods.value = [];
+        totalCount.value = 0;
+        totalPages.value = 0;
+        errorMessage.value =
+            error instanceof Error ? error.message : "获取 Gloss Mods 失败";
+    } finally {
+        if (currentRequestSequence === requestSequence) {
+            loading.value = false;
+        }
+    }
+}
+
+function formatNumber(value: number) {
+    return numberFormatter.format(value);
+}
+
+function formatDate(value?: string) {
+    if (!value) {
+        return "未知时间";
+    }
+
+    const parsed = new Date(value);
+
+    if (Number.isNaN(parsed.getTime())) {
+        return value;
+    }
+
+    return dateFormatter.format(parsed);
+}
+
+function normalizeText(value?: string) {
+    if (!value) {
+        return "暂无简介";
+    }
+
+    return value
+        .replace(/<[^>]+>/g, " ")
+        .replace(/[\r\n]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function resolveAssetUrl(path?: string) {
+    if (!path) {
+        return "";
+    }
+
+    if (/^https?:\/\//.test(path)) {
+        return path;
+    }
+
+    const normalizedPath = path.startsWith("/")
+        ? path
+        : `/${path.replace(/^\/+/, "")}`;
+
+    return `${GLOSS_MOD_WEB_BASE_URL}${normalizedPath}`;
+}
+
+function getCoverUrl(item: IGlossExploreMod) {
+    return resolveAssetUrl(item.mods_image_url) || EMPTY_POSTER;
+}
+
+function getFallbackCoverUrl(item: IGlossExploreMod) {
+    return resolveAssetUrl(item.game_imgUrl) || EMPTY_POSTER;
+}
+
+function handleCoverError(event: Event) {
+    const imageElement = event.target as HTMLImageElement;
+    const fallbackSrc = imageElement.dataset.fallbackSrc || EMPTY_POSTER;
+
+    if (imageElement.dataset.fallbackApplied === "true") {
+        imageElement.src = EMPTY_POSTER;
+        return;
+    }
+
+    imageElement.dataset.fallbackApplied = "true";
+    imageElement.src = fallbackSrc;
+}
+
+function getOriginalLabel(value: number) {
+    return originalLabelMap[String(value)] ?? "其它";
+}
+
+function getLatestResource(item: IGlossExploreMod) {
+    return (
+        item.mods_resource.find((resource) => resource.mods_resource_latest_version) ??
+        item.mods_resource[0]
+    );
+}
+
+function getTags(item: IGlossExploreMod) {
+    if (Array.isArray(item.mods_key)) {
+        return item.mods_key.filter(Boolean);
+    }
+
+    if (typeof item.mods_key === "string") {
+        return item.mods_key
+            .split(/[，,\s]+/)
+            .map((tag) => tag.trim())
+            .filter(Boolean);
+    }
+
+    return [] as string[];
+}
+
+function resetFilters() {
+    searchKeyword.value = "";
+    tagKeyword.value = "";
+    selectedOriginal.value = "all";
+    selectedTime.value = "all";
+    selectedType.value = "all";
+    onlySupportGmm.value = false;
+    onlyLocal.value = false;
+    followCurrentGame.value = true;
+    pageSize.value = DEFAULT_PAGE_SIZE;
+
+    if (page.value !== 1) {
+        page.value = 1;
+    }
+}
+
+async function openModDetail(item: IGlossExploreMod) {
+    try {
+        await openUrl(`${GLOSS_MOD_WEB_BASE_URL}/mod/${item.id}`);
+    } catch (error) {
+        console.error(error);
+        ElMessage.error("打开 Mod 详情失败。",);
+    }
+}
+
+async function openLatestResource(item: IGlossExploreMod) {
+    const latestResource = getLatestResource(item);
+
+    if (!latestResource?.mods_resource_url) {
+        ElMessage.warning("当前 Mod 没有可用资源。");
+        return;
+    }
+
+    try {
+        await openUrl(latestResource.mods_resource_url);
+    } catch (error) {
+        console.error(error);
+        ElMessage.error("打开下载资源失败。");
+    }
+}
+
+function goToPage(targetPage: number) {
+    if (targetPage < 1 || targetPage > totalPages.value || targetPage === page.value) {
+        return;
+    }
+
+    page.value = targetPage;
+}
+</script>
+
+<template>
+    <div class="space-y-5">
+        <section
+            class="overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-amber-100/65 via-background to-background p-4">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Badge class="rounded-full" variant="secondary">
+                            Gloss Mod
+                        </Badge>
+                        <Badge v-if="currentGameName" class="rounded-full" variant="outline">
+                            当前游戏
+                            · {{ currentGameName }}
+                        </Badge>
+                        <Badge v-else class="rounded-full" variant="outline">
+                            未选择本地游戏，当前显示全站结果
+                        </Badge>
+                        <Badge v-if="onlySupportGmm" class="rounded-full" variant="outline">
+                            仅 GMM
+                        </Badge>
+                        <Badge v-if="onlyLocal" class="rounded-full" variant="outline">
+                            仅本地资源
+                        </Badge>
+                    </div>
+                    <div>
+                        <h4 class="text-base font-semibold tracking-tight">
+                            3DM Gloss Mods 搜索与游览
+                        </h4>
+
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        <span>
+                            {{ totalPages > 0 ? `第 ${page} / ${totalPages} 页` : "暂无分页结果" }}
+                        </span>
+                        <span>·</span>
+                        <span>
+                            {{ hasActiveFilters ? "已启用筛选" : "当前未启用额外筛选" }}
+                        </span>
+                        <span v-if="loading">· 正在更新结果</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-105">
+                    <div v-for="item in summaryCards" :key="item.label"
+                        class="rounded-xl border border-border/60 bg-background/80 px-3 py-3 backdrop-blur-sm">
+                        <div class="text-xs text-muted-foreground">
+                            {{ item.label }}
+                        </div>
+                        <div class="mt-1 text-lg font-semibold tracking-tight">
+                            {{ item.value }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-4 rounded-2xl border p-4">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                    <Badge class="rounded-full" variant="outline">
+                        筛选条件
+                    </Badge>
+                    <Badge v-if="currentGameName" class="rounded-full" variant="outline">
+                        当前游戏：{{ currentGameName }}
+                    </Badge>
+                    <span v-else class="text-xs text-muted-foreground">
+                        当前未限定游戏范围
+                    </span>
+                </div>
+                <Button size="sm" variant="outline" @click="resetFilters">
+                    <IconFilterX />
+                    重置筛选
+                </Button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    <div class="xl:col-span-2">
+                        <div class="text-sm font-medium">搜索 Mod</div>
+                        <div class="relative mt-2">
+                            <Input v-model="searchKeyword" class="pr-10" placeholder="按标题搜索，例如：材质、武器、整合包" />
+                            <IconSearch
+                                class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium">标签筛选</div>
+                        <Input v-model="tagKeyword" class="mt-2" placeholder="多个标签可用空格或逗号分隔" />
+                    </div>
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+                    <div>
+                        <div class="text-sm font-medium">来源类型</div>
+                        <Select v-model="selectedOriginal">
+                            <SelectTrigger class="mt-2 w-full">
+                                <SelectValue placeholder="全部来源" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="item in originalFilterOptions" :key="item.value" :value="item.value">
+                                    {{ item.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-medium">发布时间</div>
+                        <Select v-model="selectedTime">
+                            <SelectTrigger class="mt-2 w-full">
+                                <SelectValue placeholder="全部时间" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="item in timeFilterOptions" :key="item.value" :value="item.value">
+                                    {{ item.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-medium">游戏类型</div>
+                        <Select v-model="selectedType" :disabled="!currentTypeOptions.length">
+                            <SelectTrigger class="mt-2 w-full">
+                                <SelectValue :placeholder="currentTypeOptions.length ? '全部类型' : '当前游戏暂无类型'" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">全部类型</SelectItem>
+                                <SelectItem v-for="item in currentTypeOptions" :key="item.value" :value="item.value">
+                                    {{ item.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div>
+                        <div class="text-sm font-medium">每页数量</div>
+                        <Select v-model="pageSize">
+                            <SelectTrigger class="mt-2 w-full">
+                                <SelectValue placeholder="选择每页数量" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem v-for="item in PAGE_SIZE_OPTIONS" :key="item" :value="item">
+                                    每页 {{ item }} 条
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1">
+                        <div class="text-sm font-medium">仅支持 GMM</div>
+                        <Switch v-model="onlySupportGmm" />
+                    </div>
+
+                    <div class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1">
+                        <div class="text-sm font-medium">仅本地资源</div>
+                        <Switch v-model="onlyLocal" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section v-if="errorMessage" class="rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div class="text-sm font-semibold text-destructive">加载失败</div>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        {{ errorMessage }}
+                    </p>
+                </div>
+                <Button variant="outline" @click="fetchMods">
+                    <IconRefreshCcw />
+                    重试
+                </Button>
+            </div>
+        </section>
+
+        <section v-else-if="loading && !mods.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div v-for="item in 6" :key="item" class="overflow-hidden rounded-2xl border bg-background">
+                <div class="aspect-video animate-pulse bg-muted"></div>
+                <div class="space-y-3 p-4">
+                    <div class="h-5 w-2/3 animate-pulse rounded bg-muted"></div>
+                    <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
+                    <div class="h-4 w-5/6 animate-pulse rounded bg-muted"></div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="h-8 animate-pulse rounded bg-muted"></div>
+                        <div class="h-8 animate-pulse rounded bg-muted"></div>
+                        <div class="h-8 animate-pulse rounded bg-muted"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section v-else-if="!mods.length" class="rounded-2xl border border-dashed px-4 py-10 text-center">
+            <div class="mx-auto max-w-md">
+                <div class="text-base font-semibold">没有找到符合条件的 Mod</div>
+                <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                    可以试着清空标签、放宽时间范围，或者关闭“仅支持 GMM / 仅本地资源”开关后再试。
+                </p>
+                <div class="mt-5 flex justify-center">
+                    <Button variant="outline" @click="resetFilters">
+                        <IconFilterX />
+                        清空筛选
+                    </Button>
+                </div>
+            </div>
+        </section>
+
+        <template v-else>
+            <section class="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3">
+                <div>
+                    <div class="text-sm font-medium">
+                        {{ currentGameId ? `${currentGameName} 的 Mod 列表` : "全部 Gloss Mods" }}
+                    </div>
+                    <div class="mt-1 text-xs text-muted-foreground">
+                        共 {{ formatNumber(totalCount) }} 条结果
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 text-xs text-muted-foreground">
+                    <IconLoaderCircle v-if="loading" class="size-4 animate-spin" />
+                    <span>{{ totalPages > 0 ? `第 ${page} / ${totalPages} 页` : "暂无分页" }}</span>
+                </div>
+            </section>
+
+            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <article v-for="item in mods" :key="item.id"
+                    class="group overflow-hidden rounded-2xl border bg-card transition-colors hover:border-primary/40">
+                    <div class="relative aspect-video overflow-hidden bg-muted">
+                        <img :src="getCoverUrl(item)" :data-fallback-src="getFallbackCoverUrl(item)"
+                            :alt="item.mods_title"
+                            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                            @error="handleCoverError" />
+                        <div
+                            class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/65 via-black/20 to-transparent px-4 py-3 text-white">
+                            <div class="flex flex-wrap items-center gap-2 text-xs">
+                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                                    {{ item.game_name }}
+                                </Badge>
+                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                                    {{ item.mods_type_name }}
+                                </Badge>
+                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                                    {{ getOriginalLabel(item.mods_original) }}
+                                </Badge>
+                                <Badge v-if="item.support_gmm"
+                                    class="rounded-full border-white/30 bg-emerald-500/30 text-white">
+                                    支持 GMM
+                                </Badge>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 p-4">
+                        <div class="flex flex-col gap-2">
+                            <div class="line-clamp-2 text-base font-semibold leading-6">
+                                {{ item.mods_title }}
+                            </div>
+                            <div class="flex flex-wrap gap-2" v-if="getTags(item).length">
+                                <Badge v-for="tag in getTags(item).slice(0, 5)" :key="tag" class="rounded-full"
+                                    variant="outline">
+                                    {{ tag }}
+                                </Badge>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                            <span>作者：{{ item.user_nickName || item.mods_author || "未知" }}</span>
+                            <span>·</span>
+                            <span>更新：{{ formatDate(item.mods_updateTime) }}</span>
+                            <span>·</span>
+                            <span>
+                                版本：{{ item.mods_version || getLatestResource(item)?.mods_resource_version || "未知" }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                            <div class="rounded-xl bg-muted/55 px-2 py-2.5">
+                                <div class="text-muted-foreground">下载</div>
+                                <div class="mt-1 text-sm font-semibold">
+                                    {{ formatNumber(item.mods_download_cnt) }}
+                                </div>
+                            </div>
+                            <div class="rounded-xl bg-muted/55 px-2 py-2.5">
+                                <div class="text-muted-foreground">浏览</div>
+                                <div class="mt-1 text-sm font-semibold">
+                                    {{ formatNumber(item.mods_click_cnt) }}
+                                </div>
+                            </div>
+                            <div class="rounded-xl bg-muted/55 px-2 py-2.5">
+                                <div class="text-muted-foreground">收藏</div>
+                                <div class="mt-1 text-sm font-semibold">
+                                    {{ formatNumber(item.mods_mark_cnt) }}
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="rounded-xl border bg-muted/20 px-3 py-3 text-xs text-muted-foreground">
+                            <div class="flex items-center justify-between gap-3">
+                                <span>
+                                    {{ item.mods_resource.length }} 个资源
+                                </span>
+                                <span>
+                                    {{ getLatestResource(item)?.mods_resource_size || "大小未知" }}
+                                </span>
+                            </div>
+                            <div class="mt-2 line-clamp-1">
+                                {{ getLatestResource(item)?.mods_resource_name || "暂无资源名称" }}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <Button class="flex-1" size="sm" @click="openModDetail(item)">
+                                <IconExternalLink />
+                                查看详情
+                            </Button>
+                            <Button class="flex-1" size="sm" variant="outline" @click="openLatestResource(item)">
+                                <IconDownload />
+                                打开资源
+                            </Button>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section
+                class="flex flex-col gap-4 rounded-2xl border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="text-sm text-muted-foreground">
+                    当前显示第 {{ page }} 页，共 {{ totalPages }} 页，累计
+                    {{ formatNumber(totalCount) }} 条结果。
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <Button size="sm" variant="outline" :disabled="page <= 1" @click="goToPage(page - 1)">
+                        <IconChevronLeft />
+                        上一页
+                    </Button>
+
+                    <template v-for="item in paginationItems" :key="item.key">
+                        <span v-if="item.ellipsis" class="px-2 text-sm text-muted-foreground">
+                            {{ item.label }}
+                        </span>
+                        <Button v-else size="sm" :variant="item.page === page ? 'default' : 'outline'"
+                            @click="goToPage(item.page ?? 1)">
+                            {{ item.label }}
+                        </Button>
+                    </template>
+
+                    <Button size="sm" variant="outline" :disabled="page >= totalPages" @click="goToPage(page + 1)">
+                        下一页
+                        <IconChevronRight />
+                    </Button>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

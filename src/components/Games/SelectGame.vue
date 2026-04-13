@@ -27,7 +27,7 @@ async function select(item: ISupportedGames) {
     if (selected) {
         const folder = selectGameByFolder ? selected : await dirname(selected);
         const files = await FileHandler.getAllFilesInFolder(folder);
-
+        
         if (typeof item.gameExe == "string") {
             // 判断 item.gameExe 是否存在于 files 中
             if (files.includes(item.gameExe)) {

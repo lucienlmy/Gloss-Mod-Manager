@@ -1,11 +1,39 @@
 import { Command } from "@tauri-apps/plugin-shell";
 import { parse } from "vdf-parser";
-import { join } from "@tauri-apps/api/path";
+import { homeDir, join } from "@tauri-apps/api/path";
+import { platform } from "@tauri-apps/plugin-os";
 import { FileHandler } from "@/lib/FileHandler";
 
 export class ScanGame {
-    // 获取steam安装目录
-    public static async getSteamInstallPath() {
+    private static async isValidSteamInstallPath(steamPath: string) {
+        const libraryfoldersPath = await join(
+            steamPath,
+            "steamapps",
+            "libraryfolders.vdf",
+        );
+        if (await FileHandler.fileExists(libraryfoldersPath)) {
+            return true;
+        }
+
+        const loginusersPath = await join(steamPath, "config", "loginusers.vdf");
+        return FileHandler.fileExists(loginusersPath);
+    }
+
+    private static async findSteamInstallPathByCandidates(candidates: string[]) {
+        for (const candidatePath of candidates) {
+            if (!candidatePath) {
+                continue;
+            }
+
+            if (await this.isValidSteamInstallPath(candidatePath)) {
+                return candidatePath;
+            }
+        }
+
+        return null;
+    }
+
+    private static async getWindowsSteamInstallPath() {
         try {
             const result = await Command.create("reg", [
                 "query",
@@ -14,11 +42,59 @@ export class ScanGame {
                 "InstallPath",
             ]).execute();
             const matches = result.stdout.match(/InstallPath\s+REG_SZ\s+(.*)/i);
+
             if (matches && matches[1]) {
-                // console.log(matches);
-                return matches[1];
+                return matches[1].trim();
             }
+
             return null;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    private static async getMacSteamInstallPath() {
+        const userHomeDir = await homeDir();
+
+        return this.findSteamInstallPathByCandidates([
+            await join(userHomeDir, "Library", "Application Support", "Steam"),
+        ]);
+    }
+
+    private static async getLinuxSteamInstallPath() {
+        const userHomeDir = await homeDir();
+
+        return this.findSteamInstallPathByCandidates([
+            await join(userHomeDir, ".local", "share", "Steam"),
+            await join(userHomeDir, ".steam", "steam"),
+            await join(userHomeDir, ".steam", "root"),
+            await join(userHomeDir, ".steam", "debian-installation"),
+            await join(
+                userHomeDir,
+                ".var",
+                "app",
+                "com.valvesoftware.Steam",
+                ".local",
+                "share",
+                "Steam",
+            ),
+        ]);
+    }
+
+    // 获取steam安装目录
+    public static async getSteamInstallPath() {
+        try {
+            switch (platform()) {
+                case "windows":
+                    return await this.getWindowsSteamInstallPath();
+                case "macos":
+                    return await this.getMacSteamInstallPath();
+                case "linux":
+                    return await this.getLinuxSteamInstallPath();
+                default:
+                    return null;
+            }
         } catch (error) {
             console.log(error);
             return null;

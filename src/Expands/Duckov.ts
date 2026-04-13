@@ -12,7 +12,15 @@ export const supportedGames = async () =>
         steamAppID: 3167020,
         installdir: await join("Escape from Duckov"),
         gameName: "Escape from Duckov",
-        gameExe: "Duckov.exe",
+        gameExe: [
+            {
+                name: "Duckov.exe",
+                rootPath: await join("."),
+            }, {
+                name: "Duckov.app",
+                rootPath: await join("."),
+            }
+        ],
         startExe: [
             {
                 name: "Steam 启动",

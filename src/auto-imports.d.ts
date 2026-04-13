@@ -8,6 +8,7 @@ export {}
 declare global {
   const AppAnalytics: typeof import('./lib/Analytics').AppAnalytics
   const Aria2: typeof import('./lib/aria2').Aria2
+  const Aria2Rpc: typeof import('./lib/aria2-rpc').Aria2Rpc
   const AutoStart: typeof import('./lib/auto-start').AutoStart
   const EMBEDDED_TOOL_VERSIONS: typeof import('./lib/native-tools-manifest').EMBEDDED_TOOL_VERSIONS
   const EffectScope: typeof import('vue').EffectScope
@@ -373,6 +374,9 @@ declare global {
   // @ts-ignore
   export type { UnrealEngine } from './lib/UnrealEngine'
   import('./lib/UnrealEngine')
+  // @ts-ignore
+  export type { Aria2Rpc, IAria2RpcTaskUri, IAria2RpcTaskFile, IAria2RpcTask, IAria2GlobalStat, IAria2RpcEnsureOptions, IAria2RuntimeSettings } from './lib/aria2-rpc'
+  import('./lib/aria2-rpc')
   // @ts-ignore
   export type { Aria2, Aria2DownloadOptions, Aria2RpcServerOptions } from './lib/aria2'
   import('./lib/aria2')
