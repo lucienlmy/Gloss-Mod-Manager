@@ -6,7 +6,9 @@ import { ElMessage } from "element-plus-message";
 import {
     Aria2Rpc,
     type IAria2GlobalStat,
+    type IAria2RpcEnsureOptions,
     type IAria2RpcTask,
+    type IAria2RuntimeSettings,
 } from "@/lib/aria2-rpc";
 
 type QueueFilter = "all" | "active" | "waiting" | "paused" | "stopped";
@@ -91,6 +93,10 @@ const downloadDirectory = PersistentStore.useValue<string>(
     "",
 );
 const downloadProxy = PersistentStore.useValue<string>("downloadProxy", "");
+const aria2Settings = PersistentStore.useValue<IAria2RuntimeSettings>(
+    "aria2Settings",
+    Aria2Rpc.getDefaultSettings(),
+);
 const taskMetaMap = PersistentStore.useValue<Record<string, IAria2TaskMeta>>(
     "aria2TaskMetaMap",
     {},
@@ -114,12 +120,19 @@ const addingResourceKey = ref("");
 const queueFilter = ref<QueueFilter>("all");
 const selectedTaskGid = ref("");
 const defaultDownloadDirectory = ref("");
+const showAddModDialog = ref(false);
+const showTaskDetailDialog = ref(false);
+const showAria2SettingsDialog = ref(false);
+const aria2SettingsDraft = ref<IAria2RuntimeSettings>(
+    Aria2Rpc.getDefaultSettings(),
+);
+const downloadProxyDraft = ref("");
 
 let refreshSequence = 0;
 let detailSequence = 0;
 
-const currentGameLabel = computed(
-    () => manager.managerGame?.gameShowName || manager.managerGame?.gameName || "未选择",
+const normalizedAria2Settings = computed(() =>
+    Aria2Rpc.normalizeSettings(aria2Settings.value),
 );
 const resolvedDownloadDirectory = computed(
     () => downloadDirectory.value || defaultDownloadDirectory.value,
@@ -170,12 +183,12 @@ const taskSummaryCards = computed(() => [
                         : "待启动",
     },
     {
-        label: "下载中",
-        value: String(activeTasks.value.length),
+        label: "总任务",
+        value: String(allTasks.value.length),
     },
     {
-        label: "已暂停",
-        value: String(pausedTasks.value.length),
+        label: "下载中",
+        value: String(activeTasks.value.length),
     },
     {
         label: "总速度",
@@ -262,6 +275,7 @@ watch(
             return;
         }
 
+        showAddModDialog.value = true;
         modLookupInput.value = modId;
         void loadModDetail(modId);
     },
@@ -284,8 +298,35 @@ function getErrorMessage(error: unknown) {
     return "操作失败，请稍后重试。";
 }
 
-function normalizePathSegment(value: string) {
-    return value.replace(/[<>:"/\\|?*\u0000-\u001F]/gu, "-").trim();
+function buildRpcEnsureOptions(
+    outputDirectory?: string,
+): IAria2RpcEnsureOptions {
+    const settings = normalizedAria2Settings.value;
+
+    return {
+        outputDirectory: outputDirectory || resolvedDownloadDirectory.value,
+        listenPort: settings.rpcPort,
+        secret: settings.rpcSecret,
+        maxConcurrentDownloads: settings.maxConcurrentDownloads,
+        split: settings.split,
+        maxConnectionPerServer: settings.maxConnectionPerServer,
+        minSplitSize: settings.minSplitSize,
+    };
+}
+
+function openAddModDialog() {
+    showAddModDialog.value = true;
+}
+
+function openTaskDetail(task: IAria2RpcTask) {
+    selectedTaskGid.value = task.gid;
+    showTaskDetailDialog.value = true;
+}
+
+function openAria2SettingsDialog() {
+    aria2SettingsDraft.value = Aria2Rpc.normalizeSettings(aria2Settings.value);
+    downloadProxyDraft.value = downloadProxy.value;
+    showAria2SettingsDialog.value = true;
 }
 
 function extractModId(input: string) {
@@ -312,7 +353,6 @@ async function refreshDefaultDownloadDirectory() {
     defaultDownloadDirectory.value = await join(
         baseDirectory,
         "downloads",
-        "mods",
     );
 }
 
@@ -330,14 +370,19 @@ async function ensureDownloadDirectoryReady() {
     return resolvedDownloadDirectory.value;
 }
 
+async function ensureRpcReady() {
+    const outputDirectory = await ensureDownloadDirectoryReady();
+
+    await Aria2Rpc.ensureServer(buildRpcEnsureOptions(outputDirectory));
+
+    return outputDirectory;
+}
+
 async function initializeDownloadPage() {
     try {
         rpcState.value = "starting";
         rpcErrorMessage.value = "";
-        await ensureDownloadDirectoryReady();
-        await Aria2Rpc.ensureServer({
-            outputDirectory: resolvedDownloadDirectory.value,
-        });
+        await ensureRpcReady();
         rpcState.value = "ready";
         await refreshTaskLists();
         startTaskPolling();
@@ -364,10 +409,7 @@ async function refreshTaskLists(silent: boolean = false) {
     }
 
     try {
-        await ensureDownloadDirectoryReady();
-        await Aria2Rpc.ensureServer({
-            outputDirectory: resolvedDownloadDirectory.value,
-        });
+        await ensureRpcReady();
 
         const [stat, active, waiting, stopped] = await Promise.all([
             Aria2Rpc.getGlobalStat(),
@@ -412,13 +454,43 @@ async function selectDownloadDirectory() {
     }
 
     downloadDirectory.value = selected;
-    await ensureDownloadDirectoryReady();
-    await refreshTaskLists();
+    await restartAria2Service("下载目录已更新。");
 }
 
 async function openDownloadDirectory() {
     const directory = await ensureDownloadDirectoryReady();
     await FileHandler.openFolder(directory);
+}
+
+async function restartAria2Service(successMessage?: string) {
+    try {
+        stopTaskPolling();
+        rpcState.value = "starting";
+        rpcErrorMessage.value = "";
+
+        const outputDirectory = await ensureDownloadDirectoryReady();
+        await Aria2Rpc.restartServer(buildRpcEnsureOptions(outputDirectory));
+
+        rpcState.value = "ready";
+        await refreshTaskLists();
+        startTaskPolling();
+
+        if (successMessage) {
+            ElMessage.success(successMessage);
+        }
+    } catch (error: unknown) {
+        rpcState.value = "error";
+        rpcErrorMessage.value = getErrorMessage(error);
+        ElMessage.error(rpcErrorMessage.value);
+    }
+}
+
+async function saveAria2Settings() {
+    aria2Settings.value = Aria2Rpc.normalizeSettings(aria2SettingsDraft.value);
+    downloadProxy.value = downloadProxyDraft.value.trim();
+    showAria2SettingsDialog.value = false;
+
+    await restartAria2Service("Aria2 配置已保存。");
 }
 
 async function loadModDetail(explicitModId?: string) {
@@ -700,17 +772,19 @@ async function addResourceTask(resource: IResource) {
     addingResourceKey.value = resourceKey;
 
     try {
-        const outputDirectory = await ensureDownloadDirectoryReady();
-        await Aria2Rpc.ensureServer({ outputDirectory });
+        const outputDirectory = await ensureRpcReady();
+        const settings = normalizedAria2Settings.value;
 
         const options: Record<string, string> = {
             dir: outputDirectory,
             out: buildOutputFileName(resource),
             continue: "true",
             "allow-overwrite": "true",
-            split: "8",
-            "max-connection-per-server": "8",
-            "min-split-size": "1M",
+            split: String(settings.split),
+            "max-connection-per-server": String(
+                settings.maxConnectionPerServer,
+            ),
+            "min-split-size": settings.minSplitSize,
             referer: `${GLOSS_MOD_WEB_BASE_URL}/mod/${selectedMod.value.id}`,
             "user-agent":
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -875,6 +949,8 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
         return;
     }
 
+    showTaskDetailDialog.value = false;
+    showAddModDialog.value = true;
     modLookupInput.value = String(relatedModId);
     await loadModDetail(String(relatedModId));
 }
@@ -883,12 +959,17 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
     <div class="flex flex-col gap-6">
         <Card>
             <CardHeader>
-                <CardTitle class="flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <h1 class="text-2xl">下载中心</h1>
-                        <Badge class="rounded-full" variant="secondary">
-                            Aria2
-                        </Badge>
+                <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                    <div class="space-y-2">
+                        <CardTitle class="flex flex-wrap items-center gap-3">
+                            <h1 class="text-2xl">下载中心</h1>
+                            <Badge class="rounded-full" variant="secondary">
+                                Aria2
+                            </Badge>
+                        </CardTitle>
+                        <CardDescription>
+                            顶部负责下载相关操作，底部集中展示下载队列。
+                        </CardDescription>
                     </div>
                     <Badge class="rounded-full"
                         :class="getTaskStatusClass(rpcState === 'ready' ? 'active' : rpcState === 'error' ? 'error' : 'waiting')"
@@ -896,14 +977,23 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                         {{ rpcState === "ready" ? "服务已连接" : rpcState === "starting" ? "服务启动中" : rpcState === "error" ?
                             "服务异常" : "等待启动" }}
                     </Badge>
-                </CardTitle>
-                <CardDescription>
-                    内置详情预览、任务管理和 aria2 下载队列。
-                </CardDescription>
+                </div>
             </CardHeader>
             <CardContent class="flex flex-col gap-4">
                 <div class="flex flex-wrap items-center gap-2">
                     <SelectGame />
+                    <Button size="sm" @click="openAddModDialog">
+                        <IconPlus />
+                        添加 Mod
+                    </Button>
+                    <Button variant="outline" size="sm" @click="openAria2SettingsDialog">
+                        <IconSettings2 />
+                        Aria2 设置
+                    </Button>
+                    <Button variant="outline" size="sm" @click="restartAria2Service()">
+                        <IconRefreshCw />
+                        重启 Aria2
+                    </Button>
                     <Button variant="outline" size="sm" @click="selectDownloadDirectory">
                         <IconFolderSearch />
                         选择下载目录
@@ -918,29 +1008,17 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                     </Button>
                 </div>
 
-                <div class="grid gap-3 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-                    <div class="rounded-xl border bg-muted/20 px-4 py-3">
-                        <div class="text-xs text-muted-foreground">当前下载目录</div>
-                        <div class="mt-1 break-all text-sm font-medium leading-6">
-                            {{ resolvedDownloadDirectory || "正在准备目录..." }}
-                        </div>
-                    </div>
-                    <div class="rounded-xl border bg-muted/20 px-4 py-3">
-                        <div class="text-xs text-muted-foreground">当前游戏</div>
-                        <div class="mt-1 text-sm font-medium">
-                            {{ currentGameLabel }}
-                        </div>
-                    </div>
-                </div>
-
                 <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div v-for="item in taskSummaryCards" :key="item.label" class="rounded-xl border px-4 py-3">
+                    <div v-for="item in taskSummaryCards" :key="item.label" class="flex items-center gap-3 ">
                         <div class="text-xs text-muted-foreground">
                             {{ item.label }}
                         </div>
-                        <div class="mt-1 text-lg font-semibold tracking-tight">
+                        <Badge variant="outline" class="rounded-full px-2 py-1">
                             {{ item.value }}
-                        </div>
+                        </Badge>
+                        <!-- <div class="text-lg font-semibold tracking-tight">
+                            {{ item.value }}
+                        </div> -->
                     </div>
                 </div>
 
@@ -951,52 +1029,141 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
             </CardContent>
         </Card>
 
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-            <Card>
-                <CardHeader>
-                    <CardTitle>添加 Mod</CardTitle>
-                    <CardDescription>
-                        输入 3DM Mod ID 或详情链接后，在页内直接预览并添加资源。
-                    </CardDescription>
-                </CardHeader>
-                <CardContent class="flex flex-col gap-4">
-                    <div class="flex gap-2">
-                        <Input v-model="modLookupInput" placeholder="例如：252329 或 https://mod.3dmgame.com/mod/252329" />
-                        <Button :disabled="modLookupLoading" @click="loadModDetail()">
-                            <IconSearch />
-                            读取详情
-                        </Button>
-                    </div>
+        <Card>
+            <CardHeader>
+                <CardTitle class="flex flex-wrap items-center justify-between gap-3">
+                    <span>下载任务列表</span>
+                    <Button size="sm" variant="outline" @click="purgeStoppedTasks">
+                        <IconTrash2 />
+                        清理记录
+                    </Button>
+                </CardTitle>
+                <CardDescription>
+                    列表用于管理下载队列，详情改为弹窗查看。
+                </CardDescription>
+            </CardHeader>
+            <CardContent class="flex flex-col gap-4">
+                <div class="flex flex-wrap gap-2">
+                    <Button v-for="item in queueFilterOptions" :key="item.value" size="sm"
+                        :variant="queueFilter === item.value ? 'default' : 'outline'" @click="queueFilter = item.value">
+                        {{ item.label }}
+                        <span class="text-xs opacity-70">{{ item.count }}</span>
+                    </Button>
+                </div>
 
-                    <div v-if="modLookupError"
-                        class="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">
-                        {{ modLookupError }}
-                    </div>
+                <div v-if="!filteredTasks.length" class="rounded-xl border border-dashed px-6 py-12 text-center">
+                    <div class="text-base font-medium">当前没有任务</div>
+                    <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                        通过顶部“添加 Mod”弹窗读取资源后，下载任务会直接出现在这里。
+                    </p>
+                </div>
 
-                    <div v-if="modLookupLoading" class="space-y-3 rounded-xl border p-4">
-                        <div class="aspect-video animate-pulse rounded-xl bg-muted"></div>
-                        <div class="h-6 w-2/3 animate-pulse rounded bg-muted"></div>
-                        <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
-                        <div class="h-4 w-5/6 animate-pulse rounded bg-muted"></div>
-                    </div>
+                <div v-else class="space-y-3">
+                    <article v-for="task in filteredTasks" :key="task.gid"
+                        class="cursor-pointer rounded-xl border px-4 py-4 transition-colors hover:border-primary/40"
+                        :class="selectedTaskGid === task.gid ? 'border-primary/50 bg-primary/5' : ''"
+                        @click="openTaskDetail(task)">
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div class="truncate text-sm font-medium">
+                                        {{ getTaskDisplayName(task) }}
+                                    </div>
+                                    <Badge class="rounded-full" :class="getTaskStatusClass(task.status)"
+                                        variant="outline">
+                                        {{ getTaskStatusLabel(task.status) }}
+                                    </Badge>
+                                    <Badge v-if="taskMetaMap[task.gid]?.modTitle" class="rounded-full"
+                                        variant="outline">
+                                        {{ taskMetaMap[task.gid]?.modTitle }}
+                                    </Badge>
+                                </div>
 
-                    <div v-else-if="!selectedMod"
-                        class="flex min-h-70 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center">
-                        <IconDownload class="size-8 text-muted-foreground" />
-                        <div class="mt-3 text-base font-medium">等待载入 Mod 详情</div>
-                        <p class="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-                            读取成功后，这里会展示资源列表和内置详情。
-                        </p>
-                    </div>
+                                <div class="h-2 overflow-hidden rounded-full bg-muted">
+                                    <div class="h-full rounded-full bg-primary transition-all"
+                                        :style="{ width: `${getTaskProgress(task)}%` }"></div>
+                                </div>
 
-                    <template v-else>
+                                <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                                    <span>{{ formatBytes(task.completedLength) }} / {{ formatBytes(task.totalLength)
+                                        }}</span>
+                                    <span>速度：{{ formatSpeed(task.downloadSpeed) }}</span>
+                                    <span>连接：{{ formatNumber(task.connections) }}</span>
+                                    <span v-if="task.errorMessage">错误：{{ task.errorMessage }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2" @click.stop>
+                                <Button v-if="task.status === 'active' || task.status === 'waiting'" size="sm"
+                                    variant="outline" :disabled="isTaskOperating(task.gid)" @click="pauseTask(task)">
+                                    <IconPause />
+                                    暂停
+                                </Button>
+                                <Button v-else-if="task.status === 'paused'" size="sm" variant="outline"
+                                    :disabled="isTaskOperating(task.gid)" @click="resumeTask(task)">
+                                    <IconPlay />
+                                    继续
+                                </Button>
+                                <Button size="sm" variant="outline" :disabled="isTaskOperating(task.gid)"
+                                    @click="removeTask(task)">
+                                    <IconTrash2 />
+                                    删除
+                                </Button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Dialog v-model:open="showAddModDialog" modal>
+            <DialogScrollContent class="sm:max-w-6xl">
+                <DialogHeader>
+                    <DialogTitle>添加 Mod</DialogTitle>
+                    <DialogDescription>
+                        输入 3DM Mod ID 或详情链接后，直接在弹窗里查看详情并添加到 aria2 队列。
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="flex gap-2">
+                    <Input v-model="modLookupInput" placeholder="例如：252329 或 https://mod.3dmgame.com/mod/252329"
+                        @keydown.enter="loadModDetail()" />
+                    <Button :disabled="modLookupLoading" @click="loadModDetail()">
+                        <IconSearch />
+                        读取详情
+                    </Button>
+                </div>
+
+                <div v-if="modLookupError"
+                    class="rounded-xl border border-destructive/30 bg-destructive/5 px-3 py-3 text-sm text-destructive">
+                    {{ modLookupError }}
+                </div>
+
+                <div v-if="modLookupLoading" class="space-y-3 rounded-xl border p-4">
+                    <div class="aspect-video animate-pulse rounded-xl bg-muted"></div>
+                    <div class="h-6 w-2/3 animate-pulse rounded bg-muted"></div>
+                    <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
+                    <div class="h-4 w-5/6 animate-pulse rounded bg-muted"></div>
+                </div>
+
+                <div v-else-if="!selectedMod"
+                    class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center">
+                    <IconDownload class="size-8 text-muted-foreground" />
+                    <div class="mt-3 text-base font-medium">等待载入 Mod 详情</div>
+                    <p class="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+                        读取成功后，这里会显示 Mod 简介、资源列表和下载按钮。
+                    </p>
+                </div>
+
+                <div v-else class="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+                    <div class="space-y-4">
                         <div class="overflow-hidden rounded-xl border">
                             <img :src="resolveGlossAssetUrl(selectedMod.mods_image_url)" :alt="selectedMod.mods_title"
                                 class="aspect-video w-full object-cover"
                                 @error="(event) => ((event.target as HTMLImageElement).src = EMPTY_POSTER)" />
                         </div>
 
-                        <div class="space-y-3">
+                        <div class="space-y-3 rounded-xl border px-4 py-4">
                             <div>
                                 <h2 class="text-xl font-semibold leading-8">
                                     {{ selectedMod.mods_title }}
@@ -1043,19 +1210,9 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 </div>
                             </div>
                         </div>
-                    </template>
-                </CardContent>
-            </Card>
+                    </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>内置详情</CardTitle>
-                    <CardDescription>
-                        资源会直接加入内置 aria2 队列，不再跳转网页端。
-                    </CardDescription>
-                </CardHeader>
-                <CardContent class="flex flex-col gap-4">
-                    <template v-if="selectedMod">
+                    <div class="space-y-4">
                         <div class="rounded-xl border px-4 py-4 text-sm leading-7 text-muted-foreground">
                             <p v-if="selectedMod.mods_desc" class="whitespace-pre-wrap">
                                 {{ selectedMod.mods_desc }}
@@ -1077,7 +1234,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 </div>
                             </div>
 
-                            <div class="space-y-3">
+                            <div class="max-h-[48vh] space-y-3 overflow-y-auto pr-1">
                                 <div v-for="resource in selectedMod.mods_resource"
                                     :key="`${selectedMod.id}-${resource.id}`" class="rounded-xl border px-4 py-4">
                                     <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -1116,130 +1273,100 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 </div>
                             </div>
                         </div>
-                    </template>
-
-                    <div v-else
-                        class="flex min-h-70 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center">
-                        <IconPanelRight class="size-8 text-muted-foreground" />
-                        <div class="mt-3 text-base font-medium">这里显示 Mod 详情和资源</div>
-                        <p class="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-                            加载 Mod 后即可在页内查看介绍、资源版本和下载按钮。
-                        </p>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+            </DialogScrollContent>
+        </Dialog>
 
-        <div class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-            <Card>
-                <CardHeader>
-                    <CardTitle class="flex flex-wrap items-center justify-between gap-3">
-                        <span>下载任务列表</span>
-                        <div class="flex flex-wrap gap-2">
-                            <Button size="sm" variant="outline" :disabled="refreshingTasks" @click="refreshTaskLists()">
-                                <IconRefreshCw :class="refreshingTasks ? 'animate-spin' : ''" />
-                                刷新
-                            </Button>
-                            <Button size="sm" variant="outline" @click="purgeStoppedTasks">
-                                <IconTrash2 />
-                                清理记录
-                            </Button>
-                        </div>
-                    </CardTitle>
-                    <CardDescription>
-                        查看、暂停、继续、删除当前 aria2 下载任务。
-                    </CardDescription>
-                </CardHeader>
-                <CardContent class="flex flex-col gap-4">
-                    <div class="flex flex-wrap gap-2">
-                        <Button v-for="item in queueFilterOptions" :key="item.value" size="sm"
-                            :variant="queueFilter === item.value ? 'default' : 'outline'"
-                            @click="queueFilter = item.value">
-                            {{ item.label }}
-                            <span class="text-xs opacity-70">{{ item.count }}</span>
-                        </Button>
-                    </div>
+        <Dialog v-model:open="showAria2SettingsDialog" modal>
+            <DialogContent class="sm:max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Aria2 设置</DialogTitle>
+                    <DialogDescription>
+                        修改后会立即重启 aria2 服务，并对后续任务生效。
+                    </DialogDescription>
+                </DialogHeader>
 
-                    <div v-if="!filteredTasks.length" class="rounded-xl border border-dashed px-6 py-10 text-center">
-                        <div class="text-base font-medium">当前没有任务</div>
-                        <p class="mt-2 text-sm leading-6 text-muted-foreground">
-                            读取 Mod 详情后点击资源按钮，任务会直接出现在这里。
-                        </p>
-                    </div>
-
-                    <div v-else class="space-y-3">
-                        <article v-for="task in filteredTasks" :key="task.gid"
-                            class="cursor-pointer rounded-xl border px-4 py-4 transition-colors hover:border-primary/40"
-                            :class="selectedTaskGid === task.gid ? 'border-primary/50 bg-primary/5' : ''"
-                            @click="selectedTaskGid = task.gid">
-                            <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                                <div class="min-w-0 flex-1 space-y-2">
-                                    <div class="flex flex-wrap items-center gap-2">
-                                        <div class="truncate text-sm font-medium">
-                                            {{ getTaskDisplayName(task) }}
-                                        </div>
-                                        <Badge class="rounded-full" :class="getTaskStatusClass(task.status)"
-                                            variant="outline">
-                                            {{ getTaskStatusLabel(task.status) }}
-                                        </Badge>
-                                        <Badge v-if="taskMetaMap[task.gid]?.modTitle" class="rounded-full"
-                                            variant="outline">
-                                            {{ taskMetaMap[task.gid]?.modTitle }}
-                                        </Badge>
-                                    </div>
-
-                                    <div class="h-2 overflow-hidden rounded-full bg-muted">
-                                        <div class="h-full rounded-full bg-primary transition-all"
-                                            :style="{ width: `${getTaskProgress(task)}%` }"></div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                                        <span>{{ formatBytes(task.completedLength) }} / {{ formatBytes(task.totalLength)
-                                        }}</span>
-                                        <span>速度：{{ formatSpeed(task.downloadSpeed) }}</span>
-                                        <span>连接：{{ formatNumber(task.connections) }}</span>
-                                        <span v-if="task.errorMessage">错误：{{ task.errorMessage }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-wrap gap-2" @click.stop>
-                                    <Button size="sm" variant="outline" @click="selectedTaskGid = task.gid">
-                                        <IconEye />
-                                        查看
-                                    </Button>
-                                    <Button v-if="task.status === 'active' || task.status === 'waiting'" size="sm"
-                                        variant="outline" :disabled="isTaskOperating(task.gid)"
-                                        @click="pauseTask(task)">
-                                        <IconPause />
-                                        暂停
-                                    </Button>
-                                    <Button v-else-if="task.status === 'paused'" size="sm" variant="outline"
-                                        :disabled="isTaskOperating(task.gid)" @click="resumeTask(task)">
-                                        <IconPlay />
-                                        继续
-                                    </Button>
-                                    <Button size="sm" variant="outline" :disabled="isTaskOperating(task.gid)"
-                                        @click="removeTask(task)">
-                                        <IconTrash2 />
-                                        删除
-                                    </Button>
-                                </div>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="flex items-center justify-between rounded-xl border px-4 py-3 sm:col-span-2">
+                        <div>
+                            <div class="text-sm font-medium">启动时自动启动 Aria2</div>
+                            <div class="mt-1 text-xs text-muted-foreground">
+                                开启后，程序启动时会自动拉起 aria2 RPC 服务。
                             </div>
-                        </article>
+                        </div>
+                        <Switch v-model="aria2SettingsDraft.autoStart" />
                     </div>
-                </CardContent>
-            </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>任务详情</CardTitle>
-                    <CardDescription>
-                        选中任务后可查看文件、目录、速度和关联 Mod。
-                    </CardDescription>
-                </CardHeader>
-                <CardContent class="flex flex-col gap-4">
-                    <template v-if="selectedTask">
-                        <div class="space-y-3">
+                    <div class="grid gap-2">
+                        <Label for="aria2-rpc-port">RPC 端口</Label>
+                        <Input id="aria2-rpc-port" v-model.number="aria2SettingsDraft.rpcPort" type="number" min="1" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="aria2-rpc-secret">RPC 密钥</Label>
+                        <Input id="aria2-rpc-secret" v-model="aria2SettingsDraft.rpcSecret" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="aria2-max-concurrent">最大并发任务</Label>
+                        <Input id="aria2-max-concurrent" v-model.number="aria2SettingsDraft.maxConcurrentDownloads"
+                            type="number" min="1" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="aria2-split">单任务分片数</Label>
+                        <Input id="aria2-split" v-model.number="aria2SettingsDraft.split" type="number" min="1" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="aria2-max-connection">单服务器连接数</Label>
+                        <Input id="aria2-max-connection" v-model.number="aria2SettingsDraft.maxConnectionPerServer"
+                            type="number" min="1" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="aria2-min-split-size">最小分片大小</Label>
+                        <Input id="aria2-min-split-size" v-model="aria2SettingsDraft.minSplitSize"
+                            placeholder="例如 1M" />
+                    </div>
+
+                    <div class="grid gap-2 sm:col-span-2">
+                        <Label for="aria2-download-proxy">下载代理</Label>
+                        <Input id="aria2-download-proxy" v-model="downloadProxyDraft"
+                            placeholder="例如 http://127.0.0.1:7890，可留空" />
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button variant="outline" @click="showAria2SettingsDialog = false">
+                        取消
+                    </Button>
+                    <Button @click="saveAria2Settings">
+                        保存并重启
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog v-model:open="showTaskDetailDialog" modal>
+            <DialogScrollContent class="sm:max-w-5xl">
+                <DialogHeader>
+                    <DialogTitle>任务详情</DialogTitle>
+                    <DialogDescription>
+                        查看当前任务的进度、文件和关联 Mod 信息。
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div v-if="selectedTask" class="grid gap-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+                    <div class="space-y-4">
+                        <div class="overflow-hidden rounded-xl border bg-muted/30">
+                            <img :src="selectedTaskMeta?.cover || EMPTY_POSTER" :alt="getTaskDisplayName(selectedTask)"
+                                class="aspect-video w-full object-cover"
+                                @error="(event) => ((event.target as HTMLImageElement).src = EMPTY_POSTER)" />
+                        </div>
+
+                        <div class="space-y-3 rounded-xl border px-4 py-4">
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <div class="text-lg font-semibold leading-7">
@@ -1251,22 +1378,10 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                         <span>{{ getTaskStatusLabel(selectedTask.status) }}</span>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap gap-2">
-                                    <Button size="sm" variant="outline" @click="openTaskFolder(selectedTask)">
-                                        <IconFolderOpen />
-                                        打开目录
-                                    </Button>
-                                    <Button size="sm" variant="outline" :disabled="selectedTask.status !== 'complete'"
-                                        @click="openTaskFile(selectedTask)">
-                                        <IconFileUp />
-                                        打开文件
-                                    </Button>
-                                    <Button v-if="selectedTaskMeta?.modId" size="sm" variant="outline"
-                                        @click="loadRelatedModDetail(selectedTask)">
-                                        <IconPanelRightOpen />
-                                        加载关联 Mod
-                                    </Button>
-                                </div>
+                                <Badge class="rounded-full" :class="getTaskStatusClass(selectedTask.status)"
+                                    variant="outline">
+                                    {{ getTaskStatusLabel(selectedTask.status) }}
+                                </Badge>
                             </div>
 
                             <div class="grid grid-cols-2 gap-3 text-center text-xs">
@@ -1296,61 +1411,82 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 </div>
                             </div>
 
-                            <div class="rounded-xl border px-4 py-3 text-sm">
-                                <div class="text-xs text-muted-foreground">保存目录</div>
-                                <div class="mt-1 break-all leading-6">
-                                    {{ selectedTask.dir || "未知目录" }}
-                                </div>
-                            </div>
-
-                            <div v-if="selectedTaskMeta" class="rounded-xl border px-4 py-3 text-sm">
-                                <div class="text-xs text-muted-foreground">关联 Mod</div>
-                                <div class="mt-1 font-medium">
-                                    {{ selectedTaskMeta.modTitle || "未知 Mod" }}
-                                </div>
-                                <div class="mt-1 text-xs text-muted-foreground">
-                                    {{ selectedTaskMeta.gameName || "未记录游戏" }}
-                                    <span v-if="selectedTaskMeta.version">· 版本 {{ selectedTaskMeta.version }}</span>
-                                </div>
+                            <div class="flex flex-wrap gap-2">
+                                <Button size="sm" variant="outline" @click="openTaskFolder(selectedTask)">
+                                    <IconFolderOpen />
+                                    打开目录
+                                </Button>
+                                <Button size="sm" variant="outline" :disabled="selectedTask.status !== 'complete'"
+                                    @click="openTaskFile(selectedTask)">
+                                    <IconFileUp />
+                                    打开文件
+                                </Button>
+                                <Button v-if="selectedTaskMeta?.modId" size="sm" variant="outline"
+                                    @click="loadRelatedModDetail(selectedTask)">
+                                    <IconPanelRightOpen />
+                                    查看关联 Mod
+                                </Button>
                             </div>
 
                             <div v-if="selectedTask.errorMessage"
                                 class="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
                                 {{ selectedTask.errorMessage }}
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="space-y-3">
-                                <div class="text-sm font-medium">文件列表</div>
-                                <div class="space-y-2">
-                                    <div v-for="(file, index) in selectedTask.files"
-                                        :key="`${selectedTask.gid}-${index}`"
-                                        class="rounded-xl border px-3 py-3 text-sm">
-                                        <div class="font-medium">
-                                            {{ getBaseName(file.path) || `文件 ${index + 1}` }}
-                                        </div>
-                                        <div class="mt-1 text-xs text-muted-foreground">
-                                            {{ formatBytes(file.completedLength) }} / {{ formatBytes(file.length) }}
-                                        </div>
-                                        <div class="mt-2 break-all text-xs text-muted-foreground">
-                                            {{ file.path || "暂无文件路径" }}
-                                        </div>
+                    <div class="space-y-4">
+                        <div class="rounded-xl border px-4 py-3 text-sm">
+                            <div class="text-xs text-muted-foreground">保存目录</div>
+                            <div class="mt-1 break-all leading-6">
+                                {{ selectedTask.dir || "未知目录" }}
+                            </div>
+                        </div>
+
+                        <div v-if="selectedTaskMeta" class="rounded-xl border px-4 py-3 text-sm">
+                            <div class="text-xs text-muted-foreground">关联 Mod</div>
+                            <div class="mt-1 font-medium">
+                                {{ selectedTaskMeta.modTitle || "未知 Mod" }}
+                            </div>
+                            <div class="mt-1 text-xs text-muted-foreground leading-6">
+                                {{ selectedTaskMeta.gameName || "未记录游戏" }}
+                                <span v-if="selectedTaskMeta.version">· 版本 {{ selectedTaskMeta.version }}</span>
+                            </div>
+                            <p v-if="selectedTaskMeta.content" class="mt-3 line-clamp-6 text-sm text-muted-foreground">
+                                {{ selectedTaskMeta.content }}
+                            </p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="text-sm font-medium">文件列表</div>
+                            <div class="max-h-[48vh] space-y-2 overflow-y-auto pr-1">
+                                <div v-for="(file, index) in selectedTask.files" :key="`${selectedTask.gid}-${index}`"
+                                    class="rounded-xl border px-3 py-3 text-sm">
+                                    <div class="font-medium">
+                                        {{ getBaseName(file.path) || `文件 ${index + 1}` }}
+                                    </div>
+                                    <div class="mt-1 text-xs text-muted-foreground">
+                                        {{ formatBytes(file.completedLength) }} / {{ formatBytes(file.length) }}
+                                    </div>
+                                    <div class="mt-2 break-all text-xs text-muted-foreground">
+                                        {{ file.path || "暂无文件路径" }}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </template>
-
-                    <div v-else
-                        class="flex min-h-90 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center">
-                        <IconListChecks class="size-8 text-muted-foreground" />
-                        <div class="mt-3 text-base font-medium">先选择一个任务</div>
-                        <p class="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
-                            这里会展示任务状态、保存目录、文件列表和关联的 Mod 信息。
-                        </p>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+
+                <div v-else
+                    class="flex min-h-80 flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center">
+                    <IconListChecks class="size-8 text-muted-foreground" />
+                    <div class="mt-3 text-base font-medium">先选择一个任务</div>
+                    <p class="mt-2 max-w-sm text-sm leading-6 text-muted-foreground">
+                        关闭弹窗后从下载列表重新点开任务即可查看详情。
+                    </p>
+                </div>
+            </DialogScrollContent>
+        </Dialog>
     </div>
 </template>
 <style scoped></style>

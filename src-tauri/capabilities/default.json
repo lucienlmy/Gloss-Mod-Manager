@@ -29,6 +29,18 @@
                     "name": "powershell",
                     "cmd": "powershell",
                     "args": true
+                },
+                {
+                    "name": "binaries/sevenzip",
+                    "cmd": "sevenzip",
+                    "sidecar": true,
+                    "args": true
+                },
+                {
+                    "name": "binaries/aria2c",
+                    "cmd": "aria2c",
+                    "sidecar": true,
+                    "args": true
                 }
             ]
         },
@@ -49,6 +61,18 @@
                 {
                     "name": "powershell",
                     "cmd": "powershell",
+                    "args": true
+                },
+                {
+                    "name": "binaries/sevenzip",
+                    "cmd": "sevenzip",
+                    "sidecar": true,
+                    "args": true
+                },
+                {
+                    "name": "binaries/aria2c",
+                    "cmd": "aria2c",
+                    "sidecar": true,
                     "args": true
                 }
             ]

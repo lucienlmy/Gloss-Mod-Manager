@@ -387,18 +387,6 @@ function formatDate(value?: string) {
     return dateFormatter.format(parsed);
 }
 
-function normalizeText(value?: string) {
-    if (!value) {
-        return "暂无简介";
-    }
-
-    return value
-        .replace(/<[^>]+>/g, " ")
-        .replace(/[\r\n]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
 function resolveAssetUrl(path?: string) {
     if (!path) {
         return "";
