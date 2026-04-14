@@ -25,6 +25,7 @@ export const useManager = defineStore("Manager", () => {
   const tags = ref<ITag[]>([]);
   const managerRoot = ref("");
 
+
   function sortModsByWeight(list: IModInfo[]) {
     return list
       .map((mod, index) => ({

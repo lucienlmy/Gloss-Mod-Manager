@@ -7,8 +7,12 @@ const props = defineProps<{
 const imageSrc = ref("");
 
 async function getImageSrc() {
-    const base64 = convertFileSrc(props.src);
-    imageSrc.value = base64;
+    if (props.src.includes("http://") || props.src.includes("https://")) {
+        imageSrc.value = props.src;
+    } else {
+        const base64 = convertFileSrc(props.src);
+        imageSrc.value = base64;
+    }
 }
 getImageSrc();
 </script>

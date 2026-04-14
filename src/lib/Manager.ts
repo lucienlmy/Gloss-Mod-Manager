@@ -325,16 +325,19 @@ export class Manager {
         isLink: boolean = true,
         commonParent: boolean = false,
     ) {
-        const { closeSoftLinks } = await Manager.getContext();
-        const modStorage = await Manager.getModStoragePath(mod.id);
-        const targetRoot = await Manager.resolveInstallRoot(
-            installPath,
-            inGameStorage,
+        const manager = useManager();
+        const settings = useSettings();
+        const modStorage = await join(
+            settings.storagePath,
+            manager.managerGame?.gameName || "",
+            mod.id.toString(),
         );
 
-        if (targetRoot === null) {
-            return false;
-        }
+        const closeSoftLinks = settings.closeSoftLinks;
+
+        const gameStorage = inGameStorage
+            ? await join(manager.managerGame?.gamePath || "", installPath)
+            : installPath;
 
         let folders: string[] = [];
 
@@ -355,7 +358,7 @@ export class Manager {
         }
 
         for (const folder of folders) {
-            const target = await join(targetRoot, await basename(folder));
+            const target = await join(gameStorage, await basename(folder));
 
             if (isInstall) {
                 if (isLink && !closeSoftLinks) {

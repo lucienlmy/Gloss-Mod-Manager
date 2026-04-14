@@ -13,7 +13,7 @@ const sidecarCommands = {
     aria2: "binaries/aria2c",
 } as const;
 
-const windowsSevenZipSupportFiles = ["7za.dll", "7zxa.dll"] as const;
+const windowsSevenZipSupportFiles = ["7z.dll"] as const;
 
 export class NativeToolsManifest {
     public static readonly EMBEDDED_TOOL_VERSIONS = embeddedToolVersions;

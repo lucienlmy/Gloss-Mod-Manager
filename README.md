@@ -44,5 +44,5 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 注意：
 
 - macOS / Linux 上的 aria2 来自官方源码构建，因此需要本机具备编译工具链与相关依赖库；如果缺少依赖，`prepare:sidecars` 会直接失败。
-- Windows 上 7-Zip 会额外打包 `7za.dll` 与 `7zxa.dll`，以保证 sidecar 在发布包内可用。
+- Windows 上 7-Zip 会额外打包 `7z.dll`，并使用完整 `7z.exe` 作为 sidecar，以保证 RAR 等格式在发布包内可用。
 

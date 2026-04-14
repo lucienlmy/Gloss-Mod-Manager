@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
+import { t } from "vue-router/dist/index-BzEKChPW.js";
 
 interface IEditModForm {
     modName: string;
@@ -228,6 +229,32 @@ async function updateModType(item: IModInfo, nextType: unknown) {
     ElMessage.success(`已更新 ${item.modName} 的类型。`);
 }
 
+async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
+    if (typeof nextInstalled !== "boolean") {
+        return;
+    }
+
+    const type = manager.managerGame?.modType.find(
+        (type) => type.id === item.modType,
+    );
+
+    if (nextInstalled) {
+        if (typeof type?.install == "function") {
+            const res = await type.install(item);
+            if (typeof res == "boolean" && res == false) {
+                item.isInstalled = false;
+            }
+        }
+    } else {
+        if (typeof type?.uninstall == "function") {
+            const res = await type.uninstall(item);
+            if (typeof res == "boolean" && res == false) {
+                item.isInstalled = true;
+            }
+        }
+    }
+}
+
 function clearDragState() {
     dragSourceId.value = null;
     dragTargetId.value = null;
@@ -356,7 +383,8 @@ function getRowClass(item: IModInfo) {
                         :key="item.id"
                         :class="getRowClass(item)"
                         @dragover="handleDragOver($event, item.id)"
-                        @drop="handleDrop($event, item.id)">
+                        @drop="handleDrop($event, item.id)"
+                    >
                         <TableCell>
                             <div class="flex items-center gap-2">
                                 <span
@@ -365,18 +393,21 @@ function getRowClass(item: IModInfo) {
                                     @dragstart="
                                         handleDragStart($event, item.id)
                                     "
-                                    @dragend="handleDragEnd">
+                                    @dragend="handleDragEnd"
+                                >
                                     <IconGripVertical class="w-4 h-4" />
                                 </span>
                                 <Badge
                                     variant="outline"
                                     v-for="tag in item.tags"
-                                    :key="tag.name">
+                                    :key="tag.name"
+                                >
                                     <div
                                         class="h-2.5 w-2.5 rounded-full"
                                         :style="{
                                             backgroundColor: tag.color,
-                                        }"></div>
+                                        }"
+                                    ></div>
                                     {{ tag.name }}
                                 </Badge>
                                 {{ item.modName }}
@@ -388,7 +419,9 @@ function getRowClass(item: IModInfo) {
                                 :model-value="item.modType"
                                 @update:model-value="
                                     updateModType(item, $event)
-                                ">
+                                "
+                                :disabled="item.isInstalled"
+                            >
                                 <SelectTrigger>
                                     <SelectValue></SelectValue>
                                 </SelectTrigger>
@@ -407,7 +440,11 @@ function getRowClass(item: IModInfo) {
                             <div class="flex items-center gap-2">
                                 <Switch
                                     :id="`is-installed-${item.id}`"
-                                    v-model="item.isInstalled" />
+                                    v-model="item.isInstalled"
+                                    @update:model-value="
+                                        updateModInstalled(item, $event)
+                                    "
+                                />
                                 <Label :for="`is-installed-${item.id}`">
                                     {{ item.isInstalled ? "已安装" : "未安装" }}
                                 </Label>
@@ -426,7 +463,8 @@ function getRowClass(item: IModInfo) {
                             </HoverCard>
                             <IconEyeOff
                                 v-else
-                                class="w-4 h-4 text-muted-foreground" />
+                                class="w-4 h-4 text-muted-foreground"
+                            />
                         </TableCell>
                         <TableCell>
                             <DropdownMenu>
@@ -437,10 +475,11 @@ function getRowClass(item: IModInfo) {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <DropdownMenuItem
-                                        @click="openEditDialog(item)">
+                                        @click="openEditDialog(item)"
+                                    >
                                         编辑
-                                        <DropdownMenuShortcut
-                                            ><IconSquarePen />
+                                        <DropdownMenuShortcut>
+                                            <IconSquarePen />
                                         </DropdownMenuShortcut>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem @click="open(item)">
@@ -451,11 +490,13 @@ function getRowClass(item: IModInfo) {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        @click="deleteMod(item)">
+                                        @click="deleteMod(item)"
+                                    >
                                         删除
                                         <DropdownMenuShortcut>
                                             <IconTrash
-                                                class="text-destructive" />
+                                                class="text-destructive"
+                                            />
                                         </DropdownMenuShortcut>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -494,7 +535,8 @@ function getRowClass(item: IModInfo) {
                                 <SelectItem
                                     v-for="type in manager.managerGame?.modType"
                                     :key="type.id"
-                                    :value="type.id">
+                                    :value="type.id"
+                                >
                                     {{ type.name }}
                                 </SelectItem>
                             </SelectContent>
@@ -516,7 +558,8 @@ function getRowClass(item: IModInfo) {
                     <Input
                         id="mod-tags"
                         v-model="editForm.tagsText"
-                        placeholder="多个标签请用逗号分隔" />
+                        placeholder="多个标签请用逗号分隔"
+                    />
                 </div>
                 <div class="grid gap-2">
                     <Label for="mod-desc">描述</Label>

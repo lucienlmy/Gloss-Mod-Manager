@@ -57,8 +57,12 @@ const sevenZipMacAsset =
 const sevenZipWindowsExtractorAsset =
     "https://github.com/ip7z/7zip/releases/download/26.00/7zr.exe";
 
-const sevenZipWindowsBundleAsset =
-    "https://github.com/ip7z/7zip/releases/download/26.00/7z2600-extra.7z";
+const sevenZipWindowsInstallerAssetByArch: Record<RuntimeArch, string | null> = {
+    x64: "https://github.com/ip7z/7zip/releases/download/26.00/7z2600-x64.exe",
+    x86: "https://github.com/ip7z/7zip/releases/download/26.00/7z2600.exe",
+    arm64: "https://github.com/ip7z/7zip/releases/download/26.00/7z2600-arm64.exe",
+    arm: "https://github.com/ip7z/7zip/releases/download/26.00/7z2600-arm.exe",
+};
 
 const aria2WindowsAssetByArch: Record<RuntimeArch, string | null> = {
     x64: "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip",
@@ -69,6 +73,15 @@ const aria2WindowsAssetByArch: Record<RuntimeArch, string | null> = {
 
 const aria2SourceAsset =
     "https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0.tar.xz";
+
+const legacyWindowsSevenZipSupportFiles = ["7za.dll", "7zxa.dll"] as const;
+const allKnownWindowsSevenZipSupportFiles = new Set<string>([
+    ...WINDOWS_SEVEN_ZIP_SUPPORT_FILES,
+    ...legacyWindowsSevenZipSupportFiles,
+]);
+const currentWindowsSevenZipSupportFiles = new Set<string>(
+    WINDOWS_SEVEN_ZIP_SUPPORT_FILES,
+);
 
 function log(message: string) {
     console.log(`[sidecars] ${message}`);
@@ -167,21 +180,21 @@ function parseTargetTriple(triple: string): ResolvedTarget {
         triple.includes("windows")
             ? "windows"
             : triple.includes("apple-darwin")
-              ? "macos"
-              : triple.includes("linux")
-                ? "linux"
-                : undefined,
+                ? "macos"
+                : triple.includes("linux")
+                    ? "linux"
+                    : undefined,
     );
     const arch = normalizeArch(
         triple.startsWith("x86_64")
             ? "x64"
             : triple.startsWith("i686") || triple.startsWith("i586")
-              ? "x86"
-              : triple.startsWith("aarch64")
-                ? "arm64"
-                : triple.startsWith("arm")
-                  ? "arm"
-                  : undefined,
+                ? "x86"
+                : triple.startsWith("aarch64")
+                    ? "arm64"
+                    : triple.startsWith("arm")
+                        ? "arm"
+                        : undefined,
     );
 
     if (!platform || !arch) {
@@ -359,10 +372,9 @@ async function cleanupManagedArtifacts(target: ResolvedTarget) {
             entry.name.startsWith(`${SIDECAR_BASE_NAMES.aria2}-`) &&
             entry.name !== currentAria2;
         const shouldDeleteWindowsSupport =
-            target.platform !== "windows" &&
-            WINDOWS_SEVEN_ZIP_SUPPORT_FILES.includes(
-                entry.name as (typeof WINDOWS_SEVEN_ZIP_SUPPORT_FILES)[number],
-            );
+            allKnownWindowsSevenZipSupportFiles.has(entry.name) &&
+            (target.platform !== "windows" ||
+                !currentWindowsSevenZipSupportFiles.has(entry.name));
 
         if (
             shouldDeleteSevenZip ||
@@ -419,27 +431,23 @@ async function prepareSevenZip(target: ResolvedTarget) {
 
     if (target.platform === "windows") {
         const extractorPath = join(sevenZipWorkDir, "7zr.exe");
-        const bundlePath = join(sevenZipWorkDir, "7z-extra.7z");
+        const installerAsset = sevenZipWindowsInstallerAssetByArch[target.arch];
+        const installerPath = join(sevenZipWorkDir, "7zip-installer.exe");
         const extractDir = join(sevenZipWorkDir, "out");
 
+        if (!installerAsset) {
+            throw new Error(
+                `No official 7-Zip Windows installer mapping for ${target.arch}`,
+            );
+        }
+
         await downloadFile(sevenZipWindowsExtractorAsset, extractorPath);
-        await downloadFile(sevenZipWindowsBundleAsset, bundlePath);
-        runCommand(extractorPath, ["x", bundlePath, `-o${extractDir}`, "-y"]);
+        await downloadFile(installerAsset, installerPath);
+        runCommand(extractorPath, ["x", installerPath, `-o${extractDir}`, "-y"]);
 
-        const archFolder =
-            target.arch === "x64"
-                ? "x64"
-                : target.arch === "arm64"
-                  ? "arm64"
-                  : "";
-        const archRoot = archFolder ? join(extractDir, archFolder) : extractDir;
-
-        await copyFile(join(archRoot, "7za.exe"), outputPath);
-        await copyFile(join(archRoot, "7za.dll"), join(binariesDir, "7za.dll"));
-        await copyFile(
-            join(archRoot, "7zxa.dll"),
-            join(binariesDir, "7zxa.dll"),
-        );
+        // Windows 上使用完整的 7z.exe，而不是精简的 7za.exe，才能稳定处理 RAR 等格式。
+        await copyFile(join(extractDir, "7z.exe"), outputPath);
+        await copyFile(join(extractDir, "7z.dll"), join(binariesDir, "7z.dll"));
         return;
     }
 

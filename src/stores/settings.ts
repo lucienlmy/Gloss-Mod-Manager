@@ -1,4 +1,4 @@
-import { documentDir } from "@tauri-apps/api/path";
+import { documentDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { AutoStart } from "@/lib/auto-start";
 import { PersistentStore } from "@/lib/persistent-store";
@@ -43,8 +43,8 @@ export const useSettings = defineStore("Settings", () => {
         "showPreloadList",
         true,
     );
-    const disableSymlinkInstall = PersistentStore.useValue<boolean>(
-        "disableSymlinkInstall",
+    const closeSoftLinks = PersistentStore.useValue<boolean>(
+        "closeSoftLinks",
         false,
     );
     const debugInfo = ref<unknown>({});
@@ -66,13 +66,25 @@ export const useSettings = defineStore("Settings", () => {
         const selected = await open({
             directory: true,
             defaultPath:
-                storagePath.value || `${await documentDir()}/Gloss Mod Manager`,
+                storagePath.value ||
+                (await join(await documentDir(), "Gloss Mod Manager")),
             title: "选择储存路径",
         });
 
         if (selected) {
             storagePath.value = selected;
         }
+    }
+
+    async function setDefaultStoragePath() {
+        storagePath.value = await join(
+            await documentDir(),
+            "Gloss Mod Manager",
+        );
+    }
+
+    if (storagePath.value == "") {
+        setDefaultStoragePath();
     }
 
     return {
@@ -88,7 +100,7 @@ export const useSettings = defineStore("Settings", () => {
         debugMode,
         modifiableDuringGame,
         showPreloadList,
-        disableSymlinkInstall,
+        closeSoftLinks,
         debugInfo,
         settingsStartPageOptions,
         selectStoragePath,

@@ -11,7 +11,7 @@ const {
     debugInfo,
     debugMode,
     defaultStartPage,
-    disableSymlinkInstall,
+    closeSoftLinks,
     modifiableDuringGame,
     selectGameByFolder,
     showPreloadList,
@@ -57,41 +57,72 @@ const autoStartModel = computed({
                             <!-- 这个站两格 -->
                             <div class="col-span-2 items-center">
                                 <InputGroup>
-                                    <InputGroupInput id="storage-path" v-model="storagePath" disabled></InputGroupInput>
+                                    <InputGroupInput
+                                        id="storage-path"
+                                        v-model="storagePath"
+                                        disabled
+                                    ></InputGroupInput>
                                     <InputGroupAddon>
-                                        <Label for="storage-path" class="text-sm font-medium">储存路径</Label>
+                                        <Label
+                                            for="storage-path"
+                                            class="text-sm font-medium"
+                                            >储存路径</Label
+                                        >
                                     </InputGroupAddon>
                                     <InputGroupAddon align="inline-end">
-                                        <Button variant="secondary" @click="settings.selectStoragePath">
+                                        <Button
+                                            variant="secondary"
+                                            @click="settings.selectStoragePath"
+                                        >
                                             选择
                                         </Button>
                                     </InputGroupAddon>
                                 </InputGroup>
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="theme-model" class="text-sm font-medium">主题</Label>
+                                <Label
+                                    for="theme-model"
+                                    class="text-sm font-medium"
+                                    >主题</Label
+                                >
                                 <Select id="theme-model" v-model="themeModel">
                                     <SelectTrigger>
                                         <SelectValue placeholder="选择主题" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="system">跟随系统</SelectItem>
+                                        <SelectItem value="system"
+                                            >跟随系统</SelectItem
+                                        >
                                         <SelectItem value="light">
                                             浅色
                                         </SelectItem>
-                                        <SelectItem value="dark">深色</SelectItem>
+                                        <SelectItem value="dark"
+                                            >深色</SelectItem
+                                        >
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="default-start-page" class="text-sm font-medium">默认启动页</Label>
-                                <Select id="default-start-page" v-model="defaultStartPage">
+                                <Label
+                                    for="default-start-page"
+                                    class="text-sm font-medium"
+                                    >默认启动页</Label
+                                >
+                                <Select
+                                    id="default-start-page"
+                                    v-model="defaultStartPage"
+                                >
                                     <SelectTrigger>
-                                        <SelectValue placeholder="选择默认启动页" />
+                                        <SelectValue
+                                            placeholder="选择默认启动页"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem v-for="item in settings.settingsStartPageOptions" :key="item.value"
-                                            :value="item.value">
+                                        <SelectItem
+                                            v-for="item in settings.settingsStartPageOptions"
+                                            :key="item.value"
+                                            :value="item.value"
+                                        >
                                             {{ item.name }}
                                         </SelectItem>
                                     </SelectContent>
@@ -100,28 +131,57 @@ const autoStartModel = computed({
                         </div>
                         <div class="grid grid-cols-4 items-center gap-8">
                             <div class="flex gap-2 items-center">
-                                <Label for="auto-add-after-download">下载后自动导入</Label>
-                                <Switch id="auto-add-after-download" v-model="autoAddAfterDownload" />
+                                <Label for="auto-add-after-download"
+                                    >下载后自动导入</Label
+                                >
+                                <Switch
+                                    id="auto-add-after-download"
+                                    v-model="autoAddAfterDownload"
+                                />
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="select-game-by-folder">通过目录选择游戏</Label>
-                                <Switch id="select-game-by-folder" v-model="selectGameByFolder" />
+                                <Label for="select-game-by-folder"
+                                    >通过目录选择游戏</Label
+                                >
+                                <Switch
+                                    id="select-game-by-folder"
+                                    v-model="selectGameByFolder"
+                                />
                             </div>
                             <div class="flex gap-2 items-center">
                                 <Label for="auto-start">开机自启</Label>
-                                <Switch id="auto-start" v-model="autoStartModel" :disabled="autoStartLoading" />
+                                <Switch
+                                    id="auto-start"
+                                    v-model="autoStartModel"
+                                    :disabled="autoStartLoading"
+                                />
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="modifiable-during-game">游戏运行时可修改</Label>
-                                <Switch id="modifiable-during-game" v-model="modifiableDuringGame" />
+                                <Label for="modifiable-during-game"
+                                    >游戏运行时可修改</Label
+                                >
+                                <Switch
+                                    id="modifiable-during-game"
+                                    v-model="modifiableDuringGame"
+                                />
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="show-preload-list">显示前置列表</Label>
-                                <Switch id="show-preload-list" v-model="showPreloadList" />
+                                <Label for="show-preload-list"
+                                    >显示前置列表</Label
+                                >
+                                <Switch
+                                    id="show-preload-list"
+                                    v-model="showPreloadList"
+                                />
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="disable-symlink-install">关闭软链安装</Label>
-                                <Switch id="disable-symlink-install" v-model="disableSymlinkInstall" />
+                                <Label for="disable-symlink-install"
+                                    >关闭软链安装</Label
+                                >
+                                <Switch
+                                    id="disable-symlink-install"
+                                    v-model="closeSoftLinks"
+                                />
                             </div>
                         </div>
                     </CardContent>
