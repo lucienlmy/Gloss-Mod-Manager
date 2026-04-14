@@ -469,14 +469,11 @@ function resetFilters() {
 async function openModDetail(item: IGlossExploreMod) {
     try {
         await router.push({
-            path: "/download",
-            query: {
-                modId: String(item.id),
-            },
+            path: `/detail/${item.id}`,
         });
     } catch (error) {
         console.error(error);
-        ElMessage.error("打开内置 Mod 详情失败。",);
+        ElMessage.error("打开 Mod 详情页失败。",);
     }
 }
 

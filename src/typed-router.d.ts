@@ -48,6 +48,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/detail/[id]': RouteRecordInfo<
+      '/detail/[id]',
+      '/detail/:id',
+      { id: ParamValue<true> },
+      { id: ParamValue<false> },
+      | never
+    >,
     '/download': RouteRecordInfo<
       '/download',
       '/download',
@@ -125,6 +132,12 @@ declare module 'vue-router/auto-routes' {
     'src/pages/backup.vue': {
       routes:
         | '/backup'
+      views:
+        | never
+    }
+    'src/pages/detail/[id].vue': {
+      routes:
+        | '/detail/[id]'
       views:
         | never
     }
