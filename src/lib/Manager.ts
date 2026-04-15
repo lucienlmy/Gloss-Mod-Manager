@@ -2,7 +2,6 @@
  * 管理相关
  */
 
-import { appLocalDataDir } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
 import { FileHandler } from "@/lib/FileHandler";
 import { basename, dirname, extname, join } from "@tauri-apps/api/path";
@@ -24,6 +23,35 @@ export class Manager {
 
     private static context: Partial<IManagerContext> = {};
 
+    private static async getStoreContext(): Promise<Partial<IManagerContext>> {
+        const manager = useManager();
+        const settings = useSettings();
+        const gameName = manager.managerGame?.gameName || "";
+        const modStorage =
+            settings.storagePath && gameName
+                ? await join(settings.storagePath, "mods", gameName)
+                : manager.managerRoot || "";
+
+        return {
+            modStorage,
+            gameStorage: manager.managerGame?.gamePath || "",
+            closeSoftLinks: settings.closeSoftLinks,
+        };
+    }
+
+    private static async resolveModStorage(modId: number | string) {
+        const modStorage = await Manager.getModStoragePath(modId);
+
+        if (modStorage) {
+            return modStorage;
+        }
+
+        ElMessage.warning(
+            "未设置 Mod 储存目录，无法执行安装或卸载。请先选择当前游戏并配置储存路径。",
+        );
+        return null;
+    }
+
     /**
      * 从页面层注入当前运行所需的路径上下文。
      */
@@ -35,15 +63,20 @@ export class Manager {
     }
 
     /**
-     * 获取当前运行上下文，未配置时退回到 Tauri 应用目录。
+     * 获取当前运行上下文，优先使用管理器 store，旧上下文仅作为兼容兜底。
      */
     public static async getContext(): Promise<IManagerContext> {
+        const storeContext = await Manager.getStoreContext();
+
         return {
             modStorage:
-                Manager.context.modStorage ||
-                (await join(await appLocalDataDir(), "mods")),
-            gameStorage: Manager.context.gameStorage || "",
-            closeSoftLinks: Manager.context.closeSoftLinks ?? true,
+                storeContext.modStorage || Manager.context.modStorage || "",
+            gameStorage:
+                storeContext.gameStorage || Manager.context.gameStorage || "",
+            closeSoftLinks:
+                storeContext.closeSoftLinks ??
+                Manager.context.closeSoftLinks ??
+                true,
         };
     }
 
@@ -52,6 +85,11 @@ export class Manager {
      */
     public static async getModStoragePath(modId: number | string) {
         const { modStorage } = await Manager.getContext();
+
+        if (!modStorage) {
+            return "";
+        }
+
         return join(modStorage, String(modId));
     }
 
@@ -67,7 +105,7 @@ export class Manager {
 
         if (!gameStorage) {
             ElMessage.warning(
-                "未设置游戏目录，无法执行安装或卸载。请先调用 Manager.configureContext 配置 gameStorage。",
+                "未设置游戏目录，无法执行安装或卸载。请先选择当前游戏并确认游戏路径。",
             );
             return null;
         }
@@ -132,7 +170,12 @@ export class Manager {
         keepPath: boolean = false,
         inGameStorage: boolean = true,
     ): Promise<IState[]> {
-        const modStorage = await Manager.getModStoragePath(mod.id);
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return Manager.createFailureState(mod);
+        }
+
         const targetRoot = await Manager.resolveInstallRoot(
             installPath,
             inGameStorage,
@@ -174,7 +217,12 @@ export class Manager {
         keepPath: boolean = false,
         inGameStorage: boolean = true,
     ): Promise<IState[]> {
-        const modStorage = await Manager.getModStoragePath(mod.id);
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return Manager.createFailureState(mod);
+        }
+
         const targetRoot = await Manager.resolveInstallRoot(
             installPath,
             inGameStorage,
@@ -235,9 +283,15 @@ export class Manager {
         include: boolean = false,
         spare: boolean = false,
     ) {
-        const modStorage = await Manager.getModStoragePath(mod.id);
-        const targetRoot = await Manager.resolveInstallRoot(installPath, true);
         const result: IState[] = [];
+
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return result;
+        }
+
+        const targetRoot = await Manager.resolveInstallRoot(installPath, true);
 
         if (targetRoot === null) {
             return result;
@@ -325,26 +379,29 @@ export class Manager {
         isLink: boolean = true,
         commonParent: boolean = false,
     ) {
-        const manager = useManager();
-        const settings = useSettings();
-        const modStorage = await join(
-            settings.storagePath,
-            manager.managerGame?.gameName || "",
-            mod.id.toString(),
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return false;
+        }
+
+        const targetRoot = await Manager.resolveInstallRoot(
+            installPath,
+            inGameStorage,
         );
 
-        const closeSoftLinks = settings.closeSoftLinks;
+        if (targetRoot === null) {
+            return false;
+        }
 
-        const gameStorage = inGameStorage
-            ? await join(manager.managerGame?.gamePath || "", installPath)
-            : installPath;
+        const { closeSoftLinks } = await Manager.getContext();
 
         let folders: string[] = [];
 
         for (const item of mod.modFiles) {
             const matched = isExtname
                 ? (await extname(item)) === fileName
-                : FileHandler.compareFileName(item, fileName);
+                : await FileHandler.compareFileName(item, fileName);
 
             if (matched) {
                 folders.push(await dirname(await join(modStorage, item)));
@@ -358,7 +415,7 @@ export class Manager {
         }
 
         for (const folder of folders) {
-            const target = await join(gameStorage, await basename(folder));
+            const target = await join(targetRoot, await basename(folder));
 
             if (isInstall) {
                 if (isLink && !closeSoftLinks) {
@@ -372,8 +429,9 @@ export class Manager {
                 } else {
                     await FileHandler.deleteFolder(target);
                 }
-
-                await Manager.deleteEmptyFolders(await dirname(target));
+                if (closeSoftLinks) {
+                    await Manager.deleteEmptyFolders(await dirname(target));
+                }
             }
         }
 
@@ -400,7 +458,12 @@ export class Manager {
         inGameStorage: boolean = true,
         pass: string[] = [],
     ) {
-        const modStorage = await Manager.getModStoragePath(mod.id);
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return false;
+        }
+
         const targetRoot = await Manager.resolveInstallRoot(
             installPath,
             inGameStorage,
@@ -493,7 +556,12 @@ export class Manager {
         isInstall: boolean,
         inGameStorage: boolean = true,
     ) {
-        const modStorage = await Manager.getModStoragePath(mod.id);
+        const modStorage = await Manager.resolveModStorage(mod.id);
+
+        if (modStorage === null) {
+            return false;
+        }
+
         const targetRoot = await Manager.resolveInstallRoot(
             installPath,
             inGameStorage,

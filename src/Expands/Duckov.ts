@@ -16,10 +16,11 @@ export const supportedGames = async () =>
             {
                 name: "Duckov.exe",
                 rootPath: await join("."),
-            }, {
+            },
+            {
                 name: "Duckov.app",
                 rootPath: await join("."),
-            }
+            },
         ],
         startExe: [
             {
@@ -71,7 +72,6 @@ export const supportedGames = async () =>
         ],
         async checkModType(mod) {
             console.log(mod);
-            
 
             let mods = false;
 

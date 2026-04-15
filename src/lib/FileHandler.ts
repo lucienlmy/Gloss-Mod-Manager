@@ -11,6 +11,8 @@ import {
     resourceDir,
     sep,
 } from "@tauri-apps/api/path";
+import { platform } from "@tauri-apps/plugin-os";
+import { Command } from "@tauri-apps/plugin-shell";
 import {
     copyFile as copyFileByFs,
     exists,
@@ -50,6 +52,152 @@ interface IFileSystemMetadata {
 
 export class FileHandler {
     private static readonly pathSeparator = sep();
+
+    private static toPowerShellLiteral(value: string) {
+        return `'${value.replace(/'/g, "''")}'`;
+    }
+
+    private static toShellOutputBytes(output: unknown) {
+        if (output instanceof Uint8Array) {
+            return output;
+        }
+
+        if (output instanceof ArrayBuffer) {
+            return new Uint8Array(output);
+        }
+
+        if (ArrayBuffer.isView(output)) {
+            return new Uint8Array(
+                output.buffer,
+                output.byteOffset,
+                output.byteLength,
+            );
+        }
+
+        if (Array.isArray(output)) {
+            return Uint8Array.from(output);
+        }
+
+        if (
+            output &&
+            typeof output === "object" &&
+            "data" in output &&
+            Array.isArray(output.data)
+        ) {
+            return Uint8Array.from(output.data);
+        }
+
+        if (output && typeof output === "object" && Symbol.iterator in output) {
+            return Uint8Array.from(output as Iterable<number>);
+        }
+
+        return new Uint8Array();
+    }
+
+    private static decodeShellOutput(output: unknown) {
+        if (typeof output === "string") {
+            return output.trim();
+        }
+
+        const bytes = FileHandler.toShellOutputBytes(output);
+
+        if (bytes.length === 0) {
+            return "";
+        }
+
+        const encodingCandidates =
+            platform() === "windows" ? ["utf-8", "gb18030"] : ["utf-8"];
+
+        for (const encoding of encodingCandidates) {
+            try {
+                return new TextDecoder(encoding, {
+                    fatal: encoding === "utf-8",
+                })
+                    .decode(bytes)
+                    .trim();
+            } catch {
+                continue;
+            }
+        }
+
+        return new TextDecoder().decode(bytes).trim();
+    }
+
+    private static async executeShellCommand(
+        commandName: string,
+        args: string[],
+    ) {
+        const result =
+            platform() === "windows"
+                ? await Command.create(commandName, args, {
+                      encoding: "raw",
+                  }).execute()
+                : await Command.create(commandName, args).execute();
+
+        if (result.code === 0) {
+            return result;
+        }
+
+        const stderr = FileHandler.decodeShellOutput(result.stderr);
+        const stdout = FileHandler.decodeShellOutput(result.stdout);
+
+        throw new Error(
+            stderr ||
+                stdout ||
+                `${commandName} exited with code ${result.code ?? "null"}`,
+        );
+    }
+
+    private static async createWindowsLink(
+        sourcePath: string,
+        targetPath: string,
+        isDirectory: boolean,
+    ) {
+        if (!sourcePath || !targetPath) {
+            throw new Error("软链接源路径或目标路径不能为空。");
+        }
+
+        const runNewItem = async (itemType: "SymbolicLink" | "Junction") => {
+            const script = [
+                "$ErrorActionPreference = 'Stop'",
+                `$target = ${FileHandler.toPowerShellLiteral(targetPath)}`,
+                `$source = ${FileHandler.toPowerShellLiteral(sourcePath)}`,
+                `$itemType = ${FileHandler.toPowerShellLiteral(itemType)}`,
+                "New-Item -ItemType $itemType -Path $target -Target $source -ErrorAction Stop | Out-Null",
+            ].join("; ");
+
+            await FileHandler.executeShellCommand("powershell", [
+                "-NoLogo",
+                "-NoProfile",
+                "-NonInteractive",
+                "-Command",
+                script,
+            ]);
+        };
+
+        if (!isDirectory) {
+            await runNewItem("SymbolicLink");
+            return;
+        }
+
+        try {
+            await runNewItem("SymbolicLink");
+        } catch {
+            // Windows 下目录符号链接可能受权限限制，失败时退回 Junction。
+            await runNewItem("Junction");
+        }
+    }
+
+    private static async createUnixLink(
+        sourcePath: string,
+        targetPath: string,
+    ) {
+        await FileHandler.executeShellCommand("ln", [
+            "-s",
+            sourcePath,
+            targetPath,
+        ]);
+    }
 
     /**
      * plugin-fs 在 Tauri 2 中支持 file URL，这里把绝对路径统一转为 file URL。
@@ -152,6 +300,8 @@ export class FileHandler {
         filePath: string,
         recursive: boolean = false,
     ) {
+        console.log({ filePath });
+
         if (recursive) {
             await remove(FileHandler.toFsPath(filePath), { recursive: true });
             return;
@@ -581,18 +731,68 @@ export class FileHandler {
         destPath: string,
         backup: boolean = false,
     ) {
+        const sourcePath = FileHandler.normalizePath(folderPath);
+        const targetPath = FileHandler.normalizePath(destPath);
+        let backupPath = "";
+
         try {
-            if (backup && (await FileHandler.fileExists(destPath))) {
-                await FileHandler.renameFile(destPath, `${destPath}_back`);
+            await FileHandler.ensureParentDirectory(targetPath);
+
+            if (backup && (await FileHandler.fileExists(targetPath))) {
+                backupPath = `${targetPath}_back`;
+
+                if (await FileHandler.fileExists(backupPath)) {
+                    if (await FileHandler.isDir(backupPath)) {
+                        await FileHandler.deleteFolder(backupPath);
+                    } else {
+                        await FileHandler.deleteFile(backupPath);
+                    }
+                }
+
+                const renamed = await FileHandler.renameFile(
+                    targetPath,
+                    backupPath,
+                );
+
+                if (!renamed) {
+                    return false;
+                }
             }
 
-            // Tauri 前端没有通用的 symlink API，这里退化为复制目录/文件。
-            if (await FileHandler.isDir(folderPath)) {
-                return FileHandler.copyFolder(folderPath, destPath);
-            }
+            const isDirectory = await FileHandler.isDir(sourcePath);
 
-            return FileHandler.copyFile(folderPath, destPath);
+            switch (platform()) {
+                case "windows":
+                    await FileHandler.createWindowsLink(
+                        sourcePath,
+                        targetPath,
+                        isDirectory,
+                    );
+                    return true;
+                case "linux":
+                case "macos":
+                    await FileHandler.createUnixLink(sourcePath, targetPath);
+                    return true;
+                default:
+                    ElMessage.warning(
+                        "当前平台暂不支持使用 shell 创建软连接，将退化为复制。",
+                    );
+
+                    if (isDirectory) {
+                        return FileHandler.copyFolder(sourcePath, targetPath);
+                    }
+
+                    return FileHandler.copyFile(sourcePath, targetPath);
+            }
         } catch (error) {
+            if (
+                backupPath &&
+                (await FileHandler.fileExists(backupPath)) &&
+                !(await FileHandler.fileExists(targetPath))
+            ) {
+                await FileHandler.renameFile(backupPath, targetPath);
+            }
+
             ElMessage.error(`创建软连接失败：${error}`);
             FileHandler.writeLog(String(error), true);
             return false;
@@ -615,6 +815,12 @@ export class FileHandler {
      */
     public static async removeLink(linkPath: string, backup: boolean = false) {
         try {
+            console.log({
+                linkPath,
+                isDir: await FileHandler.isDir(linkPath),
+                backup,
+            });
+
             if (await FileHandler.isDir(linkPath)) {
                 await FileHandler.deleteFolder(linkPath);
             } else {
@@ -623,6 +829,7 @@ export class FileHandler {
 
             if (backup) {
                 const backFile = `${linkPath}_back`;
+
                 if (await FileHandler.fileExists(backFile)) {
                     await FileHandler.renameFile(backFile, linkPath);
                 }

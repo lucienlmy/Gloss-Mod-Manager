@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
-import { t } from "vue-router/dist/index-BzEKChPW.js";
 
 interface IEditModForm {
     modName: string;
@@ -237,20 +236,31 @@ async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
     const type = manager.managerGame?.modType.find(
         (type) => type.id === item.modType,
     );
-
     if (nextInstalled) {
         if (typeof type?.install == "function") {
-            const res = await type.install(item);
-            if (typeof res == "boolean" && res == false) {
+            try {
+                const res = await type.install(item);
+                if (typeof res == "boolean" && res == false) {
+                    item.isInstalled = false;
+                }
+            } catch (error) {
+                ElMessage.error(`安装 ${item.modName} 失败：${error}`);
                 item.isInstalled = false;
             }
+            await manager.saveManagerData();
         }
     } else {
         if (typeof type?.uninstall == "function") {
-            const res = await type.uninstall(item);
-            if (typeof res == "boolean" && res == false) {
+            try {
+                const res = await type.uninstall(item);
+                if (typeof res == "boolean" && res == false) {
+                    item.isInstalled = true;
+                }
+            } catch (error) {
+                ElMessage.error(`卸载 ${item.modName} 失败：${error}`);
                 item.isInstalled = true;
             }
+            await manager.saveManagerData();
         }
     }
 }

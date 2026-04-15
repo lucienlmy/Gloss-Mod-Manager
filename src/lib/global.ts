@@ -3,6 +3,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { Aria2Rpc } from "@/lib/aria2-rpc";
 import { PersistentStore } from "@/lib/persistent-store";
 import router from "@/routes";
 
@@ -33,6 +34,14 @@ async function quitApplication() {
     if (tray) {
         await tray.close();
         tray = null;
+    }
+
+    try {
+        // 退出应用前主动关闭 aria2 sidecar，避免 dev 构建时目标文件被占用。
+        await Aria2Rpc.stopServer();
+    } catch (error) {
+        console.error("停止 aria2 服务失败");
+        console.error(error);
     }
 
     await getCurrentWindow().destroy();

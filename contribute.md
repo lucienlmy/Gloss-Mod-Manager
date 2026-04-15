@@ -27,13 +27,13 @@ src-tauri/
 
 ## 贡献指南：
 1. 下载并安装 [Node.js](https://nodejs.org/) 、 [Rust](https://www.rust-lang.org/tools/install)、Yarn 或 npm。
-1. Fork 本仓库并克隆到本地。
-2. 创建一个新的分支 `git checkout -b feature/your-feature-name` 或 `git checkout -b bugfix/your-bugfix-name`。
-3. 用 vs code 打开项目，在终端运行 `yarn` 安装依赖。
-4. 运行 `yarn tauri dev` 启动开发服务器，进行开发和测试。
-5. 运行 `yarn tauri build` 构建生产版本。
-6. 在开发过程中，请确保你的代码符合项目的[代码风格](/CodeStyle.md)和最佳实践，并且通过了所有相关的测试。
-7. 提交你的更改 `git commit -m "Add some feature"`，并推送到你的分支 `git push origin feature/your-feature-name`。
-8. 在 GitHub 上创建一个 Pull Request，描述你的更改和相关的背景信息。
+2. Fork 本仓库并克隆到本地。
+3. 创建一个新的分支 `git checkout -b feature/your-feature-name` 或 `git checkout -b bugfix/your-bugfix-name`。
+4. 用 vs code 打开项目，在终端运行 `yarn` 安装依赖。
+5. 运行 `yarn tauri dev` 启动开发服务器，进行开发和测试。
+6. 运行 `yarn tauri build` 构建生产版本。
+7. 在开发过程中，请确保你的代码符合项目的[代码风格](/CodeStyle.md)和最佳实践，并且通过了所有相关的测试。
+8. 提交你的更改 `git commit -m "Add some feature"`，并推送到你的分支 `git push origin feature/your-feature-name`。
+9.  在 GitHub 上创建一个 Pull Request，描述你的更改和相关的背景信息。
 
 注意: 在开发的时候请尽量兼容不同平台（Windows、macOS、Linux），并遵循项目的代码风格和最佳实践。
