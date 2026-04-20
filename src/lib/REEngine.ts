@@ -70,7 +70,7 @@ export class REEngine {
         const patchNumbers: number[] = [];
 
         for (const filePath of pakFiles) {
-            if ((await extname(filePath)).toLowerCase() !== ".pak") {
+            if ((await extname(filePath)).toLowerCase() !== "pak") {
                 continue;
             }
 
@@ -150,7 +150,7 @@ export class REEngine {
                 continue;
             }
 
-            if ((await extname(sourcePath)).toLowerCase() !== ".pak") {
+            if ((await extname(sourcePath)).toLowerCase() !== "pak") {
                 continue;
             }
 
@@ -377,7 +377,7 @@ export class REEngine {
                 refPlugins = true;
             }
 
-            if ((await extname(item)).toLowerCase() === ".pak") {
+            if ((await extname(item)).toLowerCase() === "pak") {
                 pak = true;
             }
         }

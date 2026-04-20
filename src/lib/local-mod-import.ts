@@ -187,6 +187,7 @@ function normalizeMod(
         fileName: mod.fileName || mod.modName || `mod-${mod.id ?? Date.now()}`,
         md5: mod.md5 || "",
         modVersion: mod.modVersion || "1.0.0",
+        isUpdate: Boolean(mod.isUpdate),
         isInstalled: Boolean(mod.isInstalled),
         weight: typeof mod.weight === "number" ? mod.weight : 0,
         modFiles: Array.isArray(mod.modFiles) ? mod.modFiles : [],

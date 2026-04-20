@@ -24,6 +24,8 @@ export const useManager = defineStore("Manager", () => {
     const selectedTag = ref("全部");
     const tags = ref<ITag[]>([]);
     const managerRoot = ref("");
+    const selectionMode = ref(false);
+    const selectionIds = ref<number[]>([]);
 
     function sortModsByWeight(list: IModInfo[]) {
         return list
@@ -32,9 +34,11 @@ export const useManager = defineStore("Manager", () => {
                 index,
             }))
             .sort((left, right) => {
-                const weightDiff =
-                    Number(left.mod.weight ?? 0) -
-                    Number(right.mod.weight ?? 0);
+                const leftWeight =
+                    Number.isFinite(left.mod.weight) ? left.mod.weight : 0;
+                const rightWeight =
+                    Number.isFinite(right.mod.weight) ? right.mod.weight : 0;
+                const weightDiff = leftWeight - rightWeight;
 
                 if (weightDiff !== 0) {
                     return weightDiff;
@@ -90,6 +94,60 @@ export const useManager = defineStore("Manager", () => {
     });
 
     const availableTypes = computed(() => managerGame.value?.modType ?? []);
+    const selectedMods = computed<IModInfo[]>(() => {
+        const selectedIdSet = new Set(selectionIds.value);
+
+        return sortModsByWeight(managerModList.value).filter((mod) => {
+            return selectedIdSet.has(mod.id);
+        });
+    });
+
+    function setSelection(ids: number[]) {
+        const existingIdSet = new Set(
+            managerModList.value.map((mod) => mod.id),
+        );
+        selectionIds.value = [...new Set(ids)].filter((id) => {
+            return existingIdSet.has(id);
+        });
+    }
+
+    function clearSelection() {
+        selectionIds.value = [];
+    }
+
+    function toggleSelection(modId: number, selected?: boolean) {
+        const selectedIdSet = new Set(selectionIds.value);
+        const shouldSelect = selected ?? !selectedIdSet.has(modId);
+
+        if (shouldSelect) {
+            selectedIdSet.add(modId);
+        } else {
+            selectedIdSet.delete(modId);
+        }
+
+        setSelection([...selectedIdSet]);
+    }
+
+    function selectAllVisible() {
+        setSelection(filteredMods.value.map((mod) => mod.id));
+    }
+
+    function invertVisibleSelection() {
+        const selectedIdSet = new Set(selectionIds.value);
+        const nextIds = filteredMods.value
+            .filter((mod) => !selectedIdSet.has(mod.id))
+            .map((mod) => mod.id);
+
+        setSelection(nextIds);
+    }
+
+    function retainVisibleSelection() {
+        const visibleIdSet = new Set(filteredMods.value.map((mod) => mod.id));
+
+        selectionIds.value = selectionIds.value.filter((id) => {
+            return visibleIdSet.has(id);
+        });
+    }
 
     function getTypeName(typeId: IModInfo["modType"]) {
         const type = availableTypes.value.find(
@@ -135,6 +193,16 @@ export const useManager = defineStore("Manager", () => {
             console.error(error);
         });
 
+    watch(selectionMode, (enabled) => {
+        if (!enabled) {
+            clearSelection();
+        }
+    });
+
+    watch(managerModList, () => {
+        setSelection(selectionIds.value);
+    });
+
     return {
         supportedGames,
         managerModList,
@@ -149,6 +217,15 @@ export const useManager = defineStore("Manager", () => {
         availableTypes,
         getTypeName,
         managerRoot,
+        selectionMode,
+        selectionIds,
+        selectedMods,
+        setSelection,
+        clearSelection,
+        toggleSelection,
+        selectAllVisible,
+        invertVisibleSelection,
+        retainVisibleSelection,
         saveManagerData,
     };
 });

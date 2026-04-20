@@ -300,7 +300,7 @@ export class FileHandler {
         filePath: string,
         recursive: boolean = false,
     ) {
-        console.log({ filePath });
+        // console.log({ filePath });
 
         if (recursive) {
             await remove(FileHandler.toFsPath(filePath), { recursive: true });

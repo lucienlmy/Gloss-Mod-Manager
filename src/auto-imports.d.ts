@@ -21,6 +21,7 @@ declare global {
   const GTA5Handler: typeof import('./lib/GTA5Handler').GTA5Handler
   const GlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').GlossDownloadMonitor
   const Manager: typeof import('./lib/Manager').Manager
+  const McpService: typeof import('./lib/mcp-service').McpService
   const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
   const PersistentStore: typeof import('./lib/persistent-store').PersistentStore
   const REEngine: typeof import('./lib/REEngine').REEngine
@@ -43,6 +44,7 @@ declare global {
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
   const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
+  const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
   const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
@@ -55,6 +57,7 @@ declare global {
   const createArchiveWithSevenZip: typeof import('./lib/sevenZip').createArchiveWithSevenZip
   const createEventHook: typeof import('@vueuse/core').createEventHook
   const createGlobalState: typeof import('@vueuse/core').createGlobalState
+  const createGmmPackage: typeof import('./lib/gmm-package').createGmmPackage
   const createInjectionState: typeof import('@vueuse/core').createInjectionState
   const createPinia: typeof import('pinia').createPinia
   const createReactiveFn: typeof import('@vueuse/core').createReactiveFn
@@ -77,7 +80,9 @@ declare global {
   const executeSidecar: typeof import('./lib/sidecar').executeSidecar
   const extendRef: typeof import('@vueuse/core').extendRef
   const extractArchiveWithSevenZip: typeof import('./lib/sevenZip').extractArchiveWithSevenZip
+  const fetchAllGlossGames: typeof import('./lib/gloss-mod-api').fetchAllGlossGames
   const fetchGlossGamePlugins: typeof import('./lib/gloss-mod-api').fetchGlossGamePlugins
+  const fetchGlossGames: typeof import('./lib/gloss-mod-api').fetchGlossGames
   const fetchGlossModDetail: typeof import('./lib/gloss-mod-api').fetchGlossModDetail
   const findGlossDuplicateLocalMods: typeof import('./lib/gloss-download').findGlossDuplicateLocalMods
   const findGlossDuplicateTasks: typeof import('./lib/gloss-download').findGlossDuplicateTasks
@@ -96,6 +101,7 @@ declare global {
   const initializeTheme: typeof import('./lib/theme').initializeTheme
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
+  const installGmmPackage: typeof import('./lib/gmm-package').installGmmPackage
   const isDefined: typeof import('@vueuse/core').isDefined
   const isGlossCloudDriveResource: typeof import('./lib/gloss-download-queue').isGlossCloudDriveResource
   const isGlossCloudDriveUrl: typeof import('./lib/gloss-download-queue').isGlossCloudDriveUrl
@@ -112,6 +118,9 @@ declare global {
   const mapStores: typeof import('pinia').mapStores
   const mapWritableState: typeof import('pinia').mapWritableState
   const markRaw: typeof import('vue').markRaw
+  const mcpPromptDefinitions: typeof import('./lib/mcp-service').mcpPromptDefinitions
+  const mcpResourceDefinitions: typeof import('./lib/mcp-service').mcpResourceDefinitions
+  const mcpToolDefinitions: typeof import('./lib/mcp-service').mcpToolDefinitions
   const nextTick: typeof import('vue').nextTick
   const normalizeCompareText: typeof import('./lib/gloss-download').normalizeCompareText
   const onActivated: typeof import('vue').onActivated
@@ -145,6 +154,7 @@ declare global {
   const reactiveComputed: typeof import('@vueuse/core').reactiveComputed
   const reactiveOmit: typeof import('@vueuse/core').reactiveOmit
   const reactivePick: typeof import('@vueuse/core').reactivePick
+  const readGmmPackageDetails: typeof import('./lib/gmm-package').readGmmPackageDetails
   const readonly: typeof import('vue').readonly
   const ref: typeof import('vue').ref
   const refAutoReset: typeof import('@vueuse/core').refAutoReset
@@ -156,6 +166,7 @@ declare global {
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveGlossAssetUrl: typeof import('./lib/gloss-mod-api').resolveGlossAssetUrl
   const resolveGlossDownloadImportSourceType: typeof import('./lib/gloss-download-queue').resolveGlossDownloadImportSourceType
+  const resolveGmmPackFolderKey: typeof import('./lib/gmm-package').resolveGmmPackFolderKey
   const resolveLocalModImportSourceType: typeof import('./lib/local-mod-import').resolveLocalModImportSourceType
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const runAria2Command: typeof import('./lib/aria2').runAria2Command
@@ -432,6 +443,12 @@ declare global {
   // @ts-ignore
   export type { IGlossDownloadTaskMeta, GlossDownloadPresence, IGlossDuplicateCriteria, IGlossDuplicateTaskMatch, IGlossDuplicateLocalModMatch } from './lib/gloss-download'
   import('./lib/gloss-download')
+  // @ts-ignore
+  export type { IGlossGameModType, IGlossGameListItem, IGlossModUpdateItem } from './lib/gloss-mod-api'
+  import('./lib/gloss-mod-api')
+  // @ts-ignore
+  export type { IGmmPackageDetails, IInstallGmmPackageOptions } from './lib/gmm-package'
+  import('./lib/gmm-package')
   // @ts-ignore
   export type { LocalModImportSourceType, LocalModImportDuplicateStrategy, ILocalModImportSource } from './lib/local-mod-import'
   import('./lib/local-mod-import')

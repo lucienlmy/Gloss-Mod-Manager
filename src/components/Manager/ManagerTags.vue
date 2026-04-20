@@ -7,6 +7,10 @@ const tagName = ref("");
 const tagColor = ref("#14F7D8");
 const showTagEditDialog = ref(false);
 const editingTagName = ref("");
+const draggingTagName = ref("");
+const dragTargetTagName = ref("");
+
+const TAG_DRAG_MIME = "application/x-gloss-manager-tag";
 
 function openCreateTagDialog() {
     resetTagEditor();
@@ -111,6 +115,79 @@ async function deleteTag(tag: ITag) {
     ElMessage.success("标签已删除。");
 }
 
+function resolveDraggedTagName(event: DragEvent) {
+    const draggedName =
+        event.dataTransfer?.getData(TAG_DRAG_MIME) ||
+        event.dataTransfer?.getData("text/plain") ||
+        draggingTagName.value;
+
+    return draggedName.trim();
+}
+
+function clearTagDragState() {
+    draggingTagName.value = "";
+    dragTargetTagName.value = "";
+}
+
+function handleTagDragStart(event: DragEvent, tag: ITag) {
+    draggingTagName.value = tag.name;
+
+    if (!event.dataTransfer) {
+        return;
+    }
+
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData(TAG_DRAG_MIME, tag.name);
+    event.dataTransfer.setData("text/plain", tag.name);
+}
+
+function handleTagDragOver(event: DragEvent, tag: ITag) {
+    const draggedName = resolveDraggedTagName(event);
+
+    if (!draggedName || draggedName === tag.name) {
+        return;
+    }
+
+    event.preventDefault();
+    dragTargetTagName.value = tag.name;
+
+    if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = "move";
+    }
+}
+
+async function handleTagDrop(event: DragEvent, tag: ITag) {
+    const draggedName = resolveDraggedTagName(event);
+
+    event.preventDefault();
+
+    if (!draggedName || draggedName === tag.name) {
+        clearTagDragState();
+        return;
+    }
+
+    const sourceIndex = manager.tags.findIndex(
+        (item) => item.name === draggedName,
+    );
+    const targetIndex = manager.tags.findIndex(
+        (item) => item.name === tag.name,
+    );
+
+    if (sourceIndex === -1 || targetIndex === -1) {
+        clearTagDragState();
+        return;
+    }
+
+    const reorderedTags = [...manager.tags];
+    const [draggedTag] = reorderedTags.splice(sourceIndex, 1);
+
+    reorderedTags.splice(targetIndex, 0, draggedTag);
+    manager.tags = reorderedTags;
+    await manager.saveManagerData();
+    clearTagDragState();
+    ElMessage.success("标签顺序已更新。");
+}
+
 function resetTagEditor() {
     editingTagName.value = "";
     tagName.value = "";
@@ -124,14 +201,29 @@ function resetTagEditor() {
             <ToggleGroupItem
                 v-for="tag in manager.tags"
                 :key="tag.name"
-                :value="tag.name">
+                :value="tag.name"
+            >
                 <ContextMenu>
-                    <ContextMenuTrigger class="flex items-center gap-2">
+                    <ContextMenuTrigger
+                        class="flex items-center gap-2 rounded-md px-1 py-0.5 cursor-grab active:cursor-grabbing"
+                        :class="
+                            dragTargetTagName === tag.name &&
+                            draggingTagName !== tag.name
+                                ? 'ring-1 ring-primary/50 bg-primary/5'
+                                : ''
+                        "
+                        draggable="true"
+                        @dragstart="handleTagDragStart($event, tag)"
+                        @dragover="handleTagDragOver($event, tag)"
+                        @drop="handleTagDrop($event, tag)"
+                        @dragend="clearTagDragState"
+                    >
                         <div
                             class="h-2.5 w-2.5 rounded-full"
                             :style="{
                                 backgroundColor: tag.color,
-                            }"></div>
+                            }"
+                        ></div>
                         {{ tag.name }}
                     </ContextMenuTrigger>
                     <ContextMenuContent class="w-2">
@@ -152,7 +244,8 @@ function resetTagEditor() {
                 <Button
                     variant="outline"
                     size="icon"
-                    @click="openCreateTagDialog">
+                    @click="openCreateTagDialog"
+                >
                     <IconPlus />
                 </Button>
             </DialogTrigger>
@@ -166,7 +259,8 @@ function resetTagEditor() {
                     <InputGroup>
                         <InputGroupInput
                             v-model="tagName"
-                            placeholder="标签名称" />
+                            placeholder="标签名称"
+                        />
                         <InputGroupAddon align="inline-end">
                             <input type="color" v-model="tagColor" />
                         </InputGroupAddon>

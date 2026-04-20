@@ -1,19 +1,33 @@
 <script setup lang="ts">
-import { open } from "@tauri-apps/plugin-dialog";
+import { onMounted, onUnmounted } from "vue";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { ElMessage } from "element-plus-message";
+import { createGmmPackage, installGmmPackage } from "@/lib/gmm-package";
+import { checkGlossModUpdates } from "@/lib/gloss-mod-api";
 import {
     ARCHIVE_EXTENSIONS,
     importLocalModSources,
+    resolveLocalModImportSourceType,
 } from "@/lib/local-mod-import";
 import { syncManagerRuntimeContext } from "@/lib/manager-context";
+import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import ManagerPreloadList from "@/components/Manager/ManagerPreloadList.vue";
 import {
+    CheckCheck,
+    CheckSquare,
+    Download,
     FolderOpen,
     FolderPlus,
     Gamepad2,
+    Package,
     RefreshCw,
     Search,
     Settings2,
+    Shuffle,
+    SquarePen,
+    Trash2,
+    Upload,
 } from "lucide-vue-next";
 
 interface IBatchEditForm {
@@ -26,6 +40,7 @@ interface IBatchEditForm {
 
 const manager = useManager();
 const router = useRouter();
+const { selectionMode, selectionIds } = storeToRefs(manager);
 
 const storagePath = PersistentStore.useValue<string>("storagePath", "");
 const disableSymlinkInstall = PersistentStore.useValue<boolean>(
@@ -36,10 +51,13 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
 const loading = ref(false);
 const importLoading = ref(false);
 const loadError = ref("");
-const selectedIds = ref<number[]>([]);
 const actioningIds = ref<number[]>([]);
+const updateChecking = ref(false);
+const exportLoading = ref(false);
+const windowDropActive = ref(false);
 
 const showBatchEditDialog = ref(false);
+const showExportDialog = ref(false);
 const batchEditForm = reactive<IBatchEditForm>({
     modAuthor: "",
     modType: "",
@@ -47,12 +65,20 @@ const batchEditForm = reactive<IBatchEditForm>({
     modWebsite: "",
     tagsText: "",
 });
+const exportForm = reactive<IInfo>({
+    name: "",
+    version: "1.0.0",
+    description: "",
+    gameID: undefined,
+    author: "",
+});
 
 let latestLoadId = 0;
+let unlistenWindowDragDrop: (() => void) | null = null;
 
 watch(manager.filteredMods, (mods) => {
-    const visibleIds = new Set(mods.map((mod) => mod.id));
-    selectedIds.value = selectedIds.value.filter((id) => visibleIds.has(id));
+    void mods;
+    manager.retainVisibleSelection();
 });
 
 watch(
@@ -60,6 +86,14 @@ watch(
     async () => {
         await syncManagerContext();
         await loadManagerData();
+    },
+    { immediate: true },
+);
+
+watch(
+    () => manager.managerGame?.GlossGameId,
+    (gameId) => {
+        exportForm.gameID = gameId;
     },
     { immediate: true },
 );
@@ -203,6 +237,7 @@ function normalizeMod(mod: Partial<IModInfo>): IModInfo {
         fileName: mod.fileName || mod.modName || `mod-${mod.id ?? Date.now()}`,
         md5: mod.md5 || "",
         modVersion: mod.modVersion || "1.0.0",
+        isUpdate: Boolean(mod.isUpdate),
         isInstalled: Boolean(mod.isInstalled),
         weight: typeof mod.weight === "number" ? mod.weight : 0,
         modFiles: Array.isArray(mod.modFiles) ? mod.modFiles : [],
@@ -224,7 +259,7 @@ async function loadManagerData() {
     latestLoadId += 1;
     const currentLoadId = latestLoadId;
     loadError.value = "";
-    selectedIds.value = [];
+    selectionIds.value = [];
 
     if (!manager.managerGame) {
         manager.managerModList = [];
@@ -319,7 +354,7 @@ async function applyBatchEdit() {
     );
 
     manager.managerModList = manager.managerModList.map((mod) => {
-        if (!selectedIds.value.includes(mod.id)) {
+        if (!selectionIds.value.includes(mod.id)) {
             return mod;
         }
 
@@ -427,10 +462,6 @@ function finishAction(modId: number) {
     actioningIds.value = actioningIds.value.filter((item) => item !== modId);
 }
 
-function isActioning(modId: number) {
-    return actioningIds.value.includes(modId);
-}
-
 async function toggleInstall(mod: IModInfo, install: boolean) {
     const type = getTypeDefinition(mod);
 
@@ -475,9 +506,199 @@ async function toggleInstall(mod: IModInfo, install: boolean) {
     }
 }
 
-void applyBatchEdit;
-void isActioning;
-void toggleInstall;
+// ── GMM 包导入 ──────────────────────────────────────────────────────────────
+async function importGmmFile() {
+    if (!manager.managerRoot) {
+        ElMessage.warning("请先选择游戏并配置储存路径。");
+        return;
+    }
+
+    const selected = await open({
+        directory: false,
+        multiple: true,
+        title: "选择 GMM 包文件",
+        filters: [{ name: "GMM 包", extensions: ["gmm"] }],
+    });
+
+    if (!selected) {
+        return;
+    }
+
+    const files = Array.isArray(selected) ? selected : [selected];
+    importLoading.value = true;
+
+    try {
+        for (const file of files) {
+            await installGmmPackage({ filePath: file, manager });
+        }
+
+        ElMessage.success("GMM 包导入完成。");
+    } catch (error: unknown) {
+        console.error("GMM 包导入失败");
+        console.error(error);
+        ElMessage.error("GMM 包导入失败，请查看控制台日志。");
+    } finally {
+        importLoading.value = false;
+    }
+}
+
+// ── GMM 包导出 ──────────────────────────────────────────────────────────────
+async function exportToGmm() {
+    if (!manager.managerRoot) {
+        return;
+    }
+
+    const modsToExport = manager.managerModList.filter((m) =>
+        selectionIds.value.includes(m.id),
+    );
+
+    if (modsToExport.length === 0) {
+        ElMessage.warning("请先选择至少一个 Mod 再导出。");
+        return;
+    }
+
+    const savePath = await save({
+        title: "导出为 GMM 包",
+        filters: [{ name: "GMM 包", extensions: ["gmm"] }],
+        defaultPath: exportForm.name || "export",
+    });
+
+    if (!savePath) {
+        return;
+    }
+
+    exportLoading.value = true;
+
+    try {
+        await createGmmPackage({
+            mods: modsToExport,
+            managerRoot: manager.managerRoot,
+            info: exportForm,
+            outputPath: savePath,
+        });
+        ElMessage.success("GMM 包导出成功。");
+        showExportDialog.value = false;
+    } catch (error: unknown) {
+        console.error("GMM 包导出失败");
+        console.error(error);
+        ElMessage.error("GMM 包导出失败，请查看控制台日志。");
+    } finally {
+        exportLoading.value = false;
+    }
+}
+
+// ── 更新检查 ────────────────────────────────────────────────────────────────
+async function checkForUpdates() {
+    const glossMods = manager.managerModList.filter(
+        (m) => typeof m.webId === "number" && m.webId > 0,
+    );
+
+    if (glossMods.length === 0) {
+        ElMessage.info("当前没有来自 Gloss Mod 的 Mod 可检查更新。");
+        return;
+    }
+
+    updateChecking.value = true;
+
+    try {
+        const webIds = glossMods
+            .map((m) => m.webId)
+            .filter((id): id is number => typeof id === "number" && id > 0);
+        const updates = await checkGlossModUpdates(webIds);
+
+        if (updates.length === 0) {
+            ElMessage.success("所有 Mod 已是最新版本。");
+            return;
+        }
+
+        for (const update of updates) {
+            const localMod = glossMods.find((m) => m.webId === update.id);
+
+            if (localMod) {
+                await queueGlossModDownload({
+                    modId: update.id,
+                    replaceLocalModId: localMod.id,
+                });
+            }
+        }
+
+        ElMessage.success(`发现 ${updates.length} 个更新，已加入下载队列。`);
+    } catch (error: unknown) {
+        console.error("检查更新失败");
+        console.error(error);
+        ElMessage.error("检查更新失败，请查看控制台日志。");
+    } finally {
+        updateChecking.value = false;
+    }
+}
+
+// ── 批量操作（安装/卸载/移除） ─────────────────────────────────────────────
+async function batchInstall(install: boolean) {
+    const targets = manager.managerModList.filter((m) =>
+        selectionIds.value.includes(m.id),
+    );
+
+    for (const mod of targets) {
+        await toggleInstall(mod, install);
+    }
+}
+
+async function batchRemove() {
+    const count = selectionIds.value.length;
+
+    manager.managerModList = manager.managerModList.filter(
+        (m) => !selectionIds.value.includes(m.id),
+    );
+    selectionIds.value = [];
+    manager.selectionMode = false;
+    await manager.saveManagerData();
+    ElMessage.success(`已移除 ${count} 个 Mod。`);
+}
+
+// ── 窗口级拖拽导入 ──────────────────────────────────────────────────────────
+onMounted(async () => {
+    unlistenWindowDragDrop = await getCurrentWindow().onDragDropEvent(
+        async (event) => {
+            if (event.payload.type === "over") {
+                windowDropActive.value = true;
+            } else if (event.payload.type === "drop") {
+                windowDropActive.value = false;
+
+                if (!manager.managerRoot) {
+                    return;
+                }
+
+                const paths = "paths" in event.payload ? event.payload.paths : [];
+                const gmmFiles = paths.filter((p) =>
+                    p.toLowerCase().endsWith(".gmm"),
+                );
+                const others = paths.filter(
+                    (p) => !p.toLowerCase().endsWith(".gmm"),
+                );
+
+                for (const gmmFile of gmmFiles) {
+                    await installGmmPackage({ filePath: gmmFile, manager });
+                }
+
+                if (others.length > 0) {
+                    // resolveLocalModImportSourceType 返回 "archive" | "file"，
+                    // 拖入的非压缩包文件统一按文件夹处理（允许直接拖入文件夹）
+                    const sourceType =
+                        resolveLocalModImportSourceType(others[0]) === "archive"
+                            ? "archive"
+                            : "folder";
+                    await importSources(others, sourceType);
+                }
+            } else {
+                windowDropActive.value = false;
+            }
+        },
+    );
+});
+
+onUnmounted(() => {
+    unlistenWindowDragDrop?.();
+});
 
 async function openModRootFolder() {
     if (!manager.managerRoot) {
@@ -668,12 +889,37 @@ function openGamesPage() {
                                         <FolderPlus class="h-4 w-4" />
                                         导入压缩包
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem @click="importGmmFile">
+                                        <Package class="h-4 w-4" />
+                                        导入 GMM 包
+                                    </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                             <StartGame :game="manager.managerGame" />
                             <Button variant="outline" @click="loadManagerData">
                                 <RefreshCw class="h-4 w-4" />
                                 刷新
+                            </Button>
+                            <Button
+                                variant="outline"
+                                :disabled="updateChecking"
+                                @click="checkForUpdates"
+                            >
+                                <Download class="h-4 w-4" />
+                                {{ updateChecking ? "检查中…" : "检查更新" }}
+                            </Button>
+                            <Button
+                                :variant="
+                                    selectionMode ? 'default' : 'outline'
+                                "
+                                @click="
+                                    manager.selectionMode =
+                                        !manager.selectionMode
+                                "
+                            >
+                                <CheckSquare class="h-4 w-4" />
+                                多选
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
@@ -692,6 +938,14 @@ function openGamesPage() {
                                     <DropdownMenuItem @click="openGameFolder">
                                         <FolderOpen class="h-4 w-4" />
                                         打开游戏目录
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        :disabled="!selectionIds.length"
+                                        @click="showExportDialog = true"
+                                    >
+                                        <Upload class="h-4 w-4" />
+                                        导出 GMM 包
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                 </DropdownMenuContent>
@@ -759,7 +1013,193 @@ function openGamesPage() {
                     条目。
                 </p>
             </div>
+            <!-- 多选操作工具栏 -->
+            <div
+                v-if="selectionMode"
+                class="sticky bottom-4 z-10 flex flex-wrap items-center gap-2 rounded-lg border bg-background/90 px-4 py-2 shadow-md backdrop-blur"
+            >
+                <span class="text-sm text-muted-foreground">
+                    已选 {{ selectionIds.length }} /
+                    {{ manager.filteredMods.length }}
+                </span>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    @click="manager.selectAllVisible()"
+                >
+                    <CheckCheck class="h-4 w-4" />
+                    全选
+                </Button>
+                <Button
+                    size="sm"
+                    variant="ghost"
+                    @click="manager.clearSelection()"
+                >
+                    取消
+                </Button>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    :disabled="!selectionIds.length"
+                    @click="batchInstall(true)"
+                >
+                    <Shuffle class="h-4 w-4" />
+                    批量安装
+                </Button>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    :disabled="!selectionIds.length"
+                    @click="batchInstall(false)"
+                >
+                    批量卸载
+                </Button>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    :disabled="!selectionIds.length"
+                    @click="showBatchEditDialog = true"
+                >
+                    <SquarePen class="h-4 w-4" />
+                    批量编辑
+                </Button>
+                <Button
+                    size="sm"
+                    variant="destructive"
+                    :disabled="!selectionIds.length"
+                    @click="batchRemove"
+                >
+                    <Trash2 class="h-4 w-4" />
+                    批量移除
+                </Button>
+            </div>
+
+            <!-- 批量编辑 Dialog -->
+            <Dialog v-model:open="showBatchEditDialog">
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>批量编辑 Mod 信息</DialogTitle>
+                        <DialogDescription>
+                            仅填写需要修改的字段，留空表示不修改。
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div class="grid gap-3 py-2">
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">作者</Label>
+                            <Input
+                                v-model="batchEditForm.modAuthor"
+                                class="col-span-3"
+                                placeholder="留空表示不修改"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">版本</Label>
+                            <Input
+                                v-model="batchEditForm.modVersion"
+                                class="col-span-3"
+                                placeholder="留空表示不修改"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">网站</Label>
+                            <Input
+                                v-model="batchEditForm.modWebsite"
+                                class="col-span-3"
+                                placeholder="留空表示不修改"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">标签</Label>
+                            <Input
+                                v-model="batchEditForm.tagsText"
+                                class="col-span-3"
+                                placeholder="逗号分隔，留空表示不修改"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            @click="showBatchEditDialog = false"
+                            >取消</Button
+                        >
+                        <Button @click="applyBatchEdit">确定</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <!-- GMM 包导出 Dialog -->
+            <Dialog v-model:open="showExportDialog">
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>导出 GMM 包</DialogTitle>
+                        <DialogDescription>
+                            将已选中的 {{ selectionIds.length }} 个 Mod
+                            打包为 *.gmm 文件。
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div class="grid gap-3 py-2">
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">包名</Label>
+                            <Input
+                                v-model="exportForm.name"
+                                class="col-span-3"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">版本</Label>
+                            <Input
+                                v-model="exportForm.version"
+                                class="col-span-3"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">作者</Label>
+                            <Input
+                                v-model="exportForm.author"
+                                class="col-span-3"
+                            />
+                        </div>
+                        <div class="grid grid-cols-4 items-center gap-3">
+                            <Label class="text-right">描述</Label>
+                            <Input
+                                v-model="exportForm.description"
+                                class="col-span-3"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            @click="showExportDialog = false"
+                            >取消</Button
+                        >
+                        <Button :disabled="exportLoading" @click="exportToGmm">
+                            {{ exportLoading ? "导出中…" : "导出" }}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <!-- 窗口拖拽导入提示浮层 -->
+            <Transition name="fade">
+                <div
+                    v-if="windowDropActive"
+                    class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center rounded-lg border-4 border-dashed border-primary bg-background/70 text-2xl font-bold text-primary backdrop-blur-sm"
+                >
+                    松开以导入 Mod
+                </div>
+            </Transition>
         </template>
     </div>
 </template>
-<style scoped></style>
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

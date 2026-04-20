@@ -59,7 +59,8 @@ function findNodeElementById(parent: Document | Element, nodeId: string) {
 function findAttributeElementById(parent: Element, attributeId: string) {
     return Array.from(parent.children).find((item) => {
         return (
-            item.tagName === "attribute" && item.getAttribute("id") === attributeId
+            item.tagName === "attribute" &&
+            item.getAttribute("id") === attributeId
         );
     });
 }
@@ -87,9 +88,9 @@ function createNodeElement(document: Document, nodeId: string) {
 
 function ensureModsNode(document: Document) {
     const saveElement = document.documentElement;
-    let regionElement = Array.from(saveElement.getElementsByTagName("region")).find(
-        (item) => item.getAttribute("id") === "ModuleSettings",
-    );
+    let regionElement = Array.from(
+        saveElement.getElementsByTagName("region"),
+    ).find((item) => item.getAttribute("id") === "ModuleSettings");
 
     if (!regionElement) {
         regionElement = document.createElement("region");
@@ -167,7 +168,9 @@ async function getBg3ToolAssemblyPath() {
     );
 
     if (!assemblyPath) {
-        ElMessage.warning("未找到博德之门3前置工具，请先在当前游戏管理器中安装该前置。");
+        ElMessage.warning(
+            "未找到博德之门3前置工具，请先在当前游戏管理器中安装该前置。",
+        );
         return "";
     }
 
@@ -228,7 +231,11 @@ async function loadModDataFromPak(assemblyPath: string, pakPath: string) {
         .filter((item) => item.id && item.type);
 }
 
-async function handlePak(mod: IModInfo, installPath: string, isInstall: boolean) {
+async function handlePak(
+    mod: IModInfo,
+    installPath: string,
+    isInstall: boolean,
+) {
     const assemblyPath = await getBg3ToolAssemblyPath();
     const modStorage = await Manager.getModStoragePath(mod.id);
 
@@ -242,7 +249,7 @@ async function handlePak(mod: IModInfo, installPath: string, isInstall: boolean)
     let hasChanges = false;
 
     for (const item of mod.modFiles) {
-        if ((await extname(item)).toLowerCase() !== ".pak") {
+        if ((await extname(item)).toLowerCase() !== "pak") {
             continue;
         }
 
@@ -290,7 +297,10 @@ async function handlePak(mod: IModInfo, installPath: string, isInstall: boolean)
     }
 
     if (hasChanges) {
-        await FileHandler.writeFile(modsettingsPath, serializeXmlDocument(document));
+        await FileHandler.writeFile(
+            modsettingsPath,
+            serializeXmlDocument(document),
+        );
     }
 
     return true;
@@ -480,7 +490,9 @@ export const supportedGames = async () =>
                 name: "未知",
                 installPath: "",
                 async install(_mod) {
-                    ElMessage.warning("该mod类型未知, 无法自动安装, 请手动安装!");
+                    ElMessage.warning(
+                        "该mod类型未知, 无法自动安装, 请手动安装!",
+                    );
                     return false;
                 },
                 async uninstall(_mod) {
@@ -502,11 +514,14 @@ export const supportedGames = async () =>
             for (const item of mod.modFiles) {
                 const lowerItem = item.toLowerCase();
 
-                if ((await extname(item)).toLowerCase() === ".pak") pak = true;
-                if (lowerItem.includes("public") || lowerItem.includes("data")) data = true;
+                if ((await extname(item)).toLowerCase() === "pak") pak = true;
+                if (lowerItem.includes("public") || lowerItem.includes("data"))
+                    data = true;
                 if (lowerItem.includes("bin")) bin = true;
-                if ((await extname(item)).toLowerCase() === ".dll") nativeMods = true;
-                if ((await basename(item)).toLowerCase() === "dwrite.dll") bg3se = true;
+                if ((await extname(item)).toLowerCase() === "dll")
+                    nativeMods = true;
+                if ((await basename(item)).toLowerCase() === "dwrite.dll")
+                    bg3se = true;
             }
 
             if (bg3se) return 6;

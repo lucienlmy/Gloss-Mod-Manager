@@ -213,15 +213,15 @@ export async function autoImportCompletedGlossTasks(
                     modTitle: importMetadata.modName,
                 },
             );
-
-            if (duplicateLocalMods.length > 0) {
-                const targetLocalMod = duplicateLocalMods[0].mod;
-                await updateTaskMeta(gid, {
-                    localModId: targetLocalMod.id,
-                    importedAt: new Date().toISOString(),
-                });
-                continue;
-            }
+            const overwriteTargetMod =
+                metadata.replaceLocalModId !== undefined
+                    ? (duplicateLocalMods.find((item) => {
+                          return (
+                              Number(item.mod.id) ===
+                              Number(metadata.replaceLocalModId)
+                          );
+                      })?.mod ?? null)
+                    : null;
 
             const importSource: ILocalModImportSource = {
                 path: primaryFile.path,
@@ -231,6 +231,22 @@ export async function autoImportCompletedGlossTasks(
                 ),
                 metadata: importMetadata,
             };
+
+            if (duplicateLocalMods.length > 0) {
+                if (overwriteTargetMod) {
+                    importSource.duplicateStrategy = "overwrite";
+                    importSource.targetMod = overwriteTargetMod;
+                } else {
+                    const targetLocalMod = duplicateLocalMods[0].mod;
+
+                    await updateTaskMeta(gid, {
+                        localModId: targetLocalMod.id,
+                        importedAt: new Date().toISOString(),
+                    });
+                    continue;
+                }
+            }
+
             const result = await importLocalModSources(manager, [importSource]);
             const importedMod = result.importedMods[0];
 
@@ -242,6 +258,12 @@ export async function autoImportCompletedGlossTasks(
                 localModId: importedMod.id,
                 importedAt: new Date().toISOString(),
             });
+
+            if (overwriteTargetMod) {
+                ElMessage.success(`已自动更新本地 Mod：${importedMod.modName}`);
+                continue;
+            }
+
             ElMessage.success(`已自动导入到管理器：${importedMod.modName}`);
         } catch (error: unknown) {
             console.error("自动导入下载任务失败");

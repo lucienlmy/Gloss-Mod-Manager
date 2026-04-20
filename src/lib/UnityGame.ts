@@ -97,7 +97,7 @@ export class UnityGame {
                 bepinEx = true;
             }
 
-            if ((await extname(item)) === ".dll") {
+            if ((await extname(item)) === "dll") {
                 plugins = true;
             }
 
@@ -144,7 +144,7 @@ export class UnityGameILCPP2 {
                 return Manager.installByFileSibling(
                     mod,
                     this.installPath ?? "",
-                    ".dll",
+                    "dll",
                     true,
                     true,
                 );
@@ -153,7 +153,7 @@ export class UnityGameILCPP2 {
                 return Manager.installByFileSibling(
                     mod,
                     this.installPath ?? "",
-                    ".dll",
+                    "dll",
                     false,
                     true,
                 );
@@ -201,7 +201,7 @@ export class UnityGameILCPP2 {
                 melonLoader = true;
             }
 
-            if ((await extname(item)) === ".dll") {
+            if ((await extname(item)) === "dll") {
                 mods = true;
             }
         }

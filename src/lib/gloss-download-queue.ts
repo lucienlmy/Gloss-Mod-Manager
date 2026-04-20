@@ -43,6 +43,7 @@ export interface IQueueGlossDownloadOptions {
     modId?: number | string;
     resourceId?: number | string | "latest";
     managerModList?: IModInfo[];
+    replaceLocalModId?: number;
 }
 
 export interface IQueueGlossDownloadResult {
@@ -351,6 +352,7 @@ async function createGlossDownloadTask(
     mod: IGlossDownloadModSource,
     resource: IResource,
     outputFileName: string,
+    replaceLocalModId?: number,
 ) {
     const gid = await Aria2Rpc.addUri(
         [resource.mods_resource_url],
@@ -360,6 +362,7 @@ async function createGlossDownloadTask(
     const taskMeta: IGlossDownloadTaskMeta = {
         modId: mod.id,
         resourceId: resource.id,
+        replaceLocalModId,
         resourceFormat: resource.mods_resource_formart,
         modTitle: mod.mods_title,
         gameName: mod.game_name,
@@ -392,6 +395,33 @@ function getExistingTaskMessage(task: IAria2RpcTask, resource: IResource) {
     }
 
     return `${resource.mods_resource_name} 已在下载队列中。`;
+}
+
+function getTaskPrimaryFile(task: IAria2RpcTask) {
+    return task.files.find((item) => item.path) ?? task.files[0] ?? null;
+}
+
+async function removeCompletedDuplicateTask(
+    runtime: IQueueRuntimeContext,
+    task: IAria2RpcTask,
+) {
+    const primaryFile = getTaskPrimaryFile(task);
+
+    await Aria2Rpc.removeDownloadResult(task.gid);
+
+    if (primaryFile?.path) {
+        const deleted = await FileHandler.deleteFile(primaryFile.path);
+
+        if (!deleted) {
+            throw new Error("删除旧下载文件失败，请稍后重试。");
+        }
+    }
+
+    const nextTaskMetaMap = { ...runtime.taskMetaMap };
+    delete nextTaskMetaMap[task.gid];
+    await saveTaskMetaMap(nextTaskMetaMap);
+    runtime.taskMetaMap = nextTaskMetaMap;
+    runtime.allTasks = runtime.allTasks.filter((item) => item.gid !== task.gid);
 }
 
 export async function queueGlossModDownload(
@@ -431,8 +461,11 @@ export async function queueGlossModDownload(
         options.managerModList ?? [],
         duplicateCriteria,
     );
+    const allowReplacingLocalMod =
+        Number.isFinite(Number(options.replaceLocalModId)) &&
+        Number(options.replaceLocalModId) > 0;
 
-    if (duplicateLocalMods.length > 0) {
+    if (duplicateLocalMods.length > 0 && !allowReplacingLocalMod) {
         return {
             status: "imported",
             gid: null,
@@ -461,10 +494,34 @@ export async function queueGlossModDownload(
 
     if (duplicateTasks.length > 0) {
         const currentTask = duplicateTasks[0].task;
+
+        if (currentTask.status === "complete") {
+            await removeCompletedDuplicateTask(runtime, currentTask);
+
+            const gid = await createGlossDownloadTask(
+                runtime,
+                mod,
+                resource,
+                outputFileName,
+                options.replaceLocalModId,
+            );
+
+            return {
+                status: "retried",
+                gid,
+                mod,
+                resource,
+                message: `已重新下载：${resource.mods_resource_name}`,
+            };
+        }
+
         const nextTaskMetaMap = {
             ...runtime.taskMetaMap,
             [currentTask.gid]: {
                 ...runtime.taskMetaMap[currentTask.gid],
+                replaceLocalModId:
+                    options.replaceLocalModId ??
+                    runtime.taskMetaMap[currentTask.gid]?.replaceLocalModId,
                 taskStatus: currentTask.status as TaskStatus,
                 updatedAt: new Date().toISOString(),
             },
@@ -490,6 +547,7 @@ export async function queueGlossModDownload(
                 mod,
                 resource,
                 outputFileName,
+                options.replaceLocalModId,
             );
 
             return {
@@ -517,6 +575,7 @@ export async function queueGlossModDownload(
         mod,
         resource,
         outputFileName,
+        options.replaceLocalModId,
     );
 
     return {

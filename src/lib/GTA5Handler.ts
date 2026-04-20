@@ -17,7 +17,12 @@ const DEFAULT_PEDMODELINFO_XML = `<?xml version="1.0" encoding="UTF-8" standalon
 </CPedModelInfo__InitDataList>`;
 
 function getBaseNameFromPath(filePath: string) {
-    return filePath.replace(/[\\/]+/gu, "/").split("/").pop() ?? filePath;
+    return (
+        filePath
+            .replace(/[\\/]+/gu, "/")
+            .split("/")
+            .pop() ?? filePath
+    );
 }
 
 function getFileExtension(filePath: string) {
@@ -47,7 +52,7 @@ function escapeXml(value: string) {
         .replace(/&/gu, "&amp;")
         .replace(/</gu, "&lt;")
         .replace(/>/gu, "&gt;")
-    .replace(/"/gu, "&quot;")
+        .replace(/"/gu, "&quot;")
         .replace(/'/gu, "&apos;");
 }
 
@@ -84,7 +89,9 @@ async function resolveGta5Context(modId: number) {
     const { gameStorage } = await Manager.getContext();
 
     if (!modStorage || !gameStorage) {
-        ElMessage.warning("未设置当前游戏目录或 Mod 储存目录，无法处理 GTA5 模组。");
+        ElMessage.warning(
+            "未设置当前游戏目录或 Mod 储存目录，无法处理 GTA5 模组。",
+        );
         return null;
     }
 
@@ -102,7 +109,9 @@ export class GTA5Handler {
         );
 
         if (!assemblyPath) {
-            ElMessage.warning("未找到 RPF 文件编辑工具，请先在 GTA5 管理器中安装该前置。");
+            ElMessage.warning(
+                "未找到 RPF 文件编辑工具，请先在 GTA5 管理器中安装该前置。",
+            );
             return "";
         }
 
@@ -134,6 +143,7 @@ export class GTA5Handler {
             typeName: "Rpf.Program",
             methodName,
             payload,
+            runtimeMode: "isolatedDirectory",
         });
     }
 
@@ -250,7 +260,12 @@ export class GTA5Handler {
     }
 
     private static async ensureUpdateRpf(gameStorage: string) {
-        const updatePath = await join(gameStorage, "mods", "update", "update.rpf");
+        const updatePath = await join(
+            gameStorage,
+            "mods",
+            "update",
+            "update.rpf",
+        );
 
         if (!(await FileHandler.fileExists(updatePath))) {
             await FileHandler.copyFile(
@@ -306,7 +321,10 @@ export class GTA5Handler {
         }
 
         const inputFile = await join(toolsDirectory, "dlclist.xml");
-        await FileHandler.writeFile(inputFile, serializeXmlDocument(xmlDocument));
+        await FileHandler.writeFile(
+            inputFile,
+            serializeXmlDocument(xmlDocument),
+        );
         await GTA5Handler.invokeRpf("Write", {
             rpf: updatePath,
             inputFile,
@@ -362,20 +380,30 @@ export class GTA5Handler {
             return false;
         }
 
+        const outputPath = await GTA5Handler.ensureGmmDlcDirectory(gameStorage);
+
         await GTA5Handler.invokeRpf("Create", {
             inputFolder: await join(toolsDirectory, "gmm"),
-            outputPath: await join(
-                gameStorage,
-                "mods",
-                "update",
-                "x64",
-                "dlcpacks",
-                "gmm",
-            ),
+            outputPath,
             rpfName: "dlc",
         });
 
         return true;
+    }
+
+    private static async ensureGmmDlcDirectory(gameStorage: string) {
+        const gmmDirectory = await join(
+            gameStorage,
+            "mods",
+            "update",
+            "x64",
+            "dlcpacks",
+            "gmm",
+        );
+
+        // RPF 工具不会自动补齐输出目录，先创建好父目录，避免 Create 直接抛出路径不存在异常。
+        await FileHandler.createDirectory(gmmDirectory);
+        return gmmDirectory;
     }
 
     public static async initGmmRpf() {
@@ -385,15 +413,8 @@ export class GTA5Handler {
             return false;
         }
 
-        const gmmRpf = await join(
-            gameStorage,
-            "mods",
-            "update",
-            "x64",
-            "dlcpacks",
-            "gmm",
-            "dlc.rpf",
-        );
+        const gmmDirectory = await GTA5Handler.ensureGmmDlcDirectory(gameStorage);
+        const gmmRpf = await join(gmmDirectory, "dlc.rpf");
 
         if (await FileHandler.fileExists(gmmRpf)) {
             return true;
@@ -412,7 +433,12 @@ export class GTA5Handler {
 
         await GTA5Handler.initGmmRpf();
 
-        const targetRoot = await join(toolsDirectory, "gmm", "x64", "vehicles.rpf");
+        const targetRoot = await join(
+            toolsDirectory,
+            "gmm",
+            "x64",
+            "vehicles.rpf",
+        );
 
         for (const item of mod.modFiles) {
             const extension = getFileExtension(item);
@@ -422,7 +448,10 @@ export class GTA5Handler {
             }
 
             const sourcePath = await join(context.modStorage, item);
-            const targetPath = await join(targetRoot, getBaseNameFromPath(item));
+            const targetPath = await join(
+                targetRoot,
+                getBaseNameFromPath(item),
+            );
 
             if (isInstall) {
                 await FileHandler.copyFile(sourcePath, targetPath);
@@ -442,7 +471,9 @@ export class GTA5Handler {
             return false;
         }
 
-        const updatePath = await GTA5Handler.ensureUpdateRpf(context.gameStorage);
+        const updatePath = await GTA5Handler.ensureUpdateRpf(
+            context.gameStorage,
+        );
 
         for (const item of mod.modFiles) {
             if ((await basename(item)).toLowerCase() !== "gameconfig.xml") {
@@ -459,8 +490,14 @@ export class GTA5Handler {
         return true;
     }
 
-    private static buildPedItemXml(name: string, mod: IModInfo, isMale: boolean) {
-        const streamed = String(Boolean(mod.advanced?.data?.Streamed)).toLowerCase();
+    private static buildPedItemXml(
+        name: string,
+        mod: IModInfo,
+        isMale: boolean,
+    ) {
+        const streamed = String(
+            Boolean(mod.advanced?.data?.Streamed),
+        ).toLowerCase();
         const clipDictionaryName = isMale ? "move_m@generic" : "move_f@generic";
         const expressionSetName = isMale
             ? "expr_set_ambient_male"
@@ -554,14 +591,23 @@ export class GTA5Handler {
 </Item>`;
     }
 
-    public static async pedItem(name: string, mod: IModInfo, isInstall: boolean) {
+    public static async pedItem(
+        name: string,
+        mod: IModInfo,
+        isInstall: boolean,
+    ) {
         const toolsDirectory = await GTA5Handler.getToolsDirectory();
 
         if (!toolsDirectory) {
             return false;
         }
 
-        const metaPath = await join(toolsDirectory, "gmm", "data", "pedmodelinfo.meta");
+        const metaPath = await join(
+            toolsDirectory,
+            "gmm",
+            "data",
+            "pedmodelinfo.meta",
+        );
         const xmlContent = await FileHandler.readFile(
             metaPath,
             DEFAULT_PEDMODELINFO_XML,
@@ -584,14 +630,20 @@ export class GTA5Handler {
                 `<Root>${GTA5Handler.buildPedItemXml(name, mod, mod.advanced?.data?.sex === "Male")}</Root>`,
                 "ped Item",
             );
-            const itemElement = fragmentDocument.documentElement.firstElementChild;
+            const itemElement =
+                fragmentDocument.documentElement.firstElementChild;
 
             if (itemElement) {
-                initDatas.appendChild(xmlDocument.importNode(itemElement, true));
+                initDatas.appendChild(
+                    xmlDocument.importNode(itemElement, true),
+                );
             }
         }
 
-        await FileHandler.writeFile(metaPath, serializeXmlDocument(xmlDocument));
+        await FileHandler.writeFile(
+            metaPath,
+            serializeXmlDocument(xmlDocument),
+        );
         return true;
     }
 
@@ -646,7 +698,10 @@ export class GTA5Handler {
                         );
                     }
                 } else {
-                    const targetPath = await join(targetRoot, getBaseNameFromPath(item));
+                    const targetPath = await join(
+                        targetRoot,
+                        getBaseNameFromPath(item),
+                    );
 
                     if (await FileHandler.isDir(targetPath)) {
                         await FileHandler.deleteFolder(targetPath);
@@ -692,10 +747,16 @@ async function getGTA5ModTypes(): Promise<ISupportedGames["modType"]> {
             name: "asi",
             installPath: "",
             async install(mod) {
-                return Manager.installByFileSibling(mod, "", ".asi", true, true);
+                return Manager.installByFileSibling(mod, "", "asi", true, true);
             },
             async uninstall(mod) {
-                return Manager.installByFileSibling(mod, "", ".asi", false, true);
+                return Manager.installByFileSibling(
+                    mod,
+                    "",
+                    "asi",
+                    false,
+                    true,
+                );
             },
         },
         {
@@ -714,10 +775,18 @@ async function getGTA5ModTypes(): Promise<ISupportedGames["modType"]> {
             name: "游戏根目录",
             installPath: "",
             async install(mod) {
-                return Manager.generalInstall(mod, this.installPath ?? "", true);
+                return Manager.generalInstall(
+                    mod,
+                    this.installPath ?? "",
+                    true,
+                );
             },
             async uninstall(mod) {
-                return Manager.generalUninstall(mod, this.installPath ?? "", true);
+                return Manager.generalUninstall(
+                    mod,
+                    this.installPath ?? "",
+                    true,
+                );
             },
         },
         {
@@ -746,10 +815,18 @@ async function getGTA5ModTypes(): Promise<ISupportedGames["modType"]> {
             name: "script",
             installPath: await join("scripts"),
             async install(mod) {
-                return Manager.generalInstall(mod, this.installPath ?? "", true);
+                return Manager.generalInstall(
+                    mod,
+                    this.installPath ?? "",
+                    true,
+                );
             },
             async uninstall(mod) {
-                return Manager.generalUninstall(mod, this.installPath ?? "", true);
+                return Manager.generalUninstall(
+                    mod,
+                    this.installPath ?? "",
+                    true,
+                );
             },
         },
         {
@@ -757,10 +834,18 @@ async function getGTA5ModTypes(): Promise<ISupportedGames["modType"]> {
             name: "dlc",
             installPath: await join("mods", "update", "x64", "dlcpacks"),
             async install(mod) {
-                return GTA5Handler.dlcHandler(mod, this.installPath ?? "", true);
+                return GTA5Handler.dlcHandler(
+                    mod,
+                    this.installPath ?? "",
+                    true,
+                );
             },
             async uninstall(mod) {
-                return GTA5Handler.dlcHandler(mod, this.installPath ?? "", false);
+                return GTA5Handler.dlcHandler(
+                    mod,
+                    this.installPath ?? "",
+                    false,
+                );
             },
         },
         {

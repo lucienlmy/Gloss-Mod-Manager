@@ -263,7 +263,7 @@ export class UnrealEngine {
         let scripts = false;
 
         for (const item of mod.modFiles) {
-            if ((await extname(item)) === ".pak") pak = true;
+            if ((await extname(item)) === "pak") pak = true;
             if (await FileHandler.compareFileName(item, "Enabled.txt"))
                 mods = true;
             if (await FileHandler.compareFileName(item, "ue4ss.dll"))

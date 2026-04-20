@@ -101,7 +101,7 @@ export const supportedGames = async () =>
             for (const item of mod.modFiles) {
                 if ((await basename(item)).toLowerCase() == "modinfo.xml")
                     Mods = true;
-                if ((await extname(item)) == ".unity3d") Avatars = true;
+                if ((await extname(item)) == "unity3d") Avatars = true;
             }
 
             if (Mods) return 1;

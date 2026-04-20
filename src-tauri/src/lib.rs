@@ -1,9 +1,19 @@
+mod mcp_server;
+
+use std::sync::Arc;
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .manage(Arc::new(mcp_server::McpRuntimeState::default()))
+        .invoke_handler(tauri::generate_handler![
+            mcp_server::mcp_get_server_state,
+            mcp_server::mcp_start_server,
+            mcp_server::mcp_stop_server,
+            mcp_server::mcp_complete_request
+        ])
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())

@@ -13,11 +13,15 @@ import {
     isGlossCloudDriveResource,
     queueGlossModDownload,
 } from "@/lib/gloss-download-queue";
+import {
+    fetchAllGlossGames,
+    GLOSS_MOD_API_BASE_URL,
+    GLOSS_MOD_KEY,
+    GLOSS_MOD_WEB_BASE_URL,
+    type IGlossGameListItem,
+    type IGlossGameModType,
+} from "@/lib/gloss-mod-api";
 import { PersistentStore } from "@/lib/persistent-store";
-
-const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
-const GLOSS_MOD_WEB_BASE_URL = "https://mod.3dmgame.com";
-const GLOSS_MOD_KEY = (import.meta.env.GLOSS_MOD_KEY ?? "").trim();
 const DEFAULT_PAGE_SIZE = "12";
 const PAGE_SIZE_OPTIONS = ["12", "20", "36", "48"];
 const EMPTY_POSTER =
@@ -99,6 +103,11 @@ interface IExploreDownloadStatus {
     progress: number;
 }
 
+interface IGlossTypeOption {
+    label: string;
+    value: string;
+}
+
 const manager = useManager();
 const router = useRouter();
 const taskMetaMap = PersistentStore.useValue<
@@ -110,6 +119,9 @@ const loading = ref(false);
 const errorMessage = ref("");
 const queueingModId = ref("");
 const taskSnapshots = ref<Record<string, IAria2RpcTask>>({});
+const glossGameModTypeMap = ref<Record<string, IGlossGameModType[]>>({});
+const glossGameTypeLoading = ref(false);
+const glossGameTypeError = ref("");
 const totalCount = ref(0);
 const totalPages = ref(0);
 const page = ref(1);
@@ -125,6 +137,7 @@ const followCurrentGame = ref(true);
 
 // 用请求序号兜住并发搜索，避免慢请求把新结果覆盖掉。
 let requestSequence = 0;
+let gameTypeRequestSequence = 0;
 let refreshTaskSnapshotPending = false;
 let taskSnapshotTimer: ReturnType<typeof globalThis.setInterval> | null = null;
 
@@ -140,16 +153,36 @@ const currentGameId = computed<number | null>(() => {
     return currentGame.value?.GlossGameId ?? null;
 });
 
-// 跟随当前已选游戏时，直接复用本地游戏扩展里提供的类型定义。
-const currentTypeOptions = computed(() => {
-    if (!followCurrentGame.value || !currentGame.value?.modType?.length) {
-        return [] as Array<{ label: string; value: string }>;
+// 游戏类型筛选改为使用 Gloss 游戏接口返回的 game_mod_types。
+const currentTypeOptions = computed<IGlossTypeOption[]>(() => {
+    if (!followCurrentGame.value || !currentGameId.value) {
+        return [];
     }
 
-    return currentGame.value.modType.map((item) => ({
-        label: item.name,
-        value: String(item.id),
-    }));
+    const gameTypes =
+        glossGameModTypeMap.value[String(currentGameId.value)] ?? [];
+
+    return gameTypes
+        .map((item) => ({
+            label: item.mods_type_name?.trim() || `类型 ${item.id}`,
+            value: String(item.id),
+        }))
+        .filter((item) => Boolean(item.label && item.value));
+});
+const currentTypePlaceholder = computed(() => {
+    if (!followCurrentGame.value || !currentGameId.value) {
+        return "当前未限定游戏";
+    }
+
+    if (glossGameTypeLoading.value) {
+        return "正在加载类型";
+    }
+
+    if (glossGameTypeError.value) {
+        return "类型加载失败";
+    }
+
+    return currentTypeOptions.value.length ? "全部类型" : "当前游戏暂无类型";
 });
 const parsedTags = computed(() =>
     tagKeyword.value
@@ -333,6 +366,10 @@ watch(
     { immediate: true },
 );
 
+onMounted(() => {
+    void fetchGlossGameModTypes();
+});
+
 onBeforeUnmount(() => {
     if (taskSnapshotTimer !== null) {
         globalThis.clearInterval(taskSnapshotTimer);
@@ -379,6 +416,57 @@ function buildListUrl() {
     }
 
     return url.toString();
+}
+
+function buildGlossGameModTypeMap(gameModTypes: IGlossGameModType[]) {
+    return Object.fromEntries(
+        gameModTypes.map((item) => [String(item.id), item]),
+    );
+}
+
+async function fetchGlossGameModTypes() {
+    if (!GLOSS_MOD_KEY) {
+        glossGameModTypeMap.value = {};
+        glossGameTypeError.value = "未读取到 GLOSS_MOD_KEY，请检查 .env 配置。";
+        return;
+    }
+
+    const currentRequestSequence = ++gameTypeRequestSequence;
+
+    glossGameTypeLoading.value = true;
+    glossGameTypeError.value = "";
+
+    try {
+        const games: IGlossGameListItem[] = await fetchAllGlossGames();
+
+        if (currentRequestSequence !== gameTypeRequestSequence) {
+            return;
+        }
+
+        glossGameModTypeMap.value = Object.fromEntries(
+            games.map((item) => {
+                const uniqueTypes = Object.values(
+                    buildGlossGameModTypeMap(item.game_mod_types ?? []),
+                );
+
+                return [String(item.id), uniqueTypes];
+            }),
+        );
+    } catch (error: unknown) {
+        if (currentRequestSequence !== gameTypeRequestSequence) {
+            return;
+        }
+
+        glossGameModTypeMap.value = {};
+        glossGameTypeError.value =
+            error instanceof Error ? error.message : "加载 Gloss 游戏类型失败";
+        console.error("加载 Gloss 游戏类型失败");
+        console.error(error);
+    } finally {
+        if (currentRequestSequence === gameTypeRequestSequence) {
+            glossGameTypeLoading.value = false;
+        }
+    }
 }
 
 async function fetchMods() {
@@ -639,7 +727,7 @@ function resolveDownloadStatus(item: IGlossExploreMod): IExploreDownloadStatus {
         case "complete":
             return {
                 state: "complete",
-                label: "已下载",
+                label: "重新下载",
                 progress: 100,
             };
         case "imported":
@@ -680,9 +768,7 @@ function isDownloadActionDisabled(item: IGlossExploreMod) {
 
     const status = getDownloadStatus(item).state;
 
-    return ["active", "waiting", "complete", "imported", "missing"].includes(
-        status,
-    );
+    return ["active", "waiting", "imported", "missing"].includes(status);
 }
 
 function getDownloadButtonClass(item: IGlossExploreMod) {
@@ -1031,11 +1117,7 @@ function goToPage(targetPage: number) {
                         >
                             <SelectTrigger class="mt-2 w-full">
                                 <SelectValue
-                                    :placeholder="
-                                        currentTypeOptions.length
-                                            ? '全部类型'
-                                            : '当前游戏暂无类型'
-                                    "
+                                    :placeholder="currentTypePlaceholder"
                                 />
                             </SelectTrigger>
                             <SelectContent>

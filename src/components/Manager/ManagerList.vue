@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
+import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 
 interface IEditModForm {
     modName: string;
@@ -21,6 +22,9 @@ const deleteTargetMod = ref<IModInfo | null>(null);
 const dragSourceId = ref<number | null>(null);
 const dragTargetId = ref<number | null>(null);
 const dragPosition = ref<"before" | "after">("before");
+const tagDropTargetId = ref<number | null>(null);
+const operatingIds = ref<number[]>([]);
+const updateingIds = ref<number[]>([]);
 const editForm = reactive<IEditModForm>({
     modName: "",
     modVersion: "",
@@ -30,6 +34,8 @@ const editForm = reactive<IEditModForm>({
     modDesc: "",
     tagsText: "",
 });
+
+const TAG_DRAG_MIME = "application/x-gloss-manager-tag";
 
 function createTagColor(tagName: string) {
     let hash = 0;
@@ -267,35 +273,46 @@ async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
         return;
     }
 
-    const type = manager.managerGame?.modType.find(
-        (type) => type.id === item.modType,
-    );
-    if (nextInstalled) {
-        if (typeof type?.install == "function") {
-            try {
-                const res = await type.install(item);
-                if (typeof res == "boolean" && res == false) {
+    const previousInstalled = item.isInstalled;
+    item.isInstalled = nextInstalled;
+    startOperating(item.id);
+
+    try {
+        const type = manager.managerGame?.modType.find(
+            (type) => type.id === item.modType,
+        );
+        if (nextInstalled) {
+            if (typeof type?.install == "function") {
+                try {
+                    const res = await type.install(item);
+                    if (typeof res == "boolean" && res == false) {
+                        item.isInstalled = false;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    ElMessage.error(`安装 ${item.modName} 失败：${error}`);
                     item.isInstalled = false;
                 }
-            } catch (error) {
-                ElMessage.error(`安装 ${item.modName} 失败：${error}`);
-                item.isInstalled = false;
             }
-            await manager.saveManagerData();
-        }
-    } else {
-        if (typeof type?.uninstall == "function") {
-            try {
-                const res = await type.uninstall(item);
-                if (typeof res == "boolean" && res == false) {
+        } else {
+            if (typeof type?.uninstall == "function") {
+                try {
+                    const res = await type.uninstall(item);
+                    if (typeof res == "boolean" && res == false) {
+                        item.isInstalled = true;
+                    }
+                } catch (error) {
+                    ElMessage.error(`卸载 ${item.modName} 失败：${error}`);
                     item.isInstalled = true;
                 }
-            } catch (error) {
-                ElMessage.error(`卸载 ${item.modName} 失败：${error}`);
-                item.isInstalled = true;
             }
+        }
+
+        if (item.isInstalled !== previousInstalled) {
             await manager.saveManagerData();
         }
+    } finally {
+        finishOperating(item.id);
     }
 }
 
@@ -305,7 +322,116 @@ function clearDragState() {
     dragPosition.value = "before";
 }
 
+function clearTagDropState() {
+    tagDropTargetId.value = null;
+}
+
+function startOperating(modId: number) {
+    if (!operatingIds.value.includes(modId)) {
+        operatingIds.value = [...operatingIds.value, modId];
+    }
+}
+
+function finishOperating(modId: number) {
+    operatingIds.value = operatingIds.value.filter((item) => item !== modId);
+}
+
+function isOperating(modId: number) {
+    return operatingIds.value.includes(modId);
+}
+
+function startUpdate(modId: number) {
+    if (!updateingIds.value.includes(modId)) {
+        updateingIds.value = [...updateingIds.value, modId];
+    }
+}
+
+function finishUpdate(modId: number) {
+    updateingIds.value = updateingIds.value.filter((item) => item !== modId);
+}
+
+function isUpdateing(modId: number) {
+    return updateingIds.value.includes(modId);
+}
+
+function handleSelectionChange(event: Event, modId: number) {
+    manager.toggleSelection(
+        modId,
+        (event.target as HTMLInputElement | null)?.checked ?? false,
+    );
+}
+
+function getDraggedTagName(event: DragEvent) {
+    return event.dataTransfer?.getData(TAG_DRAG_MIME)?.trim() || "";
+}
+
+function isTagDragEvent(event: DragEvent) {
+    return Array.from(event.dataTransfer?.types ?? []).includes(TAG_DRAG_MIME);
+}
+
+async function toggleTagOnMod(item: IModInfo, tagName: string) {
+    const matchedTag = manager.tags.find((tag) => tag.name === tagName);
+
+    if (!matchedTag) {
+        clearTagDropState();
+        return;
+    }
+
+    const hasTag = (item.tags ?? []).some((tag) => tag.name === tagName);
+    item.tags = hasTag
+        ? (item.tags ?? []).filter((tag) => tag.name !== tagName)
+        : dedupeTags([...(item.tags ?? []), matchedTag]);
+    await manager.saveManagerData();
+    clearTagDropState();
+    ElMessage.success(
+        hasTag
+            ? `已从 ${item.modName} 移除标签：${tagName}`
+            : `已为 ${item.modName} 添加标签：${tagName}`,
+    );
+}
+
+async function queueModUpdate(item: IModInfo) {
+    if (item.from !== "GlossMod" || !item.webId) {
+        ElMessage.warning("当前只有来自 Gloss 的 Mod 支持直接更新。");
+        return;
+    }
+
+    startUpdate(item.id);
+
+    try {
+        const result = await queueGlossModDownload({
+            modId: item.webId,
+            resourceId: "latest",
+            managerModList: manager.managerModList,
+            replaceLocalModId: item.id,
+        });
+
+        if (
+            result.status === "created" ||
+            result.status === "resumed" ||
+            result.status === "retried"
+        ) {
+            ElMessage.success(result.message);
+            return;
+        }
+
+        ElMessage.info(result.message);
+    } catch (error: unknown) {
+        console.error("提交更新下载失败");
+        console.error(error);
+        ElMessage.error(
+            error instanceof Error ? error.message : "提交更新下载失败。",
+        );
+    } finally {
+        finishUpdate(item.id);
+    }
+}
+
 function handleDragStart(event: DragEvent, modId: number) {
+    if (manager.selectionMode) {
+        return;
+    }
+
     dragSourceId.value = modId;
 
     if (event.dataTransfer) {
@@ -315,6 +441,19 @@ function handleDragStart(event: DragEvent, modId: number) {
 }
 
 function handleDragOver(event: DragEvent, modId: number) {
+    if (isTagDragEvent(event)) {
+        event.preventDefault();
+        tagDropTargetId.value = modId;
+
+        if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "copy";
+        }
+
+        return;
+    }
+
+    clearTagDropState();
+
     if (dragSourceId.value === null || dragSourceId.value === modId) {
         return;
     }
@@ -338,6 +477,22 @@ function handleDragOver(event: DragEvent, modId: number) {
 }
 
 async function handleDrop(event: DragEvent, modId: number) {
+    const draggedTagName = getDraggedTagName(event);
+
+    if (draggedTagName) {
+        event.preventDefault();
+        const targetMod = manager.managerModList.find(
+            (item) => item.id === modId,
+        );
+
+        if (targetMod) {
+            await toggleTagOnMod(targetMod, draggedTagName);
+        }
+
+        clearDragState();
+        return;
+    }
+
     event.preventDefault();
 
     if (dragSourceId.value === null || dragSourceId.value === modId) {
@@ -360,19 +515,19 @@ async function handleDrop(event: DragEvent, modId: number) {
     const [movingMod] = reorderedVisibleMods.splice(sourceIndex, 1);
     let insertIndex = targetIndex;
 
-    if (dragPosition.value === "after") {
-        insertIndex += 1;
-    }
-
     if (sourceIndex < targetIndex) {
         insertIndex -= 1;
+    }
+
+    if (dragPosition.value === "after") {
+        insertIndex += 1;
     }
 
     reorderedVisibleMods.splice(insertIndex, 0, movingMod);
 
     const visibleIdSet = new Set(visibleMods.map((item) => item.id));
     const orderedAllMods = [...manager.managerModList].sort(
-        (left, right) => left.weight - right.weight,
+        (left, right) => (left.weight ?? 0) - (right.weight ?? 0),
     );
     let visibleIndex = 0;
 
@@ -395,16 +550,31 @@ async function handleDrop(event: DragEvent, modId: number) {
 
 function handleDragEnd() {
     clearDragState();
+    clearTagDropState();
 }
 
 function getRowClass(item: IModInfo) {
-    if (dragTargetId.value !== item.id || dragSourceId.value === item.id) {
-        return "";
+    const classNames = [] as string[];
+
+    if (manager.selectionIds.includes(item.id)) {
+        classNames.push("bg-primary/5");
     }
 
-    return dragPosition.value === "after"
-        ? "border-b-2 border-primary"
-        : "border-t-2 border-primary";
+    if (tagDropTargetId.value === item.id) {
+        classNames.push("ring-1 ring-primary/40 bg-primary/5");
+    }
+
+    if (dragTargetId.value !== item.id || dragSourceId.value === item.id) {
+        return classNames.join(" ");
+    }
+
+    classNames.push(
+        dragPosition.value === "after"
+            ? "border-b-2 border-primary"
+            : "border-t-2 border-primary",
+    );
+
+    return classNames.join(" ");
 }
 </script>
 <template>
@@ -413,6 +583,9 @@ function getRowClass(item: IModInfo) {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead v-if="manager.selectionMode" class="w-12">
+                            选择
+                        </TableHead>
                         <TableHead>名称</TableHead>
                         <TableHead class="w-30">版本</TableHead>
                         <TableHead class="w-30">类型</TableHead>
@@ -428,12 +601,22 @@ function getRowClass(item: IModInfo) {
                         :class="getRowClass(item)"
                         @dragover="handleDragOver($event, item.id)"
                         @drop="handleDrop($event, item.id)"
+                        @dragleave="clearTagDropState"
                     >
+                        <TableCell v-if="manager.selectionMode">
+                            <input
+                                type="checkbox"
+                                class="h-4 w-4 accent-primary"
+                                :checked="manager.selectionIds.includes(item.id)"
+                                @change="handleSelectionChange($event, item.id)"
+                            />
+                        </TableCell>
                         <TableCell>
                             <div class="flex items-center gap-2">
                                 <span
+                                    v-if="!manager.selectionMode"
                                     class="inline-flex cursor-grab text-muted-foreground active:cursor-grabbing"
-                                    draggable="true"
+                                    :draggable="!manager.selectionMode"
                                     @dragstart="
                                         handleDragStart($event, item.id)
                                     "
@@ -454,7 +637,14 @@ function getRowClass(item: IModInfo) {
                                     ></div>
                                     {{ tag.name }}
                                 </Badge>
-                                {{ item.modName }}
+                                <span class="font-medium">{{ item.modName }}</span>
+                                <Badge
+                                    v-if="item.isUpdate"
+                                    variant="outline"
+                                    class="border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200"
+                                >
+                                    可更新
+                                </Badge>
                             </div>
                         </TableCell>
                         <TableCell>{{ item.modVersion }}</TableCell>
@@ -464,7 +654,7 @@ function getRowClass(item: IModInfo) {
                                 @update:model-value="
                                     updateModType(item, $event)
                                 "
-                                :disabled="item.isInstalled"
+                                :disabled="item.isInstalled || isOperating(item.id)"
                             >
                                 <SelectTrigger>
                                     <SelectValue></SelectValue>
@@ -484,13 +674,20 @@ function getRowClass(item: IModInfo) {
                             <div class="flex items-center gap-2">
                                 <Switch
                                     :id="`is-installed-${item.id}`"
-                                    v-model="item.isInstalled"
+                                    :model-value="item.isInstalled"
                                     @update:model-value="
                                         updateModInstalled(item, $event)
                                     "
+                                    :disabled="isOperating(item.id)"
                                 />
                                 <Label :for="`is-installed-${item.id}`">
-                                    {{ item.isInstalled ? "已安装" : "未安装" }}
+                                    {{
+                                        isOperating(item.id)
+                                            ? "处理中"
+                                            : item.isInstalled
+                                              ? "已安装"
+                                              : "未安装"
+                                    }}
                                 </Label>
                             </div>
                         </TableCell>
@@ -513,7 +710,14 @@ function getRowClass(item: IModInfo) {
                         <TableCell>
                             <DropdownMenu>
                                 <DropdownMenuTrigger as-child>
-                                    <Button variant="ghost" size="icon">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        :disabled="
+                                            deletingModId === item.id ||
+                                            isUpdateing(item.id)
+                                        "
+                                    >
                                         <IconMenu class="w-4 h-4" />
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -533,6 +737,28 @@ function getRowClass(item: IModInfo) {
                                         </DropdownMenuShortcut>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
+                                        v-if="
+                                            item.from === 'GlossMod' &&
+                                            item.webId
+                                        "
+                                        @click="queueModUpdate(item)"
+                                    >
+                                        {{
+                                            isUpdateing(item.id)
+                                                ? "更新中..."
+                                                : "更新"
+                                        }}
+                                        <DropdownMenuShortcut>
+                                            <IconRefreshCw
+                                                :class="
+                                                    isUpdateing(item.id)
+                                                        ? 'animate-spin'
+                                                        : ''
+                                                "
+                                            />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
                                         v-if="item.modWebsite"
                                         as-child
                                     >
@@ -549,6 +775,7 @@ function getRowClass(item: IModInfo) {
                                     <DropdownMenuItem
                                         variant="destructive"
                                         @click="deleteMod(item)"
+                                        :disabled="deletingModId === item.id"
                                     >
                                         删除
                                         <DropdownMenuShortcut>

@@ -1,6 +1,7 @@
 export interface IGlossDownloadTaskMeta {
     modId?: number;
     resourceId?: number;
+    replaceLocalModId?: number;
     resourceFormat?: string;
     modTitle?: string;
     gameName?: string;

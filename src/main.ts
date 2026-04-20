@@ -5,6 +5,7 @@ import router from "@/routes";
 import "@/style.css";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
 import { initializeGlossDownloadMonitor } from "@/lib/gloss-download-monitor";
+import { McpService } from "@/lib/mcp-service";
 import { Theme } from "@/lib/theme";
 import lang from "@/lang";
 import { useManager } from "@/stores/manager";
@@ -21,6 +22,7 @@ async function bootstrap() {
     app.use(router);
     app.use(lang);
     app.use(pinia);
+    await McpService.initialize(pinia);
 
     app.mount("#app");
 
