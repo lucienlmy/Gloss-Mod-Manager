@@ -14,7 +14,10 @@ interface IEditModForm {
 
 const manager = useManager();
 const showEditDialog = ref(false);
+const showDeleteDialog = ref(false);
 const editingModId = ref<number | null>(null);
+const deletingModId = ref<number | null>(null);
+const deleteTargetMod = ref<IModInfo | null>(null);
 const dragSourceId = ref<number | null>(null);
 const dragTargetId = ref<number | null>(null);
 const dragPosition = ref<"before" | "after">("before");
@@ -171,42 +174,73 @@ async function saveEdit() {
 }
 
 async function deleteMod(item: IModInfo) {
-    const confirmed = window.confirm(
-        item.isInstalled
-            ? `确定删除 ${item.modName} 吗？\n\n当前条目标记为已安装，删除只会移除本地缓存目录和列表记录，不会自动清理游戏目录中的文件。`
-            : `确定删除 ${item.modName} 吗？此操作会删除本地缓存目录和列表记录。`,
-    );
+    deleteTargetMod.value = item;
+    showDeleteDialog.value = true;
+}
 
-    if (!confirmed) {
+function closeDeleteDialog(force = false) {
+    if (!force && deletingModId.value !== null) {
         return;
     }
 
+    showDeleteDialog.value = false;
+
+    if (force) {
+        deleteTargetMod.value = null;
+    }
+}
+
+function getDeleteDescription(item: IModInfo) {
+    return item.isInstalled
+        ? `确定删除 ${item.modName} 吗？\n\n当前条目标记为已安装，删除只会移除本地缓存目录和列表记录，不会自动清理游戏目录中的文件。`
+        : `确定删除 ${item.modName} 吗？此操作会删除本地缓存目录和列表记录。`;
+}
+
+async function confirmDeleteMod() {
+    const item = deleteTargetMod.value;
+
+    if (!item) {
+        closeDeleteDialog(true);
+        return;
+    }
+
+    deletingModId.value = item.id;
+
     const modPath = await getModStoragePath(item.id);
 
-    if (modPath) {
-        const deleted = await FileHandler.deleteFolder(modPath);
+    try {
+        if (modPath) {
+            const deleted = await FileHandler.deleteFolder(modPath);
 
-        if (!deleted) {
-            ElMessage.error("删除 Mod 目录失败，请检查文件占用或权限设置。");
-            return;
+            if (!deleted) {
+                ElMessage.error(
+                    "删除 Mod 目录失败，请检查文件占用或权限设置。",
+                );
+                return;
+            }
         }
+
+        manager.managerModList = manager.managerModList.filter(
+            (mod) => mod.id !== item.id,
+        );
+        await manager.saveManagerData();
+
+        if (
+            manager.selectedTag !== "全部" &&
+            !manager.managerModList.some((mod) =>
+                (mod.tags ?? []).some(
+                    (tag) => tag.name === manager.selectedTag,
+                ),
+            )
+        ) {
+            manager.selectedTag = "全部";
+        }
+
+        ElMessage.success(`已删除 ${item.modName}`);
+        closeDeleteDialog(true);
+    } finally {
+        deletingModId.value = null;
     }
-
-    manager.managerModList = manager.managerModList.filter(
-        (mod) => mod.id !== item.id,
-    );
-    await manager.saveManagerData();
-
-    if (
-        manager.selectedTag !== "全部" &&
-        !manager.managerModList.some((mod) =>
-            (mod.tags ?? []).some((tag) => tag.name === manager.selectedTag),
-        )
-    ) {
-        manager.selectedTag = "全部";
-    }
-
-    ElMessage.success(`已删除 ${item.modName}`);
 }
 
 async function updateModType(item: IModInfo, nextType: unknown) {
@@ -499,6 +533,20 @@ function getRowClass(item: IModInfo) {
                                         </DropdownMenuShortcut>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
+                                        v-if="item.modWebsite"
+                                        as-child
+                                    >
+                                        <a
+                                            :href="item.modWebsite"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            >网址
+                                            <DropdownMenuShortcut>
+                                                <IconGlobe />
+                                            </DropdownMenuShortcut>
+                                        </a>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
                                         variant="destructive"
                                         @click="deleteMod(item)"
                                     >
@@ -584,5 +632,34 @@ function getRowClass(item: IModInfo) {
             </DialogFooter>
         </DialogContent>
     </Dialog>
+    <AlertDialog
+        :open="showDeleteDialog"
+        @update:open="(open: boolean) => !open && closeDeleteDialog()"
+    >
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle> 确认删除 </AlertDialogTitle>
+                <AlertDialogDescription class="whitespace-pre-line">
+                    {{
+                        deleteTargetMod
+                            ? getDeleteDescription(deleteTargetMod)
+                            : "未找到要删除的 Mod。"
+                    }}
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel :disabled="deletingModId !== null">
+                    取消
+                </AlertDialogCancel>
+                <AlertDialogAction
+                    :disabled="deletingModId !== null"
+                    class="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60"
+                    @click="confirmDeleteMod()"
+                >
+                    {{ deletingModId !== null ? "删除中..." : "确认删除" }}
+                </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
 </template>
 <style scoped></style>

@@ -11,12 +11,19 @@ declare global {
   const Aria2: typeof import('./lib/aria2').Aria2
   const Aria2Rpc: typeof import('./lib/aria2-rpc').Aria2Rpc
   const AutoStart: typeof import('./lib/auto-start').AutoStart
+  const DotNetTool: typeof import('./lib/dotnet-tool').DotNetTool
   const EMBEDDED_TOOL_VERSIONS: typeof import('./lib/native-tools-manifest').EMBEDDED_TOOL_VERSIONS
   const EffectScope: typeof import('vue').EffectScope
   const FileHandler: typeof import('./lib/FileHandler').FileHandler
+  const GLOSS_MOD_API_BASE_URL: typeof import('./lib/gloss-mod-api').GLOSS_MOD_API_BASE_URL
+  const GLOSS_MOD_KEY: typeof import('./lib/gloss-mod-api').GLOSS_MOD_KEY
+  const GLOSS_MOD_WEB_BASE_URL: typeof import('./lib/gloss-mod-api').GLOSS_MOD_WEB_BASE_URL
+  const GTA5Handler: typeof import('./lib/GTA5Handler').GTA5Handler
+  const GlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').GlossDownloadMonitor
   const Manager: typeof import('./lib/Manager').Manager
   const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
   const PersistentStore: typeof import('./lib/persistent-store').PersistentStore
+  const REEngine: typeof import('./lib/REEngine').REEngine
   const SIDECAR_BASE_NAMES: typeof import('./lib/native-tools-manifest').SIDECAR_BASE_NAMES
   const SIDECAR_COMMANDS: typeof import('./lib/native-tools-manifest').SIDECAR_COMMANDS
   const ScanGame: typeof import('./lib/scan-game').ScanGame
@@ -30,9 +37,11 @@ declare global {
   const WINDOWS_SEVEN_ZIP_SUPPORT_FILES: typeof import('./lib/native-tools-manifest').WINDOWS_SEVEN_ZIP_SUPPORT_FILES
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
+  const autoImportCompletedGlossTasks: typeof import('./lib/gloss-download-monitor').autoImportCompletedGlossTasks
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const buildAria2DownloadArgs: typeof import('./lib/aria2').buildAria2DownloadArgs
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
+  const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
   const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
@@ -68,6 +77,8 @@ declare global {
   const executeSidecar: typeof import('./lib/sidecar').executeSidecar
   const extendRef: typeof import('@vueuse/core').extendRef
   const extractArchiveWithSevenZip: typeof import('./lib/sevenZip').extractArchiveWithSevenZip
+  const fetchGlossGamePlugins: typeof import('./lib/gloss-mod-api').fetchGlossGamePlugins
+  const fetchGlossModDetail: typeof import('./lib/gloss-mod-api').fetchGlossModDetail
   const findGlossDuplicateLocalMods: typeof import('./lib/gloss-download').findGlossDuplicateLocalMods
   const findGlossDuplicateTasks: typeof import('./lib/gloss-download').findGlossDuplicateTasks
   const getActivePinia: typeof import('pinia').getActivePinia
@@ -81,10 +92,13 @@ declare global {
   const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
   const init: typeof import('./lib/global').init
   const initializeAutoStart: typeof import('./lib/auto-start').initializeAutoStart
+  const initializeGlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').initializeGlossDownloadMonitor
   const initializeTheme: typeof import('./lib/theme').initializeTheme
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
   const isDefined: typeof import('@vueuse/core').isDefined
+  const isGlossCloudDriveResource: typeof import('./lib/gloss-download-queue').isGlossCloudDriveResource
+  const isGlossCloudDriveUrl: typeof import('./lib/gloss-download-queue').isGlossCloudDriveUrl
   const isProxy: typeof import('vue').isProxy
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
@@ -124,6 +138,7 @@ declare global {
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
+  const queueGlossModDownload: typeof import('./lib/gloss-download-queue').queueGlossModDownload
   const reactify: typeof import('@vueuse/core').reactify
   const reactifyObject: typeof import('@vueuse/core').reactifyObject
   const reactive: typeof import('vue').reactive
@@ -139,6 +154,8 @@ declare global {
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
   const resolveComponent: typeof import('vue').resolveComponent
+  const resolveGlossAssetUrl: typeof import('./lib/gloss-mod-api').resolveGlossAssetUrl
+  const resolveGlossDownloadImportSourceType: typeof import('./lib/gloss-download-queue').resolveGlossDownloadImportSourceType
   const resolveLocalModImportSourceType: typeof import('./lib/local-mod-import').resolveLocalModImportSourceType
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const runAria2Command: typeof import('./lib/aria2').runAria2Command
@@ -154,6 +171,8 @@ declare global {
   const spawnSidecar: typeof import('./lib/sidecar').spawnSidecar
   const startAria2RpcServer: typeof import('./lib/aria2').startAria2RpcServer
   const storeToRefs: typeof import('pinia').storeToRefs
+  const supportedGamesGTA5: typeof import('./lib/GTA5Handler').supportedGamesGTA5
+  const supportedGamesGTA5Enhanced: typeof import('./lib/GTA5Handler').supportedGamesGTA5Enhanced
   const syncManagerRuntimeContext: typeof import('./lib/manager-context').syncManagerRuntimeContext
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
@@ -378,8 +397,14 @@ declare global {
   export type { FileHandler } from './lib/FileHandler'
   import('./lib/FileHandler')
   // @ts-ignore
+  export type { GTA5Handler } from './lib/GTA5Handler'
+  import('./lib/GTA5Handler')
+  // @ts-ignore
   export type { Manager } from './lib/Manager'
   import('./lib/Manager')
+  // @ts-ignore
+  export type { REEngine } from './lib/REEngine'
+  import('./lib/REEngine')
   // @ts-ignore
   export type { UnityGame, UnityGameILCPP2 } from './lib/UnityGame'
   import('./lib/UnityGame')
@@ -395,6 +420,15 @@ declare global {
   // @ts-ignore
   export type { AutoStart } from './lib/auto-start'
   import('./lib/auto-start')
+  // @ts-ignore
+  export type { DotNetTool } from './lib/dotnet-tool'
+  import('./lib/dotnet-tool')
+  // @ts-ignore
+  export type { GlossDownloadMonitor } from './lib/gloss-download-monitor'
+  import('./lib/gloss-download-monitor')
+  // @ts-ignore
+  export type { GlossQueueDownloadStatus, IQueueGlossDownloadOptions, IQueueGlossDownloadResult } from './lib/gloss-download-queue'
+  import('./lib/gloss-download-queue')
   // @ts-ignore
   export type { IGlossDownloadTaskMeta, GlossDownloadPresence, IGlossDuplicateCriteria, IGlossDuplicateTaskMatch, IGlossDuplicateLocalModMatch } from './lib/gloss-download'
   import('./lib/gloss-download')

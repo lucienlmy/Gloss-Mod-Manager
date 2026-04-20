@@ -1,0 +1,35 @@
+import { join } from "@tauri-apps/api/path";
+import { FileHandler } from "@/lib/FileHandler";
+import { UnrealEngine } from "@/lib/UnrealEngine";
+
+export const supportedGames = async () => ({
+    GlossGameId: 410,
+    steamAppID: 2701660,
+    nexusMods: {
+        game_domain_name: "dragonquest3remake",
+        game_id: 7044,
+    },
+    gameName: "DQIIIHD2DRemake",
+    installdir: "DRAGON QUEST III HD-2D Remake",
+    gameExe: "DQIIIHD2DRemake.exe",
+    startExe: [
+        {
+            name: "Steam 启动",
+            cmd: "steam://rungameid/2701660",
+        },
+        {
+            name: "直接启动",
+            exePath: "DQIIIHD2DRemake.exe",
+        },
+    ],
+    archivePath: await join(
+        await FileHandler.GetAppData(),
+        "Local",
+        "SparkingZERO",
+        "Saved"
+    ),
+    gameCoverImg:
+        "https://assets-mod.3dmgame.com/static/upload/mod/202412/MOD675a59d27912a.png@webp",
+    modType: await UnrealEngine.modType("Game", false),
+    checkModType: UnrealEngine.checkModType,
+}) as ISupportedGames;

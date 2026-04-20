@@ -41,17 +41,20 @@ function deleteGame(item: ISupportedGames) {
             </CardTitle>
         </CardHeader>
         <CardContent
-            class="grid grid-cols-4 items-center gap-4 justify-items-center">
+            class="grid grid-cols-4 items-center gap-4 justify-items-center"
+        >
             <div
                 v-for="item in manager.managerGameList"
                 :key="item.gameName"
-                class="flex flex-col items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors">
+                class="flex flex-col items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent/50"
+            >
                 <img
                     :src="item.gameCoverImg"
                     :alt="item.gameName"
                     @click="select(item)"
-                    class="h-25 hover:bg-accent/50 cursor-pointer" />
-                <div>{{ item.gameName }}</div>
+                    class="h-25 hover:bg-accent/50 cursor-pointer"
+                />
+                <div>{{ $t(item.gameName) }}</div>
                 <div class="flex w-full items-center justify-between gap-2">
                     <DropdownMenu>
                         <DropdownMenuTrigger>
@@ -71,7 +74,7 @@ function deleteGame(item: ISupportedGames) {
                             >
                         </DropdownMenuContent>
                     </DropdownMenu>
-                    <Button variant="outline">启动游戏</Button>
+                    <StartGame :game="item" />
                 </div>
             </div>
         </CardContent>

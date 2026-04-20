@@ -1,6 +1,19 @@
 <script setup lang="ts">
 import { fetch as httpFetch } from "@tauri-apps/plugin-http";
 import { ElMessage } from "element-plus-message";
+import { Aria2Rpc, type IAria2RpcTask } from "@/lib/aria2-rpc";
+import {
+    findGlossDuplicateTasks,
+    getGlossModPresence,
+    type GlossDownloadPresence,
+    type IGlossDownloadTaskMeta,
+} from "@/lib/gloss-download";
+import {
+    buildGlossOutputFileName,
+    isGlossCloudDriveResource,
+    queueGlossModDownload,
+} from "@/lib/gloss-download-queue";
+import { PersistentStore } from "@/lib/persistent-store";
 
 const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
 const GLOSS_MOD_WEB_BASE_URL = "https://mod.3dmgame.com";
@@ -78,12 +91,25 @@ interface IPageItem {
     ellipsis?: boolean;
 }
 
+type IExploreDownloadState = GlossDownloadPresence | "cloud" | "missing";
+
+interface IExploreDownloadStatus {
+    state: IExploreDownloadState;
+    label: string;
+    progress: number;
+}
+
 const manager = useManager();
 const router = useRouter();
+const taskMetaMap = PersistentStore.useValue<
+    Record<string, IGlossDownloadTaskMeta>
+>("aria2TaskMetaMap", {});
 
 const mods = ref<IGlossExploreMod[]>([]);
 const loading = ref(false);
 const errorMessage = ref("");
+const queueingModId = ref("");
+const taskSnapshots = ref<Record<string, IAria2RpcTask>>({});
 const totalCount = ref(0);
 const totalPages = ref(0);
 const page = ref(1);
@@ -99,6 +125,8 @@ const followCurrentGame = ref(true);
 
 // 用请求序号兜住并发搜索，避免慢请求把新结果覆盖掉。
 let requestSequence = 0;
+let refreshTaskSnapshotPending = false;
+let taskSnapshotTimer: ReturnType<typeof globalThis.setInterval> | null = null;
 
 const currentGame = computed(() => manager.managerGame);
 const currentGameName = computed(
@@ -210,6 +238,21 @@ const summaryCards = computed(() => [
         value: String(parsedTags.value.length),
     },
 ]);
+const shouldPollTaskSnapshots = computed(() => {
+    return Object.values(taskMetaMap.value).some((meta) => {
+        return ["active", "waiting", "paused"].includes(meta.taskStatus ?? "");
+    });
+});
+const downloadStatusMap = computed<Record<string, IExploreDownloadStatus>>(
+    () => {
+        return Object.fromEntries(
+            mods.value.map((item) => [
+                String(item.id),
+                resolveDownloadStatus(item),
+            ]),
+        );
+    },
+);
 
 watch(
     currentTypeOptions,
@@ -263,6 +306,38 @@ watch(pageSize, () => {
     }
 
     void fetchMods();
+});
+
+watch(
+    shouldPollTaskSnapshots,
+    (shouldPoll) => {
+        if (shouldPoll) {
+            void refreshTaskSnapshots();
+
+            if (taskSnapshotTimer === null) {
+                taskSnapshotTimer = globalThis.setInterval(() => {
+                    void refreshTaskSnapshots();
+                }, 2000);
+            }
+
+            return;
+        }
+
+        if (taskSnapshotTimer !== null) {
+            globalThis.clearInterval(taskSnapshotTimer);
+            taskSnapshotTimer = null;
+        }
+
+        taskSnapshots.value = {};
+    },
+    { immediate: true },
+);
+
+onBeforeUnmount(() => {
+    if (taskSnapshotTimer !== null) {
+        globalThis.clearInterval(taskSnapshotTimer);
+        taskSnapshotTimer = null;
+    }
 });
 
 function buildListUrl() {
@@ -349,7 +424,10 @@ async function fetchMods() {
         totalCount.value = payload.data.count ?? 0;
         totalPages.value = payload.data.totalPages ?? 0;
 
-        if (payload.data.totalPages > 0 && page.value > payload.data.totalPages) {
+        if (
+            payload.data.totalPages > 0 &&
+            page.value > payload.data.totalPages
+        ) {
             page.value = payload.data.totalPages;
         }
     } catch (error: unknown) {
@@ -371,6 +449,12 @@ async function fetchMods() {
 
 function formatNumber(value: number) {
     return numberFormatter.format(value);
+}
+
+function toNumber(value?: string | number) {
+    const normalized = Number(value ?? 0);
+
+    return Number.isFinite(normalized) ? normalized : 0;
 }
 
 function formatDate(value?: string) {
@@ -430,9 +514,243 @@ function getOriginalLabel(value: number) {
 
 function getLatestResource(item: IGlossExploreMod) {
     return (
-        item.mods_resource.find((resource) => resource.mods_resource_latest_version) ??
-        item.mods_resource[0]
+        item.mods_resource.find(
+            (resource) => resource.mods_resource_latest_version,
+        ) ?? item.mods_resource[0]
     );
+}
+
+function isCloudDriveMod(item: IGlossExploreMod) {
+    return isGlossCloudDriveResource(getLatestResource(item));
+}
+
+function getGlossDuplicateCriteria(item: IGlossExploreMod) {
+    const latestResource = getLatestResource(item);
+
+    if (!latestResource?.mods_resource_url) {
+        return null;
+    }
+
+    return {
+        modId: item.id,
+        resourceId: latestResource.id,
+        downloadUrl: latestResource.mods_resource_url,
+        fileName: buildGlossOutputFileName(latestResource),
+        modTitle: item.mods_title,
+    };
+}
+
+function getMatchedTask(item: IGlossExploreMod) {
+    const criteria = getGlossDuplicateCriteria(item);
+
+    if (!criteria) {
+        return null;
+    }
+
+    for (const match of findGlossDuplicateTasks(taskMetaMap.value, criteria)) {
+        const task = taskSnapshots.value[match.gid];
+
+        if (task && task.status !== "removed") {
+            return task;
+        }
+    }
+
+    return null;
+}
+
+function getTaskProgress(task?: IAria2RpcTask | null) {
+    if (!task) {
+        return 0;
+    }
+
+    const totalLength = toNumber(task.totalLength);
+
+    if (totalLength <= 0) {
+        return 0;
+    }
+
+    return Math.min(
+        100,
+        Math.round((toNumber(task.completedLength) / totalLength) * 100),
+    );
+}
+
+function resolveDownloadStatus(item: IGlossExploreMod): IExploreDownloadStatus {
+    const latestResource = getLatestResource(item);
+
+    if (!latestResource?.mods_resource_url) {
+        return {
+            state: "missing",
+            label: "暂无资源",
+            progress: 0,
+        };
+    }
+
+    if (isGlossCloudDriveResource(latestResource)) {
+        return {
+            state: "cloud",
+            label: "打开网盘",
+            progress: 0,
+        };
+    }
+
+    const criteria = getGlossDuplicateCriteria(item);
+
+    if (!criteria) {
+        return {
+            state: "none",
+            label: "加入下载",
+            progress: 0,
+        };
+    }
+
+    const presence = getGlossModPresence(
+        taskMetaMap.value,
+        manager.managerModList,
+        criteria,
+    );
+    const task = getMatchedTask(item);
+
+    switch (presence.state) {
+        case "active":
+            return {
+                state: "active",
+                label: "下载中",
+                progress: getTaskProgress(task),
+            };
+        case "waiting":
+            return {
+                state: "waiting",
+                label: "排队中",
+                progress: getTaskProgress(task),
+            };
+        case "paused":
+            return {
+                state: "paused",
+                label: "已暂停",
+                progress: getTaskProgress(task),
+            };
+        case "error":
+            return {
+                state: "error",
+                label: "下载失败",
+                progress: 0,
+            };
+        case "complete":
+            return {
+                state: "complete",
+                label: "已下载",
+                progress: 100,
+            };
+        case "imported":
+            return {
+                state: "imported",
+                label: "已添加",
+                progress: 100,
+            };
+        default:
+            return {
+                state: "none",
+                label: "加入下载",
+                progress: 0,
+            };
+    }
+}
+
+function getDownloadStatus(item: IGlossExploreMod) {
+    return (
+        downloadStatusMap.value[String(item.id)] ?? {
+            state: "none",
+            label: "加入下载",
+            progress: 0,
+        }
+    );
+}
+
+function shouldShowDownloadProgress(item: IGlossExploreMod) {
+    return ["active", "waiting", "paused"].includes(
+        getDownloadStatus(item).state,
+    );
+}
+
+function isDownloadActionDisabled(item: IGlossExploreMod) {
+    if (queueingModId.value === String(item.id)) {
+        return true;
+    }
+
+    const status = getDownloadStatus(item).state;
+
+    return ["active", "waiting", "complete", "imported", "missing"].includes(
+        status,
+    );
+}
+
+function getDownloadButtonClass(item: IGlossExploreMod) {
+    const status = getDownloadStatus(item).state;
+
+    if (status === "active") {
+        return "border-sky-500/40 bg-sky-500/10 text-sky-700 hover:bg-sky-500/15 dark:text-sky-200";
+    }
+
+    if (status === "waiting" || status === "paused") {
+        return "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/15 dark:text-amber-200";
+    }
+
+    if (status === "complete" || status === "imported") {
+        return "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-200";
+    }
+
+    if (status === "error") {
+        return "border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/15";
+    }
+
+    if (status === "cloud") {
+        return "border-sky-500/30 bg-sky-500/8 text-sky-700 hover:bg-sky-500/15 dark:text-sky-200";
+    }
+
+    return "";
+}
+
+function getProgressBarClass(item: IGlossExploreMod) {
+    const status = getDownloadStatus(item).state;
+
+    if (status === "active") {
+        return "bg-sky-500";
+    }
+
+    if (status === "paused") {
+        return "bg-amber-500";
+    }
+
+    return "bg-amber-400";
+}
+
+async function refreshTaskSnapshots() {
+    if (!shouldPollTaskSnapshots.value || refreshTaskSnapshotPending) {
+        return;
+    }
+
+    refreshTaskSnapshotPending = true;
+
+    try {
+        const [activeTasks, waitingTasks, stoppedTasks] = await Promise.all([
+            Aria2Rpc.tellActive(),
+            Aria2Rpc.tellWaiting(0, 100),
+            Aria2Rpc.tellStopped(0, 100),
+        ]);
+
+        taskSnapshots.value = Object.fromEntries(
+            [...activeTasks, ...waitingTasks, ...stoppedTasks].map((task) => [
+                task.gid,
+                task,
+            ]),
+        );
+    } catch (error) {
+        console.error("刷新游览页下载状态失败");
+        console.error(error);
+    } finally {
+        refreshTaskSnapshotPending = false;
+    }
 }
 
 function getTags(item: IGlossExploreMod) {
@@ -473,7 +791,7 @@ async function openModDetail(item: IGlossExploreMod) {
         });
     } catch (error) {
         console.error(error);
-        ElMessage.error("打开 Mod 详情页失败。",);
+        ElMessage.error("打开 Mod 详情页失败。");
     }
 }
 
@@ -485,23 +803,50 @@ async function openLatestResource(item: IGlossExploreMod) {
         return;
     }
 
+    const queueKey = String(item.id);
+    queueingModId.value = queueKey;
+
     try {
-        await router.push({
-            path: "/download",
-            query: {
-                modId: String(item.id),
-                resourceId: String(latestResource.id ?? "latest"),
-                autoDownload: "1",
-            },
+        const result = await queueGlossModDownload({
+            mod: item,
+            resourceId: latestResource.id ?? "latest",
+            managerModList: manager.managerModList,
         });
+
+        if (
+            ["created", "resumed", "retried", "exists"].includes(result.status)
+        ) {
+            void refreshTaskSnapshots();
+        }
+
+        if (
+            result.status === "created" ||
+            result.status === "resumed" ||
+            result.status === "retried"
+        ) {
+            ElMessage.success(result.message);
+            return;
+        }
+
+        ElMessage.info(result.message);
     } catch (error) {
         console.error(error);
-        ElMessage.error("提交下载任务失败。",);
+        ElMessage.error(
+            error instanceof Error ? error.message : "提交下载任务失败。",
+        );
+    } finally {
+        if (queueingModId.value === queueKey) {
+            queueingModId.value = "";
+        }
     }
 }
 
 function goToPage(targetPage: number) {
-    if (targetPage < 1 || targetPage > totalPages.value || targetPage === page.value) {
+    if (
+        targetPage < 1 ||
+        targetPage > totalPages.value ||
+        targetPage === page.value
+    ) {
         return;
     }
 
@@ -512,24 +857,38 @@ function goToPage(targetPage: number) {
 <template>
     <div class="space-y-5">
         <section
-            class="overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-amber-100/65 via-background to-background p-4">
-            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+            class="overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-amber-100/65 via-background to-background p-4"
+        >
+            <div
+                class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"
+            >
                 <div class="space-y-3">
                     <div class="flex flex-wrap items-center gap-2">
                         <Badge class="rounded-full" variant="secondary">
                             Gloss Mod
                         </Badge>
-                        <Badge v-if="currentGameName" class="rounded-full" variant="outline">
-                            当前游戏
-                            · {{ currentGameName }}
+                        <Badge
+                            v-if="currentGameName"
+                            class="rounded-full"
+                            variant="outline"
+                        >
+                            当前游戏 · {{ currentGameName }}
                         </Badge>
                         <Badge v-else class="rounded-full" variant="outline">
                             未选择本地游戏，当前显示全站结果
                         </Badge>
-                        <Badge v-if="onlySupportGmm" class="rounded-full" variant="outline">
+                        <Badge
+                            v-if="onlySupportGmm"
+                            class="rounded-full"
+                            variant="outline"
+                        >
                             仅 GMM
                         </Badge>
-                        <Badge v-if="onlyLocal" class="rounded-full" variant="outline">
+                        <Badge
+                            v-if="onlyLocal"
+                            class="rounded-full"
+                            variant="outline"
+                        >
                             仅本地资源
                         </Badge>
                     </div>
@@ -537,23 +896,35 @@ function goToPage(targetPage: number) {
                         <h4 class="text-base font-semibold tracking-tight">
                             3DM Gloss Mods 搜索与游览
                         </h4>
-
                     </div>
-                    <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <div
+                        class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+                    >
                         <span>
-                            {{ totalPages > 0 ? `第 ${page} / ${totalPages} 页` : "暂无分页结果" }}
+                            {{
+                                totalPages > 0
+                                    ? `第 ${page} / ${totalPages} 页`
+                                    : "暂无分页结果"
+                            }}
                         </span>
                         <span>·</span>
                         <span>
-                            {{ hasActiveFilters ? "已启用筛选" : "当前未启用额外筛选" }}
+                            {{
+                                hasActiveFilters
+                                    ? "已启用筛选"
+                                    : "当前未启用额外筛选"
+                            }}
                         </span>
                         <span v-if="loading">· 正在更新结果</span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-4 xl:min-w-105">
-                    <div v-for="item in summaryCards" :key="item.label"
-                        class="rounded-xl border border-border/60 bg-background/80 px-3 py-3 backdrop-blur-sm">
+                    <div
+                        v-for="item in summaryCards"
+                        :key="item.label"
+                        class="rounded-xl border border-border/60 bg-background/80 px-3 py-3 backdrop-blur-sm"
+                    >
                         <div class="text-xs text-muted-foreground">
                             {{ item.label }}
                         </div>
@@ -566,12 +937,18 @@ function goToPage(targetPage: number) {
         </section>
 
         <section class="space-y-4 rounded-2xl border p-4">
-            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div
+                class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+            >
                 <div class="flex flex-wrap items-center gap-2">
                     <Badge class="rounded-full" variant="outline">
                         筛选条件
                     </Badge>
-                    <Badge v-if="currentGameName" class="rounded-full" variant="outline">
+                    <Badge
+                        v-if="currentGameName"
+                        class="rounded-full"
+                        variant="outline"
+                    >
                         当前游戏：{{ currentGameName }}
                     </Badge>
                     <span v-else class="text-xs text-muted-foreground">
@@ -589,14 +966,23 @@ function goToPage(targetPage: number) {
                     <div class="xl:col-span-2">
                         <div class="text-sm font-medium">搜索 Mod</div>
                         <div class="relative mt-2">
-                            <Input v-model="searchKeyword" class="pr-10" placeholder="按标题搜索，例如：材质、武器、整合包" />
+                            <Input
+                                v-model="searchKeyword"
+                                class="pr-10"
+                                placeholder="按标题搜索，例如：材质、武器、整合包"
+                            />
                             <IconSearch
-                                class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                                class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground"
+                            />
                         </div>
                     </div>
                     <div>
                         <div class="text-sm font-medium">标签筛选</div>
-                        <Input v-model="tagKeyword" class="mt-2" placeholder="多个标签可用空格或逗号分隔" />
+                        <Input
+                            v-model="tagKeyword"
+                            class="mt-2"
+                            placeholder="多个标签可用空格或逗号分隔"
+                        />
                     </div>
                 </div>
 
@@ -608,7 +994,11 @@ function goToPage(targetPage: number) {
                                 <SelectValue placeholder="全部来源" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="item in originalFilterOptions" :key="item.value" :value="item.value">
+                                <SelectItem
+                                    v-for="item in originalFilterOptions"
+                                    :key="item.value"
+                                    :value="item.value"
+                                >
                                     {{ item.label }}
                                 </SelectItem>
                             </SelectContent>
@@ -622,7 +1012,11 @@ function goToPage(targetPage: number) {
                                 <SelectValue placeholder="全部时间" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="item in timeFilterOptions" :key="item.value" :value="item.value">
+                                <SelectItem
+                                    v-for="item in timeFilterOptions"
+                                    :key="item.value"
+                                    :value="item.value"
+                                >
                                     {{ item.label }}
                                 </SelectItem>
                             </SelectContent>
@@ -631,13 +1025,26 @@ function goToPage(targetPage: number) {
 
                     <div>
                         <div class="text-sm font-medium">游戏类型</div>
-                        <Select v-model="selectedType" :disabled="!currentTypeOptions.length">
+                        <Select
+                            v-model="selectedType"
+                            :disabled="!currentTypeOptions.length"
+                        >
                             <SelectTrigger class="mt-2 w-full">
-                                <SelectValue :placeholder="currentTypeOptions.length ? '全部类型' : '当前游戏暂无类型'" />
+                                <SelectValue
+                                    :placeholder="
+                                        currentTypeOptions.length
+                                            ? '全部类型'
+                                            : '当前游戏暂无类型'
+                                    "
+                                />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">全部类型</SelectItem>
-                                <SelectItem v-for="item in currentTypeOptions" :key="item.value" :value="item.value">
+                                <SelectItem
+                                    v-for="item in currentTypeOptions"
+                                    :key="item.value"
+                                    :value="item.value"
+                                >
                                     {{ item.label }}
                                 </SelectItem>
                             </SelectContent>
@@ -651,19 +1058,27 @@ function goToPage(targetPage: number) {
                                 <SelectValue placeholder="选择每页数量" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem v-for="item in PAGE_SIZE_OPTIONS" :key="item" :value="item">
+                                <SelectItem
+                                    v-for="item in PAGE_SIZE_OPTIONS"
+                                    :key="item"
+                                    :value="item"
+                                >
                                     每页 {{ item }} 条
                                 </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
-                    <div class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1">
+                    <div
+                        class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1"
+                    >
                         <div class="text-sm font-medium">仅支持 GMM</div>
                         <Switch v-model="onlySupportGmm" />
                     </div>
 
-                    <div class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1">
+                    <div
+                        class="flex items-center justify-between rounded-lg border px-3 py-2.5 xl:col-span-1"
+                    >
                         <div class="text-sm font-medium">仅本地资源</div>
                         <Switch v-model="onlyLocal" />
                     </div>
@@ -671,10 +1086,17 @@ function goToPage(targetPage: number) {
             </div>
         </section>
 
-        <section v-if="errorMessage" class="rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-5">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <section
+            v-if="errorMessage"
+            class="rounded-2xl border border-destructive/40 bg-destructive/5 px-4 py-5"
+        >
+            <div
+                class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+            >
                 <div>
-                    <div class="text-sm font-semibold text-destructive">加载失败</div>
+                    <div class="text-sm font-semibold text-destructive">
+                        加载失败
+                    </div>
                     <p class="mt-1 text-sm text-muted-foreground">
                         {{ errorMessage }}
                     </p>
@@ -686,12 +1108,21 @@ function goToPage(targetPage: number) {
             </div>
         </section>
 
-        <section v-else-if="loading && !mods.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <div v-for="item in 6" :key="item" class="overflow-hidden rounded-2xl border bg-background">
+        <section
+            v-else-if="loading && !mods.length"
+            class="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        >
+            <div
+                v-for="item in 6"
+                :key="item"
+                class="overflow-hidden rounded-2xl border bg-background"
+            >
                 <div class="aspect-video animate-pulse bg-muted"></div>
                 <div class="space-y-3 p-4">
                     <div class="h-5 w-2/3 animate-pulse rounded bg-muted"></div>
-                    <div class="h-4 w-full animate-pulse rounded bg-muted"></div>
+                    <div
+                        class="h-4 w-full animate-pulse rounded bg-muted"
+                    ></div>
                     <div class="h-4 w-5/6 animate-pulse rounded bg-muted"></div>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="h-8 animate-pulse rounded bg-muted"></div>
@@ -702,11 +1133,17 @@ function goToPage(targetPage: number) {
             </div>
         </section>
 
-        <section v-else-if="!mods.length" class="rounded-2xl border border-dashed px-4 py-10 text-center">
+        <section
+            v-else-if="!mods.length"
+            class="rounded-2xl border border-dashed px-4 py-10 text-center"
+        >
             <div class="mx-auto max-w-md">
-                <div class="text-base font-semibold">没有找到符合条件的 Mod</div>
+                <div class="text-base font-semibold">
+                    没有找到符合条件的 Mod
+                </div>
                 <p class="mt-2 text-sm leading-6 text-muted-foreground">
-                    可以试着清空标签、放宽时间范围，或者关闭“仅支持 GMM / 仅本地资源”开关后再试。
+                    可以试着清空标签、放宽时间范围，或者关闭“仅支持 GMM /
+                    仅本地资源”开关后再试。
                 </p>
                 <div class="mt-5 flex justify-center">
                     <Button variant="outline" @click="resetFilters">
@@ -718,44 +1155,82 @@ function goToPage(targetPage: number) {
         </section>
 
         <template v-else>
-            <section class="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3">
+            <section
+                class="flex items-center justify-between gap-3 rounded-2xl border px-4 py-3"
+            >
                 <div>
                     <div class="text-sm font-medium">
-                        {{ currentGameId ? `${currentGameName} 的 Mod 列表` : "全部 Gloss Mods" }}
+                        {{
+                            currentGameId
+                                ? `${currentGameName} 的 Mod 列表`
+                                : "全部 Gloss Mods"
+                        }}
                     </div>
                     <div class="mt-1 text-xs text-muted-foreground">
                         共 {{ formatNumber(totalCount) }} 条结果
                     </div>
                 </div>
-                <div class="flex items-center gap-2 text-xs text-muted-foreground">
-                    <IconLoaderCircle v-if="loading" class="size-4 animate-spin" />
-                    <span>{{ totalPages > 0 ? `第 ${page} / ${totalPages} 页` : "暂无分页" }}</span>
+                <div
+                    class="flex items-center gap-2 text-xs text-muted-foreground"
+                >
+                    <IconLoaderCircle
+                        v-if="loading"
+                        class="size-4 animate-spin"
+                    />
+                    <span>{{
+                        totalPages > 0
+                            ? `第 ${page} / ${totalPages} 页`
+                            : "暂无分页"
+                    }}</span>
                 </div>
             </section>
 
             <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                <article v-for="item in mods" :key="item.id"
-                    class="group overflow-hidden rounded-2xl border bg-card transition-colors hover:border-primary/40">
+                <article
+                    v-for="item in mods"
+                    :key="item.id"
+                    class="group overflow-hidden rounded-2xl border bg-card transition-colors hover:border-primary/40"
+                >
                     <div class="relative aspect-video overflow-hidden bg-muted">
-                        <img :src="getCoverUrl(item)" :data-fallback-src="getFallbackCoverUrl(item)"
+                        <img
+                            :src="getCoverUrl(item)"
+                            :data-fallback-src="getFallbackCoverUrl(item)"
                             :alt="item.mods_title"
                             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                            @error="handleCoverError" />
+                            @error="handleCoverError"
+                        />
                         <div
-                            class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/65 via-black/20 to-transparent px-4 py-3 text-white">
-                            <div class="flex flex-wrap items-center gap-2 text-xs">
-                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                            class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/65 via-black/20 to-transparent px-4 py-3 text-white"
+                        >
+                            <div
+                                class="flex flex-wrap items-center gap-2 text-xs"
+                            >
+                                <Badge
+                                    class="rounded-full border-white/30 bg-black/25 text-white"
+                                >
                                     {{ item.game_name }}
                                 </Badge>
-                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                                <Badge
+                                    class="rounded-full border-white/30 bg-black/25 text-white"
+                                >
                                     {{ item.mods_type_name }}
                                 </Badge>
-                                <Badge class="rounded-full border-white/30 bg-black/25 text-white">
+                                <Badge
+                                    class="rounded-full border-white/30 bg-black/25 text-white"
+                                >
                                     {{ getOriginalLabel(item.mods_original) }}
                                 </Badge>
-                                <Badge v-if="item.support_gmm"
-                                    class="rounded-full border-white/30 bg-emerald-500/30 text-white">
+                                <Badge
+                                    v-if="item.support_gmm"
+                                    class="rounded-full border-white/30 bg-emerald-500/30 text-white"
+                                >
                                     支持 GMM
+                                </Badge>
+                                <Badge
+                                    v-if="isCloudDriveMod(item)"
+                                    class="rounded-full border-white/30 bg-sky-500/30 text-white"
+                                >
+                                    网盘
                                 </Badge>
                             </div>
                         </div>
@@ -763,24 +1238,50 @@ function goToPage(targetPage: number) {
 
                     <div class="space-y-4 p-4">
                         <div class="flex flex-col gap-2">
-                            <div class="line-clamp-2 text-base font-semibold leading-6">
+                            <div
+                                class="line-clamp-2 text-base font-semibold leading-6"
+                            >
                                 {{ item.mods_title }}
                             </div>
-                            <div class="flex flex-wrap gap-2" v-if="getTags(item).length">
-                                <Badge v-for="tag in getTags(item).slice(0, 5)" :key="tag" class="rounded-full"
-                                    variant="outline">
+                            <div
+                                class="flex flex-wrap gap-2"
+                                v-if="getTags(item).length"
+                            >
+                                <Badge
+                                    v-for="tag in getTags(item).slice(0, 5)"
+                                    :key="tag"
+                                    class="rounded-full"
+                                    variant="outline"
+                                >
                                     {{ tag }}
                                 </Badge>
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                            <span>作者：{{ item.user_nickName || item.mods_author || "未知" }}</span>
+                        <div
+                            class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"
+                        >
+                            <span
+                                >作者：{{
+                                    item.user_nickName ||
+                                    item.mods_author ||
+                                    "未知"
+                                }}</span
+                            >
                             <span>·</span>
-                            <span>更新：{{ formatDate(item.mods_updateTime) }}</span>
+                            <span
+                                >更新：{{
+                                    formatDate(item.mods_updateTime)
+                                }}</span
+                            >
                             <span>·</span>
                             <span>
-                                版本：{{ item.mods_version || getLatestResource(item)?.mods_resource_version || "未知" }}
+                                版本：{{
+                                    item.mods_version ||
+                                    getLatestResource(item)
+                                        ?.mods_resource_version ||
+                                    "未知"
+                                }}
                             </span>
                         </div>
 
@@ -805,60 +1306,134 @@ function goToPage(targetPage: number) {
                             </div>
                         </div>
 
-
-
-                        <div class="rounded-xl border bg-muted/20 px-3 py-3 text-xs text-muted-foreground">
-                            <div class="flex items-center justify-between gap-3">
+                        <div
+                            class="rounded-xl border bg-muted/20 px-3 py-3 text-xs text-muted-foreground"
+                        >
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
                                 <span>
                                     {{ item.mods_resource.length }} 个资源
                                 </span>
                                 <span>
-                                    {{ getLatestResource(item)?.mods_resource_size || "大小未知" }}
+                                    {{
+                                        getLatestResource(item)
+                                            ?.mods_resource_size || "大小未知"
+                                    }}
                                 </span>
                             </div>
                             <div class="mt-2 line-clamp-1">
-                                {{ getLatestResource(item)?.mods_resource_name || "暂无资源名称" }}
+                                {{
+                                    getLatestResource(item)
+                                        ?.mods_resource_name || "暂无资源名称"
+                                }}
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <Button class="flex-1" size="sm" @click="openModDetail(item)">
+                        <div class="grid grid-cols-2 gap-2 items-start">
+                            <Button
+                                class="flex-1"
+                                size="sm"
+                                @click="openModDetail(item)"
+                            >
                                 <IconExternalLink />
                                 查看详情
                             </Button>
-                            <Button class="flex-1" size="sm" variant="outline" @click="openLatestResource(item)">
-                                <IconDownload />
-                                加入下载
-                            </Button>
+                            <div class="space-y-1.5">
+                                <Button
+                                    class="w-full"
+                                    size="sm"
+                                    variant="outline"
+                                    :class="getDownloadButtonClass(item)"
+                                    :disabled="isDownloadActionDisabled(item)"
+                                    @click="openLatestResource(item)"
+                                >
+                                    <IconDownload />
+                                    {{
+                                        queueingModId === String(item.id)
+                                            ? "加入中..."
+                                            : getDownloadStatus(item).label
+                                    }}
+                                </Button>
+                                <div
+                                    v-if="shouldShowDownloadProgress(item)"
+                                    class="space-y-1"
+                                >
+                                    <div
+                                        class="h-1.5 overflow-hidden rounded-full bg-muted"
+                                    >
+                                        <div
+                                            class="h-full rounded-full transition-[width] duration-300"
+                                            :class="getProgressBarClass(item)"
+                                            :style="{
+                                                width: `${getDownloadStatus(item).progress}%`,
+                                            }"
+                                        ></div>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-between text-[11px] text-muted-foreground"
+                                    >
+                                        <span>
+                                            {{ getDownloadStatus(item).label }}
+                                        </span>
+                                        <span>
+                                            {{
+                                                getDownloadStatus(item)
+                                                    .progress
+                                            }}%
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </article>
             </section>
 
             <section
-                class="flex flex-col gap-4 rounded-2xl border px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
+                class="flex flex-col gap-4 rounded-2xl border px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
+            >
                 <div class="text-sm text-muted-foreground">
                     当前显示第 {{ page }} 页，共 {{ totalPages }} 页，累计
                     {{ formatNumber(totalCount) }} 条结果。
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2">
-                    <Button size="sm" variant="outline" :disabled="page <= 1" @click="goToPage(page - 1)">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        :disabled="page <= 1"
+                        @click="goToPage(page - 1)"
+                    >
                         <IconChevronLeft />
                         上一页
                     </Button>
 
                     <template v-for="item in paginationItems" :key="item.key">
-                        <span v-if="item.ellipsis" class="px-2 text-sm text-muted-foreground">
+                        <span
+                            v-if="item.ellipsis"
+                            class="px-2 text-sm text-muted-foreground"
+                        >
                             {{ item.label }}
                         </span>
-                        <Button v-else size="sm" :variant="item.page === page ? 'default' : 'outline'"
-                            @click="goToPage(item.page ?? 1)">
+                        <Button
+                            v-else
+                            size="sm"
+                            :variant="
+                                item.page === page ? 'default' : 'outline'
+                            "
+                            @click="goToPage(item.page ?? 1)"
+                        >
                             {{ item.label }}
                         </Button>
                     </template>
 
-                    <Button size="sm" variant="outline" :disabled="page >= totalPages" @click="goToPage(page + 1)">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        :disabled="page >= totalPages"
+                        @click="goToPage(page + 1)"
+                    >
                         下一页
                         <IconChevronRight />
                     </Button>

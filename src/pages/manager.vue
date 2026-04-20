@@ -6,6 +6,7 @@ import {
     importLocalModSources,
 } from "@/lib/local-mod-import";
 import { syncManagerRuntimeContext } from "@/lib/manager-context";
+import ManagerPreloadList from "@/components/Manager/ManagerPreloadList.vue";
 import {
     FolderOpen,
     FolderPlus,
@@ -167,7 +168,9 @@ async function detectModType(mod: IModInfo) {
                     }
 
                     if (rule.UseFunction === "basename") {
-                        return getBaseName(normalizedFile) === normalizedKeyword;
+                        return (
+                            getBaseName(normalizedFile) === normalizedKeyword
+                        );
                     }
 
                     return [
@@ -630,13 +633,17 @@ function openGamesPage() {
         <template v-else>
             <Card>
                 <CardHeader>
-                    <CardTitle class="flex flex-wrap justify-between items-center gap-3">
+                    <CardTitle
+                        class="flex flex-wrap justify-between items-center gap-3"
+                    >
                         <h3 class="text-2xl">Mod 管理</h3>
                         <div>
                             当前游戏『
                             {{
-                                manager.managerGame.gameShowName ||
-                                manager.managerGame.gameName
+                                $t(
+                                    manager.managerGame.gameShowName ||
+                                        manager.managerGame.gameName,
+                                )
                             }}
                             』
                         </div>
@@ -676,7 +683,9 @@ function openGamesPage() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" class="w-56">
-                                    <DropdownMenuItem @click="openModRootFolder">
+                                    <DropdownMenuItem
+                                        @click="openModRootFolder"
+                                    >
                                         <FolderOpen class="h-4 w-4" />
                                         打开 Mod 目录
                                     </DropdownMenuItem>
@@ -689,39 +698,61 @@ function openGamesPage() {
                             </DropdownMenu>
                         </div>
                         <InputGroup>
-                            <InputGroupInput v-model="manager.search" placeholder="搜索名称、作者、版本、标签或类型" />
+                            <InputGroupInput
+                                v-model="manager.search"
+                                placeholder="搜索名称、作者、版本、标签或类型"
+                            />
                             <InputGroupAddon>
                                 <Search />
                             </InputGroupAddon>
                         </InputGroup>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 text-sm">
-                        <Button :variant="manager.selectedType === 0
-                                ? 'default'
-                                : 'outline'
-                            " size="sm" @click="manager.selectedType = 0">
+                        <Button
+                            :variant="
+                                manager.selectedType === 0
+                                    ? 'default'
+                                    : 'outline'
+                            "
+                            size="sm"
+                            @click="manager.selectedType = 0"
+                        >
                             全部 ({{ getTypeCount(0) }})
                         </Button>
-                        <Button v-for="item in manager.availableTypes" :key="item.id" :variant="manager.selectedType === item.id
-                                ? 'default'
-                                : 'outline'
-                            " size="sm" @click="manager.selectedType = item.id">
+                        <Button
+                            v-for="item in manager.availableTypes"
+                            :key="item.id"
+                            :variant="
+                                manager.selectedType === item.id
+                                    ? 'default'
+                                    : 'outline'
+                            "
+                            size="sm"
+                            @click="manager.selectedType = item.id"
+                        >
                             {{ item.name }} ({{ getTypeCount(item.id) }})
                         </Button>
                     </div>
                     <ManagerTags />
                 </CardContent>
             </Card>
+            <ManagerPreloadList />
             <ManagerList />
 
             <Card v-if="loadError">
-                <CardContent class="flex items-center justify-between gap-4 py-6">
+                <CardContent
+                    class="flex items-center justify-between gap-4 py-6"
+                >
                     <p class="text-sm text-destructive">{{ loadError }}</p>
-                    <Button variant="outline" @click="loadManagerData">重试</Button>
+                    <Button variant="outline" @click="loadManagerData"
+                        >重试</Button
+                    >
                 </CardContent>
             </Card>
-            <div v-else-if="manager.filteredMods.length === 0"
-                class="rounded-lg border border-dashed px-6 py-16 text-center text-sm text-muted-foreground">
+            <div
+                v-else-if="manager.filteredMods.length === 0"
+                class="rounded-lg border border-dashed px-6 py-16 text-center text-sm text-muted-foreground"
+            >
                 <p>当前没有匹配的 Mod。</p>
                 <p class="mt-2">
                     你可以调整筛选条件，或从上方导入文件夹/压缩包来创建本地 Mod

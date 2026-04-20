@@ -2,9 +2,38 @@
 import { open } from "@tauri-apps/plugin-dialog";
 import { dirname, join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
+import { useI18n } from "vue-i18n";
 
 const manager = useManager();
 const showSelectDialog = ref(false);
+const searchKeyword = ref("");
+const { t } = useI18n();
+
+const filteredGames = computed(() => {
+    const keyword = normalizeCompareText(searchKeyword.value);
+
+    if (!keyword) {
+        return manager.supportedGames;
+    }
+
+    return manager.supportedGames.filter((item) => {
+        const matchedNames = [item.gameName, String(t(item.gameName))].map(
+            (name) => normalizeCompareText(name),
+        );
+
+        return matchedNames.some((name) => name.includes(keyword));
+    });
+});
+
+const gameCountLabel = computed(() => {
+    const total = manager.supportedGames.length;
+
+    if (!searchKeyword.value.trim()) {
+        return `共${total}款游戏`;
+    }
+
+    return `匹配${filteredGames.value.length}款 / 共${total}款`;
+});
 
 async function select(item: ISupportedGames) {
     const path = await ScanGame.getSteamGamePath(
@@ -27,7 +56,7 @@ async function select(item: ISupportedGames) {
     if (selected) {
         const folder = selectGameByFolder ? selected : await dirname(selected);
         const files = await FileHandler.getAllFilesInFolder(folder);
-        
+
         if (typeof item.gameExe == "string") {
             // 判断 item.gameExe 是否存在于 files 中
             if (files.includes(item.gameExe)) {
@@ -92,16 +121,14 @@ async function select(item: ISupportedGames) {
                     <DialogTitle class="flex gap-3">
                         <div class="flex items-center">
                             选择游戏
-                            <small
-                                >(共{{
-                                    manager.supportedGames.length
-                                }}款游戏)</small
-                            >
+                            <small>({{ gameCountLabel }})</small>
                         </div>
                         <div class="flex-1 max-w-[75%]">
                             <InputGroup>
                                 <InputGroupInput
-                                    placeholder="搜索游戏"></InputGroupInput>
+                                    v-model="searchKeyword"
+                                    placeholder="搜索游戏"
+                                ></InputGroupInput>
                                 <InputGroupAddon align="inline-end">
                                     <Button variant="ghost" size="icon">
                                         <IconSearch class="h-4 w-4" />
@@ -112,17 +139,26 @@ async function select(item: ISupportedGames) {
                     </DialogTitle>
                 </DialogHeader>
                 <div
-                    class="grid grid-cols-4 items-center gap-4 justify-items-center">
+                    class="grid grid-cols-4 items-center gap-4 justify-items-center"
+                >
                     <div
-                        v-for="item in manager.supportedGames"
+                        v-for="item in filteredGames"
                         :key="item.gameName"
                         @click="select(item)"
-                        class="flex flex-col items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent/50 cursor-pointer">
+                        class="flex flex-col items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent/50 cursor-pointer"
+                    >
                         <img
                             class="h-25"
                             :src="item.gameCoverImg"
-                            :alt="item.gameName" />
-                        <div>{{ item.gameName }}</div>
+                            :alt="item.gameName"
+                        />
+                        <div>{{ $t(item.gameName) }}</div>
+                    </div>
+                    <div
+                        v-if="!filteredGames.length"
+                        class="col-span-4 py-10 text-center text-sm text-muted-foreground"
+                    >
+                        未找到匹配的游戏，请尝试输入原名或翻译名。
                     </div>
                 </div>
             </DialogContent>

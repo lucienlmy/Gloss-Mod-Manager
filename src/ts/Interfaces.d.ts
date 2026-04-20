@@ -1035,6 +1035,13 @@ interface ITree {
     children?: ITree[];
 }
 
+interface IBackupTreeNode {
+    label: string;
+    relativePath: string;
+    isDirectory: boolean;
+    children?: IBackupTreeNode[];
+}
+
 //#endregion
 
 type ManagerSortKey =

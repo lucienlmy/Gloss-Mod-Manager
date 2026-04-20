@@ -1,0 +1,31 @@
+import { join } from "@tauri-apps/api/path";
+import { FileHandler } from "@/lib/FileHandler";
+import { UnrealEngine } from "@/lib/UnrealEngine";
+
+export const supportedGames = async () => ({
+    GlossGameId: 403,
+    steamAppID: 1643320,
+    nexusMods: {
+        game_domain_name: "stalker2heartofchornobyl",
+        game_id: 6944,
+    },
+    mod_io: 5761,
+    gameName: "Stalker2",
+    installdir: "S.T.A.L.K.E.R. 2 Heart of Chornobyl",
+    gameExe: "Stalker2.exe",
+    startExe: [
+        {
+            name: "Steam 启动",
+            cmd: "steam://rungameid/1643320",
+        },
+        {
+            name: "直接启动",
+            exePath: "Stalker2.exe",
+        },
+    ],
+    archivePath: await join(await FileHandler.GetAppData(), "Local", "Stalker2", "Saved"),
+    gameCoverImg:
+        "https://assets-mod.3dmgame.com/static/upload/mod/202412/MOD675955ed444f0.png@webp",
+    modType: await UnrealEngine.modType("Stalker2", false),
+    checkModType: UnrealEngine.checkModType,
+}) as ISupportedGames;

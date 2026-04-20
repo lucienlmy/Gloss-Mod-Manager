@@ -341,7 +341,7 @@ export class FileHandler {
         }
     }
 
-    private static async isFile(filePath: string) {
+    private static async isFileInternal(filePath: string) {
         try {
             return (await FileHandler.getMetadata(filePath)).isFile;
         } catch {
@@ -561,8 +561,6 @@ export class FileHandler {
      */
     public static async readFile(filePath: string, defaultValue: string = "") {
         const hasFile = await FileHandler.fileExists(filePath);
-        console.log({ hasFile });
-
         if (!hasFile) {
             await FileHandler.ensureDirectoryExistence(filePath, defaultValue);
         }
@@ -637,7 +635,7 @@ export class FileHandler {
         let combinedHash = "";
 
         for (const filePath of files.sort()) {
-            if (await FileHandler.isFile(filePath)) {
+            if (await FileHandler.isFileInternal(filePath)) {
                 combinedHash += await FileHandler.getFileMd5(filePath);
             }
         }
@@ -1038,6 +1036,15 @@ export class FileHandler {
         } catch {
             return false;
         }
+    }
+
+    /**
+     * 判断是否是文件
+     * @param filePath 路径
+     * @returns
+     */
+    public static async isFile(filePath: string) {
+        return FileHandler.isFileInternal(filePath);
     }
 
     /**

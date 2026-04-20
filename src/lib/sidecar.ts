@@ -1,4 +1,5 @@
 import { Command, type Child } from "@tauri-apps/plugin-shell";
+import { platform } from "@tauri-apps/plugin-os";
 import {
     NativeToolsManifest,
     type EmbeddedSidecarCommand,
@@ -54,16 +55,89 @@ export class SidecarExecutionError extends Error {
 
 export class Sidecar {
     /**
+     * Windows 下 sidecar 可能输出本地编码文件名，需先按原始字节读取再自行解码。
+     */
+    private static toOutputBytes(output: unknown) {
+        if (output instanceof Uint8Array) {
+            return output;
+        }
+
+        if (output instanceof ArrayBuffer) {
+            return new Uint8Array(output);
+        }
+
+        if (ArrayBuffer.isView(output)) {
+            return new Uint8Array(
+                output.buffer,
+                output.byteOffset,
+                output.byteLength,
+            );
+        }
+
+        if (Array.isArray(output)) {
+            return Uint8Array.from(output);
+        }
+
+        if (
+            output &&
+            typeof output === "object" &&
+            "data" in output &&
+            Array.isArray(output.data)
+        ) {
+            return Uint8Array.from(output.data);
+        }
+
+        if (output && typeof output === "object" && Symbol.iterator in output) {
+            return Uint8Array.from(output as Iterable<number>);
+        }
+
+        return new Uint8Array();
+    }
+
+    /**
+     * 将 sidecar 输出统一解码为字符串，兼容 Windows 上常见的非 UTF-8 控制台编码。
+     */
+    private static decodeOutput(output: unknown) {
+        if (typeof output === "string") {
+            return output;
+        }
+
+        const bytes = Sidecar.toOutputBytes(output);
+
+        if (bytes.length === 0) {
+            return "";
+        }
+
+        const encodingCandidates =
+            platform() === "windows" ? ["utf-8", "gb18030"] : ["utf-8"];
+
+        for (const encoding of encodingCandidates) {
+            try {
+                return new TextDecoder(encoding, {
+                    fatal: encoding === "utf-8",
+                }).decode(bytes);
+            } catch {
+                continue;
+            }
+        }
+
+        return new TextDecoder().decode(bytes);
+    }
+
+    /**
      * 将 shell 插件返回结果标准化为统一结构。
      */
     private static toResult(output: {
         code: number | null;
         signal: number | null;
-        stdout: string;
-        stderr: string;
+        stdout: string | Uint8Array;
+        stderr: string | Uint8Array;
     }): SidecarResult {
         return {
-            ...output,
+            code: output.code,
+            signal: output.signal,
+            stdout: Sidecar.decodeOutput(output.stdout),
+            stderr: Sidecar.decodeOutput(output.stderr),
             ok: output.code === 0,
         };
     }
@@ -76,10 +150,13 @@ export class Sidecar {
         args: readonly string[],
         options: SidecarCommandOptions = {},
     ): Promise<SidecarResult> {
-        const output = await Command.sidecar(
-            commandName,
-            [...args],
-            options,
+        const output = await (
+            platform() === "windows"
+                ? Command.sidecar(commandName, [...args], {
+                      ...options,
+                      encoding: "raw",
+                  })
+                : Command.sidecar(commandName, [...args], options)
         ).execute();
         const result = Sidecar.toResult(output);
 
