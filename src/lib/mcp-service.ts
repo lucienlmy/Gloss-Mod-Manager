@@ -1452,7 +1452,7 @@ async function dispatchRequest(
         return createJsonRpcError(null, INVALID_REQUEST, "无效的 JSON-RPC 请求。");
     }
 
-    const normalizedRequest = request as IMcpJsonRpcRequest;
+    const normalizedRequest = request as unknown as IMcpJsonRpcRequest;
     const requestId = normalizedRequest.id ?? null;
     const params = isPlainObject(normalizedRequest.params)
         ? normalizedRequest.params

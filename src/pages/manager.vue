@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import { ElMessage } from "element-plus-message";
 import { createGmmPackage, installGmmPackage } from "@/lib/gmm-package";
@@ -8,7 +8,6 @@ import { checkGlossModUpdates } from "@/lib/gloss-mod-api";
 import {
     ARCHIVE_EXTENSIONS,
     importLocalModSources,
-    resolveLocalModImportSourceType,
 } from "@/lib/local-mod-import";
 import { syncManagerRuntimeContext } from "@/lib/manager-context";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
@@ -38,6 +37,11 @@ interface IBatchEditForm {
     tagsText: string;
 }
 
+interface IDroppedImportSource {
+    path: string;
+    sourceType: "archive" | "folder" | "file" | "gmm";
+}
+
 const manager = useManager();
 const router = useRouter();
 const { selectionMode, selectionIds } = storeToRefs(manager);
@@ -54,7 +58,8 @@ const loadError = ref("");
 const actioningIds = ref<number[]>([]);
 const updateChecking = ref(false);
 const exportLoading = ref(false);
-const windowDropActive = ref(false);
+const fileDropActive = ref(false);
+const dragImportRootRef = ref<HTMLElement | null>(null);
 
 const showBatchEditDialog = ref(false);
 const showExportDialog = ref(false);
@@ -74,7 +79,7 @@ const exportForm = reactive<IInfo>({
 });
 
 let latestLoadId = 0;
-let unlistenWindowDragDrop: (() => void) | null = null;
+let unlistenNativeDragDrop: (() => void) | null = null;
 
 watch(manager.filteredMods, (mods) => {
     void mods;
@@ -116,6 +121,70 @@ function getFileExtension(filePath: string) {
     }
 
     return fileName.slice(index).toLowerCase();
+}
+
+function normalizeNativeDragPosition(position: { x: number; y: number }) {
+    const scaleFactor = window.devicePixelRatio || 1;
+
+    return {
+        x: position.x / scaleFactor,
+        y: position.y / scaleFactor,
+    };
+}
+
+function isInDragImportZone(position: { x: number; y: number }) {
+    const dragImportRoot = dragImportRootRef.value;
+
+    if (!dragImportRoot) {
+        return false;
+    }
+
+    const logicalPosition = normalizeNativeDragPosition(position);
+    const bounds = dragImportRoot.getBoundingClientRect();
+
+    return (
+        logicalPosition.x >= bounds.left &&
+        logicalPosition.x <= bounds.right &&
+        logicalPosition.y >= bounds.top &&
+        logicalPosition.y <= bounds.bottom
+    );
+}
+
+function resolveDroppedSourceType(filePath: string, isDirectory: boolean) {
+    if (isDirectory) {
+        return "folder" as const;
+    }
+
+    const extension = getFileExtension(filePath);
+
+    if (extension === ".gmm") {
+        return "gmm" as const;
+    }
+
+    return ARCHIVE_EXTENSIONS.includes(
+        extension.slice(1) as (typeof ARCHIVE_EXTENSIONS)[number],
+    )
+        ? ("archive" as const)
+        : ("file" as const);
+}
+
+async function createDroppedImportSources(paths: string[]) {
+    const uniquePaths = [...new Set(paths.map((item) => item.trim()).filter(Boolean))];
+
+    return Promise.all(
+        uniquePaths.map(async (path) => {
+            const isDirectory = await FileHandler.isDir(path);
+
+            return {
+                path,
+                sourceType: resolveDroppedSourceType(path, isDirectory),
+            } satisfies IDroppedImportSource;
+        }),
+    );
+}
+
+function resetFileDragState() {
+    fileDropActive.value = false;
 }
 
 function createTagColor(tagName: string) {
@@ -655,51 +724,6 @@ async function batchRemove() {
     ElMessage.success(`已移除 ${count} 个 Mod。`);
 }
 
-// ── 窗口级拖拽导入 ──────────────────────────────────────────────────────────
-onMounted(async () => {
-    unlistenWindowDragDrop = await getCurrentWindow().onDragDropEvent(
-        async (event) => {
-            if (event.payload.type === "over") {
-                windowDropActive.value = true;
-            } else if (event.payload.type === "drop") {
-                windowDropActive.value = false;
-
-                if (!manager.managerRoot) {
-                    return;
-                }
-
-                const paths = "paths" in event.payload ? event.payload.paths : [];
-                const gmmFiles = paths.filter((p) =>
-                    p.toLowerCase().endsWith(".gmm"),
-                );
-                const others = paths.filter(
-                    (p) => !p.toLowerCase().endsWith(".gmm"),
-                );
-
-                for (const gmmFile of gmmFiles) {
-                    await installGmmPackage({ filePath: gmmFile, manager });
-                }
-
-                if (others.length > 0) {
-                    // resolveLocalModImportSourceType 返回 "archive" | "file"，
-                    // 拖入的非压缩包文件统一按文件夹处理（允许直接拖入文件夹）
-                    const sourceType =
-                        resolveLocalModImportSourceType(others[0]) === "archive"
-                            ? "archive"
-                            : "folder";
-                    await importSources(others, sourceType);
-                }
-            } else {
-                windowDropActive.value = false;
-            }
-        },
-    );
-});
-
-onUnmounted(() => {
-    unlistenWindowDragDrop?.();
-});
-
 async function openModRootFolder() {
     if (!manager.managerRoot) {
         ElMessage.warning("请先配置储存路径并选择游戏。");
@@ -766,7 +790,7 @@ async function importModArchive() {
 
 async function importSources(
     sources: string[],
-    sourceType: "archive" | "folder",
+    sourceType: "archive" | "folder" | "file",
 ) {
     if (!manager.managerRoot) {
         return;
@@ -797,6 +821,100 @@ async function importSources(
     }
 }
 
+async function importDroppedSources(sources: IDroppedImportSource[]) {
+    const gmmFiles = sources
+        .filter((item) => item.sourceType === "gmm")
+        .map((item) => item.path);
+    const archiveFiles = sources
+        .filter((item) => item.sourceType === "archive")
+        .map((item) => item.path);
+    const folders = sources
+        .filter((item) => item.sourceType === "folder")
+        .map((item) => item.path);
+    const looseFiles = sources
+        .filter((item) => item.sourceType === "file")
+        .map((item) => item.path);
+
+    try {
+        if (gmmFiles.length > 0) {
+            importLoading.value = true;
+
+            for (const filePath of gmmFiles) {
+                await installGmmPackage({ filePath, manager });
+            }
+
+            ElMessage.success(`成功导入 ${gmmFiles.length} 个 GMM 包。`);
+        }
+
+        if (archiveFiles.length > 0) {
+            await importSources(archiveFiles, "archive");
+        }
+
+        if (folders.length > 0) {
+            await importSources(folders, "folder");
+        }
+
+        if (looseFiles.length > 0) {
+            await importSources(looseFiles, "file");
+        }
+    } finally {
+        importLoading.value = false;
+    }
+}
+
+async function handleNativeFileDrop(paths: string[]) {
+    if (!manager.managerRoot || !manager.managerGame) {
+        ElMessage.warning("请先选择游戏并配置储存路径。");
+        return;
+    }
+
+    try {
+        const droppedSources = await createDroppedImportSources(paths);
+
+        if (droppedSources.length === 0) {
+            ElMessage.warning("未能读取拖拽内容，请改用按钮选择文件或文件夹。");
+            return;
+        }
+
+        await importDroppedSources(droppedSources);
+    } catch (error: unknown) {
+        console.error("处理拖拽导入内容失败");
+        console.error(error);
+        ElMessage.error("处理拖拽导入失败，请查看控制台日志。");
+    }
+}
+
+onMounted(async () => {
+    unlistenNativeDragDrop = await getCurrentWebviewWindow().onDragDropEvent(
+        ({ payload }) => {
+            if (payload.type === "leave") {
+                resetFileDragState();
+                return;
+            }
+
+            const inImportZone = isInDragImportZone(payload.position);
+
+            if (payload.type === "enter" || payload.type === "over") {
+                fileDropActive.value = inImportZone;
+                return;
+            }
+
+            resetFileDragState();
+
+            if (!inImportZone) {
+                return;
+            }
+
+            void handleNativeFileDrop(payload.paths);
+        },
+    );
+});
+
+onUnmounted(() => {
+    unlistenNativeDragDrop?.();
+    unlistenNativeDragDrop = null;
+});
+
 function getTypeCount(typeId: number | string | 0) {
     if (typeId === 0) {
         return manager.managerModList.length;
@@ -816,7 +934,10 @@ function openGamesPage() {
 }
 </script>
 <template>
-    <div class="flex flex-col gap-6">
+    <div
+        ref="dragImportRootRef"
+        class="relative flex flex-col gap-6"
+    >
         <Card v-if="!storagePath">
             <CardHeader>
                 <CardTitle>先配置储存路径</CardTitle>
@@ -910,9 +1031,7 @@ function openGamesPage() {
                                 {{ updateChecking ? "检查中…" : "检查更新" }}
                             </Button>
                             <Button
-                                :variant="
-                                    selectionMode ? 'default' : 'outline'
-                                "
+                                :variant="selectionMode ? 'default' : 'outline'"
                                 @click="
                                     manager.selectionMode =
                                         !manager.selectionMode
@@ -1134,8 +1253,8 @@ function openGamesPage() {
                     <DialogHeader>
                         <DialogTitle>导出 GMM 包</DialogTitle>
                         <DialogDescription>
-                            将已选中的 {{ selectionIds.length }} 个 Mod
-                            打包为 *.gmm 文件。
+                            将已选中的 {{ selectionIds.length }} 个 Mod 打包为
+                            *.gmm 文件。
                         </DialogDescription>
                     </DialogHeader>
                     <div class="grid gap-3 py-2">
@@ -1181,25 +1300,75 @@ function openGamesPage() {
                 </DialogContent>
             </Dialog>
 
-            <!-- 窗口拖拽导入提示浮层 -->
-            <Transition name="fade">
+            <Transition name="import-overlay">
                 <div
-                    v-if="windowDropActive"
-                    class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center rounded-lg border-4 border-dashed border-primary bg-background/70 text-2xl font-bold text-primary backdrop-blur-sm"
+                    v-if="fileDropActive"
+                    class="pointer-events-none fixed inset-4 z-40 rounded-3xl border border-primary/30 bg-primary/6 shadow-[0_0_0_1px_hsl(var(--primary)/0.08),0_24px_80px_-32px_hsl(var(--primary)/0.45)]"
+                />
+            </Transition>
+            <Transition name="import-hint">
+                <div
+                    v-if="fileDropActive"
+                    class="pointer-events-none fixed left-6 bottom-6 z-50"
                 >
-                    松开以导入 Mod
+                    <div
+                        class="flex items-center gap-3 rounded-2xl border border-primary/25 bg-background/95 px-4 py-3 shadow-2xl backdrop-blur-md"
+                    >
+                        <div
+                            class="manager-import-hint-icon flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                        >
+                            <Upload class="h-5 w-5" />
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-sm font-semibold text-foreground">
+                                拖拽到这里导入
+                            </span>
+                            <span class="text-xs text-muted-foreground">
+                                支持单文件、压缩包、文件夹与 GMM 包
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </Transition>
         </template>
     </div>
 </template>
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.15s ease;
+.import-overlay-enter-active,
+.import-overlay-leave-active,
+.import-hint-enter-active,
+.import-hint-leave-active {
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+
+.import-overlay-enter-from,
+.import-overlay-leave-to {
     opacity: 0;
+    transform: scale(0.985);
+}
+
+.import-hint-enter-from,
+.import-hint-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+}
+
+.manager-import-hint-icon {
+    animation: manager-import-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes manager-import-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 hsl(var(--primary) / 0.3);
+    }
+
+    50% {
+        transform: scale(1.06);
+        box-shadow: 0 0 0 10px hsl(var(--primary) / 0);
+    }
 }
 </style>

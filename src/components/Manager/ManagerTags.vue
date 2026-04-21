@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import { ElMessage } from "element-plus-message";
+import {
+    clearManagerInternalDrag,
+    INTERNAL_DRAG_THRESHOLD,
+    managerDragKind,
+    managerDraggingTagName,
+    startManagerTagDrag,
+} from "@/lib/manager-internal-drag";
 
 const manager = useManager();
 
@@ -7,10 +15,9 @@ const tagName = ref("");
 const tagColor = ref("#14F7D8");
 const showTagEditDialog = ref(false);
 const editingTagName = ref("");
-const draggingTagName = ref("");
 const dragTargetTagName = ref("");
-
-const TAG_DRAG_MIME = "application/x-gloss-manager-tag";
+const pendingTagName = ref("");
+const pendingPointerPosition = ref<{ x: number; y: number } | null>(null);
 
 function openCreateTagDialog() {
     resetTagEditor();
@@ -115,63 +122,15 @@ async function deleteTag(tag: ITag) {
     ElMessage.success("标签已删除。");
 }
 
-function resolveDraggedTagName(event: DragEvent) {
-    const draggedName =
-        event.dataTransfer?.getData(TAG_DRAG_MIME) ||
-        event.dataTransfer?.getData("text/plain") ||
-        draggingTagName.value;
-
-    return draggedName.trim();
-}
-
 function clearTagDragState() {
-    draggingTagName.value = "";
     dragTargetTagName.value = "";
+    pendingTagName.value = "";
+    pendingPointerPosition.value = null;
 }
 
-function handleTagDragStart(event: DragEvent, tag: ITag) {
-    draggingTagName.value = tag.name;
-
-    if (!event.dataTransfer) {
-        return;
-    }
-
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData(TAG_DRAG_MIME, tag.name);
-    event.dataTransfer.setData("text/plain", tag.name);
-}
-
-function handleTagDragOver(event: DragEvent, tag: ITag) {
-    const draggedName = resolveDraggedTagName(event);
-
-    if (!draggedName || draggedName === tag.name) {
-        return;
-    }
-
-    event.preventDefault();
-    dragTargetTagName.value = tag.name;
-
-    if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = "move";
-    }
-}
-
-async function handleTagDrop(event: DragEvent, tag: ITag) {
-    const draggedName = resolveDraggedTagName(event);
-
-    event.preventDefault();
-
-    if (!draggedName || draggedName === tag.name) {
-        clearTagDragState();
-        return;
-    }
-
-    const sourceIndex = manager.tags.findIndex(
-        (item) => item.name === draggedName,
-    );
-    const targetIndex = manager.tags.findIndex(
-        (item) => item.name === tag.name,
-    );
+async function reorderTag(draggedName: string, targetName: string) {
+    const sourceIndex = manager.tags.findIndex((item) => item.name === draggedName);
+    const targetIndex = manager.tags.findIndex((item) => item.name === targetName);
 
     if (sourceIndex === -1 || targetIndex === -1) {
         clearTagDragState();
@@ -187,6 +146,83 @@ async function handleTagDrop(event: DragEvent, tag: ITag) {
     clearTagDragState();
     ElMessage.success("标签顺序已更新。");
 }
+
+function handleTagPointerDown(event: PointerEvent, tag: ITag) {
+    if (event.button !== 0) {
+        return;
+    }
+
+    pendingTagName.value = tag.name;
+    pendingPointerPosition.value = {
+        x: event.clientX,
+        y: event.clientY,
+    };
+}
+
+function handleTagPointerEnter(tag: ITag) {
+    if (
+        managerDragKind.value !== "tag" ||
+        !managerDraggingTagName.value ||
+        managerDraggingTagName.value === tag.name
+    ) {
+        return;
+    }
+
+    dragTargetTagName.value = tag.name;
+}
+
+function handleTagPointerLeave(tag: ITag) {
+    if (dragTargetTagName.value === tag.name) {
+        dragTargetTagName.value = "";
+    }
+}
+
+function handleWindowPointerMove(event: PointerEvent) {
+    if (
+        !pendingTagName.value ||
+        !pendingPointerPosition.value ||
+        managerDragKind.value !== null
+    ) {
+        return;
+    }
+
+    const deltaX = event.clientX - pendingPointerPosition.value.x;
+    const deltaY = event.clientY - pendingPointerPosition.value.y;
+
+    if (Math.hypot(deltaX, deltaY) < INTERNAL_DRAG_THRESHOLD) {
+        return;
+    }
+
+    startManagerTagDrag(pendingTagName.value);
+}
+
+function handleWindowPointerUp() {
+    const draggedName = managerDraggingTagName.value;
+    const targetName = dragTargetTagName.value;
+
+    if (
+        managerDragKind.value === "tag" &&
+        draggedName &&
+        targetName &&
+        draggedName !== targetName
+    ) {
+        void reorderTag(draggedName, targetName);
+        clearManagerInternalDrag();
+        return;
+    }
+
+    clearTagDragState();
+}
+
+onMounted(() => {
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp, true);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", handleWindowPointerUp, true);
+});
 
 function resetTagEditor() {
     editingTagName.value = "";
@@ -208,15 +244,13 @@ function resetTagEditor() {
                         class="flex items-center gap-2 rounded-md px-1 py-0.5 cursor-grab active:cursor-grabbing"
                         :class="
                             dragTargetTagName === tag.name &&
-                            draggingTagName !== tag.name
+                            managerDraggingTagName !== tag.name
                                 ? 'ring-1 ring-primary/50 bg-primary/5'
                                 : ''
                         "
-                        draggable="true"
-                        @dragstart="handleTagDragStart($event, tag)"
-                        @dragover="handleTagDragOver($event, tag)"
-                        @drop="handleTagDrop($event, tag)"
-                        @dragend="clearTagDragState"
+                        @pointerdown="handleTagPointerDown($event, tag)"
+                        @pointerenter="handleTagPointerEnter(tag)"
+                        @pointerleave="handleTagPointerLeave(tag)"
                     >
                         <div
                             class="h-2.5 w-2.5 rounded-full"

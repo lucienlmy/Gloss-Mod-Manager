@@ -20,6 +20,8 @@ declare global {
   const GLOSS_MOD_WEB_BASE_URL: typeof import('./lib/gloss-mod-api').GLOSS_MOD_WEB_BASE_URL
   const GTA5Handler: typeof import('./lib/GTA5Handler').GTA5Handler
   const GlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').GlossDownloadMonitor
+  const INTERNAL_DRAG_THRESHOLD: typeof import('./lib/manager-internal-drag').INTERNAL_DRAG_THRESHOLD
+  const Log: typeof import('./lib/log').Log
   const Manager: typeof import('./lib/Manager').Manager
   const McpService: typeof import('./lib/mcp-service').McpService
   const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
@@ -45,6 +47,7 @@ declare global {
   const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
   const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
+  const clearManagerInternalDrag: typeof import('./lib/manager-internal-drag').clearManagerInternalDrag
   const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
@@ -92,6 +95,7 @@ declare global {
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const getGlossModPresence: typeof import('./lib/gloss-download').getGlossModPresence
   const h: typeof import('vue').h
+  const hasExternalFilePayload: typeof import('./lib/browser-drop-import').hasExternalFilePayload
   const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
   const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
@@ -112,12 +116,16 @@ declare global {
   const isShallow: typeof import('vue').isShallow
   const listArchiveWithSevenZip: typeof import('./lib/sevenZip').listArchiveWithSevenZip
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
+  const managerDragKind: typeof import('./lib/manager-internal-drag').managerDragKind
+  const managerDraggingModId: typeof import('./lib/manager-internal-drag').managerDraggingModId
+  const managerDraggingTagName: typeof import('./lib/manager-internal-drag').managerDraggingTagName
   const mapActions: typeof import('pinia').mapActions
   const mapGetters: typeof import('pinia').mapGetters
   const mapState: typeof import('pinia').mapState
   const mapStores: typeof import('pinia').mapStores
   const mapWritableState: typeof import('pinia').mapWritableState
   const markRaw: typeof import('vue').markRaw
+  const materializeBrowserDroppedSources: typeof import('./lib/browser-drop-import').materializeBrowserDroppedSources
   const mcpPromptDefinitions: typeof import('./lib/mcp-service').mcpPromptDefinitions
   const mcpResourceDefinitions: typeof import('./lib/mcp-service').mcpResourceDefinitions
   const mcpToolDefinitions: typeof import('./lib/mcp-service').mcpToolDefinitions
@@ -181,6 +189,8 @@ declare global {
   const spawnAria2Sidecar: typeof import('./lib/sidecar').spawnAria2Sidecar
   const spawnSidecar: typeof import('./lib/sidecar').spawnSidecar
   const startAria2RpcServer: typeof import('./lib/aria2').startAria2RpcServer
+  const startManagerModDrag: typeof import('./lib/manager-internal-drag').startManagerModDrag
+  const startManagerTagDrag: typeof import('./lib/manager-internal-drag').startManagerTagDrag
   const storeToRefs: typeof import('pinia').storeToRefs
   const supportedGamesGTA5: typeof import('./lib/GTA5Handler').supportedGamesGTA5
   const supportedGamesGTA5Enhanced: typeof import('./lib/GTA5Handler').supportedGamesGTA5Enhanced
@@ -452,6 +462,9 @@ declare global {
   // @ts-ignore
   export type { LocalModImportSourceType, LocalModImportDuplicateStrategy, ILocalModImportSource } from './lib/local-mod-import'
   import('./lib/local-mod-import')
+  // @ts-ignore
+  export type { Log } from './lib/log'
+  import('./lib/log')
   // @ts-ignore
   export type { NativeToolsManifest, EmbeddedToolName, EmbeddedSidecarCommand } from './lib/native-tools-manifest'
   import('./lib/native-tools-manifest')

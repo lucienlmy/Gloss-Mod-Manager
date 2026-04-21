@@ -1,7 +1,16 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from "vue";
 import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
+import {
+    clearManagerInternalDrag,
+    INTERNAL_DRAG_THRESHOLD,
+    managerDragKind,
+    managerDraggingModId,
+    managerDraggingTagName,
+    startManagerModDrag,
+} from "@/lib/manager-internal-drag";
 
 interface IEditModForm {
     modName: string;
@@ -19,12 +28,13 @@ const showDeleteDialog = ref(false);
 const editingModId = ref<number | null>(null);
 const deletingModId = ref<number | null>(null);
 const deleteTargetMod = ref<IModInfo | null>(null);
-const dragSourceId = ref<number | null>(null);
 const dragTargetId = ref<number | null>(null);
 const dragPosition = ref<"before" | "after">("before");
 const tagDropTargetId = ref<number | null>(null);
 const operatingIds = ref<number[]>([]);
 const updateingIds = ref<number[]>([]);
+const pendingModDragId = ref<number | null>(null);
+const pendingPointerPosition = ref<{ x: number; y: number } | null>(null);
 const editForm = reactive<IEditModForm>({
     modName: "",
     modVersion: "",
@@ -34,8 +44,6 @@ const editForm = reactive<IEditModForm>({
     modDesc: "",
     tagsText: "",
 });
-
-const TAG_DRAG_MIME = "application/x-gloss-manager-tag";
 
 function createTagColor(tagName: string) {
     let hash = 0;
@@ -317,9 +325,10 @@ async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
 }
 
 function clearDragState() {
-    dragSourceId.value = null;
     dragTargetId.value = null;
     dragPosition.value = "before";
+    pendingModDragId.value = null;
+    pendingPointerPosition.value = null;
 }
 
 function clearTagDropState() {
@@ -359,14 +368,6 @@ function handleSelectionChange(event: Event, modId: number) {
         modId,
         (event.target as HTMLInputElement | null)?.checked ?? false,
     );
-}
-
-function getDraggedTagName(event: DragEvent) {
-    return event.dataTransfer?.getData(TAG_DRAG_MIME)?.trim() || "";
-}
-
-function isTagDragEvent(event: DragEvent) {
-    return Array.from(event.dataTransfer?.types ?? []).includes(TAG_DRAG_MIME);
 }
 
 async function toggleTagOnMod(item: IModInfo, tagName: string) {
@@ -427,40 +428,54 @@ async function queueModUpdate(item: IModInfo) {
     }
 }
 
-function handleDragStart(event: DragEvent, modId: number) {
+function handleModPointerDown(event: PointerEvent, modId: number) {
     if (manager.selectionMode) {
         return;
     }
 
-    dragSourceId.value = modId;
-
-    if (event.dataTransfer) {
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", String(modId));
+    if (event.button !== 0) {
+        return;
     }
+
+    pendingModDragId.value = modId;
+    pendingPointerPosition.value = {
+        x: event.clientX,
+        y: event.clientY,
+    };
 }
 
-function handleDragOver(event: DragEvent, modId: number) {
-    if (isTagDragEvent(event)) {
-        event.preventDefault();
+function handleRowPointerEnter(modId: number) {
+    if (managerDragKind.value === "tag" && managerDraggingTagName.value) {
         tagDropTargetId.value = modId;
-
-        if (event.dataTransfer) {
-            event.dataTransfer.dropEffect = "copy";
-        }
-
         return;
     }
 
-    clearTagDropState();
-
-    if (dragSourceId.value === null || dragSourceId.value === modId) {
+    if (
+        managerDragKind.value !== "mod" ||
+        managerDraggingModId.value === null ||
+        managerDraggingModId.value === modId
+    ) {
         return;
     }
 
-    event.preventDefault();
     dragTargetId.value = modId;
+}
 
+function handleRowPointerMove(event: PointerEvent, modId: number) {
+    if (managerDragKind.value === "tag" && managerDraggingTagName.value) {
+        tagDropTargetId.value = modId;
+        return;
+    }
+
+    if (
+        managerDragKind.value !== "mod" ||
+        managerDraggingModId.value === null ||
+        managerDraggingModId.value === modId
+    ) {
+        return;
+    }
+
+    dragTargetId.value = modId;
     const currentTarget = event.currentTarget as HTMLElement | null;
 
     if (!currentTarget) {
@@ -470,41 +485,32 @@ function handleDragOver(event: DragEvent, modId: number) {
 
     const { top, height } = currentTarget.getBoundingClientRect();
     dragPosition.value = event.clientY > top + height / 2 ? "after" : "before";
+}
 
-    if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = "move";
+function handleRowPointerLeave(modId: number) {
+    if (tagDropTargetId.value === modId) {
+        clearTagDropState();
+    }
+
+    if (dragTargetId.value === modId) {
+        clearDragState();
     }
 }
 
-async function handleDrop(event: DragEvent, modId: number) {
-    const draggedTagName = getDraggedTagName(event);
-
-    if (draggedTagName) {
-        event.preventDefault();
-        const targetMod = manager.managerModList.find(
-            (item) => item.id === modId,
-        );
-
-        if (targetMod) {
-            await toggleTagOnMod(targetMod, draggedTagName);
-        }
-
-        clearDragState();
-        return;
-    }
-
-    event.preventDefault();
-
-    if (dragSourceId.value === null || dragSourceId.value === modId) {
+async function reorderDraggedMod(targetModId: number) {
+    if (
+        managerDraggingModId.value === null ||
+        managerDraggingModId.value === targetModId
+    ) {
         clearDragState();
         return;
     }
 
     const visibleMods = [...manager.filteredMods];
     const sourceIndex = visibleMods.findIndex(
-        (item) => item.id === dragSourceId.value,
+        (item) => item.id === managerDraggingModId.value,
     );
-    const targetIndex = visibleMods.findIndex((item) => item.id === modId);
+    const targetIndex = visibleMods.findIndex((item) => item.id === targetModId);
 
     if (sourceIndex === -1 || targetIndex === -1) {
         clearDragState();
@@ -548,7 +554,66 @@ async function handleDrop(event: DragEvent, modId: number) {
     ElMessage.success("Mod 顺序已更新。");
 }
 
-function handleDragEnd() {
+function handleWindowPointerMove(event: PointerEvent) {
+    if (
+        !pendingModDragId.value ||
+        !pendingPointerPosition.value ||
+        managerDragKind.value !== null
+    ) {
+        return;
+    }
+
+    const deltaX = event.clientX - pendingPointerPosition.value.x;
+    const deltaY = event.clientY - pendingPointerPosition.value.y;
+
+    if (Math.hypot(deltaX, deltaY) < INTERNAL_DRAG_THRESHOLD) {
+        return;
+    }
+
+    startManagerModDrag(pendingModDragId.value);
+}
+
+function handleWindowPointerCancel() {
+    clearDragState();
+    clearTagDropState();
+
+    if (managerDragKind.value === "mod") {
+        clearManagerInternalDrag();
+    }
+}
+
+function handleWindowPointerUp() {
+    if (managerDragKind.value === "tag") {
+        const tagName = managerDraggingTagName.value;
+        const targetMod = manager.managerModList.find(
+            (item) => item.id === tagDropTargetId.value,
+        );
+
+        if (tagName && targetMod) {
+            void toggleTagOnMod(targetMod, tagName);
+        } else {
+            clearManagerInternalDrag();
+        }
+
+        clearTagDropState();
+        clearDragState();
+        return;
+    }
+
+    if (managerDragKind.value === "mod") {
+        const targetModId = dragTargetId.value;
+
+        if (targetModId !== null) {
+            void reorderDraggedMod(targetModId);
+        } else {
+            clearManagerInternalDrag();
+            clearDragState();
+        }
+
+        clearTagDropState();
+        return;
+    }
+
     clearDragState();
     clearTagDropState();
 }
@@ -564,7 +629,10 @@ function getRowClass(item: IModInfo) {
         classNames.push("ring-1 ring-primary/40 bg-primary/5");
     }
 
-    if (dragTargetId.value !== item.id || dragSourceId.value === item.id) {
+    if (
+        dragTargetId.value !== item.id ||
+        managerDraggingModId.value === item.id
+    ) {
         return classNames.join(" ");
     }
 
@@ -576,6 +644,18 @@ function getRowClass(item: IModInfo) {
 
     return classNames.join(" ");
 }
+
+onMounted(() => {
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp);
+    window.addEventListener("pointercancel", handleWindowPointerCancel);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("pointermove", handleWindowPointerMove);
+    window.removeEventListener("pointerup", handleWindowPointerUp);
+    window.removeEventListener("pointercancel", handleWindowPointerCancel);
+});
 </script>
 <template>
     <Card>
@@ -599,9 +679,9 @@ function getRowClass(item: IModInfo) {
                         v-for="item in manager.filteredMods"
                         :key="item.id"
                         :class="getRowClass(item)"
-                        @dragover="handleDragOver($event, item.id)"
-                        @drop="handleDrop($event, item.id)"
-                        @dragleave="clearTagDropState"
+                        @pointerenter="handleRowPointerEnter(item.id)"
+                        @pointermove="handleRowPointerMove($event, item.id)"
+                        @pointerleave="handleRowPointerLeave(item.id)"
                     >
                         <TableCell v-if="manager.selectionMode">
                             <input
@@ -616,11 +696,9 @@ function getRowClass(item: IModInfo) {
                                 <span
                                     v-if="!manager.selectionMode"
                                     class="inline-flex cursor-grab text-muted-foreground active:cursor-grabbing"
-                                    :draggable="!manager.selectionMode"
-                                    @dragstart="
-                                        handleDragStart($event, item.id)
+                                    @pointerdown="
+                                        handleModPointerDown($event, item.id)
                                     "
-                                    @dragend="handleDragEnd"
                                 >
                                     <IconGripVertical class="w-4 h-4" />
                                 </span>
