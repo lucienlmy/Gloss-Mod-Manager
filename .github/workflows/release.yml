@@ -16,9 +16,7 @@ permissions:
     contents: write
 
 concurrency:
-    group:
-        release-${{ github.workflow }}-${{ github.ref_type }}-${{ github.ref_name
-        }}
+    group: release-${{ github.workflow }}-${{ github.ref_type }}-${{ github.ref_name }}
     cancel-in-progress: false
 
 jobs:
