@@ -413,7 +413,8 @@ export class GTA5Handler {
             return false;
         }
 
-        const gmmDirectory = await GTA5Handler.ensureGmmDlcDirectory(gameStorage);
+        const gmmDirectory =
+            await GTA5Handler.ensureGmmDlcDirectory(gameStorage);
         const gmmRpf = await join(gmmDirectory, "dlc.rpf");
 
         if (await FileHandler.fileExists(gmmRpf)) {
@@ -980,7 +981,7 @@ export const supportedGamesGTA5 = async () =>
         gameName: "Grand Theft Auto V",
         gameExe: [
             {
-                rootPath: ".",
+                rootPath: ["."],
                 name: "GTA5.exe",
             },
         ],
@@ -1017,7 +1018,7 @@ export const supportedGamesGTA5Enhanced = async () =>
         gameName: "Grand Theft Auto V Enhanced",
         gameExe: [
             {
-                rootPath: ".",
+                rootPath: ["."],
                 name: "GTA5_Enhanced.exe",
             },
         ],

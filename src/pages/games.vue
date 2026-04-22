@@ -49,7 +49,11 @@ function deleteGame(item: ISupportedGames) {
     <Card>
         <CardHeader>
             <CardTitle class="flex items-center gap-4">
-                游戏库 <SelectGame />
+                游戏库
+                <div class="flex flex-wrap items-center gap-2">
+                    <SelectGame />
+                    <CustomGameDialog />
+                </div>
             </CardTitle>
         </CardHeader>
         <CardContent

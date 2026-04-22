@@ -245,7 +245,7 @@ interface ITypeInstall {
 interface ICheckModType {
     UseFunction: "extname" | "basename" | "inPath";
     Keyword: string[];
-    TypeId?: number;
+    TypeId?: number | string;
 }
 
 interface IType {
@@ -267,7 +267,7 @@ interface ISupportedGames extends IGameInfo {
     modType: IType[];
     from?: "Local" | "Internal";
     checkModType:
-        | ((mod: IModInfo) => Promise<number> | number)
+        | ((mod: IModInfo) => Promise<number | string> | number | string)
         | ICheckModType[];
     sortMod?: (list: IModInfo[]) => boolean;
 }
@@ -285,7 +285,10 @@ interface IExpandsSupportedGames extends IGameInfo {
         | "Custom";
     unrealEngineData: { bassPath: string; useUE4SS: boolean };
     checkModType:
-        | (((mod: IModInfo) => number) | ICheckModType[])
+        | (
+              | ((mod: IModInfo) => Promise<number | string> | number | string)
+              | ICheckModType[]
+          )
         | "UnrealEngine.checkModType"
         | "UnityGame.checkModType"
         | "UnityGameILCPP2.checkModType"
@@ -298,8 +301,8 @@ interface IExpandsType {
     name: string;
     installPath: string;
     local: boolean;
-    install: install;
-    uninstall: install;
+    install: ITypeInstall;
+    uninstall: ITypeInstall;
     checkModType: ICheckModType;
 }
 

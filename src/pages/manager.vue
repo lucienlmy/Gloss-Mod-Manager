@@ -789,6 +789,7 @@ function openGamesPage() {
                         >
                             {{ item.name }} ({{ getTypeCount(item.id) }})
                         </Button>
+                        <CustomTypeDialog />
                     </div>
                     <ManagerTags />
                 </CardContent>

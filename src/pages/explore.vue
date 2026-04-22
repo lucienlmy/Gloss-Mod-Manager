@@ -50,16 +50,6 @@ watch(
     },
     { immediate: true },
 );
-
-function selectProvider(value: sourceType) {
-    const option = providerOptions.value.find((item) => item.value === value);
-
-    if (!option?.supported) {
-        return;
-    }
-
-    activeProvider.value = value;
-}
 </script>
 <template>
     <div class="space-y-4">

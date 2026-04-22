@@ -51,6 +51,7 @@ declare global {
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
   const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
   const clearManagerInternalDrag: typeof import('./lib/manager-internal-drag').clearManagerInternalDrag
+  const cloneDefinition: typeof import('./lib/custom-definition-utils').cloneDefinition
   const cn: typeof import('./lib/utils').cn
   const computed: typeof import('vue').computed
   const computedAsync: typeof import('@vueuse/core').computedAsync
@@ -61,6 +62,10 @@ declare global {
   const controlledRef: typeof import('@vueuse/core').controlledRef
   const createApp: typeof import('vue').createApp
   const createArchiveWithSevenZip: typeof import('./lib/sevenZip').createArchiveWithSevenZip
+  const createEmptyCheckRule: typeof import('./lib/custom-definition-utils').createEmptyCheckRule
+  const createEmptyCustomType: typeof import('./lib/custom-definition-utils').createEmptyCustomType
+  const createEmptyGameCustomType: typeof import('./lib/custom-definition-utils').createEmptyGameCustomType
+  const createEmptyTypeInstall: typeof import('./lib/custom-definition-utils').createEmptyTypeInstall
   const createEventHook: typeof import('@vueuse/core').createEventHook
   const createGlobalState: typeof import('@vueuse/core').createGlobalState
   const createGmmPackage: typeof import('./lib/gmm-package').createGmmPackage
@@ -95,6 +100,7 @@ declare global {
   const fetchThirdPartyMods: typeof import('./lib/third-party-mod-api').fetchThirdPartyMods
   const findGlossDuplicateLocalMods: typeof import('./lib/gloss-download').findGlossDuplicateLocalMods
   const findGlossDuplicateTasks: typeof import('./lib/gloss-download').findGlossDuplicateTasks
+  const formatKeywordText: typeof import('./lib/custom-definition-utils').formatKeywordText
   const getActivePinia: typeof import('pinia').getActivePinia
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -122,6 +128,7 @@ declare global {
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
   const isThirdPartyProviderSupported: typeof import('./lib/third-party-mod-api').isThirdPartyProviderSupported
+  const joinRelativePath: typeof import('./lib/custom-definition-utils').joinRelativePath
   const listArchiveWithSevenZip: typeof import('./lib/sevenZip').listArchiveWithSevenZip
   const loadLegacyCustomGames: typeof import('./lib/legacy-custom-data').loadLegacyCustomGames
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
@@ -162,6 +169,7 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const parseKeywordText: typeof import('./lib/custom-definition-utils').parseKeywordText
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
@@ -190,6 +198,8 @@ declare global {
   const resolveRef: typeof import('@vueuse/core').resolveRef
   const resolveThirdPartyDownloadUrl: typeof import('./lib/third-party-mod-api').resolveThirdPartyDownloadUrl
   const runAria2Command: typeof import('./lib/aria2').runAria2Command
+  const saveLegacyCustomGameDefinition: typeof import('./lib/legacy-custom-data').saveLegacyCustomGameDefinition
+  const saveLegacyCustomTypeDefinition: typeof import('./lib/legacy-custom-data').saveLegacyCustomTypeDefinition
   const setActivePinia: typeof import('pinia').setActivePinia
   const setMapStoreSuffix: typeof import('pinia').setMapStoreSuffix
   const setTheme: typeof import('./lib/theme').setTheme
@@ -200,6 +210,7 @@ declare global {
   const spawnAria2Download: typeof import('./lib/aria2').spawnAria2Download
   const spawnAria2Sidecar: typeof import('./lib/sidecar').spawnAria2Sidecar
   const spawnSidecar: typeof import('./lib/sidecar').spawnSidecar
+  const splitRelativePath: typeof import('./lib/custom-definition-utils').splitRelativePath
   const startAria2RpcServer: typeof import('./lib/aria2').startAria2RpcServer
   const startManagerModDrag: typeof import('./lib/manager-internal-drag').startManagerModDrag
   const startManagerTagDrag: typeof import('./lib/manager-internal-drag').startManagerTagDrag
@@ -454,6 +465,9 @@ declare global {
   // @ts-ignore
   export type { AutoStart } from './lib/auto-start'
   import('./lib/auto-start')
+  // @ts-ignore
+  export type { TCustomGameModTypeTemplate, TCustomGameCheckTypeTemplate } from './lib/custom-definition-utils'
+  import('./lib/custom-definition-utils')
   // @ts-ignore
   export type { DotNetTool } from './lib/dotnet-tool'
   import('./lib/dotnet-tool')

@@ -11,6 +11,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Accordion: typeof import('./components/ui/accordion/Accordion.vue')['default']
+    AccordionContent: typeof import('./components/ui/accordion/AccordionContent.vue')['default']
+    AccordionItem: typeof import('./components/ui/accordion/AccordionItem.vue')['default']
+    AccordionTrigger: typeof import('./components/ui/accordion/AccordionTrigger.vue')['default']
     AlertDialog: typeof import('./components/ui/alert-dialog/AlertDialog.vue')['default']
     AlertDialogAction: typeof import('./components/ui/alert-dialog/AlertDialogAction.vue')['default']
     AlertDialogCancel: typeof import('./components/ui/alert-dialog/AlertDialogCancel.vue')['default']
@@ -47,6 +51,11 @@ declare module 'vue' {
     ContextMenuSubTrigger: typeof import('./components/ui/context-menu/ContextMenuSubTrigger.vue')['default']
     ContextMenuTrigger: typeof import('./components/ui/context-menu/ContextMenuTrigger.vue')['default']
     CurseForge: typeof import('./components/Home/CurseForge.vue')['default']
+    CustomCheckRuleFields: typeof import('./components/custom-data/CustomCheckRuleFields.vue')['default']
+    CustomGameDialog: typeof import('./components/Games/CustomGameDialog.vue')['default']
+    CustomGameTypeFields: typeof import('./components/custom-data/CustomGameTypeFields.vue')['default']
+    CustomInstallFields: typeof import('./components/custom-data/CustomInstallFields.vue')['default']
+    CustomTypeDialog: typeof import('./components/Manager/CustomTypeDialog.vue')['default']
     Dialog: typeof import('./components/ui/dialog/Dialog.vue')['default']
     DialogClose: typeof import('./components/ui/dialog/DialogClose.vue')['default']
     DialogContent: typeof import('./components/ui/dialog/DialogContent.vue')['default']

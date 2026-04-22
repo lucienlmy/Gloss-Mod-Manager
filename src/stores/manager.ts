@@ -838,24 +838,47 @@ export const useManager = defineStore("Manager", () => {
         };
     }
 
-    void getAllExpands()
-        .then(async (games) => {
-            supportedGames.value = games;
-            if (managerGame.value) {
-                const matchedGame = games.find(
-                    (game) =>
-                        game.GlossGameId === managerGame.value?.GlossGameId,
+    async function reloadSupportedGames() {
+        const games = await getAllExpands();
+        supportedGames.value = games;
+
+        if (managerGame.value) {
+            const matchedGame = games.find((game) => {
+                return (
+                    game.GlossGameId === managerGame.value?.GlossGameId ||
+                    game.gameName === managerGame.value?.gameName
                 );
-                if (matchedGame) {
-                    managerGame.value.modType = matchedGame.modType;
-                    managerGame.value.checkModType = matchedGame.checkModType;
-                }
+            });
+
+            if (matchedGame) {
+                managerGame.value = {
+                    ...matchedGame,
+                    ...managerGame.value,
+                };
             }
-        })
-        .catch((error: unknown) => {
-            console.error("加载游戏扩展失败");
-            console.error(error);
+        }
+
+        managerGameList.value = managerGameList.value.map((managedGame) => {
+            const matchedGame = games.find((game) => {
+                return (
+                    game.GlossGameId === managedGame.GlossGameId ||
+                    game.gameName === managedGame.gameName
+                );
+            });
+
+            return matchedGame
+                ? {
+                      ...matchedGame,
+                      ...managedGame,
+                  }
+                : managedGame;
         });
+    }
+
+    void reloadSupportedGames().catch((error: unknown) => {
+        console.error("加载游戏扩展失败");
+        console.error(error);
+    });
 
     watch(selectionMode, (enabled) => {
         if (!enabled) {
@@ -909,5 +932,6 @@ export const useManager = defineStore("Manager", () => {
         invertVisibleSelection,
         retainVisibleSelection,
         saveManagerData,
+        reloadSupportedGames,
     };
 });

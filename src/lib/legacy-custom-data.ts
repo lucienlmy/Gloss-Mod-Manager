@@ -34,7 +34,9 @@ async function evaluateRuleMatch(
     mod: IModInfo,
     rule: ICheckModType,
 ): Promise<boolean> {
-    const normalizedKeywords = rule.Keyword.map((item) => normalizeCompareText(item));
+    const normalizedKeywords = rule.Keyword.map((item) =>
+        normalizeCompareText(item),
+    );
 
     for (const filePath of mod.modFiles) {
         const normalizedFilePath = FileHandler.normalizePath(filePath);
@@ -48,12 +50,14 @@ async function evaluateRuleMatch(
                 break;
             }
             case "inPath": {
-                const pathParts = FileHandler.pathToArray(normalizedFilePath).map((item) =>
-                    normalizeCompareText(item),
-                );
+                const pathParts = FileHandler.pathToArray(
+                    normalizedFilePath,
+                ).map((item) => normalizeCompareText(item));
 
                 if (
-                    normalizedKeywords.every((keyword) => pathParts.includes(keyword))
+                    normalizedKeywords.every((keyword) =>
+                        pathParts.includes(keyword),
+                    )
                 ) {
                     return true;
                 }
@@ -163,7 +167,7 @@ function createRuntimeType(
         uninstall: install;
     },
 ) {
-    const runtimeType = {
+    const runtimeType: IType = {
         id: type.id,
         name: type.name,
         installPath: type.installPath,
@@ -171,21 +175,29 @@ function createRuntimeType(
         local: type.local,
         install: async (_mod: IModInfo) => false,
         uninstall: async (_mod: IModInfo) => true,
-    } satisfies IType;
+    };
+
+    const installValue = type.install;
+    const uninstallValue = type.uninstall;
 
     runtimeType.install =
-        typeof type.install === "function"
-            ? type.install
-            : async (mod: IModInfo) => {
-                  return executeLegacyTypeInstall(runtimeType, type.install, mod, true);
-              };
-    runtimeType.uninstall =
-        typeof type.uninstall === "function"
-            ? type.uninstall
+        typeof installValue === "function"
+            ? installValue
             : async (mod: IModInfo) => {
                   return executeLegacyTypeInstall(
                       runtimeType,
-                      type.uninstall,
+                      installValue,
+                      mod,
+                      true,
+                  );
+              };
+    runtimeType.uninstall =
+        typeof uninstallValue === "function"
+            ? uninstallValue
+            : async (mod: IModInfo) => {
+                  return executeLegacyTypeInstall(
+                      runtimeType,
+                      uninstallValue,
                       mod,
                       false,
                   );
@@ -273,6 +285,59 @@ async function readJsonFile<T>(filePath: string): Promise<T | null> {
     }
 }
 
+async function readLegacyTypeFile(gameName: string) {
+    const files = await loadLegacyJsonFiles("Types");
+    const targetName = `${normalizeCompareText(gameName)}.json`;
+
+    for (const filePath of files) {
+        const fileName = normalizeCompareText(await basename(filePath));
+        if (fileName === targetName) {
+            return filePath;
+        }
+    }
+
+    return "";
+}
+
+async function resolveWritableLegacyConfigRoot() {
+    const roots = await getLegacyConfigRoots();
+    const documentRoot = await join(await documentDir(), "Gloss Mod Manager");
+
+    if (roots.includes(documentRoot)) {
+        return documentRoot;
+    }
+
+    return roots[0] ?? documentRoot;
+}
+
+async function resolveWritableLegacyFilePath(
+    folderName: "Expands" | "Types",
+    fileName: string,
+) {
+    const root = await resolveWritableLegacyConfigRoot();
+    const folder = await join(root, folderName);
+    await FileHandler.createDirectory(folder);
+    return join(folder, `${fileName}.json`);
+}
+
+function invalidateLegacyCache(
+    folderName?: "Expands" | "Types",
+    gameName?: string,
+) {
+    if (!folderName || folderName === "Expands") {
+        delete legacyJsonFilePromiseMap.Expands;
+    }
+
+    if (!folderName || folderName === "Types") {
+        delete legacyJsonFilePromiseMap.Types;
+        if (gameName) {
+            legacyCustomTypePromiseMap.delete(normalizeCompareText(gameName));
+        } else {
+            legacyCustomTypePromiseMap.clear();
+        }
+    }
+}
+
 async function resolveLegacyGameModTypes(
     game: IExpandsSupportedGames,
 ): Promise<IType[]> {
@@ -304,7 +369,10 @@ async function resolveLegacyGameModTypes(
 async function resolveLegacyGameCheckModType(
     game: IExpandsSupportedGames,
 ): Promise<ISupportedGames["checkModType"]> {
-    if (Array.isArray(game.checkModType) || typeof game.checkModType === "function") {
+    if (
+        Array.isArray(game.checkModType) ||
+        typeof game.checkModType === "function"
+    ) {
         return game.checkModType;
     }
 
@@ -373,6 +441,58 @@ async function loadLegacyCustomTypes(gameName: string) {
     return loadPromise;
 }
 
+export async function saveLegacyCustomGameDefinition(
+    data: IExpandsSupportedGames,
+) {
+    const filePath = await resolveWritableLegacyFilePath(
+        "Expands",
+        data.gameName,
+    );
+    const saved = await FileHandler.writeFile(
+        filePath,
+        JSON.stringify(data, null, 4),
+    );
+
+    if (!saved) {
+        throw new Error("写入自定义游戏配置失败。");
+    }
+
+    invalidateLegacyCache("Expands");
+}
+
+export async function saveLegacyCustomTypeDefinition(
+    gameName: string,
+    data: IExpandsType,
+) {
+    const existingFile = await readLegacyTypeFile(gameName);
+    const filePath =
+        existingFile ||
+        (await resolveWritableLegacyFilePath("Types", gameName));
+    const currentList =
+        (await readJsonFile<IExpandsType[]>(filePath))?.filter(Boolean) ?? [];
+    const matchedIndex = currentList.findIndex((item) => {
+        return item.name.trim() === data.name.trim();
+    });
+    const nextList = [...currentList];
+
+    if (matchedIndex >= 0) {
+        nextList[matchedIndex] = data;
+    } else {
+        nextList.push(data);
+    }
+
+    const saved = await FileHandler.writeFile(
+        filePath,
+        JSON.stringify(nextList, null, 4),
+    );
+
+    if (!saved) {
+        throw new Error("写入自定义类型配置失败。");
+    }
+
+    invalidateLegacyCache("Types", gameName);
+}
+
 async function resolveLegacyCustomTypeId(
     mod: IModInfo,
     customTypes: ILegacyResolvedType[],
@@ -390,7 +510,9 @@ async function resolveLegacyCustomTypeId(
     return undefined;
 }
 
-export async function mergeLegacyCustomTypesIntoGame(game: ISupportedGames) {
+export async function mergeLegacyCustomTypesIntoGame(
+    game: ISupportedGames,
+): Promise<ISupportedGames> {
     const customTypes = await loadLegacyCustomTypes(game.gameName);
 
     if (customTypes.length === 0) {
@@ -407,7 +529,10 @@ export async function mergeLegacyCustomTypesIntoGame(game: ISupportedGames) {
         ...game,
         modType: mergedTypes,
         checkModType: async (mod: IModInfo) => {
-            const baseTypeId = await evaluateCheckModType(mod, baseCheckModType);
+            const baseTypeId = await evaluateCheckModType(
+                mod,
+                baseCheckModType,
+            );
 
             if (
                 baseTypeId !== undefined &&
@@ -417,7 +542,10 @@ export async function mergeLegacyCustomTypesIntoGame(game: ISupportedGames) {
                 return baseTypeId;
             }
 
-            const customTypeId = await resolveLegacyCustomTypeId(mod, customTypes);
+            const customTypeId = await resolveLegacyCustomTypeId(
+                mod,
+                customTypes,
+            );
             if (customTypeId !== undefined) {
                 return customTypeId;
             }

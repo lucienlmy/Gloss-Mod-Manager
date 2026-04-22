@@ -166,23 +166,28 @@ getVersion();
                         <img
                             src="/imgs/logo.png"
                             alt="Gloss Mod Manager Logo"
-                            class="h-20 w-20 rounded-2xl border border-border/70 bg-background p-2" />
+                            class="h-20 w-20 rounded-2xl border border-border/70 bg-background p-2"
+                        />
                         <div class="min-w-0 space-y-3 flex flex-col">
                             <h1
-                                class="text-3xl font-semibold tracking-tight mb-1">
+                                class="text-3xl font-semibold tracking-tight mb-1"
+                            >
                                 Gloss Mod Manager
                                 <span
-                                    class="text-sm font-medium text-muted-foreground ml-2">
+                                    class="text-sm font-medium text-muted-foreground ml-2"
+                                >
                                     v{{ version }}
                                 </span>
                             </h1>
                             <p
-                                class="max-w-3xl text-sm leading-7 text-muted-foreground gap-3 flex flex-wrap">
+                                class="max-w-3xl text-sm leading-7 text-muted-foreground gap-3 flex flex-wrap"
+                            >
                                 <a
                                     href="https://github.com/GlossMod/Gloss-Mod-Manager"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-chip">
+                                    class="doc-chip"
+                                >
                                     GitHub
                                     <ArrowUpRight class="h-4 w-4" />
                                 </a>
@@ -190,7 +195,8 @@ getVersion();
                                     href="https://gmm.aoe.top/"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-chip">
+                                    class="doc-chip"
+                                >
                                     食用教程
                                     <ArrowUpRight class="h-4 w-4" />
                                 </a>
@@ -198,8 +204,17 @@ getVersion();
                                     href="https://gmm.aoe.top/SupportedGames.html"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-chip">
+                                    class="doc-chip"
+                                >
                                     支持的游戏
+                                    <ArrowUpRight class="h-4 w-4" />
+                                </a>
+                                <a
+                                    href="https://sponsor.aoe.top/"
+                                    target="_blank"
+                                    class="doc-chip"
+                                >
+                                    赞助
                                     <ArrowUpRight class="h-4 w-4" />
                                 </a>
                             </p>
@@ -245,20 +260,24 @@ getVersion();
                                     :href="item.href"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-link-item">
+                                    class="doc-link-item"
+                                >
                                     <div class="flex items-start gap-3">
                                         <component
                                             :is="item.icon"
-                                            class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                            class="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                                        />
                                         <div class="space-y-1">
                                             <div
-                                                class="font-medium text-foreground">
+                                                class="font-medium text-foreground"
+                                            >
                                                 {{ item.title }}
                                             </div>
                                         </div>
                                     </div>
                                     <ArrowUpRight
-                                        class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                                        class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                                    />
                                 </a>
                             </div>
                         </section>
@@ -279,7 +298,8 @@ getVersion();
                                     href="https://gmm.aoe.top/SupportedGames.html"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-inline-link">
+                                    class="doc-inline-link"
+                                >
                                     支持的游戏页面
                                 </a>
                                 。
@@ -321,20 +341,24 @@ getVersion();
                                     :href="item.href"
                                     target="_blank"
                                     rel="noreferrer"
-                                    class="doc-link-item">
+                                    class="doc-link-item"
+                                >
                                     <div class="flex items-start gap-3">
                                         <component
                                             :is="item.icon"
-                                            class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                            class="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                                        />
                                         <div class="space-y-1">
                                             <div
-                                                class="font-medium text-foreground">
+                                                class="font-medium text-foreground"
+                                            >
                                                 {{ item.title }}
                                             </div>
                                         </div>
                                     </div>
                                     <ArrowUpRight
-                                        class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                                        class="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
+                                    />
                                 </a>
                             </div>
                         </section>
