@@ -1,0 +1,257 @@
+name: release
+
+on:
+    push:
+        tags:
+            - "v*"
+    workflow_dispatch:
+        inputs:
+            prerelease:
+                description: "手动发布时是否标记为预发布"
+                required: false
+                default: false
+                type: boolean
+
+permissions:
+    contents: write
+
+concurrency:
+    group:
+        release-${{ github.workflow }}-${{ github.ref_type }}-${{ github.ref_name
+        }}
+    cancel-in-progress: false
+
+jobs:
+    publish-tauri:
+        name: ${{ matrix.name }}
+        runs-on: ${{ matrix.runner }}
+        timeout-minutes: 120
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - name: Windows x64
+                      runner: windows-latest
+                      target: x86_64-pc-windows-msvc
+                      args: --target x86_64-pc-windows-msvc
+                    - name: Linux x64
+                      runner: ubuntu-22.04
+                      target: x86_64-unknown-linux-gnu
+                      args: --target x86_64-unknown-linux-gnu
+                    # 这里显式使用 Intel 与 Apple Silicon 原生 runner，避免 sidecar 在交叉构建时产出错误架构。
+                    - name: macOS x64
+                      runner: macos-13
+                      target: x86_64-apple-darwin
+                      args: --target x86_64-apple-darwin --bundles app,dmg
+                    - name: macOS arm64
+                      runner: macos-14
+                      target: aarch64-apple-darwin
+                      args: --target aarch64-apple-darwin --bundles app,dmg
+        env:
+            NODE_OPTIONS: --max-old-space-size=8192
+            GMM_TARGET_TRIPLE: ${{ matrix.target }}
+            HOMEBREW_NO_AUTO_UPDATE: 1
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: yarn
+                  cache-dependency-path: yarn.lock
+
+            - name: Install Rust stable
+              uses: dtolnay/rust-toolchain@stable
+              with:
+                  targets: ${{ matrix.target }}
+
+            - name: Restore Rust cache
+              uses: swatinem/rust-cache@v2
+              with:
+                  workspaces: ./src-tauri -> target
+                  cache-on-failure: true
+
+            - name: Install Linux build dependencies
+              if: runner.os == 'Linux'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y \
+                    libwebkit2gtk-4.1-dev \
+                    libappindicator3-dev \
+                    librsvg2-dev \
+                    patchelf \
+                    build-essential \
+                    pkg-config \
+                    autoconf \
+                    automake \
+                    libtool \
+                    gettext \
+                    libssl-dev \
+                    libxml2-dev \
+                    zlib1g-dev \
+                    libc-ares-dev \
+                    libsqlite3-dev \
+                    libssh2-1-dev
+
+            - name: Install macOS build dependencies
+              if: runner.os == 'macOS'
+              shell: bash
+              run: |
+                  brew install \
+                    autoconf \
+                    automake \
+                    libtool \
+                    pkg-config \
+                    c-ares \
+                    libssh2 \
+                    openssl@3 \
+                    sqlite
+
+                  brew_prefix="$(brew --prefix)"
+                  {
+                      echo "PKG_CONFIG_PATH=${brew_prefix}/opt/openssl@3/lib/pkgconfig:${brew_prefix}/opt/libssh2/lib/pkgconfig:${brew_prefix}/opt/sqlite/lib/pkgconfig:${brew_prefix}/opt/c-ares/lib/pkgconfig:${PKG_CONFIG_PATH}"
+                      echo "CPPFLAGS=-I${brew_prefix}/opt/openssl@3/include -I${brew_prefix}/opt/libssh2/include -I${brew_prefix}/opt/sqlite/include -I${brew_prefix}/opt/c-ares/include ${CPPFLAGS}"
+                      echo "LDFLAGS=-L${brew_prefix}/opt/openssl@3/lib -L${brew_prefix}/opt/libssh2/lib -L${brew_prefix}/opt/sqlite/lib -L${brew_prefix}/opt/c-ares/lib ${LDFLAGS}"
+                  } >> "$GITHUB_ENV"
+
+            - name: Install frontend dependencies
+              run: yarn install --frozen-lockfile
+
+            - name: Verify release version
+              shell: bash
+              run: |
+                  node <<'NODE'
+                  const fs = require("node:fs");
+
+                  const packageJson = JSON.parse(
+                      fs.readFileSync("package.json", "utf8"),
+                  );
+                  const tauriConfig = JSON.parse(
+                      fs.readFileSync("src-tauri/tauri.conf.json", "utf8"),
+                  );
+                  const cargoToml = fs.readFileSync("src-tauri/Cargo.toml", "utf8");
+                  const cargoVersion = cargoToml.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
+
+                  if (!cargoVersion) {
+                      console.error("Unable to read version from src-tauri/Cargo.toml");
+                      process.exit(1);
+                  }
+
+                  const versions = [
+                      packageJson.version,
+                      tauriConfig.version,
+                      cargoVersion,
+                  ];
+                  const uniqueVersions = [...new Set(versions)];
+
+                  if (uniqueVersions.length !== 1) {
+                      console.error("Version mismatch detected:", {
+                          packageJson: packageJson.version,
+                          tauriConfig: tauriConfig.version,
+                          cargoToml: cargoVersion,
+                      });
+                      process.exit(1);
+                  }
+
+                  const releaseVersion = uniqueVersions[0];
+                  const releaseTag = `v${releaseVersion}`;
+                  const refType = process.env.GITHUB_REF_TYPE || "";
+                  const refName = process.env.GITHUB_REF_NAME || "";
+
+                  if (refType === "tag" && refName !== releaseTag) {
+                      console.error(
+                          `Tag version mismatch: expected ${releaseTag}, received ${refName}`,
+                      );
+                      process.exit(1);
+                  }
+
+                  fs.appendFileSync(process.env.GITHUB_ENV, `RELEASE_VERSION=${releaseVersion}\n`);
+                  fs.appendFileSync(process.env.GITHUB_ENV, `RELEASE_TAG=${releaseTag}\n`);
+                  console.log("Release version verified:", {
+                      releaseVersion,
+                      releaseTag,
+                      trigger: process.env.GITHUB_EVENT_NAME,
+                  });
+                  NODE
+
+            - name: Export optional signing secrets
+              shell: bash
+              env:
+                  INPUT_GLOSS_MOD_KEY: ${{ secrets.GLOSS_MOD_KEY }}
+                  INPUT_MODID_KEY: ${{ secrets.MODID_KEY }}
+                  INPUT_MODID_UID_KEY: ${{ secrets.MODID_UID_KEY }}
+                  INPUT_CURSE_FORGE_KEY: ${{ secrets.CURSE_FORGE_KEY }}
+                  INPUT_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+                  INPUT_TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+                  INPUT_APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+                  INPUT_APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+                  INPUT_APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+                  INPUT_APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+                  INPUT_APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+                  INPUT_APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
+              run: |
+                  export_multiline_env() {
+                      local key="$1"
+                      local value="$2"
+
+                      if [[ -z "$value" ]]; then
+                          return
+                      fi
+
+                      {
+                          echo "${key}<<EOF"
+                          echo "$value"
+                          echo "EOF"
+                      } >> "$GITHUB_ENV"
+                  }
+
+                  export_singleline_env() {
+                      local key="$1"
+                      local value="$2"
+
+                      if [[ -n "$value" ]]; then
+                          echo "${key}=${value}" >> "$GITHUB_ENV"
+                      fi
+                  }
+
+                  export_singleline_env "GLOSS_MOD_KEY" "$INPUT_GLOSS_MOD_KEY"
+                  export_singleline_env "MODID_KEY" "$INPUT_MODID_KEY"
+                  export_singleline_env "MODID_UID_KEY" "$INPUT_MODID_UID_KEY"
+                  export_singleline_env "CURSE_FORGE_KEY" "$INPUT_CURSE_FORGE_KEY"
+                  export_multiline_env "TAURI_SIGNING_PRIVATE_KEY" "$INPUT_TAURI_SIGNING_PRIVATE_KEY"
+                  export_singleline_env "TAURI_SIGNING_PRIVATE_KEY_PASSWORD" "$INPUT_TAURI_SIGNING_PRIVATE_KEY_PASSWORD"
+                  export_multiline_env "APPLE_CERTIFICATE" "$INPUT_APPLE_CERTIFICATE"
+                  export_singleline_env "APPLE_CERTIFICATE_PASSWORD" "$INPUT_APPLE_CERTIFICATE_PASSWORD"
+                  export_singleline_env "APPLE_SIGNING_IDENTITY" "$INPUT_APPLE_SIGNING_IDENTITY"
+                  export_singleline_env "APPLE_API_ISSUER" "$INPUT_APPLE_API_ISSUER"
+                  export_singleline_env "APPLE_API_KEY" "$INPUT_APPLE_API_KEY"
+
+                  if [[ -n "$INPUT_APPLE_API_KEY_CONTENT" && -n "$INPUT_APPLE_API_KEY" ]]; then
+                      apple_api_key_path="$RUNNER_TEMP/AuthKey_${INPUT_APPLE_API_KEY}.p8"
+                      printf '%s' "$INPUT_APPLE_API_KEY_CONTENT" > "$apple_api_key_path"
+                      echo "APPLE_API_KEY_PATH=$apple_api_key_path" >> "$GITHUB_ENV"
+                  fi
+
+            - name: Build and publish release assets
+              uses: tauri-apps/tauri-action@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tagName: v__VERSION__
+                  releaseName: Gloss Mod Manager v__VERSION__
+                  releaseBody: |
+                      GitHub Actions 自动构建产物见下方 Assets。
+                  generateReleaseNotes: true
+                  releaseDraft: false
+                  prerelease:
+                      ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease ||
+                      (github.ref_type == 'tag' && contains(github.ref_name,
+                      '-')) }}
+                  projectPath: ./
+                  tauriScript: yarn tauri
+                  args: ${{ matrix.args }}
+                  retryAttempts: 2
+                  uploadUpdaterJson: false

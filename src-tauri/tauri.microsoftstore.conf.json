@@ -1,0 +1,11 @@
+{
+    "$schema": "https://schema.tauri.app/config/2",
+    "identifier": "gmm2.aoe.top",
+    "bundle": {
+        "windows": {
+            "webviewInstallMode": {
+                "type": "offlineInstaller"
+            }
+        }
+    }
+}
