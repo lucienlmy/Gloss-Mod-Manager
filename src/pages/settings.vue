@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
 import { type ThemeMode } from "@/lib/theme";
 import { useSettings } from "@/stores/settings";
 
 const settings = useSettings();
+const route = useRoute();
+const router = useRouter();
 const {
     autoAddAfterDownload,
     autoStart,
@@ -13,6 +16,9 @@ const {
     defaultStartPage,
     closeSoftLinks,
     modifiableDuringGame,
+    nexusModsAuthorized,
+    nexusModsLoginLoading,
+    nexusModsUser,
     selectGameByFolder,
     showPreloadList,
     storagePath,
@@ -36,6 +42,64 @@ const autoStartModel = computed({
         }
     },
 });
+
+async function handleNexusModsLogin() {
+    try {
+        const user = await settings.loginNexusModsUser();
+        ElMessage.success(`${user.name} 授权成功`);
+    } catch (error: unknown) {
+        console.error("NexusMods 授权失败");
+        console.error(error);
+        ElMessage.error(
+            error instanceof Error ? error.message : "NexusMods 授权失败",
+        );
+    }
+}
+
+function handleNexusModsLogout() {
+    settings.clearNexusModsAuthorization();
+    ElMessage.success("已清除 NexusMods 授权");
+}
+
+async function openNexusModsProfile() {
+    const profileUrl = `https://www.nexusmods.com/profile/${nexusModsUser.value?.name?.trim()}`;
+
+    if (!profileUrl) {
+        return;
+    }
+
+    try {
+        await openUrl(profileUrl);
+    } catch (error: unknown) {
+        console.error("打开 NexusMods 主页失败");
+        console.error(error);
+        ElMessage.error("打开 NexusMods 主页失败");
+    }
+}
+
+watch(
+    () => route.query.nexusAuthAction,
+    (action) => {
+        if (
+            action !== "login" ||
+            nexusModsAuthorized.value ||
+            nexusModsLoginLoading.value
+        ) {
+            return;
+        }
+
+        const nextQuery = { ...route.query };
+        delete nextQuery.nexusAuthAction;
+
+        // 通过路由参数触发与按钮一致的登录流程，避免重复执行。
+        void router.replace({
+            path: route.path,
+            query: nextQuery,
+        });
+        void handleNexusModsLogin();
+    },
+    { immediate: true },
+);
 </script>
 <template>
     <div class="flex flex-col gap-6">
@@ -182,6 +246,91 @@ const autoStartModel = computed({
                                     id="disable-symlink-install"
                                     v-model="closeSoftLinks"
                                 />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>
+                            <h3>授权</h3>
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent class="flex flex-col gap-4">
+                        <div
+                            class="rounded-xl border border-border/70 bg-muted/40 p-4"
+                        >
+                            <div
+                                class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+                            >
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium">
+                                            NexusMods
+                                        </span>
+                                        <Badge
+                                            class="rounded-full"
+                                            :variant="
+                                                nexusModsAuthorized
+                                                    ? 'secondary'
+                                                    : 'outline'
+                                            "
+                                        >
+                                            {{
+                                                nexusModsAuthorized
+                                                    ? "已授权"
+                                                    : "未授权"
+                                            }}
+                                        </Badge>
+                                    </div>
+                                    <p
+                                        v-if="
+                                            nexusModsAuthorized && nexusModsUser
+                                        "
+                                        class="text-sm text-muted-foreground"
+                                    >
+                                        当前账号：{{ nexusModsUser.name }}（ID:
+                                        {{ nexusModsUser.user_id }}）
+                                    </p>
+                                    <p
+                                        v-else
+                                        class="text-sm text-muted-foreground"
+                                    >
+                                        使用 NexusMods 浏览与下载前，需要先完成
+                                        SSO 授权。
+                                    </p>
+                                </div>
+
+                                <div class="flex flex-wrap gap-2">
+                                    <Button
+                                        variant="secondary"
+                                        :disabled="nexusModsLoginLoading"
+                                        @click="handleNexusModsLogin"
+                                    >
+                                        {{
+                                            nexusModsAuthorized
+                                                ? "重新授权"
+                                                : "登录 NexusMods"
+                                        }}
+                                    </Button>
+                                    <Button
+                                        v-if="
+                                            nexusModsAuthorized &&
+                                            nexusModsUser?.profile_url
+                                        "
+                                        variant="outline"
+                                        @click="openNexusModsProfile"
+                                    >
+                                        打开主页
+                                    </Button>
+                                    <Button
+                                        v-if="nexusModsAuthorized"
+                                        variant="outline"
+                                        @click="handleNexusModsLogout"
+                                    >
+                                        清除授权
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </CardContent>

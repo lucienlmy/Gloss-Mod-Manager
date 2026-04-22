@@ -6,8 +6,6 @@ import { ref } from "vue";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
-import { syncManagerRuntimeContext } from "@/lib/manager-context";
-import { hydrateManagerRuntimeData } from "@/lib/manager-runtime-data";
 import { PersistentStore } from "@/lib/persistent-store";
 import { ScanGame } from "@/lib/scan-game";
 import i18n from "@/lang";
@@ -676,33 +674,6 @@ function normalizeTag(tag: Partial<ITag>) {
     } satisfies ITag;
 }
 
-function mergeTags(
-    textCollator: Intl.Collator,
-    tags: Array<ITag | undefined>,
-): ITag[] {
-    const tagMap = new Map<string, ITag>();
-
-    for (const item of tags) {
-        if (!item) {
-            continue;
-        }
-
-        const normalizedTag = normalizeTag(item);
-        tagMap.set(normalizedTag.name, normalizedTag);
-    }
-
-    return [...tagMap.values()].sort((left, right) => {
-        return textCollator.compare(left.name, right.name);
-    });
-}
-
-function collectModTags(modList: IModInfo[], textCollator: Intl.Collator) {
-    return mergeTags(
-        textCollator,
-        modList.flatMap((mod) => mod.tags ?? []),
-    );
-}
-
 async function syncServerState() {
     const snapshot = await invoke<IMcpServerSnapshot>("mcp_get_server_state");
 
@@ -724,6 +695,90 @@ function getStores() {
     };
 }
 
+function getMcpFeatureFlags() {
+    const { settings } = getStores();
+
+    return {
+        promptsEnabled: settings.mcpPromptsEnabled,
+        promptItemEnabledMap: settings.mcpPromptItemEnabledMap,
+        resourcesEnabled: settings.mcpResourcesEnabled,
+        resourceItemEnabledMap: settings.mcpResourceItemEnabledMap,
+        toolsEnabled: settings.mcpToolsEnabled,
+        toolItemEnabledMap: settings.mcpToolItemEnabledMap,
+    };
+}
+
+function isMcpItemEnabled(
+    feature: "tool" | "resource" | "prompt",
+    key: string,
+) {
+    const featureFlags = getMcpFeatureFlags();
+
+    switch (feature) {
+        case "tool":
+            return featureFlags.toolItemEnabledMap[key] !== false;
+        case "resource":
+            return featureFlags.resourceItemEnabledMap[key] !== false;
+        default:
+            return featureFlags.promptItemEnabledMap[key] !== false;
+    }
+}
+
+function getEnabledToolDefinitions() {
+    return mcpToolDefinitions.filter((item) => {
+        return isMcpItemEnabled("tool", item.name);
+    });
+}
+
+function getEnabledResourceDefinitions() {
+    return mcpResourceDefinitions.filter((item) => {
+        return isMcpItemEnabled("resource", item.uri);
+    });
+}
+
+function getEnabledPromptDefinitions() {
+    return mcpPromptDefinitions.filter((item) => {
+        return isMcpItemEnabled("prompt", item.name);
+    });
+}
+
+function getInitializeCapabilities() {
+    const { promptsEnabled, resourcesEnabled, toolsEnabled } =
+        getMcpFeatureFlags();
+
+    return {
+        ...(promptsEnabled && getEnabledPromptDefinitions().length > 0
+            ? {
+                  prompts: {
+                      listChanged: true,
+                  },
+              }
+            : {}),
+        ...(resourcesEnabled && getEnabledResourceDefinitions().length > 0
+            ? {
+                  resources: {
+                      listChanged: true,
+                  },
+              }
+            : {}),
+        ...(toolsEnabled && getEnabledToolDefinitions().length > 0
+            ? {
+                  tools: {
+                      listChanged: true,
+                  },
+              }
+            : {}),
+    };
+}
+
+function createFeatureDisabledError(featureName: string) {
+    return `${featureName} 功能已关闭。请先在 MCP 页面中重新启用后再试。`;
+}
+
+function createFeatureItemDisabledError(featureName: string, itemName: string) {
+    return `${featureName}「${itemName}」已关闭。请先在 MCP 页面中重新启用后再试。`;
+}
+
 async function ensureSupportedGamesLoaded(manager: ReturnType<typeof useManager>) {
     if (manager.supportedGames.length > 0) {
         return;
@@ -742,11 +797,10 @@ async function ensureManagerRuntimeLoaded() {
     const { manager, settings } = getStores();
 
     await ensureSupportedGamesLoaded(manager);
-    await syncManagerRuntimeContext(manager, {
+    await manager.refreshRuntimeData({
         storagePath: settings.storagePath,
         closeSoftLinks: settings.closeSoftLinks,
     });
-    await hydrateManagerRuntimeData(manager);
 
     return { manager, settings };
 }
@@ -961,11 +1015,10 @@ async function handleToolCall(
                     ];
                 }
 
-                await syncManagerRuntimeContext(manager, {
+                await manager.refreshRuntimeData({
                     storagePath: settings.storagePath,
                     closeSoftLinks: settings.closeSoftLinks,
                 });
-                await hydrateManagerRuntimeData(manager);
                 await router.push("/manager");
 
                 return createToolResult({
@@ -998,11 +1051,10 @@ async function handleToolCall(
                     ...supportedGame,
                     ...managedGame,
                 };
-                await syncManagerRuntimeContext(manager, {
+                await manager.refreshRuntimeData({
                     storagePath: settings.storagePath,
                     closeSoftLinks: settings.closeSoftLinks,
                 });
-                await hydrateManagerRuntimeData(manager);
                 await router.push("/manager");
 
                 return createToolResult({
@@ -1029,11 +1081,10 @@ async function handleToolCall(
                     manager.managerGame = null;
                 }
 
-                await syncManagerRuntimeContext(manager, {
+                await manager.refreshRuntimeData({
                     storagePath: settings.storagePath,
                     closeSoftLinks: settings.closeSoftLinks,
                 });
-                await hydrateManagerRuntimeData(manager);
 
                 return createToolResult({
                     state: true,
@@ -1076,27 +1127,7 @@ async function handleToolCall(
             case "remove-mod-by-id": {
                 const modId = toRequiredNumber(args.modId, "modId");
                 const { manager } = await ensureManagerRuntimeLoaded();
-                const targetMod = manager.managerModList.find((item) => {
-                    return item.id === modId;
-                });
-
-                if (!targetMod) {
-                    throw new Error(`未找到 ID 为 ${modId} 的 Mod。`);
-                }
-
-                const modPath = await Manager.getModStoragePath(modId);
-                if (modPath && !(await FileHandler.deleteFolder(modPath))) {
-                    throw new Error("删除 Mod 本地缓存目录失败。");
-                }
-
-                manager.managerModList = manager.managerModList.filter((item) => {
-                    return item.id !== modId;
-                });
-                manager.tags = collectModTags(
-                    manager.managerModList,
-                    manager.textCollator,
-                );
-                await manager.saveManagerData();
+                const targetMod = await manager.removeModRecord(modId);
 
                 return createToolResult({
                     state: true,
@@ -1139,15 +1170,16 @@ async function handleToolCall(
                 }
 
                 const tag = normalizeTag(args.tag);
-                targetMod.tags = mergeTags(manager.textCollator, [
-                    ...(targetMod.tags ?? []),
-                    tag,
-                ]);
-                manager.tags = mergeTags(manager.textCollator, [
-                    ...manager.tags,
-                    tag,
-                ]);
-                await manager.saveManagerData();
+
+                await manager.upsertTag({
+                    name: tag.name,
+                    color: tag.color,
+                    previousName: tag.name,
+                });
+
+                if (!(targetMod.tags ?? []).some((item) => item.name === tag.name)) {
+                    await manager.toggleTagOnMod(modId, tag.name);
+                }
 
                 return createToolResult({
                     state: true,
@@ -1166,14 +1198,9 @@ async function handleToolCall(
                     throw new Error(`未找到 ID 为 ${modId} 的 Mod。`);
                 }
 
-                targetMod.tags = (targetMod.tags ?? []).filter((tag) => {
-                    return tag.name !== tagName;
-                });
-                manager.tags = collectModTags(
-                    manager.managerModList,
-                    manager.textCollator,
-                );
-                await manager.saveManagerData();
+                if ((targetMod.tags ?? []).some((tag) => tag.name === tagName)) {
+                    await manager.toggleTagOnMod(modId, tagName);
+                }
 
                 return createToolResult({
                     state: true,
@@ -1462,17 +1489,7 @@ async function dispatchRequest(
         case "initialize":
             return createJsonRpcResult(requestId, {
                 protocolVersion: resolveProtocolVersion(params.protocolVersion),
-                capabilities: {
-                    prompts: {
-                        listChanged: true,
-                    },
-                    resources: {
-                        listChanged: true,
-                    },
-                    tools: {
-                        listChanged: true,
-                    },
-                },
+                capabilities: getInitializeCapabilities(),
                 serverInfo: {
                     name: "gloss-mod-manager",
                     version: "2.0.0",
@@ -1488,14 +1505,30 @@ async function dispatchRequest(
                 ? null
                 : createJsonRpcResult(requestId, {});
         case "tools/list":
+            if (!getMcpFeatureFlags().toolsEnabled) {
+                return normalizedRequest.id === undefined
+                    ? null
+                    : createJsonRpcResult(requestId, {
+                          tools: [],
+                      });
+            }
+
             return normalizedRequest.id === undefined
                 ? null
                 : createJsonRpcResult(requestId, {
-                      tools: mcpToolDefinitions,
+                      tools: getEnabledToolDefinitions(),
                   });
         case "tools/call": {
             if (normalizedRequest.id === undefined) {
                 return null;
+            }
+
+            if (!getMcpFeatureFlags().toolsEnabled) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureDisabledError("MCP Tools"),
+                );
             }
 
             const toolName = params.name;
@@ -1504,6 +1537,17 @@ async function dispatchRequest(
                     requestId,
                     INVALID_PARAMS,
                     "tools/call 缺少有效的工具名称。",
+                );
+            }
+
+            const toolDefinition = mcpToolDefinitions.find((item) => {
+                return item.name === toolName;
+            });
+            if (toolDefinition && !isMcpItemEnabled("tool", toolDefinition.name)) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureItemDisabledError("MCP Tool", toolName),
                 );
             }
 
@@ -1516,14 +1560,30 @@ async function dispatchRequest(
             );
         }
         case "resources/list":
+            if (!getMcpFeatureFlags().resourcesEnabled) {
+                return normalizedRequest.id === undefined
+                    ? null
+                    : createJsonRpcResult(requestId, {
+                          resources: [],
+                      });
+            }
+
             return normalizedRequest.id === undefined
                 ? null
                 : createJsonRpcResult(requestId, {
-                      resources: mcpResourceDefinitions,
+                      resources: getEnabledResourceDefinitions(),
                   });
         case "resources/read": {
             if (normalizedRequest.id === undefined) {
                 return null;
+            }
+
+            if (!getMcpFeatureFlags().resourcesEnabled) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureDisabledError("MCP Resources"),
+                );
             }
 
             const uri = params.uri;
@@ -1532,6 +1592,20 @@ async function dispatchRequest(
                     requestId,
                     INVALID_PARAMS,
                     "resources/read 缺少有效的 uri。",
+                );
+            }
+
+            const resourceDefinition = mcpResourceDefinitions.find((item) => {
+                return item.uri === uri;
+            });
+            if (
+                resourceDefinition &&
+                !isMcpItemEnabled("resource", resourceDefinition.uri)
+            ) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureItemDisabledError("MCP Resource", uri),
                 );
             }
 
@@ -1555,14 +1629,30 @@ async function dispatchRequest(
             }
         }
         case "prompts/list":
+            if (!getMcpFeatureFlags().promptsEnabled) {
+                return normalizedRequest.id === undefined
+                    ? null
+                    : createJsonRpcResult(requestId, {
+                          prompts: [],
+                      });
+            }
+
             return normalizedRequest.id === undefined
                 ? null
                 : createJsonRpcResult(requestId, {
-                      prompts: mcpPromptDefinitions,
+                      prompts: getEnabledPromptDefinitions(),
                   });
         case "prompts/get": {
             if (normalizedRequest.id === undefined) {
                 return null;
+            }
+
+            if (!getMcpFeatureFlags().promptsEnabled) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureDisabledError("MCP Prompts"),
+                );
             }
 
             const promptName = params.name;
@@ -1571,6 +1661,20 @@ async function dispatchRequest(
                     requestId,
                     INVALID_PARAMS,
                     "prompts/get 缺少有效的提示名称。",
+                );
+            }
+
+            const promptDefinition = mcpPromptDefinitions.find((item) => {
+                return item.name === promptName;
+            });
+            if (
+                promptDefinition &&
+                !isMcpItemEnabled("prompt", promptDefinition.name)
+            ) {
+                return createJsonRpcError(
+                    requestId,
+                    METHOD_NOT_FOUND,
+                    createFeatureItemDisabledError("MCP Prompt", promptName),
                 );
             }
 

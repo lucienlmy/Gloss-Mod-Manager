@@ -1,6 +1,8 @@
 export interface IGlossDownloadTaskMeta {
+    sourceType?: sourceType;
+    externalId?: number | string;
     modId?: number;
-    resourceId?: number;
+    resourceId?: number | string;
     replaceLocalModId?: number;
     resourceFormat?: string;
     modTitle?: string;
@@ -14,6 +16,7 @@ export interface IGlossDownloadTaskMeta {
     sourceUrl?: string;
     downloadUrl?: string;
     localModId?: number;
+    createdAt?: string;
     importedAt?: string;
     taskStatus?: TaskStatus;
     downloadedAt?: string;
@@ -30,6 +33,8 @@ export type GlossDownloadPresence =
     | "imported";
 
 export interface IGlossDuplicateCriteria {
+    sourceType?: sourceType;
+    externalId?: number | string;
     modId?: number | string;
     resourceId?: number | string;
     downloadUrl?: string;
@@ -101,11 +106,21 @@ function isSameId(left?: number | string, right?: number | string) {
     return String(left) === String(right);
 }
 
+function getTaskExternalId(meta: IGlossDownloadTaskMeta) {
+    return meta.externalId ?? meta.modId;
+}
+
+function getCriteriaExternalId(criteria: IGlossDuplicateCriteria) {
+    return criteria.externalId ?? criteria.modId;
+}
+
 function getTaskMatchScore(
     meta: IGlossDownloadTaskMeta,
     criteria: IGlossDuplicateCriteria,
 ) {
     let score = 0;
+    const criteriaExternalId = getCriteriaExternalId(criteria);
+    const taskExternalId = getTaskExternalId(meta);
 
     if (isSameId(meta.resourceId, criteria.resourceId)) {
         score += 80;
@@ -119,7 +134,20 @@ function getTaskMatchScore(
         score += 60;
     }
 
-    if (isSameId(meta.modId, criteria.modId)) {
+    if (
+        criteria.sourceType &&
+        meta.sourceType &&
+        criteria.sourceType === meta.sourceType
+    ) {
+        score += 20;
+    }
+
+    if (
+        isSameId(taskExternalId, criteriaExternalId) &&
+        (!criteria.sourceType ||
+            !meta.sourceType ||
+            criteria.sourceType === meta.sourceType)
+    ) {
         score += 40;
     }
 
@@ -179,8 +207,25 @@ function getLocalModMatchScore(
 ) {
     const normalizedFileName = normalizeCompareText(criteria.fileName);
     const normalizedTitle = normalizeCompareText(criteria.modTitle);
+    const criteriaExternalId = getCriteriaExternalId(criteria);
+    const normalizedSourceType = criteria.sourceType?.trim();
 
-    if (mod.from === "GlossMod" && isSameId(mod.webId, criteria.modId)) {
+    if (
+        normalizedSourceType &&
+        mod.from === normalizedSourceType &&
+        isSameId(mod.webId, criteriaExternalId)
+    ) {
+        return {
+            score: 100,
+            reason: "同一来源 Mod",
+        };
+    }
+
+    if (
+        !normalizedSourceType &&
+        mod.from === "GlossMod" &&
+        isSameId(mod.webId, criteria.modId)
+    ) {
         return {
             score: 100,
             reason: "同一 Gloss Mod",

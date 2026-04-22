@@ -33,11 +33,11 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "GenshinImpact.exe",
-                rootPath: "",
+                rootPath: ["."],
             },
             {
                 name: "YuanShen.exe",
-                rootPath: "",
+                rootPath: ["."],
             },
         ],
         // archivePath: join(await FileHandler.GetAppData(), "Local", "b1", "Saved"),

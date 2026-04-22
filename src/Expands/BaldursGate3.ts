@@ -320,11 +320,11 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "bg3.exe",
-                rootPath: await join(".."),
+                rootPath: [".."],
             },
             {
                 name: "bg3_dx11.exe",
-                rootPath: await join(".."),
+                rootPath: [".."],
             },
         ],
         startExe: [

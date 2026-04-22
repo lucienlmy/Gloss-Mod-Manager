@@ -76,8 +76,12 @@ async function select(item: ISupportedGames) {
                 // console.log(exe);
                 manager.managerGame = {
                     ...item,
-                    gamePath: await join(folder, exe.rootPath),
+                    gamePath: await join(folder, ...exe.rootPath),
                 };
+                console.log({
+                    gamePath: await join(folder, ...exe.rootPath),
+                    exeRootPath: exe.rootPath,
+                });
             } else {
                 let exename = item.gameExe
                     .map((item) => item.name)

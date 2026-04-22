@@ -33,7 +33,7 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "Expeditions.exe",
-                rootPath: await join("..", ".."),
+                rootPath: ["..", ".."],
             },
         ],
         gameCoverImg:

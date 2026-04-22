@@ -15,11 +15,11 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "Duckov.exe",
-                rootPath: await join("."),
+                rootPath: ["."],
             },
             {
                 name: "Duckov.app",
-                rootPath: await join("."),
+                rootPath: ["."],
             },
         ],
         startExe: [

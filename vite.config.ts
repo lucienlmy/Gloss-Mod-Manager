@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import VueRouter from "vue-router/vite";
 import path from "node:path";
@@ -9,15 +9,8 @@ import Components from "unplugin-vue-components/vite";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
-export default defineConfig(async ({ mode }) => {
-    const env = loadEnv(mode, process.cwd(), "");
-
+export default defineConfig(async () => {
     return {
-        define: {
-            "import.meta.env.GLOSS_MOD_KEY": JSON.stringify(
-                env.GLOSS_MOD_KEY ?? "",
-            ),
-        },
         plugins: [
             vue(),
             VueRouter({
@@ -50,6 +43,8 @@ export default defineConfig(async ({ mode }) => {
                 "@": path.resolve(__dirname, "./src"),
             },
         },
+        // 兼容项目现有 .env 键名，避免必须改成 VITE_* 前缀。
+        envPrefix: ["VITE_", "GLOSS_MOD_", "MODID_", "CURSE_FORGE_"],
 
         // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
         //

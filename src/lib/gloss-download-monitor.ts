@@ -10,8 +10,6 @@ import {
     importLocalModSources,
     type ILocalModImportSource,
 } from "@/lib/local-mod-import";
-import { syncManagerRuntimeContext } from "@/lib/manager-context";
-import { hydrateManagerRuntimeData } from "@/lib/manager-runtime-data";
 import { PersistentStore } from "@/lib/persistent-store";
 
 interface IGlossDownloadMonitorManager {
@@ -24,6 +22,10 @@ interface IGlossDownloadMonitorManager {
     selectedType: number | string | 0;
     selectedTag: string;
     saveManagerData: () => Promise<void>;
+    refreshRuntimeData: (options: {
+        storagePath: string;
+        closeSoftLinks: boolean;
+    }) => Promise<void>;
 }
 
 interface IGlossDownloadMonitorSettings {
@@ -41,6 +43,14 @@ interface ITaskMetaSyncResult {
 const ARIA2_TASK_META_KEY = "aria2TaskMetaMap";
 const POLL_INTERVAL_MS = 2000;
 const importingTaskGids = new Set<string>();
+
+function getTaskSourceType(metadata?: IGlossDownloadTaskMeta): sourceType {
+    return metadata?.sourceType ?? (metadata?.modId ? "GlossMod" : "Customize");
+}
+
+function getTaskExternalId(metadata?: IGlossDownloadTaskMeta) {
+    return metadata?.externalId ?? metadata?.modId;
+}
 
 function getTaskPrimaryFile(task: IAria2RpcTask) {
     return task.files.find((item) => item.path) ?? task.files[0] ?? null;
@@ -100,6 +110,12 @@ function syncTaskMetaStatuses(
 
         const nextMeta: IGlossDownloadTaskMeta = {
             ...currentMeta,
+            createdAt:
+                currentMeta.createdAt ||
+                currentMeta.downloadedAt ||
+                currentMeta.importedAt ||
+                currentMeta.updatedAt ||
+                new Date().toISOString(),
             taskStatus: task.status as TaskStatus,
             updatedAt: new Date().toISOString(),
         };
@@ -116,6 +132,7 @@ function syncTaskMetaStatuses(
         }
 
         if (
+            nextMeta.createdAt !== currentMeta.createdAt ||
             nextMeta.taskStatus !== currentMeta.taskStatus ||
             nextMeta.downloadedAt !== currentMeta.downloadedAt
         ) {
@@ -131,7 +148,7 @@ function syncTaskMetaStatuses(
     };
 }
 
-export async function autoImportCompletedGlossTasks(
+export async function autoImportCompletedDownloadTasks(
     manager: IGlossDownloadMonitorManager,
     settings: IGlossDownloadMonitorSettings,
     completedTaskGids: string[],
@@ -166,11 +183,10 @@ export async function autoImportCompletedGlossTasks(
         importingTaskGids.add(gid);
 
         try {
-            await syncManagerRuntimeContext(manager, {
+            await manager.refreshRuntimeData({
                 storagePath: settings.storagePath,
                 closeSoftLinks: settings.closeSoftLinks,
             });
-            await hydrateManagerRuntimeData(manager);
 
             if (!manager.managerGame || !manager.managerRoot) {
                 continue;
@@ -197,8 +213,8 @@ export async function autoImportCompletedGlossTasks(
                 modWebsite: metadata.sourceUrl || "",
                 modDesc: metadata.content || "",
                 cover: metadata.cover,
-                from: (metadata.modId ? "GlossMod" : "Customize") as sourceType,
-                webId: metadata.modId,
+                from: getTaskSourceType(metadata),
+                webId: getTaskExternalId(metadata),
                 gameID: manager.managerGame.GlossGameId,
                 other: {
                     downloadTaskGid: task.gid,
@@ -208,6 +224,8 @@ export async function autoImportCompletedGlossTasks(
             const duplicateLocalMods = findGlossDuplicateLocalMods(
                 manager.managerModList,
                 {
+                    sourceType: getTaskSourceType(metadata),
+                    externalId: getTaskExternalId(metadata),
                     modId: metadata.modId,
                     fileName: importMetadata.fileName,
                     modTitle: importMetadata.modName,
@@ -340,7 +358,7 @@ export class GlossDownloadMonitor {
                 GlossDownloadMonitor.initialized = true;
             }
 
-            await autoImportCompletedGlossTasks(
+            await autoImportCompletedDownloadTasks(
                 GlossDownloadMonitor.manager,
                 GlossDownloadMonitor.settings,
                 syncResult.newlyCompletedTaskGids,
@@ -361,3 +379,5 @@ export function initializeGlossDownloadMonitor(
 ) {
     GlossDownloadMonitor.start(manager, settings);
 }
+
+export const autoImportCompletedGlossTasks = autoImportCompletedDownloadTasks;

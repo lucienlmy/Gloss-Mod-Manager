@@ -21,13 +21,11 @@ import {
     getGlossModPresence,
     type IGlossDownloadTaskMeta,
 } from "@/lib/gloss-download";
-import { autoImportCompletedGlossTasks } from "@/lib/gloss-download-monitor";
+import { autoImportCompletedDownloadTasks } from "@/lib/gloss-download-monitor";
 import {
     buildGlossOutputFileName,
     resolveGlossDownloadImportSourceType,
 } from "@/lib/gloss-download-queue";
-import { syncManagerRuntimeContext } from "@/lib/manager-context";
-import { hydrateManagerRuntimeData } from "@/lib/manager-runtime-data";
 
 type QueueFilter = "all" | "active" | "waiting" | "paused" | "stopped";
 type DuplicateDecisionAction =
@@ -62,6 +60,13 @@ interface IDuplicateDialogState {
     note: string;
     items: IDuplicateDialogItem[];
     options: IDuplicateDialogOption[];
+}
+
+interface IPageItem {
+    key: string;
+    label: string;
+    page?: number;
+    ellipsis?: boolean;
 }
 
 interface IAddResourceTaskResult {
@@ -126,6 +131,8 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
     hour: "2-digit",
     minute: "2-digit",
 });
+const DEFAULT_TASK_PAGE_SIZE = "20";
+const TASK_PAGE_SIZE_OPTIONS = ["20", "50", "100"];
 
 const manager = useManager();
 const settings = useSettings();
@@ -167,6 +174,8 @@ const selectedMod = ref<IMod | null>(null);
 const addingResourceKey = ref("");
 
 const queueFilter = ref<QueueFilter>("all");
+const taskPage = ref(1);
+const taskPageSize = ref(DEFAULT_TASK_PAGE_SIZE);
 const selectedTaskGid = ref("");
 const defaultDownloadDirectory = ref("");
 const showAddModDialog = ref(false);
@@ -210,18 +219,104 @@ const allTasks = computed(() => [
     ...stoppedTasks.value,
 ]);
 const filteredTasks = computed(() => {
+    let tasks: IAria2RpcTask[] = [];
+
     switch (queueFilter.value) {
         case "active":
-            return activeTasks.value;
+            tasks = activeTasks.value;
+            break;
         case "waiting":
-            return waitingQueueTasks.value;
+            tasks = waitingQueueTasks.value;
+            break;
         case "paused":
-            return pausedTasks.value;
+            tasks = pausedTasks.value;
+            break;
         case "stopped":
-            return stoppedTasks.value;
+            tasks = stoppedTasks.value;
+            break;
         default:
-            return allTasks.value;
+            tasks = allTasks.value;
+            break;
     }
+
+    return sortTasksByCreatedAt(tasks);
+});
+const taskPageSizeNumber = computed(() => Number(taskPageSize.value));
+const filteredTaskCount = computed(() => filteredTasks.value.length);
+const paginatedTasks = computed(() => {
+    const startIndex = (taskPage.value - 1) * taskPageSizeNumber.value;
+    return filteredTasks.value.slice(
+        startIndex,
+        startIndex + taskPageSizeNumber.value,
+    );
+});
+const taskTotalPages = computed(() => {
+    if (filteredTaskCount.value === 0) {
+        return 0;
+    }
+
+    return Math.ceil(filteredTaskCount.value / taskPageSizeNumber.value);
+});
+const visibleTaskRangeLabel = computed(() => {
+    if (filteredTaskCount.value === 0) {
+        return "暂无任务";
+    }
+
+    const startIndex = (taskPage.value - 1) * taskPageSizeNumber.value + 1;
+    const endIndex = startIndex + paginatedTasks.value.length - 1;
+
+    return `显示第 ${startIndex}-${endIndex} 条，共 ${filteredTaskCount.value} 条`;
+});
+const taskPaginationItems = computed<IPageItem[]>(() => {
+    if (taskTotalPages.value <= 1) {
+        return [];
+    }
+
+    const pages = new Set<number>([
+        1,
+        taskTotalPages.value,
+        taskPage.value - 1,
+        taskPage.value,
+        taskPage.value + 1,
+    ]);
+
+    if (taskPage.value <= 3) {
+        pages.add(2);
+        pages.add(3);
+        pages.add(4);
+    }
+
+    if (taskPage.value >= taskTotalPages.value - 2) {
+        pages.add(taskTotalPages.value - 1);
+        pages.add(taskTotalPages.value - 2);
+        pages.add(taskTotalPages.value - 3);
+    }
+
+    const sortedPages = [...pages]
+        .filter((value) => value >= 1 && value <= taskTotalPages.value)
+        .sort((left, right) => left - right);
+
+    const items: IPageItem[] = [];
+    let previousPage = 0;
+
+    for (const value of sortedPages) {
+        if (value - previousPage > 1) {
+            items.push({
+                key: `ellipsis-${previousPage}-${value}`,
+                label: "...",
+                ellipsis: true,
+            });
+        }
+
+        items.push({
+            key: `page-${value}`,
+            label: String(value),
+            page: value,
+        });
+        previousPage = value;
+    }
+
+    return items;
 });
 const selectedTask = computed(
     () =>
@@ -292,6 +387,14 @@ const detailParagraphs = computed(() =>
     ),
 );
 
+function getTaskSourceType(metadata?: IGlossDownloadTaskMeta | null): sourceType {
+    return metadata?.sourceType ?? (metadata?.modId ? "GlossMod" : "Customize");
+}
+
+function getTaskExternalId(metadata?: IGlossDownloadTaskMeta | null) {
+    return metadata?.externalId ?? metadata?.modId;
+}
+
 const { pause: stopTaskPolling, resume: startTaskPolling } = useIntervalFn(
     () => {
         void refreshTaskLists(true);
@@ -320,11 +423,39 @@ watch(
     { immediate: true },
 );
 
+watch(queueFilter, () => {
+    taskPage.value = 1;
+});
+
+watch(taskPageSize, () => {
+    taskPage.value = 1;
+});
+
+watch(
+    filteredTaskCount,
+    (count) => {
+        if (count === 0) {
+            taskPage.value = 1;
+            return;
+        }
+
+        const maxPage = Math.ceil(count / taskPageSizeNumber.value);
+
+        if (taskPage.value > maxPage) {
+            taskPage.value = maxPage;
+        }
+    },
+    { immediate: true },
+);
+
 watch(
     [storagePath, () => manager.managerGame?.gameName, disableSymlinkInstall],
     () => {
         void refreshDefaultDownloadDirectory();
-        void syncManagerContext();
+        void manager.refreshRuntimeData({
+            storagePath: storagePath.value,
+            closeSoftLinks: disableSymlinkInstall.value,
+        });
     },
     { immediate: true },
 );
@@ -421,14 +552,6 @@ async function refreshDefaultDownloadDirectory() {
         (await join(await documentDir(), "Gloss Mod Manager"));
 
     defaultDownloadDirectory.value = await join(baseDirectory, "downloads");
-}
-
-async function syncManagerContext() {
-    await syncManagerRuntimeContext(manager, {
-        storagePath: storagePath.value,
-        closeSoftLinks: disableSymlinkInstall.value,
-    });
-    await hydrateManagerRuntimeData(manager);
 }
 
 async function ensureDownloadDirectoryReady() {
@@ -786,6 +909,38 @@ function formatSpeed(value?: string | number) {
     return `${formatBytes(value)}/s`;
 }
 
+function parseTaskTimestamp(value?: string) {
+    if (!value) {
+        return 0;
+    }
+
+    const timestamp = Date.parse(value);
+
+    return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function getTaskCreatedTimestamp(task: IAria2RpcTask) {
+    const metadata = taskMetaMap.value[task.gid];
+
+    return (
+        parseTaskTimestamp(metadata?.createdAt) ||
+        parseTaskTimestamp(metadata?.updatedAt)
+    );
+}
+
+function sortTasksByCreatedAt(tasks: IAria2RpcTask[]) {
+    return [...tasks].sort((left, right) => {
+        const timestampDifference =
+            getTaskCreatedTimestamp(right) - getTaskCreatedTimestamp(left);
+
+        if (timestampDifference !== 0) {
+            return timestampDifference;
+        }
+
+        return right.gid.localeCompare(left.gid);
+    });
+}
+
 function getTaskProgress(task: IAria2RpcTask) {
     const totalLength = toNumber(task.totalLength);
 
@@ -859,6 +1014,15 @@ function getTaskStatusClass(status: string) {
     return "border-border bg-muted/40 text-muted-foreground";
 }
 
+function goToTaskPage(nextPage: number) {
+    if (taskTotalPages.value <= 0) {
+        taskPage.value = 1;
+        return;
+    }
+
+    taskPage.value = Math.min(Math.max(1, nextPage), taskTotalPages.value);
+}
+
 function buildOutputFileName(resource: IResource) {
     return buildGlossOutputFileName(resource);
 }
@@ -877,6 +1041,12 @@ function syncTaskMetaStatuses(tasks: IAria2RpcTask[]) {
 
         const nextMeta: IGlossDownloadTaskMeta = {
             ...currentMeta,
+            createdAt:
+                currentMeta.createdAt ||
+                currentMeta.downloadedAt ||
+                currentMeta.importedAt ||
+                currentMeta.updatedAt ||
+                new Date().toISOString(),
             taskStatus: task.status as TaskStatus,
             updatedAt: new Date().toISOString(),
         };
@@ -893,6 +1063,7 @@ function syncTaskMetaStatuses(tasks: IAria2RpcTask[]) {
         }
 
         if (
+            nextMeta.createdAt !== currentMeta.createdAt ||
             nextMeta.taskStatus !== currentMeta.taskStatus ||
             nextMeta.downloadedAt !== currentMeta.downloadedAt
         ) {
@@ -912,7 +1083,7 @@ async function autoImportCompletedTasks(
     completedTaskGids: string[],
     tasks: IAria2RpcTask[],
 ) {
-    await autoImportCompletedGlossTasks(
+    await autoImportCompletedDownloadTasks(
         manager,
         {
             autoAddAfterDownload: settings.autoAddAfterDownload,
@@ -1097,12 +1268,18 @@ function getTaskOutputFileName(task: IAria2RpcTask) {
 }
 
 function setTaskMeta(gid: string, metadata: IGlossDownloadTaskMeta) {
+    const nextMeta: IGlossDownloadTaskMeta = {
+        ...taskMetaMap.value[gid],
+        ...metadata,
+    };
+
+    if (!nextMeta.createdAt) {
+        nextMeta.createdAt = new Date().toISOString();
+    }
+
     taskMetaMap.value = {
         ...taskMetaMap.value,
-        [gid]: {
-            ...taskMetaMap.value[gid],
-            ...metadata,
-        },
+        [gid]: nextMeta,
     };
 }
 
@@ -1170,8 +1347,11 @@ async function createResourceTask(resource: IResource, outputFileName: string) {
             [resource.mods_resource_url],
             options,
         );
+        const now = new Date().toISOString();
 
         setTaskMeta(gid, {
+            sourceType: "GlossMod",
+            externalId: selectedMod.value.id,
             modId: selectedMod.value.id,
             resourceId: resource.id,
             resourceFormat: resource.mods_resource_formart,
@@ -1187,8 +1367,9 @@ async function createResourceTask(resource: IResource, outputFileName: string) {
             content: selectedMod.value.mods_content,
             sourceUrl: `${GLOSS_MOD_WEB_BASE_URL}/mod/${selectedMod.value.id}`,
             downloadUrl: resource.mods_resource_url,
+            createdAt: now,
             taskStatus: "waiting",
-            updatedAt: new Date().toISOString(),
+            updatedAt: now,
         });
 
         ElMessage.success(`已添加 ${resource.mods_resource_name} 到下载队列。`);
@@ -1379,11 +1560,14 @@ async function retryTask(task: IAria2RpcTask) {
         }
 
         const gid = await Aria2Rpc.addUri(uris, options);
+        const now = new Date().toISOString();
 
         setTaskMeta(gid, {
             ...(metadata ?? {}),
             fileName: getTaskOutputFileName(task),
             downloadUrl: metadata?.downloadUrl || uris[0],
+            createdAt: now,
+            updatedAt: now,
         });
 
         await refreshTaskLists();
@@ -1431,7 +1615,10 @@ async function importTaskToLocalManager(task?: IAria2RpcTask | null) {
     startTaskImport(targetTask.gid);
 
     try {
-        await syncManagerContext();
+        await manager.refreshRuntimeData({
+            storagePath: storagePath.value,
+            closeSoftLinks: disableSymlinkInstall.value,
+        });
 
         if (!manager.managerGame || !manager.managerRoot) {
             throw new Error("请先选择游戏并配置储存路径。");
@@ -1459,8 +1646,8 @@ async function importTaskToLocalManager(task?: IAria2RpcTask | null) {
             modWebsite: metadata?.sourceUrl || "",
             modDesc: metadata?.content || "",
             cover: metadata?.cover,
-            from: (metadata?.modId ? "GlossMod" : "Customize") as sourceType,
-            webId: metadata?.modId,
+            from: getTaskSourceType(metadata),
+            webId: getTaskExternalId(metadata),
             gameID: manager.managerGame.GlossGameId,
             other: {
                 downloadTaskGid: targetTask.gid,
@@ -1478,6 +1665,8 @@ async function importTaskToLocalManager(task?: IAria2RpcTask | null) {
         const duplicateLocalMods = findGlossDuplicateLocalMods(
             manager.managerModList,
             {
+                sourceType: getTaskSourceType(metadata),
+                externalId: getTaskExternalId(metadata),
                 modId: metadata?.modId,
                 fileName: importMetadata.fileName,
                 modTitle: importMetadata.modName,
@@ -1614,6 +1803,36 @@ async function resumeTask(task: IAria2RpcTask) {
     }
 }
 
+async function removeTaskLocalFile(task: IAria2RpcTask) {
+    const primaryFile = getTaskPrimaryFile(task);
+
+    if (!primaryFile?.path) {
+        return;
+    }
+
+    const deleted = await FileHandler.deleteFile(primaryFile.path);
+
+    if (!deleted) {
+        throw new Error(`删除本地文件失败：${getTaskDisplayName(task)}`);
+    }
+}
+
+async function removeTaskDownloadRecord(gid: string) {
+    let lastError: unknown = null;
+
+    for (let index = 0; index < 6; index += 1) {
+        try {
+            await Aria2Rpc.removeDownloadResult(gid);
+            return;
+        } catch (error: unknown) {
+            lastError = error;
+            await new Promise((resolve) => globalThis.setTimeout(resolve, 250));
+        }
+    }
+
+    throw lastError ?? new Error("清理下载记录失败，请稍后重试。");
+}
+
 async function removeTask(task: IAria2RpcTask) {
     startTaskOperation(task.gid);
 
@@ -1623,12 +1842,8 @@ async function removeTask(task: IAria2RpcTask) {
             await waitForRemovedTask(task.gid);
         }
 
-        try {
-            await Aria2Rpc.removeDownloadResult(task.gid);
-        } catch {
-            // 任务还未进入历史列表时会失败，这里直接忽略。
-        }
-
+        await removeTaskLocalFile(task);
+        await removeTaskDownloadRecord(task.gid);
         removeTaskMeta(task.gid);
         await refreshTaskLists();
     } catch (error: unknown) {
@@ -1655,24 +1870,42 @@ async function waitForRemovedTask(gid: string) {
 }
 
 async function purgeStoppedTasks() {
+    if (stoppedTasks.value.length === 0) {
+        ElMessage.info("当前没有可清理的历史任务。");
+        return;
+    }
+
     try {
-        await Aria2Rpc.purgeDownloadResult();
+        const nextMap = { ...taskMetaMap.value };
+        const failedMessages: string[] = [];
+        let removedCount = 0;
 
-        const activeGids = new Set([
-            ...activeTasks.value.map((task) => task.gid),
-            ...waitingTasks.value.map((task) => task.gid),
-        ]);
-        const nextMap: Record<string, IGlossDownloadTaskMeta> = {};
-
-        for (const gid of Object.keys(taskMetaMap.value)) {
-            if (activeGids.has(gid)) {
-                nextMap[gid] = taskMetaMap.value[gid];
+        for (const task of stoppedTasks.value) {
+            try {
+                await removeTaskLocalFile(task);
+                await removeTaskDownloadRecord(task.gid);
+                delete nextMap[task.gid];
+                removedCount += 1;
+            } catch (error: unknown) {
+                failedMessages.push(
+                    `${getTaskDisplayName(task)}：${getErrorMessage(error)}`,
+                );
             }
         }
 
         taskMetaMap.value = nextMap;
         await refreshTaskLists();
-        ElMessage.success("已清理历史任务记录。");
+
+        if (failedMessages.length > 0) {
+            ElMessage.warning(
+                `已清理 ${removedCount} 条历史任务，另有 ${failedMessages.length} 条处理失败：${failedMessages
+                    .slice(0, 2)
+                    .join("；")}${failedMessages.length > 2 ? "……" : ""}`,
+            );
+            return;
+        }
+
+        ElMessage.success(`已清理 ${removedCount} 条历史任务，并删除对应本地文件。`);
     } catch (error: unknown) {
         ElMessage.error(getErrorMessage(error));
     }
@@ -1709,8 +1942,9 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
     }
 
     const relatedModId = taskMetaMap.value[targetTask.gid]?.modId;
+    const relatedSourceType = taskMetaMap.value[targetTask.gid]?.sourceType;
 
-    if (!relatedModId) {
+    if (!relatedModId || relatedSourceType !== "GlossMod") {
         ElMessage.warning("当前任务没有关联的 Mod 详情。");
         return;
     }
@@ -1855,7 +2089,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                         @click="purgeStoppedTasks"
                     >
                         <IconTrash2 />
-                        清理记录
+                        清理记录和文件
                     </Button>
                 </CardTitle>
                 <CardDescription>
@@ -1879,6 +2113,33 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                 </div>
 
                 <div
+                    v-if="filteredTasks.length"
+                    class="flex flex-col gap-3 rounded-xl border px-4 py-3 lg:flex-row lg:items-center lg:justify-between"
+                >
+                    <div class="text-sm text-muted-foreground">
+                        {{ visibleTaskRangeLabel }}，已按添加时间倒序排列。
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm text-muted-foreground">每页数量</span>
+                        <Select v-model="taskPageSize">
+                            <SelectTrigger class="w-[140px]">
+                                <SelectValue placeholder="选择每页数量" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="item in TASK_PAGE_SIZE_OPTIONS"
+                                    :key="item"
+                                    :value="item"
+                                >
+                                    每页 {{ item }} 条
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+
+                <div
                     v-if="!filteredTasks.length"
                     class="rounded-xl border border-dashed px-6 py-12 text-center"
                 >
@@ -1891,7 +2152,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
 
                 <div v-else class="space-y-3">
                     <article
-                        v-for="task in filteredTasks"
+                        v-for="task in paginatedTasks"
                         :key="task.gid"
                         class="cursor-pointer rounded-xl border px-4 py-4 transition-colors hover:border-primary/40"
                         :class="
@@ -2035,6 +2296,62 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                             </div>
                         </div>
                     </article>
+
+                    <div
+                        v-if="taskTotalPages > 1"
+                        class="flex flex-col gap-4 rounded-xl border px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
+                    >
+                        <div class="text-sm text-muted-foreground">
+                            当前第 {{ taskPage }} 页，共 {{ taskTotalPages }} 页，
+                            累计 {{ filteredTaskCount }} 条任务。
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                :disabled="taskPage <= 1"
+                                @click="goToTaskPage(taskPage - 1)"
+                            >
+                                <IconChevronLeft />
+                                上一页
+                            </Button>
+
+                            <template
+                                v-for="item in taskPaginationItems"
+                                :key="item.key"
+                            >
+                                <span
+                                    v-if="item.ellipsis"
+                                    class="px-2 text-sm text-muted-foreground"
+                                >
+                                    {{ item.label }}
+                                </span>
+                                <Button
+                                    v-else
+                                    size="sm"
+                                    :variant="
+                                        item.page === taskPage
+                                            ? 'default'
+                                            : 'outline'
+                                    "
+                                    @click="goToTaskPage(item.page ?? 1)"
+                                >
+                                    {{ item.label }}
+                                </Button>
+                            </template>
+
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                :disabled="taskPage >= taskTotalPages"
+                                @click="goToTaskPage(taskPage + 1)"
+                            >
+                                下一页
+                                <IconChevronRight />
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </CardContent>
         </Card>
@@ -2721,7 +3038,10 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                     }}
                                 </Button>
                                 <Button
-                                    v-if="selectedTaskMeta?.modId"
+                                    v-if="
+                                        selectedTaskMeta?.sourceType ===
+                                            'GlossMod' && selectedTaskMeta?.modId
+                                    "
                                     size="sm"
                                     variant="outline"
                                     @click="loadRelatedModDetail(selectedTask)"

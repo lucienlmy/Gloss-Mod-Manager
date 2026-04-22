@@ -31,67 +31,20 @@ function openEditTagDialog(tag: ITag) {
 }
 
 async function submitTag() {
-    const name = tagName.value.trim();
-
-    if (!name) {
-        ElMessage.warning("标签名称不能为空。");
-        return;
+    try {
+        await manager.upsertTag({
+            name: tagName.value,
+            color: tagColor.value,
+            previousName: editingTagName.value || undefined,
+        });
+        ElMessage.success(editingTagName.value ? "标签已更新。" : "标签已添加。");
+        resetTagEditor();
+        showTagEditDialog.value = false;
+    } catch (error: unknown) {
+        ElMessage.warning(
+            error instanceof Error ? error.message : "保存标签失败。",
+        );
     }
-
-    if (
-        manager.tags.some(
-            (tag) => tag.name === name && tag.name !== editingTagName.value,
-        )
-    ) {
-        ElMessage.warning("标签已存在。");
-        return;
-    }
-
-    if (editingTagName.value) {
-        ((manager.tags = manager.tags.map((tag) => {
-            if (tag.name !== editingTagName.value) {
-                return tag;
-            }
-
-            return {
-                name,
-                color: tagColor.value,
-            };
-        })),
-            (manager.managerModList = manager.managerModList.map((mod) => ({
-                ...mod,
-                tags: (mod.tags ?? []).map((tag) => {
-                    if (tag.name !== editingTagName.value) {
-                        return tag;
-                    }
-
-                    return {
-                        name,
-                        color: tagColor.value,
-                    };
-                }),
-            }))));
-
-        if (manager.selectedTag === editingTagName.value) {
-            manager.selectedTag = name;
-        }
-
-        await manager.saveManagerData();
-        ElMessage.success("标签已更新。");
-    } else {
-        manager.tags = [
-            ...manager.tags,
-            {
-                name,
-                color: tagColor.value,
-            },
-        ];
-        await manager.saveManagerData();
-        ElMessage.success("标签已添加。");
-    }
-
-    resetTagEditor();
-    showTagEditDialog.value = false;
 }
 
 async function deleteTag(tag: ITag) {
@@ -103,23 +56,20 @@ async function deleteTag(tag: ITag) {
         return;
     }
 
-    manager.tags = manager.tags.filter((item) => item.name !== tag.name);
-    manager.managerModList = manager.managerModList.map((mod) => ({
-        ...mod,
-        tags: (mod.tags ?? []).filter((item) => item.name !== tag.name),
-    }));
+    try {
+        await manager.deleteTag(tag.name);
 
-    if (manager.selectedTag === tag.name) {
-        manager.selectedTag = "全部";
+        if (editingTagName.value === tag.name) {
+            resetTagEditor();
+            showTagEditDialog.value = false;
+        }
+
+        ElMessage.success("标签已删除。");
+    } catch (error: unknown) {
+        ElMessage.error(
+            error instanceof Error ? error.message : "删除标签失败。",
+        );
     }
-
-    if (editingTagName.value === tag.name) {
-        resetTagEditor();
-        showTagEditDialog.value = false;
-    }
-
-    await manager.saveManagerData();
-    ElMessage.success("标签已删除。");
 }
 
 function clearTagDragState() {
@@ -129,20 +79,13 @@ function clearTagDragState() {
 }
 
 async function reorderTag(draggedName: string, targetName: string) {
-    const sourceIndex = manager.tags.findIndex((item) => item.name === draggedName);
-    const targetIndex = manager.tags.findIndex((item) => item.name === targetName);
+    const reordered = await manager.reorderTags(draggedName, targetName);
 
-    if (sourceIndex === -1 || targetIndex === -1) {
+    if (!reordered) {
         clearTagDragState();
         return;
     }
 
-    const reorderedTags = [...manager.tags];
-    const [draggedTag] = reorderedTags.splice(sourceIndex, 1);
-
-    reorderedTags.splice(targetIndex, 0, draggedTag);
-    manager.tags = reorderedTags;
-    await manager.saveManagerData();
     clearTagDragState();
     ElMessage.success("标签顺序已更新。");
 }

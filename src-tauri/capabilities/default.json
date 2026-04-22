@@ -92,6 +92,7 @@
         "store:allow-keys",
         "stronghold:default",
         "dialog:default",
+        "log:default",
         "shell:default",
         "core:window:allow-destroy",
         "core:window:allow-unminimize",
@@ -103,6 +104,27 @@
             "allow": [
                 {
                     "url": "https://*.3dmgame.com"
+                },
+                {
+                    "url": "https://api.nexusmods.com"
+                },
+                {
+                    "url": "https://api-router.nexusmods.com"
+                },
+                {
+                    "url": "https://thunderstore.io"
+                },
+                {
+                    "url": "https://*.modapi.io"
+                },
+                {
+                    "url": "https://mod.io"
+                },
+                {
+                    "url": "https://api.curseforge.com"
+                },
+                {
+                    "url": "https://gamebanana.com"
                 }
             ]
         },

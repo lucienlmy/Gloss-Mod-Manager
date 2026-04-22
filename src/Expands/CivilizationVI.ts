@@ -24,7 +24,7 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "CivilizationVI.exe",
-                rootPath: await join("..", "..", ".."),
+                rootPath: ["..", "..", ".."],
             },
         ],
         startExe: [

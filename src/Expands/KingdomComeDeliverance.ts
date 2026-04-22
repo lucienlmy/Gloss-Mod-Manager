@@ -19,7 +19,7 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "KingdomCome.exe",
-                rootPath: await join("..", ".."),
+                rootPath: ["..", ".."],
             },
         ],
         startExe: [
@@ -83,7 +83,7 @@ export const supportedGames = async () =>
             let mods = false;
 
             for (const item of mod.modFiles) {
-                if (await basename(item) == "mod.manifest") mods = true;
+                if ((await basename(item)) == "mod.manifest") mods = true;
             }
 
             if (mods) return 1;

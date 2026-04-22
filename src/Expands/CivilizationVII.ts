@@ -24,15 +24,15 @@ export const supportedGames = async () =>
         gameExe: [
             {
                 name: "Civ7_Win64_DX12_FinalRelease.exe",
-                rootPath: await join("..", "..", ".."),
+                rootPath: ["..", "..", ".."],
             },
             {
                 name: "Civ7_Win64_Vulkan_FinalRelease.exe",
-                rootPath: await join("..", "..", ".."),
+                rootPath: ["..", "..", ".."],
             },
             {
                 name: "FiraxisCrashReporter.exe",
-                rootPath: await join("..", "..", ".."),
+                rootPath: ["..", "..", ".."],
             },
         ],
         startExe: [

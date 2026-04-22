@@ -1,6 +1,156 @@
+import { join } from "@tauri-apps/api/path";
 import { getAllExpands } from "@/Expands";
+import { FileHandler } from "@/lib/FileHandler";
+import { Manager } from "@/lib/Manager";
 import { PersistentStore } from "@/lib/persistent-store";
 import { ref } from "vue";
+
+interface ISyncManagerContextOptions {
+    storagePath: string;
+    closeSoftLinks: boolean;
+}
+
+interface ISaveEditedModOptions {
+    modId: number;
+    modName: string;
+    modVersion: string;
+    modAuthor: string;
+    modWebsite: string;
+    modType: number | string;
+    modDesc: string;
+    tagsText: string;
+}
+
+interface IApplyBatchEditOptions {
+    modIds: number[];
+    modAuthor: string;
+    modType: number | string | "";
+    modVersion: string;
+    modWebsite: string;
+    tagsText: string;
+}
+
+interface IUpsertTagOptions {
+    name: string;
+    color: string;
+    previousName?: string;
+}
+
+function normalizeSlashes(filePath: string) {
+    return filePath.replace(/\\+/gu, "/");
+}
+
+function getBaseName(filePath: string) {
+    const normalized = normalizeSlashes(filePath);
+    return normalized.split("/").pop() ?? filePath;
+}
+
+function getFileExtension(filePath: string) {
+    const fileName = getBaseName(filePath);
+    const index = fileName.lastIndexOf(".");
+
+    if (index === -1) {
+        return "";
+    }
+
+    return fileName.slice(index).toLowerCase();
+}
+
+function createTagColor(tagName: string) {
+    let hash = 0;
+
+    for (const char of tagName) {
+        hash = (hash * 31 + char.charCodeAt(0)) % 360;
+    }
+
+    return `hsl(${Math.abs(hash)} 68% 46%)`;
+}
+
+function dedupeTags(
+    list: Array<ITag | string | undefined>,
+    textCollator: Intl.Collator,
+    existingTags: ITag[] = [],
+    sort = true,
+) {
+    const existingTagMap = new Map(
+        existingTags.map((tag) => [tag.name.trim(), tag]),
+    );
+    const tagMap = new Map<string, ITag>();
+
+    for (const item of list) {
+        if (!item) {
+            continue;
+        }
+
+        if (typeof item === "string") {
+            const name = item.trim();
+
+            if (!name) {
+                continue;
+            }
+
+            tagMap.set(name, {
+                name,
+                color: existingTagMap.get(name)?.color ?? createTagColor(name),
+            });
+            continue;
+        }
+
+        const name = item.name.trim();
+
+        if (!name) {
+            continue;
+        }
+
+        tagMap.set(name, {
+            name,
+            color:
+                item.color ||
+                existingTagMap.get(name)?.color ||
+                createTagColor(name),
+        });
+    }
+
+    const result = [...tagMap.values()];
+
+    if (!sort) {
+        return result;
+    }
+
+    return result.sort((left, right) => {
+        return textCollator.compare(left.name, right.name);
+    });
+}
+
+function mergeTagCatalog(
+    baseTags: ITag[],
+    incoming: Array<ITag | string | undefined>,
+    textCollator: Intl.Collator,
+) {
+    const normalizedBase = dedupeTags(baseTags, textCollator, baseTags, false);
+    const incomingTags = dedupeTags(
+        incoming,
+        textCollator,
+        normalizedBase,
+        false,
+    );
+    const incomingMap = new Map(
+        incomingTags.map((tag) => [tag.name, tag] as const),
+    );
+    const mergedTags: ITag[] = [];
+
+    for (const tag of normalizedBase) {
+        mergedTags.push(incomingMap.get(tag.name) ?? tag);
+        incomingMap.delete(tag.name);
+    }
+
+    return [
+        ...mergedTags,
+        ...[...incomingMap.values()].sort((left, right) => {
+            return textCollator.compare(left.name, right.name);
+        }),
+    ];
+}
 
 export const useManager = defineStore("Manager", () => {
     const supportedGames = ref<ISupportedGames[]>([]);
@@ -26,6 +176,10 @@ export const useManager = defineStore("Manager", () => {
     const managerRoot = ref("");
     const selectionMode = ref(false);
     const selectionIds = ref<number[]>([]);
+    const runtimeLoading = ref(false);
+    const loadError = ref("");
+
+    let latestLoadId = 0;
 
     function sortModsByWeight(list: IModInfo[]) {
         return list
@@ -65,9 +219,9 @@ export const useManager = defineStore("Manager", () => {
                     return true;
                 }
 
-                return (mod.tags ?? []).some(
-                    (tag) => tag.name === selectedTag.value,
-                );
+                return (mod.tags ?? []).some((tag) => {
+                    return tag.name === selectedTag.value;
+                });
             })
             .filter((mod) => {
                 if (!keyword) {
@@ -150,11 +304,240 @@ export const useManager = defineStore("Manager", () => {
     }
 
     function getTypeName(typeId: IModInfo["modType"]) {
-        const type = availableTypes.value.find(
-            (item) => String(item.id) === String(typeId ?? ""),
-        );
+        const type = availableTypes.value.find((item) => {
+            return String(item.id) === String(typeId ?? "");
+        });
 
         return type?.name ?? "未分类";
+    }
+
+    function parseTagsText(tagText: string) {
+        return dedupeTags(
+            tagText
+                .split(/[,，]/u)
+                .map((item) => item.trim())
+                .filter(Boolean),
+            textCollator,
+            tags.value,
+        );
+    }
+
+    function collectModTags(modList: IModInfo[]) {
+        return dedupeTags(
+            modList.flatMap((mod) => mod.tags ?? []),
+            textCollator,
+            tags.value,
+        );
+    }
+
+    function normalizeMod(mod: Partial<IModInfo>): IModInfo {
+        return {
+            id: Number(mod.id ?? Date.now()),
+            modName: mod.modName || mod.fileName || `Mod ${mod.id ?? ""}`,
+            fileName:
+                mod.fileName || mod.modName || `mod-${mod.id ?? Date.now()}`,
+            md5: mod.md5 || "",
+            modVersion: mod.modVersion || "1.0.0",
+            isUpdate: Boolean(mod.isUpdate),
+            isInstalled: Boolean(mod.isInstalled),
+            weight: typeof mod.weight === "number" ? mod.weight : 0,
+            modFiles: Array.isArray(mod.modFiles) ? mod.modFiles : [],
+            tags: dedupeTags(mod.tags ?? [], textCollator, tags.value),
+            modAuthor: mod.modAuthor ?? "",
+            modWebsite: mod.modWebsite ?? "",
+            modType: mod.modType ?? 99,
+            modDesc: mod.modDesc ?? "",
+            other: mod.other ?? {},
+            from: mod.from,
+            webId: mod.webId,
+            cover: mod.cover,
+            advanced: mod.advanced,
+            key: mod.key,
+            gameID: mod.gameID,
+        };
+    }
+
+    async function detectModType(mod: IModInfo) {
+        const game = managerGame.value;
+
+        if (!game) {
+            return 99;
+        }
+
+        try {
+            if (typeof game.checkModType === "function") {
+                return await game.checkModType(mod);
+            }
+
+            for (const rule of game.checkModType) {
+                const matched = mod.modFiles.some((file) => {
+                    const normalizedFile = normalizeSlashes(file).toLowerCase();
+
+                    return rule.Keyword.some((keyword) => {
+                        const normalizedKeyword = keyword.toLowerCase();
+
+                        if (rule.UseFunction === "inPath") {
+                            return normalizedFile.includes(normalizedKeyword);
+                        }
+
+                        if (rule.UseFunction === "basename") {
+                            return (
+                                getBaseName(normalizedFile) === normalizedKeyword
+                            );
+                        }
+
+                        return [
+                            normalizedKeyword,
+                            `.${normalizedKeyword}`,
+                        ].includes(getFileExtension(normalizedFile));
+                    });
+                });
+
+                if (matched) {
+                    return rule.TypeId ?? 99;
+                }
+            }
+        } catch (error: unknown) {
+            console.error("识别 Mod 类型失败");
+            console.error(error);
+        }
+
+        return (
+            availableTypes.value.find((item) => String(item.id) === "99")?.id ??
+            availableTypes.value[0]?.id ??
+            99
+        );
+    }
+
+    function syncTagsFromMods(extraTags: Array<ITag | string | undefined> = []) {
+        tags.value = mergeTagCatalog(
+            tags.value,
+            [...extraTags, ...collectModTags(managerModList.value)],
+            textCollator,
+        );
+    }
+
+    function ensureActiveFilters() {
+        if (
+            selectedType.value !== 0 &&
+            !availableTypes.value.some((item) => {
+                return String(item.id) === String(selectedType.value);
+            })
+        ) {
+            selectedType.value = 0;
+        }
+
+        if (
+            selectedTag.value !== "全部" &&
+            !tags.value.some((tag) => tag.name === selectedTag.value)
+        ) {
+            selectedTag.value = "全部";
+        }
+    }
+
+    async function syncManagerContext(options: ISyncManagerContextOptions) {
+        if (!managerGame.value || !options.storagePath) {
+            managerRoot.value = "";
+            Manager.configureContext({
+                modStorage: "",
+                gameStorage: managerGame.value?.gamePath ?? "",
+                closeSoftLinks: options.closeSoftLinks,
+            });
+
+            return "";
+        }
+
+        managerRoot.value = await join(
+            options.storagePath,
+            "mods",
+            managerGame.value.gameName ?? "",
+        );
+        Manager.configureContext({
+            modStorage: managerRoot.value,
+            gameStorage: managerGame.value?.gamePath ?? "",
+            closeSoftLinks: options.closeSoftLinks,
+        });
+
+        return managerRoot.value;
+    }
+
+    async function loadManagerData(options: { resetSelection?: boolean } = {}) {
+        latestLoadId += 1;
+        const currentLoadId = latestLoadId;
+
+        loadError.value = "";
+
+        if (options.resetSelection !== false) {
+            clearSelection();
+        }
+
+        if (!managerGame.value || !managerRoot.value) {
+            managerModList.value = [];
+            tags.value = [];
+            return;
+        }
+
+        runtimeLoading.value = true;
+
+        try {
+            const storedMods = (await Manager.getModInfo(
+                managerRoot.value,
+            )) as IModInfo[];
+            const storedTags = (await Manager.getModInfo(
+                managerRoot.value,
+                "tags.json",
+            )) as ITag[];
+            const normalizedStoredTags = dedupeTags(
+                Array.isArray(storedTags) ? storedTags : [],
+                textCollator,
+                [],
+                false,
+            );
+            const normalizedMods = await Promise.all(
+                (Array.isArray(storedMods) ? storedMods : []).map(
+                    async (item) => {
+                        const mod = normalizeMod(item);
+
+                        if (
+                            item.modType === undefined ||
+                            item.modType === null ||
+                            item.modType === ""
+                        ) {
+                            mod.modType = await detectModType(mod);
+                        }
+
+                        return mod;
+                    },
+                ),
+            );
+
+            if (currentLoadId !== latestLoadId) {
+                return;
+            }
+
+            managerModList.value = normalizedMods;
+            tags.value = mergeTagCatalog(
+                normalizedStoredTags,
+                collectModTags(normalizedMods),
+                textCollator,
+            );
+            ensureActiveFilters();
+        } catch (error: unknown) {
+            managerModList.value = [];
+            tags.value = [];
+            loadError.value = "读取本地 Mod 数据失败，请检查储存路径权限。";
+            console.error("读取管理页数据失败");
+            console.error(error);
+        } finally {
+            if (currentLoadId === latestLoadId) {
+                runtimeLoading.value = false;
+            }
+        }
+    }
+
+    async function refreshRuntimeData(options: ISyncManagerContextOptions) {
+        await syncManagerContext(options);
+        await loadManagerData();
     }
 
     async function saveManagerData() {
@@ -174,7 +557,288 @@ export const useManager = defineStore("Manager", () => {
         await Manager.saveModInfo(tags.value, managerRoot.value, "tags.json");
     }
 
-    void Promise.all(getAllExpands())
+    async function saveEditedMod(options: ISaveEditedModOptions) {
+        const modName = options.modName.trim();
+        const modVersion = options.modVersion.trim();
+
+        if (!modName) {
+            throw new Error("Mod 名称不能为空。");
+        }
+
+        if (!modVersion) {
+            throw new Error("版本号不能为空。");
+        }
+
+        const parsedTags = parseTagsText(options.tagsText);
+        let found = false;
+
+        managerModList.value = managerModList.value.map((item) => {
+            if (item.id !== options.modId) {
+                return item;
+            }
+
+            found = true;
+
+            return normalizeMod({
+                ...item,
+                modName,
+                modVersion,
+                modAuthor: options.modAuthor.trim(),
+                modWebsite: options.modWebsite.trim(),
+                modType: options.modType,
+                modDesc: options.modDesc.trim(),
+                tags: parsedTags,
+            });
+        });
+
+        if (!found) {
+            throw new Error("未找到需要编辑的 Mod。");
+        }
+
+        syncTagsFromMods(parsedTags);
+        await saveManagerData();
+    }
+
+    async function applyBatchEdit(options: IApplyBatchEditOptions) {
+        const modIdSet = new Set(options.modIds);
+        const parsedTags = parseTagsText(options.tagsText);
+
+        managerModList.value = managerModList.value.map((mod) => {
+            if (!modIdSet.has(mod.id)) {
+                return mod;
+            }
+
+            return normalizeMod({
+                ...mod,
+                modAuthor: options.modAuthor || mod.modAuthor,
+                modType:
+                    options.modType === "" ? mod.modType : options.modType,
+                modVersion: options.modVersion || mod.modVersion,
+                modWebsite: options.modWebsite || mod.modWebsite,
+                tags: parsedTags.length > 0 ? parsedTags : mod.tags,
+            });
+        });
+
+        syncTagsFromMods(parsedTags);
+        await saveManagerData();
+    }
+
+    async function upsertTag(options: IUpsertTagOptions) {
+        const name = options.name.trim();
+        const previousName = options.previousName?.trim() ?? "";
+
+        if (!name) {
+            throw new Error("标签名称不能为空。");
+        }
+
+        if (
+            tags.value.some((tag) => {
+                return tag.name === name && tag.name !== previousName;
+            })
+        ) {
+            throw new Error("标签已存在。");
+        }
+
+        if (previousName) {
+            tags.value = tags.value.map((tag) => {
+                if (tag.name !== previousName) {
+                    return tag;
+                }
+
+                return {
+                    name,
+                    color: options.color,
+                };
+            });
+            managerModList.value = managerModList.value.map((mod) => ({
+                ...mod,
+                tags: (mod.tags ?? []).map((tag) => {
+                    if (tag.name !== previousName) {
+                        return tag;
+                    }
+
+                    return {
+                        name,
+                        color: options.color,
+                    };
+                }),
+            }));
+
+            if (selectedTag.value === previousName) {
+                selectedTag.value = name;
+            }
+        } else {
+            tags.value = [
+                ...tags.value,
+                {
+                    name,
+                    color: options.color,
+                },
+            ];
+        }
+
+        await saveManagerData();
+    }
+
+    async function deleteTag(tagName: string) {
+        tags.value = tags.value.filter((item) => item.name !== tagName);
+        managerModList.value = managerModList.value.map((mod) => ({
+            ...mod,
+            tags: (mod.tags ?? []).filter((item) => item.name !== tagName),
+        }));
+
+        if (selectedTag.value === tagName) {
+            selectedTag.value = "全部";
+        }
+
+        await saveManagerData();
+    }
+
+    async function reorderTags(draggedName: string, targetName: string) {
+        const sourceIndex = tags.value.findIndex((item) => {
+            return item.name === draggedName;
+        });
+        const targetIndex = tags.value.findIndex((item) => {
+            return item.name === targetName;
+        });
+
+        if (sourceIndex === -1 || targetIndex === -1) {
+            return false;
+        }
+
+        const reorderedTags = [...tags.value];
+        const [draggedTag] = reorderedTags.splice(sourceIndex, 1);
+
+        reorderedTags.splice(targetIndex, 0, draggedTag);
+        tags.value = reorderedTags;
+        await saveManagerData();
+
+        return true;
+    }
+
+    async function getModStoragePath(modId: number) {
+        if (!managerRoot.value) {
+            return "";
+        }
+
+        return join(managerRoot.value, String(modId));
+    }
+
+    async function removeModRecord(modId: number) {
+        const targetMod = managerModList.value.find((mod) => mod.id === modId);
+
+        if (!targetMod) {
+            throw new Error("未找到需要删除的 Mod。");
+        }
+
+        const modPath = await getModStoragePath(modId);
+
+        if (modPath) {
+            const deleted = await FileHandler.deleteFolder(modPath);
+
+            if (!deleted) {
+                throw new Error(
+                    "删除 Mod 目录失败，请检查文件占用或权限设置。",
+                );
+            }
+        }
+
+        managerModList.value = managerModList.value.filter((mod) => {
+            return mod.id !== modId;
+        });
+
+        if (
+            selectedTag.value !== "全部" &&
+            !managerModList.value.some((mod) => {
+                return (mod.tags ?? []).some((tag) => {
+                    return tag.name === selectedTag.value;
+                });
+            })
+        ) {
+            selectedTag.value = "全部";
+        }
+
+        await saveManagerData();
+        return targetMod;
+    }
+
+    async function updateModType(
+        modId: number,
+        nextType: number | string | bigint,
+    ) {
+        const normalizedType =
+            typeof nextType === "bigint" ? nextType.toString() : nextType;
+        let targetModName = "";
+        let found = false;
+
+        managerModList.value = managerModList.value.map((item) => {
+            if (item.id !== modId) {
+                return item;
+            }
+
+            found = true;
+            targetModName = item.modName;
+            return {
+                ...item,
+                modType: normalizedType,
+            };
+        });
+
+        if (!found) {
+            throw new Error("未找到需要更新类型的 Mod。");
+        }
+
+        await saveManagerData();
+        return targetModName;
+    }
+
+    async function toggleTagOnMod(modId: number, tagName: string) {
+        const matchedTag = tags.value.find((tag) => tag.name === tagName);
+
+        if (!matchedTag) {
+            throw new Error(`未找到标签：${tagName}`);
+        }
+
+        let toggledOn = false;
+        let targetModName = "";
+        let found = false;
+
+        managerModList.value = managerModList.value.map((item) => {
+            if (item.id !== modId) {
+                return item;
+            }
+
+            found = true;
+            targetModName = item.modName;
+
+            const hasTag = (item.tags ?? []).some((tag) => tag.name === tagName);
+            toggledOn = !hasTag;
+
+            return {
+                ...item,
+                tags: hasTag
+                    ? (item.tags ?? []).filter((tag) => tag.name !== tagName)
+                    : dedupeTags(
+                          [...(item.tags ?? []), matchedTag],
+                          textCollator,
+                          tags.value,
+                      ),
+            };
+        });
+
+        if (!found) {
+            throw new Error("未找到需要更新标签的 Mod。");
+        }
+
+        await saveManagerData();
+
+        return {
+            toggledOn,
+            modName: targetModName,
+        };
+    }
+
+    void getAllExpands()
         .then(async (games) => {
             supportedGames.value = games;
             if (managerGame.value) {
@@ -215,7 +879,25 @@ export const useManager = defineStore("Manager", () => {
         tags,
         textCollator,
         availableTypes,
+        runtimeLoading,
+        loadError,
         getTypeName,
+        parseTagsText,
+        collectModTags,
+        normalizeMod,
+        syncTagsFromMods,
+        syncManagerContext,
+        loadManagerData,
+        refreshRuntimeData,
+        saveEditedMod,
+        applyBatchEdit,
+        upsertTag,
+        deleteTag,
+        reorderTags,
+        getModStoragePath,
+        removeModRecord,
+        updateModType,
+        toggleTagOnMod,
         managerRoot,
         selectionMode,
         selectionIds,

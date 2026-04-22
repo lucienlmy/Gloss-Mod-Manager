@@ -942,17 +942,12 @@ function goToPage(targetPage: number) {
 
 <template>
     <div class="space-y-5">
-        <section
-            class="overflow-hidden rounded-2xl border border-border/70 bg-linear-to-br from-amber-100/65 via-background to-background p-4"
-        >
+        <section class="overflow-hidden rounded-2xl border p-4">
             <div
                 class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between"
             >
                 <div class="space-y-3">
                     <div class="flex flex-wrap items-center gap-2">
-                        <Badge class="rounded-full" variant="secondary">
-                            Gloss Mod
-                        </Badge>
                         <Badge
                             v-if="currentGameName"
                             class="rounded-full"
@@ -980,7 +975,7 @@ function goToPage(targetPage: number) {
                     </div>
                     <div>
                         <h4 class="text-base font-semibold tracking-tight">
-                            3DM Gloss Mods 搜索与游览
+                            3DM Mods
                         </h4>
                     </div>
                     <div
@@ -1413,14 +1408,6 @@ function goToPage(targetPage: number) {
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 items-start">
-                            <Button
-                                class="flex-1"
-                                size="sm"
-                                @click="openModDetail(item)"
-                            >
-                                <IconExternalLink />
-                                查看详情
-                            </Button>
                             <div class="space-y-1.5">
                                 <Button
                                     class="w-full"
@@ -1467,6 +1454,14 @@ function goToPage(targetPage: number) {
                                     </div>
                                 </div>
                             </div>
+                            <Button
+                                class="flex-1"
+                                size="sm"
+                                @click="openModDetail(item)"
+                            >
+                                <IconExternalLink />
+                                查看详情
+                            </Button>
                         </div>
                     </div>
                 </article>

@@ -246,6 +246,10 @@ export async function resolveGlossDownloadImportSourceType(
         return "archive";
     }
 
+    if (metadata?.sourceType && metadata.sourceType !== "GlossMod") {
+        return directSourceType;
+    }
+
     const resourceFormat = await resolveTaskResourceFormat(metadata);
 
     if (
@@ -358,8 +362,11 @@ async function createGlossDownloadTask(
         [resource.mods_resource_url],
         buildAria2Options(runtime, mod as IMod, outputFileName),
     );
+    const now = new Date().toISOString();
 
     const taskMeta: IGlossDownloadTaskMeta = {
+        sourceType: "GlossMod",
+        externalId: mod.id,
         modId: mod.id,
         resourceId: resource.id,
         replaceLocalModId,
@@ -374,8 +381,9 @@ async function createGlossDownloadTask(
         content: mod.mods_content,
         sourceUrl: `${GLOSS_MOD_WEB_BASE_URL}/mod/${mod.id}`,
         downloadUrl: resource.mods_resource_url,
+        createdAt: now,
         taskStatus: "waiting",
-        updatedAt: new Date().toISOString(),
+        updatedAt: now,
     };
 
     const nextTaskMetaMap = {

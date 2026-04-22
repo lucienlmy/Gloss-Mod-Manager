@@ -6,7 +6,19 @@ const manager = useManager();
 const router = useRouter();
 
 function select(item: ISupportedGames) {
-    manager.managerGame = item;
+    const resolvedGame =
+        manager.supportedGames.find((game) => {
+            return game.GlossGameId === item.GlossGameId;
+        }) ??
+        manager.supportedGames.find((game) => {
+            return game.gameName === item.gameName;
+        }) ??
+        item;
+
+    manager.managerGame = {
+        ...resolvedGame,
+        ...item,
+    };
 
     router.push({ name: "/manager" });
 }

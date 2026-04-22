@@ -182,7 +182,7 @@ interface IUser {
 
 interface IGameExe {
     name: string;
-    rootPath: string;
+    rootPath: string[];
 }
 interface IStartExe {
     name: string;

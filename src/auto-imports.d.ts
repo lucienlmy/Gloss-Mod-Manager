@@ -25,6 +25,7 @@ declare global {
   const Manager: typeof import('./lib/Manager').Manager
   const McpService: typeof import('./lib/mcp-service').McpService
   const NativeToolsManifest: typeof import('./lib/native-tools-manifest').NativeToolsManifest
+  const NexusModsAuthorizationError: typeof import('./lib/third-party-mod-api').NexusModsAuthorizationError
   const PersistentStore: typeof import('./lib/persistent-store').PersistentStore
   const REEngine: typeof import('./lib/REEngine').REEngine
   const SIDECAR_BASE_NAMES: typeof import('./lib/native-tools-manifest').SIDECAR_BASE_NAMES
@@ -33,6 +34,7 @@ declare global {
   const SevenZip: typeof import('./lib/sevenZip').SevenZip
   const Sidecar: typeof import('./lib/sidecar').Sidecar
   const SidecarExecutionError: typeof import('./lib/sidecar').SidecarExecutionError
+  const THIRD_PARTY_PROVIDER_OPTIONS: typeof import('./lib/third-party-mod-api').THIRD_PARTY_PROVIDER_OPTIONS
   const Theme: typeof import('./lib/theme').Theme
   const UnityGame: typeof import('./lib/UnityGame').UnityGame
   const UnityGameILCPP2: typeof import('./lib/UnityGame').UnityGameILCPP2
@@ -40,6 +42,7 @@ declare global {
   const WINDOWS_SEVEN_ZIP_SUPPORT_FILES: typeof import('./lib/native-tools-manifest').WINDOWS_SEVEN_ZIP_SUPPORT_FILES
   const acceptHMRUpdate: typeof import('pinia').acceptHMRUpdate
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
+  const autoImportCompletedDownloadTasks: typeof import('./lib/gloss-download-monitor').autoImportCompletedDownloadTasks
   const autoImportCompletedGlossTasks: typeof import('./lib/gloss-download-monitor').autoImportCompletedGlossTasks
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const buildAria2DownloadArgs: typeof import('./lib/aria2').buildAria2DownloadArgs
@@ -87,6 +90,9 @@ declare global {
   const fetchGlossGamePlugins: typeof import('./lib/gloss-mod-api').fetchGlossGamePlugins
   const fetchGlossGames: typeof import('./lib/gloss-mod-api').fetchGlossGames
   const fetchGlossModDetail: typeof import('./lib/gloss-mod-api').fetchGlossModDetail
+  const fetchModIoGameTags: typeof import('./lib/third-party-mod-api').fetchModIoGameTags
+  const fetchThirdPartyModDetail: typeof import('./lib/third-party-mod-api').fetchThirdPartyModDetail
+  const fetchThirdPartyMods: typeof import('./lib/third-party-mod-api').fetchThirdPartyMods
   const findGlossDuplicateLocalMods: typeof import('./lib/gloss-download').findGlossDuplicateLocalMods
   const findGlossDuplicateTasks: typeof import('./lib/gloss-download').findGlossDuplicateTasks
   const getActivePinia: typeof import('pinia').getActivePinia
@@ -94,6 +100,7 @@ declare global {
   const getCurrentScope: typeof import('vue').getCurrentScope
   const getCurrentWatcher: typeof import('vue').getCurrentWatcher
   const getGlossModPresence: typeof import('./lib/gloss-download').getGlossModPresence
+  const getThirdPartyProviderLabel: typeof import('./lib/third-party-mod-api').getThirdPartyProviderLabel
   const h: typeof import('vue').h
   const hasExternalFilePayload: typeof import('./lib/browser-drop-import').hasExternalFilePayload
   const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
@@ -114,7 +121,9 @@ declare global {
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
   const isShallow: typeof import('vue').isShallow
+  const isThirdPartyProviderSupported: typeof import('./lib/third-party-mod-api').isThirdPartyProviderSupported
   const listArchiveWithSevenZip: typeof import('./lib/sevenZip').listArchiveWithSevenZip
+  const loadLegacyCustomGames: typeof import('./lib/legacy-custom-data').loadLegacyCustomGames
   const makeDestructurable: typeof import('@vueuse/core').makeDestructurable
   const managerDragKind: typeof import('./lib/manager-internal-drag').managerDragKind
   const managerDraggingModId: typeof import('./lib/manager-internal-drag').managerDraggingModId
@@ -129,6 +138,7 @@ declare global {
   const mcpPromptDefinitions: typeof import('./lib/mcp-service').mcpPromptDefinitions
   const mcpResourceDefinitions: typeof import('./lib/mcp-service').mcpResourceDefinitions
   const mcpToolDefinitions: typeof import('./lib/mcp-service').mcpToolDefinitions
+  const mergeLegacyCustomTypesIntoGame: typeof import('./lib/legacy-custom-data').mergeLegacyCustomTypesIntoGame
   const nextTick: typeof import('vue').nextTick
   const normalizeCompareText: typeof import('./lib/gloss-download').normalizeCompareText
   const onActivated: typeof import('vue').onActivated
@@ -156,6 +166,7 @@ declare global {
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
   const queueGlossModDownload: typeof import('./lib/gloss-download-queue').queueGlossModDownload
+  const queueThirdPartyModDownload: typeof import('./lib/third-party-download-queue').queueThirdPartyModDownload
   const reactify: typeof import('@vueuse/core').reactify
   const reactifyObject: typeof import('@vueuse/core').reactifyObject
   const reactive: typeof import('vue').reactive
@@ -177,6 +188,7 @@ declare global {
   const resolveGmmPackFolderKey: typeof import('./lib/gmm-package').resolveGmmPackFolderKey
   const resolveLocalModImportSourceType: typeof import('./lib/local-mod-import').resolveLocalModImportSourceType
   const resolveRef: typeof import('@vueuse/core').resolveRef
+  const resolveThirdPartyDownloadUrl: typeof import('./lib/third-party-mod-api').resolveThirdPartyDownloadUrl
   const runAria2Command: typeof import('./lib/aria2').runAria2Command
   const setActivePinia: typeof import('pinia').setActivePinia
   const setMapStoreSuffix: typeof import('pinia').setMapStoreSuffix
@@ -389,6 +401,7 @@ declare global {
   const useWindowFocus: typeof import('@vueuse/core').useWindowFocus
   const useWindowScroll: typeof import('@vueuse/core').useWindowScroll
   const useWindowSize: typeof import('@vueuse/core').useWindowSize
+  const validateNexusModsUser: typeof import('./lib/third-party-mod-api').validateNexusModsUser
   const watch: typeof import('vue').watch
   const watchArray: typeof import('@vueuse/core').watchArray
   const watchAtMost: typeof import('@vueuse/core').watchAtMost
@@ -463,7 +476,7 @@ declare global {
   export type { LocalModImportSourceType, LocalModImportDuplicateStrategy, ILocalModImportSource } from './lib/local-mod-import'
   import('./lib/local-mod-import')
   // @ts-ignore
-  export type { Log } from './lib/log'
+  export type { Log, ILogFileItem } from './lib/log'
   import('./lib/log')
   // @ts-ignore
   export type { NativeToolsManifest, EmbeddedToolName, EmbeddedSidecarCommand } from './lib/native-tools-manifest'
@@ -483,4 +496,10 @@ declare global {
   // @ts-ignore
   export type { Theme, ThemeMode } from './lib/theme'
   import('./lib/theme')
+  // @ts-ignore
+  export type { ThirdPartyQueueDownloadStatus, IQueueThirdPartyDownloadOptions, IQueueThirdPartyDownloadResult } from './lib/third-party-download-queue'
+  import('./lib/third-party-download-queue')
+  // @ts-ignore
+  export type { NexusModsAuthorizationError, ThirdPartyProvider, ThirdPartyDescriptionFormat, IThirdPartyListQuery, IThirdPartyModFile, IThirdPartyModItem, IThirdPartyModDetail, IThirdPartyModListResult, IThirdPartyProviderOption } from './lib/third-party-mod-api'
+  import('./lib/third-party-mod-api')
 }

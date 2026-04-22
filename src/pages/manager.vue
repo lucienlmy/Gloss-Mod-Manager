@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { open } from "@tauri-apps/plugin-dialog";
 import { ElMessage } from "element-plus-message";
-import { createGmmPackage, installGmmPackage } from "@/lib/gmm-package";
+import { installGmmPackage } from "@/lib/gmm-package";
 import { checkGlossModUpdates } from "@/lib/gloss-mod-api";
 import {
     ARCHIVE_EXTENSIONS,
     importLocalModSources,
 } from "@/lib/local-mod-import";
-import { syncManagerRuntimeContext } from "@/lib/manager-context";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import ManagerPreloadList from "@/components/Manager/ManagerPreloadList.vue";
 import {
@@ -42,6 +41,11 @@ interface IDroppedImportSource {
     sourceType: "archive" | "folder" | "file" | "gmm";
 }
 
+interface IManagerGmmDialogExpose {
+    openImportDialog: (filePath?: string) => Promise<void>;
+    openExportDialog: () => void;
+}
+
 const manager = useManager();
 const router = useRouter();
 const { selectionMode, selectionIds } = storeToRefs(manager);
@@ -52,17 +56,14 @@ const disableSymlinkInstall = PersistentStore.useValue<boolean>(
     false,
 );
 
-const loading = ref(false);
 const importLoading = ref(false);
-const loadError = ref("");
 const actioningIds = ref<number[]>([]);
 const updateChecking = ref(false);
-const exportLoading = ref(false);
 const fileDropActive = ref(false);
 const dragImportRootRef = ref<HTMLElement | null>(null);
+const managerGmmDialogRef = ref<IManagerGmmDialogExpose | null>(null);
 
 const showBatchEditDialog = ref(false);
-const showExportDialog = ref(false);
 const batchEditForm = reactive<IBatchEditForm>({
     modAuthor: "",
     modType: "",
@@ -70,15 +71,7 @@ const batchEditForm = reactive<IBatchEditForm>({
     modWebsite: "",
     tagsText: "",
 });
-const exportForm = reactive<IInfo>({
-    name: "",
-    version: "1.0.0",
-    description: "",
-    gameID: undefined,
-    author: "",
-});
 
-let latestLoadId = 0;
 let unlistenNativeDragDrop: (() => void) | null = null;
 
 watch(manager.filteredMods, (mods) => {
@@ -89,16 +82,10 @@ watch(manager.filteredMods, (mods) => {
 watch(
     [manager.managerGame, storagePath, disableSymlinkInstall],
     async () => {
-        await syncManagerContext();
-        await loadManagerData();
-    },
-    { immediate: true },
-);
-
-watch(
-    () => manager.managerGame?.GlossGameId,
-    (gameId) => {
-        exportForm.gameID = gameId;
+        await manager.refreshRuntimeData({
+            storagePath: storagePath.value,
+            closeSoftLinks: disableSymlinkInstall.value,
+        });
     },
     { immediate: true },
 );
@@ -187,258 +174,15 @@ function resetFileDragState() {
     fileDropActive.value = false;
 }
 
-function createTagColor(tagName: string) {
-    let hash = 0;
-
-    for (const char of tagName) {
-        hash = (hash * 31 + char.charCodeAt(0)) % 360;
-    }
-
-    return `hsl(${Math.abs(hash)} 68% 46%)`;
-}
-
-function dedupeTags(list: Array<ITag | string | undefined>) {
-    const tagMap = new Map<string, ITag>();
-
-    for (const item of list) {
-        if (!item) {
-            continue;
-        }
-
-        if (typeof item === "string") {
-            const name = item.trim();
-
-            if (!name) {
-                continue;
-            }
-
-            tagMap.set(name, {
-                name,
-                color: createTagColor(name),
-            });
-            continue;
-        }
-
-        const name = item.name.trim();
-
-        if (!name) {
-            continue;
-        }
-
-        tagMap.set(name, {
-            name,
-            color: item.color || createTagColor(name),
-        });
-    }
-
-    return [...tagMap.values()].sort((left, right) =>
-        manager.textCollator.compare(left.name, right.name),
-    );
-}
-
-function collectModTags(modList: IModInfo[]) {
-    return dedupeTags(modList.flatMap((mod) => mod.tags ?? []));
-}
-
-async function syncManagerContext() {
-    await syncManagerRuntimeContext(manager, {
-        storagePath: storagePath.value,
-        closeSoftLinks: disableSymlinkInstall.value,
-    });
-}
-
-async function detectModType(mod: IModInfo) {
-    const game = manager.managerGame;
-
-    if (!game) {
-        return 99;
-    }
-
-    try {
-        if (typeof game.checkModType === "function") {
-            return await game.checkModType(mod);
-        }
-
-        for (const rule of game.checkModType) {
-            const matched = mod.modFiles.some((file) => {
-                const normalizedFile = normalizeSlashes(file).toLowerCase();
-
-                return rule.Keyword.some((keyword) => {
-                    const normalizedKeyword = keyword.toLowerCase();
-
-                    if (rule.UseFunction === "inPath") {
-                        return normalizedFile.includes(normalizedKeyword);
-                    }
-
-                    if (rule.UseFunction === "basename") {
-                        return (
-                            getBaseName(normalizedFile) === normalizedKeyword
-                        );
-                    }
-
-                    return [
-                        normalizedKeyword,
-                        `.${normalizedKeyword}`,
-                    ].includes(getFileExtension(normalizedFile));
-                });
-            });
-
-            if (matched) {
-                return rule.TypeId ?? 99;
-            }
-        }
-    } catch (error: unknown) {
-        console.error("识别 Mod 类型失败");
-        console.error(error);
-    }
-
-    return (
-        manager.availableTypes.find((item) => String(item.id) === "99")?.id ??
-        manager.availableTypes[0]?.id ??
-        99
-    );
-}
-
-function normalizeMod(mod: Partial<IModInfo>): IModInfo {
-    return {
-        id: Number(mod.id ?? Date.now()),
-        modName: mod.modName || mod.fileName || `Mod ${mod.id ?? ""}`,
-        fileName: mod.fileName || mod.modName || `mod-${mod.id ?? Date.now()}`,
-        md5: mod.md5 || "",
-        modVersion: mod.modVersion || "1.0.0",
-        isUpdate: Boolean(mod.isUpdate),
-        isInstalled: Boolean(mod.isInstalled),
-        weight: typeof mod.weight === "number" ? mod.weight : 0,
-        modFiles: Array.isArray(mod.modFiles) ? mod.modFiles : [],
-        tags: dedupeTags(mod.tags ?? []),
-        modAuthor: mod.modAuthor ?? "",
-        modWebsite: mod.modWebsite ?? "",
-        modType: mod.modType ?? 99,
-        modDesc: mod.modDesc ?? "",
-        other: mod.other ?? {},
-        from: mod.from,
-        webId: mod.webId,
-        cover: mod.cover,
-        advanced: mod.advanced,
-        key: mod.key,
-    };
-}
-
-async function loadManagerData() {
-    latestLoadId += 1;
-    const currentLoadId = latestLoadId;
-    loadError.value = "";
-    selectionIds.value = [];
-
-    if (!manager.managerGame) {
-        manager.managerModList = [];
-        manager.tags = [];
-        return;
-    }
-
-    if (!storagePath.value || !manager.managerRoot) {
-        manager.managerModList = [];
-        manager.tags = [];
-        return;
-    }
-
-    loading.value = true;
-
-    try {
-        const storedMods = (await Manager.getModInfo(
-            manager.managerRoot,
-        )) as IModInfo[];
-        const storedTags = (await Manager.getModInfo(
-            manager.managerRoot,
-            "tags.json",
-        )) as ITag[];
-
-        const normalizedMods = await Promise.all(
-            storedMods.map(async (item) => {
-                const mod = normalizeMod(item);
-
-                if (
-                    item.modType === undefined ||
-                    item.modType === null ||
-                    item.modType === ""
-                ) {
-                    mod.modType = await detectModType(mod);
-                }
-
-                return mod;
-            }),
-        );
-
-        if (currentLoadId !== latestLoadId) {
-            return;
-        }
-
-        manager.managerModList = normalizedMods;
-        manager.tags = dedupeTags([
-            ...storedTags,
-            ...collectModTags(normalizedMods),
-        ]);
-
-        if (
-            manager.selectedType !== 0 &&
-            !manager.availableTypes.some(
-                (item) => String(item.id) === String(manager.selectedType),
-            )
-        ) {
-            manager.selectedType = 0;
-        }
-
-        if (
-            manager.selectedTag !== "全部" &&
-            !manager.tags.some((tag) => tag.name === manager.selectedTag)
-        ) {
-            manager.selectedTag = "全部";
-        }
-    } catch (error: unknown) {
-        manager.managerModList = [];
-        manager.tags = [];
-        loadError.value = "读取本地 Mod 数据失败，请检查储存路径权限。";
-        console.error("读取管理页数据失败");
-        console.error(error);
-    } finally {
-        if (currentLoadId === latestLoadId) {
-            loading.value = false;
-        }
-    }
-}
-
-function syncTagsFromMods() {
-    manager.tags = dedupeTags([
-        ...manager.tags,
-        ...collectModTags(manager.managerModList),
-    ]);
-}
-
 async function applyBatchEdit() {
-    const parsedTags = dedupeTags(
-        batchEditForm.tagsText
-            .split(",")
-            .map((item) => item.trim())
-            .filter(Boolean),
-    );
-
-    manager.managerModList = manager.managerModList.map((mod) => {
-        if (!selectionIds.value.includes(mod.id)) {
-            return mod;
-        }
-
-        return normalizeMod({
-            ...mod,
-            modAuthor: batchEditForm.modAuthor || mod.modAuthor,
-            modType: batchEditForm.modType || mod.modType,
-            modVersion: batchEditForm.modVersion || mod.modVersion,
-            modWebsite: batchEditForm.modWebsite || mod.modWebsite,
-            tags: parsedTags.length ? parsedTags : mod.tags,
-        });
+    await manager.applyBatchEdit({
+        modIds: selectionIds.value,
+        modAuthor: batchEditForm.modAuthor,
+        modType: batchEditForm.modType,
+        modVersion: batchEditForm.modVersion,
+        modWebsite: batchEditForm.modWebsite,
+        tagsText: batchEditForm.tagsText,
     });
-
-    syncTagsFromMods();
-    await manager.saveManagerData();
     showBatchEditDialog.value = false;
     ElMessage.success("已更新所选 Mod 信息。");
 }
@@ -575,85 +319,12 @@ async function toggleInstall(mod: IModInfo, install: boolean) {
     }
 }
 
-// ── GMM 包导入 ──────────────────────────────────────────────────────────────
 async function importGmmFile() {
-    if (!manager.managerRoot) {
-        ElMessage.warning("请先选择游戏并配置储存路径。");
-        return;
-    }
-
-    const selected = await open({
-        directory: false,
-        multiple: true,
-        title: "选择 GMM 包文件",
-        filters: [{ name: "GMM 包", extensions: ["gmm"] }],
-    });
-
-    if (!selected) {
-        return;
-    }
-
-    const files = Array.isArray(selected) ? selected : [selected];
-    importLoading.value = true;
-
-    try {
-        for (const file of files) {
-            await installGmmPackage({ filePath: file, manager });
-        }
-
-        ElMessage.success("GMM 包导入完成。");
-    } catch (error: unknown) {
-        console.error("GMM 包导入失败");
-        console.error(error);
-        ElMessage.error("GMM 包导入失败，请查看控制台日志。");
-    } finally {
-        importLoading.value = false;
-    }
+    await managerGmmDialogRef.value?.openImportDialog();
 }
 
-// ── GMM 包导出 ──────────────────────────────────────────────────────────────
-async function exportToGmm() {
-    if (!manager.managerRoot) {
-        return;
-    }
-
-    const modsToExport = manager.managerModList.filter((m) =>
-        selectionIds.value.includes(m.id),
-    );
-
-    if (modsToExport.length === 0) {
-        ElMessage.warning("请先选择至少一个 Mod 再导出。");
-        return;
-    }
-
-    const savePath = await save({
-        title: "导出为 GMM 包",
-        filters: [{ name: "GMM 包", extensions: ["gmm"] }],
-        defaultPath: exportForm.name || "export",
-    });
-
-    if (!savePath) {
-        return;
-    }
-
-    exportLoading.value = true;
-
-    try {
-        await createGmmPackage({
-            mods: modsToExport,
-            managerRoot: manager.managerRoot,
-            info: exportForm,
-            outputPath: savePath,
-        });
-        ElMessage.success("GMM 包导出成功。");
-        showExportDialog.value = false;
-    } catch (error: unknown) {
-        console.error("GMM 包导出失败");
-        console.error(error);
-        ElMessage.error("GMM 包导出失败，请查看控制台日志。");
-    } finally {
-        exportLoading.value = false;
-    }
+function openGmmExportDialog() {
+    managerGmmDialogRef.value?.openExportDialog();
 }
 
 // ── 更新检查 ────────────────────────────────────────────────────────────────
@@ -836,6 +507,16 @@ async function importDroppedSources(sources: IDroppedImportSource[]) {
         .map((item) => item.path);
 
     try {
+        if (
+            gmmFiles.length === 1 &&
+            archiveFiles.length === 0 &&
+            folders.length === 0 &&
+            looseFiles.length === 0
+        ) {
+            await managerGmmDialogRef.value?.openImportDialog(gmmFiles[0]);
+            return;
+        }
+
         if (gmmFiles.length > 0) {
             importLoading.value = true;
 
@@ -1018,7 +699,10 @@ function openGamesPage() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                             <StartGame :game="manager.managerGame" />
-                            <Button variant="outline" @click="loadManagerData">
+                            <Button
+                                variant="outline"
+                                @click="manager.loadManagerData()"
+                            >
                                 <RefreshCw class="h-4 w-4" />
                                 刷新
                             </Button>
@@ -1060,8 +744,8 @@ function openGamesPage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        :disabled="!selectionIds.length"
-                                        @click="showExportDialog = true"
+                                        :disabled="!manager.managerModList.length"
+                                        @click="openGmmExportDialog"
                                     >
                                         <Upload class="h-4 w-4" />
                                         导出 GMM 包
@@ -1112,12 +796,14 @@ function openGamesPage() {
             <ManagerPreloadList />
             <ManagerList />
 
-            <Card v-if="loadError">
+            <Card v-if="manager.loadError">
                 <CardContent
                     class="flex items-center justify-between gap-4 py-6"
                 >
-                    <p class="text-sm text-destructive">{{ loadError }}</p>
-                    <Button variant="outline" @click="loadManagerData"
+                    <p class="text-sm text-destructive">
+                        {{ manager.loadError }}
+                    </p>
+                    <Button variant="outline" @click="manager.loadManagerData()"
                         >重试</Button
                     >
                 </CardContent>
@@ -1246,59 +932,7 @@ function openGamesPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
-            <!-- GMM 包导出 Dialog -->
-            <Dialog v-model:open="showExportDialog">
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>导出 GMM 包</DialogTitle>
-                        <DialogDescription>
-                            将已选中的 {{ selectionIds.length }} 个 Mod 打包为
-                            *.gmm 文件。
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div class="grid gap-3 py-2">
-                        <div class="grid grid-cols-4 items-center gap-3">
-                            <Label class="text-right">包名</Label>
-                            <Input
-                                v-model="exportForm.name"
-                                class="col-span-3"
-                            />
-                        </div>
-                        <div class="grid grid-cols-4 items-center gap-3">
-                            <Label class="text-right">版本</Label>
-                            <Input
-                                v-model="exportForm.version"
-                                class="col-span-3"
-                            />
-                        </div>
-                        <div class="grid grid-cols-4 items-center gap-3">
-                            <Label class="text-right">作者</Label>
-                            <Input
-                                v-model="exportForm.author"
-                                class="col-span-3"
-                            />
-                        </div>
-                        <div class="grid grid-cols-4 items-center gap-3">
-                            <Label class="text-right">描述</Label>
-                            <Input
-                                v-model="exportForm.description"
-                                class="col-span-3"
-                            />
-                        </div>
-                    </div>
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            @click="showExportDialog = false"
-                            >取消</Button
-                        >
-                        <Button :disabled="exportLoading" @click="exportToGmm">
-                            {{ exportLoading ? "导出中…" : "导出" }}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <ManagerGmmDialog ref="managerGmmDialogRef" />
 
             <Transition name="import-overlay">
                 <div

@@ -8,13 +8,14 @@
   "windows": [
     "main"
   ],
-  "permissions": [
-    "autostart:default",
-    "positioner:default",
-    "cli:default",
+    "permissions": [
+        "autostart:default",
+        "positioner:default",
+        "cli:default",
     "updater:default",
     "window-state:default",
     "dialog:default",
+    "log:default",
     "opener:allow-open-path",
     {
       "identifier": "opener:allow-open-path",
@@ -27,14 +28,43 @@
     "fs:read-all",
     "fs:write-all",
     "fs:allow-size",
-    {
-      "identifier": "fs:scope",
-      "allow": [
         {
-          "path": "**"
-        }
-      ]
-    },
-    "http:default"
-  ]
-}
+          "identifier": "fs:scope",
+          "allow": [
+            {
+              "path": "**"
+            }
+          ]
+        },
+        {
+          "identifier": "http:default",
+          "allow": [
+            {
+              "url": "https://*.3dmgame.com"
+            },
+            {
+              "url": "https://api.nexusmods.com"
+            },
+            {
+              "url": "https://api-router.nexusmods.com"
+            },
+            {
+              "url": "https://thunderstore.io"
+            },
+            {
+              "url": "https://*.modapi.io"
+            },
+            {
+              "url": "https://mod.io"
+            },
+            {
+              "url": "https://api.curseforge.com"
+            },
+            {
+              "url": "https://gamebanana.com"
+            }
+          ]
+        },
+        "http:default"
+    ]
+  }

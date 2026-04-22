@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import {
@@ -45,63 +44,8 @@ const editForm = reactive<IEditModForm>({
     tagsText: "",
 });
 
-function createTagColor(tagName: string) {
-    let hash = 0;
-
-    for (const char of tagName) {
-        hash = (hash * 31 + char.charCodeAt(0)) % 360;
-    }
-
-    return `hsl(${Math.abs(hash)} 68% 46%)`;
-}
-
-function dedupeTags(list: Array<ITag | string | undefined>) {
-    const tagMap = new Map<string, ITag>();
-
-    for (const item of list) {
-        if (!item) {
-            continue;
-        }
-
-        if (typeof item === "string") {
-            const name = item.trim();
-
-            if (!name) {
-                continue;
-            }
-
-            const existingTag = manager.tags.find((tag) => tag.name === name);
-
-            tagMap.set(name, {
-                name,
-                color: existingTag?.color ?? createTagColor(name),
-            });
-            continue;
-        }
-
-        const name = item.name.trim();
-
-        if (!name) {
-            continue;
-        }
-
-        tagMap.set(name, {
-            name,
-            color: item.color || createTagColor(name),
-        });
-    }
-
-    return [...tagMap.values()].sort((left, right) =>
-        manager.textCollator.compare(left.name, right.name),
-    );
-}
-
 function getModStoragePath(modId: number) {
-    if (!manager.managerRoot) {
-        return "";
-    }
-
-    return join(manager.managerRoot, String(modId));
+    return manager.getModStoragePath(modId);
 }
 
 async function open(item: IModInfo) {
@@ -140,51 +84,30 @@ function resetEditDialog() {
 
 async function saveEdit() {
     const modId = editingModId.value;
-    const modName = editForm.modName.trim();
-    const modVersion = editForm.modVersion.trim();
 
     if (!modId) {
         return;
     }
 
-    if (!modName) {
-        ElMessage.warning("Mod 名称不能为空。");
-        return;
-    }
-
-    if (!modVersion) {
-        ElMessage.warning("版本号不能为空。");
-        return;
-    }
-
-    const tags = dedupeTags(
-        editForm.tagsText
-            .split(/[,，]/u)
-            .map((item) => item.trim())
-            .filter(Boolean),
-    );
-
-    manager.managerModList = manager.managerModList.map((item) => {
-        if (item.id !== modId) {
-            return item;
-        }
-
-        return {
-            ...item,
-            modName,
-            modVersion,
-            modAuthor: editForm.modAuthor.trim(),
-            modWebsite: editForm.modWebsite.trim(),
+    try {
+        await manager.saveEditedMod({
+            modId,
+            modName: editForm.modName,
+            modVersion: editForm.modVersion,
+            modAuthor: editForm.modAuthor,
+            modWebsite: editForm.modWebsite,
             modType: editForm.modType,
-            modDesc: editForm.modDesc.trim(),
-            tags,
-        };
-    });
-    manager.tags = dedupeTags([...manager.tags, ...tags]);
-    await manager.saveManagerData();
-    showEditDialog.value = false;
-    resetEditDialog();
-    ElMessage.success("Mod 信息已更新。");
+            modDesc: editForm.modDesc,
+            tagsText: editForm.tagsText,
+        });
+        showEditDialog.value = false;
+        resetEditDialog();
+        ElMessage.success("Mod 信息已更新。");
+    } catch (error: unknown) {
+        ElMessage.warning(
+            error instanceof Error ? error.message : "更新 Mod 信息失败。",
+        );
+    }
 }
 
 async function deleteMod(item: IModInfo) {
@@ -220,38 +143,16 @@ async function confirmDeleteMod() {
 
     deletingModId.value = item.id;
 
-    const modPath = await getModStoragePath(item.id);
-
     try {
-        if (modPath) {
-            const deleted = await FileHandler.deleteFolder(modPath);
-
-            if (!deleted) {
-                ElMessage.error(
-                    "删除 Mod 目录失败，请检查文件占用或权限设置。",
-                );
-                return;
-            }
-        }
-
-        manager.managerModList = manager.managerModList.filter(
-            (mod) => mod.id !== item.id,
-        );
-        await manager.saveManagerData();
-
-        if (
-            manager.selectedTag !== "全部" &&
-            !manager.managerModList.some((mod) =>
-                (mod.tags ?? []).some(
-                    (tag) => tag.name === manager.selectedTag,
-                ),
-            )
-        ) {
-            manager.selectedTag = "全部";
-        }
-
+        await manager.removeModRecord(item.id);
         ElMessage.success(`已删除 ${item.modName}`);
         closeDeleteDialog(true);
+    } catch (error: unknown) {
+        ElMessage.error(
+            error instanceof Error
+                ? error.message
+                : "删除 Mod 目录失败，请检查文件占用或权限设置。",
+        );
     } finally {
         deletingModId.value = null;
     }
@@ -270,10 +171,14 @@ async function updateModType(item: IModInfo, nextType: unknown) {
         return;
     }
 
-    item.modType =
-        typeof nextType === "bigint" ? nextType.toString() : nextType;
-    await manager.saveManagerData();
-    ElMessage.success(`已更新 ${item.modName} 的类型。`);
+    try {
+        const modName = await manager.updateModType(item.id, nextType);
+        ElMessage.success(`已更新 ${modName} 的类型。`);
+    } catch (error: unknown) {
+        ElMessage.error(
+            error instanceof Error ? error.message : "更新 Mod 类型失败。",
+        );
+    }
 }
 
 async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
@@ -371,24 +276,20 @@ function handleSelectionChange(event: Event, modId: number) {
 }
 
 async function toggleTagOnMod(item: IModInfo, tagName: string) {
-    const matchedTag = manager.tags.find((tag) => tag.name === tagName);
-
-    if (!matchedTag) {
+    try {
+        const result = await manager.toggleTagOnMod(item.id, tagName);
         clearTagDropState();
-        return;
+        ElMessage.success(
+            result.toggledOn
+                ? `已为 ${result.modName} 添加标签：${tagName}`
+                : `已从 ${result.modName} 移除标签：${tagName}`,
+        );
+    } catch (error: unknown) {
+        clearTagDropState();
+        ElMessage.error(
+            error instanceof Error ? error.message : "更新标签失败。",
+        );
     }
-
-    const hasTag = (item.tags ?? []).some((tag) => tag.name === tagName);
-    item.tags = hasTag
-        ? (item.tags ?? []).filter((tag) => tag.name !== tagName)
-        : dedupeTags([...(item.tags ?? []), matchedTag]);
-    await manager.saveManagerData();
-    clearTagDropState();
-    ElMessage.success(
-        hasTag
-            ? `已从 ${item.modName} 移除标签：${tagName}`
-            : `已为 ${item.modName} 添加标签：${tagName}`,
-    );
 }
 
 async function queueModUpdate(item: IModInfo) {
