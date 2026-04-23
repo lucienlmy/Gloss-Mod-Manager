@@ -125,7 +125,7 @@ export class GTA5Handler {
             return "";
         }
 
-        return dirname(assemblyPath);
+        return await dirname(assemblyPath);
     }
 
     private static async invokeRpf<TResult>(

@@ -23,7 +23,7 @@ export class REEngine {
             return "";
         }
 
-        return join(modStorage, "pakList.txt");
+        return await join(modStorage, "pakList.txt");
     }
 
     private static async readPakList(): Promise<PakRecord[]> {

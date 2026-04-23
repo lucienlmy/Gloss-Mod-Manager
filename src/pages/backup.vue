@@ -243,7 +243,7 @@ function normalizeArchiveList(raw: unknown): IArchive[] {
 }
 
 async function getBackupJsonPath(backupPath: string) {
-    return join(backupPath, "backup.json");
+    return await join(backupPath, "backup.json");
 }
 
 async function readBackupList(backupPath: string): Promise<IArchive[]> {
@@ -337,7 +337,7 @@ async function resolveBackupPath(scopeKey: BackupScopeKey) {
         return "";
     }
 
-    return join(
+    return await join(
         storagePath.value,
         "~Backup",
         scopeKey === "archive" ? "Archive" : "Game",

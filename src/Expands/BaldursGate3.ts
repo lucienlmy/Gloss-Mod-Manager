@@ -178,7 +178,7 @@ async function getBg3ToolAssemblyPath() {
 }
 
 async function getModsettingsPath() {
-    return join(
+    return await join(
         await FileHandler.GetAppData(),
         "Local",
         "Larian Studios",

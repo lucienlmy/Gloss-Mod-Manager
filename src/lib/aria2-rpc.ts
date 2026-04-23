@@ -149,12 +149,18 @@ export class Aria2Rpc {
 
         return {
             autoStart: settings.autoStart ?? defaults.autoStart,
-            rpcPort: Math.max(1, Math.round(settings.rpcPort ?? defaults.rpcPort)),
-            rpcSecret: (settings.rpcSecret ?? defaults.rpcSecret).trim() || defaults.rpcSecret,
+            rpcPort: Math.max(
+                1,
+                Math.round(settings.rpcPort ?? defaults.rpcPort),
+            ),
+            rpcSecret:
+                (settings.rpcSecret ?? defaults.rpcSecret).trim() ||
+                defaults.rpcSecret,
             maxConcurrentDownloads: Math.max(
                 1,
                 Math.round(
-                    settings.maxConcurrentDownloads ?? defaults.maxConcurrentDownloads,
+                    settings.maxConcurrentDownloads ??
+                        defaults.maxConcurrentDownloads,
                 ),
             ),
             split: Math.max(1, Math.round(settings.split ?? defaults.split)),
@@ -172,10 +178,9 @@ export class Aria2Rpc {
     }
 
     public static async getStoredSettings() {
-        const settings = await PersistentStore.get<Partial<IAria2RuntimeSettings>>(
-            "aria2Settings",
-            Aria2Rpc.getDefaultSettings(),
-        );
+        const settings = await PersistentStore.get<
+            Partial<IAria2RuntimeSettings>
+        >("aria2Settings", Aria2Rpc.getDefaultSettings());
 
         return Aria2Rpc.normalizeSettings(settings ?? undefined);
     }
@@ -192,9 +197,11 @@ export class Aria2Rpc {
         const storagePath = (
             await PersistentStore.get<string>("storagePath", "")
         )?.trim();
-        const baseDirectory = storagePath || (await join(await documentDir(), "Gloss Mod Manager"));
+        const baseDirectory =
+            storagePath ||
+            (await join(await documentDir(), "Gloss Mod Manager"));
 
-        return join(baseDirectory, "downloads", "mods");
+        return await join(baseDirectory, "downloads", "mods");
     }
 
     private static async resolveOptions(
@@ -247,7 +254,9 @@ export class Aria2Rpc {
     }
 
     private static async sleep(duration: number) {
-        await new Promise((resolve) => globalThis.setTimeout(resolve, duration));
+        await new Promise((resolve) =>
+            globalThis.setTimeout(resolve, duration),
+        );
     }
 
     private static buildParams(
@@ -268,7 +277,10 @@ export class Aria2Rpc {
         timeoutMs: number = RPC_REQUEST_TIMEOUT_MS,
     ) {
         const controller = new AbortController();
-        const timer = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+        const timer = globalThis.setTimeout(
+            () => controller.abort(),
+            timeoutMs,
+        );
 
         try {
             const response = await fetch(Aria2Rpc.getRpcEndpoint(options), {
@@ -347,11 +359,9 @@ export class Aria2Rpc {
             }
         }
 
-        throw (
-            lastError instanceof Error
-                ? lastError
-                : new Error("aria2 RPC 启动超时")
-        );
+        throw lastError instanceof Error
+            ? lastError
+            : new Error("aria2 RPC 启动超时");
     }
 
     private static async ping(options: IResolvedRpcOptions) {
@@ -499,7 +509,9 @@ export class Aria2Rpc {
 
     public static async remove(gid: string, force: boolean = false) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>(force ? "forceRemove" : "remove", [gid]);
+        return Aria2Rpc.request<string>(force ? "forceRemove" : "remove", [
+            gid,
+        ]);
     }
 
     public static async removeDownloadResult(gid: string) {

@@ -1065,7 +1065,7 @@ export class FileHandler {
      * @returns 返回 C:/Users/[用户名]/AppData
      */
     public static async GetAppData() {
-        return dirname(FileHandler.normalizePath(await localDataDir()));
+        return await dirname(FileHandler.normalizePath(await localDataDir()));
     }
 
     public static async readFileAsBase64(image: string) {

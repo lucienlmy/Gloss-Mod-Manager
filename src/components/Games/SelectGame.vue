@@ -108,6 +108,7 @@ async function select(item: ISupportedGames) {
         } else {
             manager.managerGameList.push(manager.managerGame);
         }
+
         showSelectDialog.value = false;
     }
 }

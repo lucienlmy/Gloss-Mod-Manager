@@ -794,7 +794,7 @@ export const useManager = defineStore("Manager", () => {
             return "";
         }
 
-        return join(managerRoot.value, String(modId));
+        return await join(managerRoot.value, String(modId));
     }
 
     async function removeModRecord(modId: number) {

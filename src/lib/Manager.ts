@@ -90,7 +90,7 @@ export class Manager {
             return "";
         }
 
-        return join(modStorage, String(modId));
+        return await join(modStorage, String(modId));
     }
 
     private static async resolveInstallRoot(
@@ -110,7 +110,7 @@ export class Manager {
             return null;
         }
 
-        return join(gameStorage, installPath);
+        return await join(gameStorage, installPath);
     }
 
     private static createFailureState(mod: IModInfo) {

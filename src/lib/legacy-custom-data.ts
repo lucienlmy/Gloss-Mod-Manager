@@ -317,7 +317,7 @@ async function resolveWritableLegacyFilePath(
     const root = await resolveWritableLegacyConfigRoot();
     const folder = await join(root, folderName);
     await FileHandler.createDirectory(folder);
-    return join(folder, `${fileName}.json`);
+    return await join(folder, `${fileName}.json`);
 }
 
 function invalidateLegacyCache(
