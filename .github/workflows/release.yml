@@ -234,7 +234,8 @@ jobs:
                   fi
 
             - name: Build and publish release assets
-              uses: tauri-apps/tauri-action@v1
+              # tauri-action 当前稳定主版本仍为 v0，`v1` 标签不存在，会导致工作流在拉取 Action 时直接失败。
+              uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
