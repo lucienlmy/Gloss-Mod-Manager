@@ -118,53 +118,65 @@ function getTaskMatchScore(
     meta: IGlossDownloadTaskMeta,
     criteria: IGlossDuplicateCriteria,
 ) {
-    let score = 0;
     const criteriaExternalId = getCriteriaExternalId(criteria);
     const taskExternalId = getTaskExternalId(meta);
-
-    if (isSameId(meta.resourceId, criteria.resourceId)) {
-        score += 80;
-    }
-
-    if (
-        criteria.downloadUrl &&
-        normalizeCompareText(meta.downloadUrl) ===
-            normalizeCompareText(criteria.downloadUrl)
-    ) {
-        score += 60;
-    }
-
-    if (
+    const sourceTypeConflict =
         criteria.sourceType &&
         meta.sourceType &&
-        criteria.sourceType === meta.sourceType
-    ) {
-        score += 20;
+        criteria.sourceType !== meta.sourceType;
+
+    if (sourceTypeConflict) {
+        return 0;
+    }
+
+    const resourceMatched = isSameId(meta.resourceId, criteria.resourceId);
+    const downloadUrlMatched =
+        Boolean(criteria.downloadUrl) &&
+        normalizeCompareText(meta.downloadUrl) ===
+            normalizeCompareText(criteria.downloadUrl);
+    const externalIdMatched = isSameId(taskExternalId, criteriaExternalId);
+    const fileNameMatched =
+        Boolean(criteria.fileName) &&
+        normalizeCompareText(meta.fileName) ===
+            normalizeCompareText(criteria.fileName);
+    const modTitleMatched =
+        Boolean(criteria.modTitle) &&
+        normalizeCompareText(meta.modTitle) ===
+            normalizeCompareText(criteria.modTitle);
+    const sourceTypeMatched =
+        Boolean(criteria.sourceType && meta.sourceType) &&
+        criteria.sourceType === meta.sourceType;
+    let score = 0;
+    let hasPrimaryIdentityMatch = false;
+
+    if (resourceMatched) {
+        score += 80;
+        hasPrimaryIdentityMatch = true;
+    }
+
+    if (downloadUrlMatched) {
+        score += 60;
+        hasPrimaryIdentityMatch = true;
     }
 
     if (
-        isSameId(taskExternalId, criteriaExternalId) &&
-        (!criteria.sourceType ||
-            !meta.sourceType ||
-            criteria.sourceType === meta.sourceType)
+        externalIdMatched &&
+        (!criteria.sourceType || !meta.sourceType || sourceTypeMatched)
     ) {
         score += 40;
+        hasPrimaryIdentityMatch = true;
     }
 
-    if (
-        criteria.fileName &&
-        normalizeCompareText(meta.fileName) ===
-            normalizeCompareText(criteria.fileName)
-    ) {
+    if (fileNameMatched && (hasPrimaryIdentityMatch || modTitleMatched)) {
         score += 20;
     }
 
-    if (
-        criteria.modTitle &&
-        normalizeCompareText(meta.modTitle) ===
-            normalizeCompareText(criteria.modTitle)
-    ) {
+    if (modTitleMatched && (hasPrimaryIdentityMatch || fileNameMatched)) {
         score += 10;
+    }
+
+    if (sourceTypeMatched && (hasPrimaryIdentityMatch || fileNameMatched)) {
+        score += 20;
     }
 
     return score;

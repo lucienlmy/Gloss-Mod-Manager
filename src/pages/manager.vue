@@ -50,7 +50,7 @@ interface IManagerGmmDialogExpose {
 
 const manager = useManager();
 const router = useRouter();
-const { selectionMode, selectionIds } = storeToRefs(manager);
+const { managerGame, selectionMode, selectionIds } = storeToRefs(manager);
 const settings = useSettings();
 const { managerGridEnabled } = storeToRefs(settings);
 
@@ -84,7 +84,7 @@ watch(manager.filteredMods, (mods) => {
 });
 
 watch(
-    [manager.managerGame, storagePath, disableSymlinkInstall],
+    [managerGame, storagePath, disableSymlinkInstall],
     async () => {
         await manager.refreshRuntimeData({
             storagePath: storagePath.value,

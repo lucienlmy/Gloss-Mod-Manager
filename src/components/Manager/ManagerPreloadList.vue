@@ -8,8 +8,14 @@ import {
     type IGlossDownloadTaskMeta,
 } from "@/lib/gloss-download";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
+import { queueThirdPartyModDownload } from "@/lib/third-party-download-queue";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { PersistentStore } from "@/lib/persistent-store";
+import {
+    fetchThirdPartyModDetail,
+    type IThirdPartyModDetail,
+    type ThirdPartyProvider,
+} from "@/lib/third-party-mod-api";
 import { ArrowDownToLine, RefreshCw } from "lucide-vue-next";
 
 interface IPreloadStatus {
@@ -17,6 +23,14 @@ interface IPreloadStatus {
     statusLabel: string;
     actionLabel: string;
     progress: number;
+}
+
+interface IPreloadLookupCriteria {
+    sourceType?: sourceType;
+    externalId?: number | string;
+    modId?: number | string;
+    fileName?: string;
+    modTitle?: string;
 }
 
 const manager = useManager();
@@ -32,9 +46,16 @@ const errorMessage = ref("");
 const preloadCatalog = ref<IGamePlugins[]>([]);
 const hasLoadedCatalog = ref(false);
 const queueingPreloadId = ref("");
+const resolvedPreloadCriteriaMap = ref<Record<string, IPreloadLookupCriteria>>(
+    {},
+);
 const taskSnapshots = ref<Record<string, IAria2RpcTask>>({});
 
-const currentGameId = computed(() => manager.managerGame?.GlossGameId ?? 0);
+const currentGame = computed(() => manager.managerGame);
+const currentGameId = computed(() => currentGame.value?.GlossGameId ?? 0);
+const currentGameName = computed(() => {
+    return currentGame.value?.gameShowName ?? currentGame.value?.gameName ?? "";
+});
 let refreshTaskSnapshotPending = false;
 let taskSnapshotTimer: ReturnType<typeof globalThis.setInterval> | null = null;
 
@@ -165,15 +186,70 @@ function dedupePreloadItems(list: IGamePlugins[]) {
 }
 
 function getPreloadKey(item: IGamePlugins) {
-    return String(item.web_id || item.id || item.name);
+    return `${item.from}:${item.web_id || item.id || item.name}`;
 }
 
-function getPreloadCriteria(item: IGamePlugins) {
+function getPreloadOther(item: IGamePlugins) {
+    return (item.other ?? {}) as Record<string, unknown>;
+}
+
+function getPreloadExternalId(item: IGamePlugins) {
+    const normalizedExternalId = String(item.web_id ?? "").trim();
+
+    if (!normalizedExternalId || normalizedExternalId === "0") {
+        return undefined;
+    }
+
+    return normalizedExternalId;
+}
+
+function getPreloadProvider(item: IGamePlugins): ThirdPartyProvider | null {
+    switch (item.from) {
+        case "NexusMods":
+        case "Thunderstore":
+        case "ModIo":
+        case "CurseForge":
+        case "GameBanana":
+            return item.from;
+        default:
+            return null;
+    }
+}
+
+function buildPreloadCriteria(item: IGamePlugins): IPreloadLookupCriteria {
+    const externalId = getPreloadExternalId(item);
+
     return {
-        modId: item.web_id || item.id,
+        sourceType: item.from,
+        externalId,
+        modId: item.from === "GlossMod" ? externalId : undefined,
         modTitle: item.name,
         fileName: item.name,
     };
+}
+
+function cacheResolvedPreloadCriteria(
+    item: IGamePlugins,
+    detail: IThirdPartyModDetail,
+) {
+    const preloadFile = detail.primaryFile ?? detail.files[0] ?? null;
+
+    resolvedPreloadCriteriaMap.value = {
+        ...resolvedPreloadCriteriaMap.value,
+        [getPreloadKey(item)]: {
+            sourceType: detail.source,
+            externalId: detail.id,
+            modTitle: detail.title,
+            fileName: preloadFile?.name ?? item.name,
+        },
+    };
+}
+
+function getPreloadCriteria(item: IGamePlugins) {
+    return (
+        resolvedPreloadCriteriaMap.value[getPreloadKey(item)] ??
+        buildPreloadCriteria(item)
+    );
 }
 
 function getMatchedTask(item: IGamePlugins) {
@@ -421,9 +497,11 @@ async function loadPreloadCatalog(force = false) {
     try {
         // 前置接口返回的是全量列表，当前页只在首次进入时拉取一次。
         preloadCatalog.value = await fetchGlossGamePlugins();
+        resolvedPreloadCriteriaMap.value = {};
         hasLoadedCatalog.value = true;
     } catch (error: unknown) {
         preloadCatalog.value = [];
+        resolvedPreloadCriteriaMap.value = {};
         hasLoadedCatalog.value = false;
         errorMessage.value =
             error instanceof Error ? error.message : "读取前置列表失败";
@@ -432,16 +510,125 @@ async function loadPreloadCatalog(force = false) {
     }
 }
 
+async function resolveThirdPartyPreloadDetail(item: IGamePlugins) {
+    const game = currentGame.value;
+
+    if (!game) {
+        throw new Error("当前没有已选中的游戏。");
+    }
+
+    const provider = getPreloadProvider(item);
+
+    if (!provider) {
+        throw new Error("当前前置来源暂不支持直接下载。");
+    }
+
+    const preloadOther = getPreloadOther(item);
+
+    switch (provider) {
+        case "Thunderstore": {
+            const namespace = String(preloadOther.namespace ?? "").trim();
+            const name = String(preloadOther.name ?? "").trim();
+
+            if (!namespace || !name) {
+                throw new Error("当前 Thunderstore 前置缺少包标识，无法下载。");
+            }
+
+            const detail = await fetchThirdPartyModDetail(
+                provider,
+                game,
+                String(item.web_id || item.id || name),
+                {
+                    source: provider,
+                    namespace,
+                    name,
+                },
+                settings.nexusModsUser,
+            );
+
+            cacheResolvedPreloadCriteria(item, detail);
+
+            return {
+                detail,
+                provider,
+            };
+        }
+        case "NexusMods":
+        case "ModIo":
+        case "CurseForge":
+        case "GameBanana": {
+            const routeId = String(
+                preloadOther.modId ?? item.web_id ?? "",
+            ).trim();
+
+            if (!routeId || routeId === "0") {
+                throw new Error(
+                    `当前 ${provider} 前置缺少资源标识，无法下载。`,
+                );
+            }
+
+            const routeQuery: Record<string, string> = {
+                source: provider,
+            };
+
+            if (provider === "ModIo") {
+                const gameId = String(
+                    preloadOther.gameId ?? game.mod_io ?? "",
+                ).trim();
+
+                if (gameId) {
+                    routeQuery.gameId = gameId;
+                }
+            }
+
+            const detail = await fetchThirdPartyModDetail(
+                provider,
+                game,
+                routeId,
+                routeQuery,
+                settings.nexusModsUser,
+            );
+
+            cacheResolvedPreloadCriteria(item, detail);
+
+            return {
+                detail,
+                provider,
+            };
+        }
+    }
+}
+
 async function queuePreload(item: IGamePlugins) {
     const preloadId = getPreloadKey(item);
     queueingPreloadId.value = preloadId;
 
     try {
-        const result = await queueGlossModDownload({
-            modId: item.web_id,
-            resourceId: "latest",
-            managerModList: manager.managerModList,
-        });
+        const result =
+            item.from === "GlossMod"
+                ? await queueGlossModDownload({
+                      modId: item.web_id,
+                      resourceId: "latest",
+                      managerModList: manager.managerModList,
+                  })
+                : await (async () => {
+                      const { detail, provider } =
+                          await resolveThirdPartyPreloadDetail(item);
+
+                      return queueThirdPartyModDownload({
+                          provider,
+                          mod: detail,
+                          gameName: currentGameName.value,
+                          managerModList: manager.managerModList,
+                          nexusUser: settings.nexusModsUser,
+                      });
+                  })();
+
+        if (
+            ["created", "resumed", "retried", "exists"].includes(result.status)
+        ) {
+            void refreshTaskSnapshots();
+        }
 
         if (
             result.status === "created" ||
