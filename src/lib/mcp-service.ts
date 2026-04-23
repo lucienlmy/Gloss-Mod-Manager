@@ -3,6 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import type { Pinia } from "pinia";
 import { computed } from "vue";
 import { ref } from "vue";
+import packageInfo from "../../package.json";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { FileHandler } from "@/lib/FileHandler";
 import { Log } from "@/lib/log";
@@ -20,6 +21,7 @@ const DEFAULT_PROTOCOL_VERSION = "2025-03-26";
 const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2025-03-26", "2024-11-05"]);
 const MCP_TRANSPORT_EVENT = "mcp-http-request";
 const MCP_STATUS_EVENT = "mcp-server-status-changed";
+const APP_VERSION = packageInfo.version;
 const PARSE_ERROR = -32700;
 const INVALID_REQUEST = -32600;
 const METHOD_NOT_FOUND = -32601;
@@ -1543,7 +1545,7 @@ async function dispatchRequest(
                 capabilities: getInitializeCapabilities(),
                 serverInfo: {
                     name: "gloss-mod-manager",
-                    version: "2.0.0",
+                    version: APP_VERSION,
                 },
                 instructions:
                     "请优先先读取当前游戏、Mod 列表等只读信息，再执行会修改本地文件或管理状态的工具。",
