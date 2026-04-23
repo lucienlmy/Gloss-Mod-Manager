@@ -3,13 +3,13 @@ import { onMounted, onUnmounted } from "vue";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { open } from "@tauri-apps/plugin-dialog";
 import { ElMessage } from "element-plus-message";
+import { queueGlossModDownloadWithSelection } from "@/lib/download-file-selection";
 import { installGmmPackage } from "@/lib/gmm-package";
 import { checkGlossModUpdates } from "@/lib/gloss-mod-api";
 import {
     ARCHIVE_EXTENSIONS,
     importLocalModSources,
 } from "@/lib/local-mod-import";
-import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import ManagerPreloadList from "@/components/Manager/ManagerPreloadList.vue";
 import {
     CheckCheck,
@@ -357,18 +357,64 @@ async function checkForUpdates() {
             return;
         }
 
+        let queuedCount = 0;
+        let skippedCount = 0;
+        let existingCount = 0;
+
         for (const update of updates) {
             const localMod = glossMods.find((m) => m.webId === update.id);
 
             if (localMod) {
-                await queueGlossModDownload({
+                const result = await queueGlossModDownloadWithSelection({
                     modId: update.id,
                     replaceLocalModId: localMod.id,
+                    managerModList: manager.managerModList,
                 });
+
+                if (!result) {
+                    skippedCount += 1;
+                    continue;
+                }
+
+                if (["created", "resumed", "retried"].includes(result.status)) {
+                    queuedCount += 1;
+                    continue;
+                }
+
+                existingCount += 1;
             }
         }
 
-        ElMessage.success(`发现 ${updates.length} 个更新，已加入下载队列。`);
+        if (queuedCount === 0 && existingCount === 0 && skippedCount > 0) {
+            ElMessage.info("已取消本次更新下载选择。");
+            return;
+        }
+
+        const summaryParts = [] as string[];
+
+        if (queuedCount > 0) {
+            summaryParts.push(`已加入 ${queuedCount} 个更新下载`);
+        }
+
+        if (existingCount > 0) {
+            summaryParts.push(`${existingCount} 个已存在或已在本地`);
+        }
+
+        if (skippedCount > 0) {
+            summaryParts.push(`跳过 ${skippedCount} 个`);
+        }
+
+        const summaryMessage =
+            summaryParts.length > 0
+                ? `${summaryParts.join("，")}。`
+                : "没有可处理的更新任务。";
+
+        if (queuedCount > 0) {
+            ElMessage.success(summaryMessage);
+            return;
+        }
+
+        ElMessage.info(summaryMessage);
     } catch (error: unknown) {
         console.error("检查更新失败");
         console.error(error);

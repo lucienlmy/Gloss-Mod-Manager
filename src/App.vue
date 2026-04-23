@@ -4,6 +4,7 @@ import "@/lib/global";
 <template>
     <Layout>
         <RouterView />
+        <DownloadFilePickerDialog />
     </Layout>
 </template>
 <style scoped></style>

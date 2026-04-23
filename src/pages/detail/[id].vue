@@ -3,7 +3,10 @@ import { fetch as httpFetch } from "@tauri-apps/plugin-http";
 import MarkdownIt from "markdown-it";
 import markdownItAnchor from "markdown-it-anchor";
 import { ElMessage } from "element-plus-message";
-import { queueGlossModDownload } from "@/lib/gloss-download-queue";
+import {
+    hasGlossMultipleResources,
+    queueGlossModDownloadWithSelection,
+} from "@/lib/download-file-selection";
 
 const GLOSS_MOD_API_BASE_URL = "https://mod.3dmgame.com/api/v3";
 const GLOSS_MOD_WEB_BASE_URL = "https://mod.3dmgame.com";
@@ -289,6 +292,20 @@ function isQueueingResource(resource?: IResource | null) {
     );
 }
 
+function getPrimaryDownloadButtonLabel() {
+    if (isQueueingResource(latestResource.value)) {
+        return "加入中...";
+    }
+
+    if (!latestResource.value) {
+        return "暂无资源";
+    }
+
+    return hasGlossMultipleResources(modDetail.value)
+        ? "选择资源下载"
+        : "下载最新资源";
+}
+
 async function downloadResource(resource?: IResource | null) {
     if (!modDetail.value) {
         ElMessage.warning("当前没有可用的 Mod 详情。");
@@ -304,11 +321,19 @@ async function downloadResource(resource?: IResource | null) {
     queueingResourceKey.value = queueKey;
 
     try {
-        const result = await queueGlossModDownload({
+        const shouldPromptSelection =
+            hasGlossMultipleResources(modDetail.value) &&
+            resource.id === latestResource.value?.id;
+        const result = await queueGlossModDownloadWithSelection({
             mod: modDetail.value,
-            resourceId: resource.id ?? "latest",
+            resourceId: shouldPromptSelection ? undefined : resource.id,
             managerModList: manager.managerModList,
         });
+
+        if (!result) {
+            ElMessage.info("已取消选择下载资源。");
+            return;
+        }
 
         if (
             result.status === "created" ||
@@ -499,15 +524,14 @@ async function goBackToExplore() {
                             <Button
                                 v-if="latestResource"
                                 variant="outline"
-                                :disabled="isQueueingResource(latestResource)"
+                                :disabled="
+                                    !latestResource ||
+                                    isQueueingResource(latestResource)
+                                "
                                 @click="downloadResource(latestResource)"
                             >
                                 <IconDownload />
-                                {{
-                                    isQueueingResource(latestResource)
-                                        ? "加入中..."
-                                        : "下载最新资源"
-                                }}
+                                {{ getPrimaryDownloadButtonLabel() }}
                             </Button>
                         </div>
                     </div>

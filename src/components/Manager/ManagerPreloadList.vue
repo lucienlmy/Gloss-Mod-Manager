@@ -2,13 +2,15 @@
 import { ElMessage } from "element-plus-message";
 import { Aria2Rpc, type IAria2RpcTask } from "@/lib/aria2-rpc";
 import {
+    queueGlossModDownloadWithSelection,
+    queueThirdPartyModDownloadWithSelection,
+} from "@/lib/download-file-selection";
+import {
     findGlossDuplicateTasks,
     getGlossModPresence,
     type GlossDownloadPresence,
     type IGlossDownloadTaskMeta,
 } from "@/lib/gloss-download";
-import { queueGlossModDownload } from "@/lib/gloss-download-queue";
-import { queueThirdPartyModDownload } from "@/lib/third-party-download-queue";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { PersistentStore } from "@/lib/persistent-store";
 import {
@@ -606,16 +608,15 @@ async function queuePreload(item: IGamePlugins) {
     try {
         const result =
             item.from === "GlossMod"
-                ? await queueGlossModDownload({
+                ? await queueGlossModDownloadWithSelection({
                       modId: item.web_id,
-                      resourceId: "latest",
                       managerModList: manager.managerModList,
                   })
                 : await (async () => {
                       const { detail, provider } =
                           await resolveThirdPartyPreloadDetail(item);
 
-                      return queueThirdPartyModDownload({
+                      return queueThirdPartyModDownloadWithSelection({
                           provider,
                           mod: detail,
                           gameName: currentGameName.value,
@@ -623,6 +624,11 @@ async function queuePreload(item: IGamePlugins) {
                           nexusUser: settings.nexusModsUser,
                       });
                   })();
+
+        if (!result) {
+            ElMessage.info("已取消选择下载文件。");
+            return;
+        }
 
         if (
             ["created", "resumed", "retried", "exists"].includes(result.status)

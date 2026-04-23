@@ -66,6 +66,7 @@ declare module 'vue' {
     DialogScrollContent: typeof import('./components/ui/dialog/DialogScrollContent.vue')['default']
     DialogTitle: typeof import('./components/ui/dialog/DialogTitle.vue')['default']
     DialogTrigger: typeof import('./components/ui/dialog/DialogTrigger.vue')['default']
+    DownloadFilePickerDialog: typeof import('./components/DownloadFilePickerDialog.vue')['default']
     DropdownMenu: typeof import('./components/ui/dropdown-menu/DropdownMenu.vue')['default']
     DropdownMenuCheckboxItem: typeof import('./components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue')['default']
     DropdownMenuContent: typeof import('./components/ui/dropdown-menu/DropdownMenuContent.vue')['default']

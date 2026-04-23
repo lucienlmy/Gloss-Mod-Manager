@@ -11,8 +11,11 @@ import {
 import {
     buildGlossOutputFileName,
     isGlossCloudDriveResource,
-    queueGlossModDownload,
 } from "@/lib/gloss-download-queue";
+import {
+    hasGlossMultipleResources,
+    queueGlossModDownloadWithSelection,
+} from "@/lib/download-file-selection";
 import {
     fetchAllGlossGames,
     GLOSS_MOD_API_BASE_URL,
@@ -755,6 +758,18 @@ function getDownloadStatus(item: IGlossExploreMod) {
     );
 }
 
+function getDownloadButtonLabel(item: IGlossExploreMod) {
+    if (queueingModId.value === String(item.id)) {
+        return "加入中...";
+    }
+
+    if (hasGlossMultipleResources(item)) {
+        return "选择资源下载";
+    }
+
+    return getDownloadStatus(item).label;
+}
+
 function shouldShowDownloadProgress(item: IGlossExploreMod) {
     return ["active", "waiting", "paused"].includes(
         getDownloadStatus(item).state,
@@ -766,6 +781,10 @@ function isDownloadActionDisabled(item: IGlossExploreMod) {
         return true;
     }
 
+    if (hasGlossMultipleResources(item)) {
+        return false;
+    }
+
     const status = getDownloadStatus(item).state;
 
     return ["active", "waiting", "imported", "missing"].includes(status);
@@ -773,6 +792,10 @@ function isDownloadActionDisabled(item: IGlossExploreMod) {
 
 function getDownloadButtonClass(item: IGlossExploreMod) {
     const status = getDownloadStatus(item).state;
+
+    if (hasGlossMultipleResources(item)) {
+        return "";
+    }
 
     if (status === "active") {
         return "border-sky-500/40 bg-sky-500/10 text-sky-700 hover:bg-sky-500/15 dark:text-sky-200";
@@ -893,11 +916,15 @@ async function openLatestResource(item: IGlossExploreMod) {
     queueingModId.value = queueKey;
 
     try {
-        const result = await queueGlossModDownload({
+        const result = await queueGlossModDownloadWithSelection({
             mod: item,
-            resourceId: latestResource.id ?? "latest",
             managerModList: manager.managerModList,
         });
+
+        if (!result) {
+            ElMessage.info("已取消选择下载资源。");
+            return;
+        }
 
         if (
             ["created", "resumed", "retried", "exists"].includes(result.status)
@@ -1418,11 +1445,7 @@ function goToPage(targetPage: number) {
                                     @click="openLatestResource(item)"
                                 >
                                     <IconDownload />
-                                    {{
-                                        queueingModId === String(item.id)
-                                            ? "加入中..."
-                                            : getDownloadStatus(item).label
-                                    }}
+                                    {{ getDownloadButtonLabel(item) }}
                                 </Button>
                                 <div
                                     v-if="shouldShowDownloadProgress(item)"

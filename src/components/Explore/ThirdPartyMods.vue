@@ -5,12 +5,15 @@ import markdownItAnchor from "markdown-it-anchor";
 import { ElMessage } from "element-plus-message";
 import { Aria2Rpc, type IAria2RpcTask } from "@/lib/aria2-rpc";
 import {
+    hasThirdPartyMultipleFiles,
+    queueThirdPartyModDownloadWithSelection,
+} from "@/lib/download-file-selection";
+import {
     findGlossDuplicateTasks,
     getGlossModPresence,
     type GlossDownloadPresence,
     type IGlossDownloadTaskMeta,
 } from "@/lib/gloss-download";
-import { queueThirdPartyModDownload } from "@/lib/third-party-download-queue";
 import { PersistentStore } from "@/lib/persistent-store";
 import {
     fetchThirdPartyModDetail,
@@ -422,7 +425,7 @@ async function openLatestResource(item: IThirdPartyModItem) {
 
     try {
         const detail = await loadModDetail(item);
-        await queueDownload(detail, detail.primaryFile?.id);
+        await queueDownload(detail);
     } catch (error: unknown) {
         console.error("提交第三方下载任务失败");
         console.error(error);
@@ -690,25 +693,24 @@ async function queueDownload(mod: IThirdPartyModDetail, fileId?: string) {
         throw new Error("当前没有已选中的游戏。");
     }
 
-    const file =
-        mod.files.find((item) => item.id === fileId) ?? mod.primaryFile ?? null;
-
-    if (!file) {
-        throw new Error("当前没有可下载的文件。");
-    }
-
-    const queueKey = `${mod.source}-${mod.id}-${file.id}`;
+    const normalizedFileId = fileId?.trim() ?? "";
+    const queueKey = `${mod.source}-${mod.id}-${normalizedFileId || "latest"}`;
     queueingResourceKey.value = queueKey;
 
     try {
-        const result = await queueThirdPartyModDownload({
+        const result = await queueThirdPartyModDownloadWithSelection({
             provider: props.provider,
             mod,
-            fileId: file.id,
+            fileId: normalizedFileId || undefined,
             gameName: currentGameName.value,
             managerModList: manager.managerModList,
             nexusUser: settings.nexusModsUser,
         });
+
+        if (!result) {
+            ElMessage.info("已取消选择下载文件。");
+            return;
+        }
 
         if (
             ["created", "resumed", "retried", "exists"].includes(result.status)
@@ -885,12 +887,20 @@ function getDownloadButtonLabel(item: IThirdPartyModItem) {
         return "提交中...";
     }
 
+    if (hasThirdPartyMultipleFiles(item)) {
+        return "选择文件下载";
+    }
+
     return getDownloadStatus(item).label;
 }
 
 function getDownloadButtonClass(item: IThirdPartyModItem) {
     if (queueingResourceKey.value.startsWith(`${item.source}-${item.id}-`)) {
         return "border-sky-500/40 bg-sky-500/10 text-sky-700 hover:bg-sky-500/15 dark:text-sky-200";
+    }
+
+    if (hasThirdPartyMultipleFiles(item)) {
+        return "";
     }
 
     const status = getDownloadStatus(item).state;
@@ -923,9 +933,37 @@ function isDownloadActionDisabled(item: IThirdPartyModItem) {
         return true;
     }
 
+    if (hasThirdPartyMultipleFiles(item)) {
+        return false;
+    }
+
     const status = getDownloadStatus(item).state;
 
     return ["active", "waiting", "imported", "missing"].includes(status);
+}
+
+function getModDownloadButtonLabel(mod: IThirdPartyModDetail) {
+    if (queueingResourceKey.value.startsWith(`${mod.source}-${mod.id}-`)) {
+        return "提交中...";
+    }
+
+    if (hasThirdPartyMultipleFiles(mod)) {
+        return "选择文件下载";
+    }
+
+    return getFileDownloadButtonLabel(mod, mod.primaryFile);
+}
+
+function isModDownloadActionDisabled(mod: IThirdPartyModDetail) {
+    if (queueingResourceKey.value.startsWith(`${mod.source}-${mod.id}-`)) {
+        return true;
+    }
+
+    if (hasThirdPartyMultipleFiles(mod)) {
+        return mod.files.length === 0;
+    }
+
+    return isFileDownloadActionDisabled(mod, mod.primaryFile);
 }
 
 function getProgressBarClass(item: IThirdPartyModItem) {
@@ -1576,19 +1614,11 @@ function escapeHtml(source: string) {
                                 <Button
                                     variant="secondary"
                                     :disabled="
-                                        isFileDownloadActionDisabled(
-                                            selectedMod,
-                                            selectedMod.primaryFile,
-                                        )
+                                        isModDownloadActionDisabled(selectedMod)
                                     "
                                     @click="handleDownload(selectedMod)"
                                 >
-                                    {{
-                                        getFileDownloadButtonLabel(
-                                            selectedMod,
-                                            selectedMod.primaryFile,
-                                        )
-                                    }}
+                                    {{ getModDownloadButtonLabel(selectedMod) }}
                                 </Button>
                                 <Button
                                     variant="outline"

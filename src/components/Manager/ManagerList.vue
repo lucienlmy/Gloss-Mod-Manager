@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus-message";
-import { queueGlossModDownload } from "@/lib/gloss-download-queue";
+import { queueGlossModDownloadWithSelection } from "@/lib/download-file-selection";
 import {
     clearManagerInternalDrag,
     INTERNAL_DRAG_THRESHOLD,
@@ -411,12 +411,16 @@ async function queueModUpdate(item: IModInfo) {
     startUpdate(item.id);
 
     try {
-        const result = await queueGlossModDownload({
+        const result = await queueGlossModDownloadWithSelection({
             modId: item.webId,
-            resourceId: "latest",
             managerModList: manager.managerModList,
             replaceLocalModId: item.id,
         });
+
+        if (!result) {
+            ElMessage.info("已取消选择下载资源。");
+            return;
+        }
 
         if (
             result.status === "created" ||

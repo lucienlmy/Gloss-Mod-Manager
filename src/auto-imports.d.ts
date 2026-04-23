@@ -110,6 +110,8 @@ declare global {
   const getThirdPartyProviderLabel: typeof import('./lib/third-party-mod-api').getThirdPartyProviderLabel
   const h: typeof import('vue').h
   const hasExternalFilePayload: typeof import('./lib/browser-drop-import').hasExternalFilePayload
+  const hasGlossMultipleResources: typeof import('./lib/download-file-selection').hasGlossMultipleResources
+  const hasThirdPartyMultipleFiles: typeof import('./lib/download-file-selection').hasThirdPartyMultipleFiles
   const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
   const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
@@ -176,7 +178,9 @@ declare global {
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
   const queueGlossModDownload: typeof import('./lib/gloss-download-queue').queueGlossModDownload
+  const queueGlossModDownloadWithSelection: typeof import('./lib/download-file-selection').queueGlossModDownloadWithSelection
   const queueThirdPartyModDownload: typeof import('./lib/third-party-download-queue').queueThirdPartyModDownload
+  const queueThirdPartyModDownloadWithSelection: typeof import('./lib/download-file-selection').queueThirdPartyModDownloadWithSelection
   const reactify: typeof import('@vueuse/core').reactify
   const reactifyObject: typeof import('@vueuse/core').reactifyObject
   const reactive: typeof import('vue').reactive
@@ -289,6 +293,7 @@ declare global {
   const useDevicesList: typeof import('@vueuse/core').useDevicesList
   const useDisplayMedia: typeof import('@vueuse/core').useDisplayMedia
   const useDocumentVisibility: typeof import('@vueuse/core').useDocumentVisibility
+  const useDownloadFilePickerStore: typeof import('./stores/download-picker').useDownloadFilePickerStore
   const useDraggable: typeof import('@vueuse/core').useDraggable
   const useDropZone: typeof import('@vueuse/core').useDropZone
   const useElementBounding: typeof import('@vueuse/core').useElementBounding
@@ -518,4 +523,7 @@ declare global {
   // @ts-ignore
   export type { NexusModsAuthorizationError, ThirdPartyProvider, ThirdPartyDescriptionFormat, IThirdPartyListQuery, IThirdPartyModFile, IThirdPartyModItem, IThirdPartyModDetail, IThirdPartyModListResult, IThirdPartyProviderOption } from './lib/third-party-mod-api'
   import('./lib/third-party-mod-api')
+  // @ts-ignore
+  export type { IDownloadFilePickerItem, IDownloadFilePickerRequest } from './stores/download-picker'
+  import('./stores/download-picker')
 }
