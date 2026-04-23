@@ -36,6 +36,8 @@ interface IUpsertTagOptions {
     previousName?: string;
 }
 
+type ModRelativePosition = "before" | "after";
+
 function normalizeSlashes(filePath: string) {
     return filePath.replace(/\\+/gu, "/");
 }
@@ -188,10 +190,12 @@ export const useManager = defineStore("Manager", () => {
                 index,
             }))
             .sort((left, right) => {
-                const leftWeight =
-                    Number.isFinite(left.mod.weight) ? left.mod.weight : 0;
-                const rightWeight =
-                    Number.isFinite(right.mod.weight) ? right.mod.weight : 0;
+                const leftWeight = Number.isFinite(left.mod.weight)
+                    ? left.mod.weight
+                    : 0;
+                const rightWeight = Number.isFinite(right.mod.weight)
+                    ? right.mod.weight
+                    : 0;
                 const weightDiff = leftWeight - rightWeight;
 
                 if (weightDiff !== 0) {
@@ -248,6 +252,9 @@ export const useManager = defineStore("Manager", () => {
     });
 
     const availableTypes = computed(() => managerGame.value?.modType ?? []);
+    const orderedMods = computed<IModInfo[]>(() => {
+        return sortModsByWeight(managerModList.value);
+    });
     const selectedMods = computed<IModInfo[]>(() => {
         const selectedIdSet = new Set(selectionIds.value);
 
@@ -382,7 +389,8 @@ export const useManager = defineStore("Manager", () => {
 
                         if (rule.UseFunction === "basename") {
                             return (
-                                getBaseName(normalizedFile) === normalizedKeyword
+                                getBaseName(normalizedFile) ===
+                                normalizedKeyword
                             );
                         }
 
@@ -409,7 +417,9 @@ export const useManager = defineStore("Manager", () => {
         );
     }
 
-    function syncTagsFromMods(extraTags: Array<ITag | string | undefined> = []) {
+    function syncTagsFromMods(
+        extraTags: Array<ITag | string | undefined> = [],
+    ) {
         tags.value = mergeTagCatalog(
             tags.value,
             [...extraTags, ...collectModTags(managerModList.value)],
@@ -611,8 +621,7 @@ export const useManager = defineStore("Manager", () => {
             return normalizeMod({
                 ...mod,
                 modAuthor: options.modAuthor || mod.modAuthor,
-                modType:
-                    options.modType === "" ? mod.modType : options.modType,
+                modType: options.modType === "" ? mod.modType : options.modType,
                 modVersion: options.modVersion || mod.modVersion,
                 modWebsite: options.modWebsite || mod.modWebsite,
                 tags: parsedTags.length > 0 ? parsedTags : mod.tags,
@@ -716,6 +725,70 @@ export const useManager = defineStore("Manager", () => {
         return true;
     }
 
+    async function moveModRelativeToTarget(
+        movingModId: number,
+        targetModId: number,
+        position: ModRelativePosition,
+        scopeIds?: number[],
+    ) {
+        if (movingModId === targetModId) {
+            return false;
+        }
+
+        const orderedAllMods = sortModsByWeight(managerModList.value);
+        const resolvedScopeIds = scopeIds
+            ? [...new Set(scopeIds)]
+            : orderedAllMods.map((item) => item.id);
+        const scopeIdSet = new Set(resolvedScopeIds);
+
+        if (!scopeIdSet.has(movingModId) || !scopeIdSet.has(targetModId)) {
+            throw new Error("排序目标不在当前可调整范围内。");
+        }
+
+        const scopedMods = orderedAllMods.filter((item) => {
+            return scopeIdSet.has(item.id);
+        });
+        const sourceIndex = scopedMods.findIndex((item) => {
+            return item.id === movingModId;
+        });
+        const targetIndex = scopedMods.findIndex((item) => {
+            return item.id === targetModId;
+        });
+
+        if (sourceIndex === -1 || targetIndex === -1) {
+            throw new Error("未找到要排序的 Mod。请刷新列表后重试。");
+        }
+
+        const reorderedScopedMods = [...scopedMods];
+        const [movingMod] = reorderedScopedMods.splice(sourceIndex, 1);
+        let insertIndex = targetIndex;
+
+        if (sourceIndex < targetIndex) {
+            insertIndex -= 1;
+        }
+
+        if (position === "after") {
+            insertIndex += 1;
+        }
+
+        reorderedScopedMods.splice(insertIndex, 0, movingMod);
+
+        let scopedIndex = 0;
+        managerModList.value = orderedAllMods.map((item, index) => {
+            const nextItem = scopeIdSet.has(item.id)
+                ? reorderedScopedMods[scopedIndex++]
+                : item;
+
+            return {
+                ...nextItem,
+                weight: index + 1,
+            };
+        });
+
+        await saveManagerData();
+        return true;
+    }
+
     async function getModStoragePath(modId: number) {
         if (!managerRoot.value) {
             return "";
@@ -811,7 +884,9 @@ export const useManager = defineStore("Manager", () => {
             found = true;
             targetModName = item.modName;
 
-            const hasTag = (item.tags ?? []).some((tag) => tag.name === tagName);
+            const hasTag = (item.tags ?? []).some(
+                (tag) => tag.name === tagName,
+            );
             toggledOn = !hasTag;
 
             return {
@@ -896,6 +971,7 @@ export const useManager = defineStore("Manager", () => {
         managerGame,
         managerGameList,
         filteredMods,
+        orderedMods,
         search,
         selectedType,
         selectedTag,
@@ -917,6 +993,7 @@ export const useManager = defineStore("Manager", () => {
         upsertTag,
         deleteTag,
         reorderTags,
+        moveModRelativeToTarget,
         getModStoragePath,
         removeModRecord,
         updateModType,

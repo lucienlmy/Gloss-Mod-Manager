@@ -52,10 +52,10 @@ jobs:
 
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup Node.js
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@v6
               with:
                   node-version: lts/*
                   cache: yarn
@@ -98,15 +98,27 @@ jobs:
               if: runner.os == 'macOS'
               shell: bash
               run: |
-                  brew install \
-                    autoconf \
-                    automake \
-                    libtool \
-                    pkg-config \
-                    c-ares \
-                    libssh2 \
-                    openssl@3 \
+                  formulae=(
+                    autoconf
+                    automake
+                    libtool
+                    pkg-config
+                    c-ares
+                    libssh2
+                    openssl@3
                     sqlite
+                  )
+                  missing_formulae=()
+
+                  for formula in "${formulae[@]}"; do
+                      if ! brew list --versions "$formula" >/dev/null; then
+                          missing_formulae+=("$formula")
+                      fi
+                  done
+
+                  if [[ ${#missing_formulae[@]} -gt 0 ]]; then
+                      brew install "${missing_formulae[@]}"
+                  fi
 
                   brew_prefix="$(brew --prefix)"
                   {
@@ -234,7 +246,7 @@ jobs:
                   fi
 
             - name: Build and publish release assets
-              # tauri-action 当前稳定主版本仍为 v0，`v1` 标签不存在，会导致工作流在拉取 Action 时直接失败。
+              # tauri-action 当前可用稳定主版本仍为 v0，对应 updater 配置使用 includeUpdaterJson。
               uses: tauri-apps/tauri-action@v0
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -251,6 +263,6 @@ jobs:
                       '-')) }}
                   projectPath: ./
                   tauriScript: yarn tauri
-                  args: ${{ matrix.args }}
+                  args: ${{ format('{0} --config src-tauri/tauri.release.conf.json', matrix.args) }}
                   retryAttempts: 2
-                  uploadUpdaterJson: false
+                  includeUpdaterJson: true

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
+import { storeToRefs } from "pinia";
 import { ElMessage } from "element-plus-message";
 import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import {
@@ -10,6 +11,9 @@ import {
     managerDraggingTagName,
     startManagerModDrag,
 } from "@/lib/manager-internal-drag";
+import { useSettings } from "@/stores/settings";
+
+const MANAGER_FALLBACK_COVER = "/imgs/logo.png";
 
 interface IEditModForm {
     modName: string;
@@ -22,11 +26,17 @@ interface IEditModForm {
 }
 
 const manager = useManager();
+const { managerGridEnabled } = storeToRefs(useSettings());
 const showEditDialog = ref(false);
 const showDeleteDialog = ref(false);
+const showSortDialog = ref(false);
 const editingModId = ref<number | null>(null);
 const deletingModId = ref<number | null>(null);
 const deleteTargetMod = ref<IModInfo | null>(null);
+const sortingMod = ref<IModInfo | null>(null);
+const sortTargetModId = ref<number | null>(null);
+const sortPlacement = ref<"before" | "after">("after");
+const sortTargetKeyword = ref("");
 const dragTargetId = ref<number | null>(null);
 const dragPosition = ref<"before" | "after">("before");
 const tagDropTargetId = ref<number | null>(null);
@@ -42,6 +52,31 @@ const editForm = reactive<IEditModForm>({
     modType: 99,
     modDesc: "",
     tagsText: "",
+});
+
+const sortTargetOptions = computed(() => {
+    const activeSortingModId = sortingMod.value?.id ?? null;
+    const keyword = sortTargetKeyword.value.trim().toLowerCase();
+
+    return manager.orderedMods.filter((item) => {
+        if (item.id === activeSortingModId) {
+            return false;
+        }
+
+        if (!keyword) {
+            return true;
+        }
+
+        return [
+            item.modName,
+            item.modVersion,
+            item.modAuthor ?? "",
+            item.fileName,
+        ]
+            .join(" ")
+            .toLowerCase()
+            .includes(keyword);
+    });
 });
 
 function getModStoragePath(modId: number) {
@@ -82,6 +117,31 @@ function resetEditDialog() {
     editForm.tagsText = "";
 }
 
+function resetSortDialog() {
+    showSortDialog.value = false;
+    sortingMod.value = null;
+    sortTargetModId.value = null;
+    sortPlacement.value = "after";
+    sortTargetKeyword.value = "";
+}
+
+function openSortDialog(item: IModInfo) {
+    const defaultTarget = manager.orderedMods.find((candidate) => {
+        return candidate.id !== item.id;
+    });
+
+    if (!defaultTarget) {
+        ElMessage.info("当前没有可用于排序的其他 Mod。");
+        return;
+    }
+
+    sortingMod.value = item;
+    sortTargetKeyword.value = "";
+    sortPlacement.value = "after";
+    sortTargetModId.value = defaultTarget.id;
+    showSortDialog.value = true;
+}
+
 async function saveEdit() {
     const modId = editingModId.value;
 
@@ -106,6 +166,42 @@ async function saveEdit() {
     } catch (error: unknown) {
         ElMessage.warning(
             error instanceof Error ? error.message : "更新 Mod 信息失败。",
+        );
+    }
+}
+
+async function confirmSortMove() {
+    const currentSortingMod = sortingMod.value;
+    const targetModId = sortTargetModId.value;
+
+    if (!currentSortingMod || targetModId === null) {
+        return;
+    }
+
+    const targetMod = manager.managerModList.find(
+        (item) => item.id === targetModId,
+    );
+
+    if (!targetMod) {
+        ElMessage.warning("未找到排序目标，请重新选择。");
+        return;
+    }
+
+    try {
+        await manager.moveModRelativeToTarget(
+            currentSortingMod.id,
+            targetModId,
+            sortPlacement.value,
+        );
+        clearDragState();
+        clearTagDropState();
+        ElMessage.success(
+            `已将 ${currentSortingMod.modName} 调整到 ${targetMod.modName} 的${sortPlacement.value === "after" ? "下方" : "上方"}。`,
+        );
+        resetSortDialog();
+    } catch (error: unknown) {
+        ElMessage.error(
+            error instanceof Error ? error.message : "调整排序失败。",
         );
     }
 }
@@ -275,6 +371,20 @@ function handleSelectionChange(event: Event, modId: number) {
     );
 }
 
+function getModCoverSrc(item: IModInfo) {
+    return item.cover || MANAGER_FALLBACK_COVER;
+}
+
+function getSortTargetLabel(item: IModInfo) {
+    return `${item.modName} · ${item.modVersion}`;
+}
+
+function getItemContainerClass(item: IModInfo) {
+    const stateClass = getRowClass(item);
+
+    return stateClass ? stateClass : "";
+}
+
 async function toggleTagOnMod(item: IModInfo, tagName: string) {
     try {
         const result = await manager.toggleTagOnMod(item.id, tagName);
@@ -407,52 +517,21 @@ async function reorderDraggedMod(targetModId: number) {
         return;
     }
 
-    const visibleMods = [...manager.filteredMods];
-    const sourceIndex = visibleMods.findIndex(
-        (item) => item.id === managerDraggingModId.value,
-    );
-    const targetIndex = visibleMods.findIndex((item) => item.id === targetModId);
-
-    if (sourceIndex === -1 || targetIndex === -1) {
+    try {
+        await manager.moveModRelativeToTarget(
+            managerDraggingModId.value,
+            targetModId,
+            dragPosition.value,
+            manager.filteredMods.map((item) => item.id),
+        );
         clearDragState();
-        return;
+        ElMessage.success("Mod 顺序已更新。");
+    } catch (error: unknown) {
+        clearDragState();
+        ElMessage.error(
+            error instanceof Error ? error.message : "调整 Mod 顺序失败。",
+        );
     }
-
-    const reorderedVisibleMods = [...visibleMods];
-    const [movingMod] = reorderedVisibleMods.splice(sourceIndex, 1);
-    let insertIndex = targetIndex;
-
-    if (sourceIndex < targetIndex) {
-        insertIndex -= 1;
-    }
-
-    if (dragPosition.value === "after") {
-        insertIndex += 1;
-    }
-
-    reorderedVisibleMods.splice(insertIndex, 0, movingMod);
-
-    const visibleIdSet = new Set(visibleMods.map((item) => item.id));
-    const orderedAllMods = [...manager.managerModList].sort(
-        (left, right) => (left.weight ?? 0) - (right.weight ?? 0),
-    );
-    let visibleIndex = 0;
-
-    // 仅重排当前可见子集，隐藏项保持原有相对位置不变。
-    manager.managerModList = orderedAllMods.map((item, index) => {
-        const nextItem = visibleIdSet.has(item.id)
-            ? reorderedVisibleMods[visibleIndex++]
-            : item;
-
-        return {
-            ...nextItem,
-            weight: index + 1,
-        };
-    });
-
-    await manager.saveManagerData();
-    clearDragState();
-    ElMessage.success("Mod 顺序已更新。");
 }
 
 function handleWindowPointerMove(event: PointerEvent) {
@@ -557,11 +636,17 @@ onUnmounted(() => {
     window.removeEventListener("pointerup", handleWindowPointerUp);
     window.removeEventListener("pointercancel", handleWindowPointerCancel);
 });
+
+watch(showSortDialog, (opened) => {
+    if (!opened) {
+        resetSortDialog();
+    }
+});
 </script>
 <template>
     <Card>
         <CardContent class="max-h-[calc(100vh-430px)] overflow-auto">
-            <Table>
+            <Table v-if="!managerGridEnabled">
                 <TableHeader>
                     <TableRow>
                         <TableHead v-if="manager.selectionMode" class="w-12">
@@ -588,7 +673,9 @@ onUnmounted(() => {
                             <input
                                 type="checkbox"
                                 class="h-4 w-4 accent-primary"
-                                :checked="manager.selectionIds.includes(item.id)"
+                                :checked="
+                                    manager.selectionIds.includes(item.id)
+                                "
                                 @change="handleSelectionChange($event, item.id)"
                             />
                         </TableCell>
@@ -604,19 +691,19 @@ onUnmounted(() => {
                                     <IconGripVertical class="w-4 h-4" />
                                 </span>
                                 <Badge
-                                    variant="outline"
                                     v-for="tag in item.tags"
                                     :key="tag.name"
+                                    variant="outline"
                                 >
                                     <div
                                         class="h-2.5 w-2.5 rounded-full"
-                                        :style="{
-                                            backgroundColor: tag.color,
-                                        }"
+                                        :style="{ backgroundColor: tag.color }"
                                     ></div>
                                     {{ tag.name }}
                                 </Badge>
-                                <span class="font-medium">{{ item.modName }}</span>
+                                <span class="font-medium">{{
+                                    item.modName
+                                }}</span>
                                 <Badge
                                     v-if="item.isUpdate"
                                     variant="outline"
@@ -630,10 +717,12 @@ onUnmounted(() => {
                         <TableCell>
                             <Select
                                 :model-value="item.modType"
+                                :disabled="
+                                    item.isInstalled || isOperating(item.id)
+                                "
                                 @update:model-value="
                                     updateModType(item, $event)
                                 "
-                                :disabled="item.isInstalled || isOperating(item.id)"
                             >
                                 <SelectTrigger>
                                     <SelectValue></SelectValue>
@@ -644,8 +733,9 @@ onUnmounted(() => {
                                             ?.modType"
                                         :key="type.id"
                                         :value="type.id"
-                                        >{{ type.name }}</SelectItem
                                     >
+                                        {{ type.name }}
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </TableCell>
@@ -654,10 +744,10 @@ onUnmounted(() => {
                                 <Switch
                                     :id="`is-installed-${item.id}`"
                                     :model-value="item.isInstalled"
+                                    :disabled="isOperating(item.id)"
                                     @update:model-value="
                                         updateModInstalled(item, $event)
                                     "
-                                    :disabled="isOperating(item.id)"
                                 />
                                 <Label :for="`is-installed-${item.id}`">
                                     {{
@@ -671,20 +761,21 @@ onUnmounted(() => {
                             </div>
                         </TableCell>
                         <TableCell>
-                            <HoverCard v-if="item.cover">
+                            <HoverCard>
                                 <HoverCardTrigger as-child>
                                     <Button variant="ghost" size="icon">
                                         <IconEye class="w-4 h-4" />
                                     </Button>
                                 </HoverCardTrigger>
-                                <HoverCardContent>
-                                    <AsyncImage :src="item.cover" />
+                                <HoverCardContent class="w-80">
+                                    <AsyncImage
+                                        :src="getModCoverSrc(item)"
+                                        :fallback-src="MANAGER_FALLBACK_COVER"
+                                        :alt="`${item.modName} 封面`"
+                                        class="h-auto w-full rounded-md object-cover"
+                                    />
                                 </HoverCardContent>
                             </HoverCard>
-                            <IconEyeOff
-                                v-else
-                                class="w-4 h-4 text-muted-foreground"
-                            />
                         </TableCell>
                         <TableCell>
                             <DropdownMenu>
@@ -713,6 +804,18 @@ onUnmounted(() => {
                                         打开
                                         <DropdownMenuShortcut>
                                             <IconFolderOpen />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        :disabled="
+                                            manager.managerModList.length < 2
+                                        "
+                                        @click="openSortDialog(item)"
+                                    >
+                                        调整排序
+                                        <DropdownMenuShortcut>
+                                            <IconGripVertical />
                                         </DropdownMenuShortcut>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem
@@ -745,16 +848,18 @@ onUnmounted(() => {
                                             :href="item.modWebsite"
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            >网址
+                                        >
+                                            网址
                                             <DropdownMenuShortcut>
                                                 <IconGlobe />
                                             </DropdownMenuShortcut>
                                         </a>
                                     </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        @click="deleteMod(item)"
                                         :disabled="deletingModId === item.id"
+                                        @click="deleteMod(item)"
                                     >
                                         删除
                                         <DropdownMenuShortcut>
@@ -769,6 +874,250 @@ onUnmounted(() => {
                     </TableRow>
                 </TableBody>
             </Table>
+
+            <div
+                v-else
+                class="grid gap-4 py-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+            >
+                <article
+                    v-for="item in manager.filteredMods"
+                    :key="item.id"
+                    :class="getItemContainerClass(item)"
+                    class="overflow-hidden rounded-xl border bg-card shadow-sm transition-colors"
+                    @pointerenter="handleRowPointerEnter(item.id)"
+                    @pointermove="handleRowPointerMove($event, item.id)"
+                    @pointerleave="handleRowPointerLeave(item.id)"
+                >
+                    <div
+                        class="relative aspect-video overflow-hidden bg-muted/20"
+                    >
+                        <AsyncImage
+                            :src="getModCoverSrc(item)"
+                            :fallback-src="MANAGER_FALLBACK_COVER"
+                            :alt="`${item.modName} 封面`"
+                            class="h-full w-full object-cover"
+                        />
+                        <Badge
+                            v-if="item.isUpdate"
+                            variant="outline"
+                            class="absolute left-3 top-3 border-emerald-500/40 bg-emerald-500/10 text-white backdrop-blur"
+                        >
+                            可更新
+                        </Badge>
+                        <div
+                            class="absolute inset-x-0 bottom-0 bg-linear-to-t from-black/75 via-black/20 to-transparent p-3"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div
+                                        class="truncate font-medium text-white"
+                                    >
+                                        {{ item.modName }}
+                                    </div>
+                                    <div class="text-xs text-white/80">
+                                        {{ item.modVersion }}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input
+                                        v-if="manager.selectionMode"
+                                        type="checkbox"
+                                        class="h-4 w-4 accent-primary"
+                                        :checked="
+                                            manager.selectionIds.includes(
+                                                item.id,
+                                            )
+                                        "
+                                        @change="
+                                            handleSelectionChange(
+                                                $event,
+                                                item.id,
+                                            )
+                                        "
+                                    />
+                                    <span
+                                        v-if="!manager.selectionMode"
+                                        class="inline-flex cursor-grab text-white/90 active:cursor-grabbing"
+                                        @pointerdown="
+                                            handleModPointerDown(
+                                                $event,
+                                                item.id,
+                                            )
+                                        "
+                                    >
+                                        <IconGripVertical class="w-4 h-4" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-3 p-4">
+                        <div
+                            v-if="item.tags?.length"
+                            class="flex flex-wrap gap-2"
+                        >
+                            <Badge
+                                v-for="tag in item.tags"
+                                :key="tag.name"
+                                variant="outline"
+                            >
+                                <div
+                                    class="h-2.5 w-2.5 rounded-full"
+                                    :style="{ backgroundColor: tag.color }"
+                                ></div>
+                                {{ tag.name }}
+                            </Badge>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <Label class="text-xs text-muted-foreground"
+                                    >类型</Label
+                                >
+                                <Select
+                                    :model-value="item.modType"
+                                    :disabled="
+                                        item.isInstalled || isOperating(item.id)
+                                    "
+                                    @update:model-value="
+                                        updateModType(item, $event)
+                                    "
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue></SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="type in manager.managerGame
+                                                ?.modType"
+                                            :key="type.id"
+                                            :value="type.id"
+                                        >
+                                            {{ type.name }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
+                                <div class="text-sm text-muted-foreground">
+                                    {{
+                                        isOperating(item.id)
+                                            ? "处理中"
+                                            : item.isInstalled
+                                              ? "已安装"
+                                              : "未安装"
+                                    }}
+                                </div>
+                                <Switch
+                                    :id="`grid-installed-${item.id}`"
+                                    :model-value="item.isInstalled"
+                                    :disabled="isOperating(item.id)"
+                                    @update:model-value="
+                                        updateModInstalled(item, $event)
+                                    "
+                                />
+                            </div>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        :disabled="
+                                            deletingModId === item.id ||
+                                            isUpdateing(item.id)
+                                        "
+                                    >
+                                        <IconMenu class="w-4 h-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        @click="openEditDialog(item)"
+                                    >
+                                        编辑
+                                        <DropdownMenuShortcut>
+                                            <IconSquarePen />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem @click="open(item)">
+                                        打开
+                                        <DropdownMenuShortcut>
+                                            <IconFolderOpen />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        :disabled="
+                                            manager.managerModList.length < 2
+                                        "
+                                        @click="openSortDialog(item)"
+                                    >
+                                        调整排序
+                                        <DropdownMenuShortcut>
+                                            <IconGripVertical />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        v-if="
+                                            item.from === 'GlossMod' &&
+                                            item.webId
+                                        "
+                                        @click="queueModUpdate(item)"
+                                    >
+                                        {{
+                                            isUpdateing(item.id)
+                                                ? "更新中..."
+                                                : "更新"
+                                        }}
+                                        <DropdownMenuShortcut>
+                                            <IconRefreshCw
+                                                :class="
+                                                    isUpdateing(item.id)
+                                                        ? 'animate-spin'
+                                                        : ''
+                                                "
+                                            />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        v-if="item.modWebsite"
+                                        as-child
+                                    >
+                                        <a
+                                            :href="item.modWebsite"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            网址
+                                            <DropdownMenuShortcut>
+                                                <IconGlobe />
+                                            </DropdownMenuShortcut>
+                                        </a>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        variant="destructive"
+                                        :disabled="deletingModId === item.id"
+                                        @click="deleteMod(item)"
+                                    >
+                                        删除
+                                        <DropdownMenuShortcut>
+                                            <IconTrash
+                                                class="text-destructive"
+                                            />
+                                        </DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+                </article>
+            </div>
         </CardContent>
     </Card>
     <Dialog v-model:open="showEditDialog" modal>
@@ -835,6 +1184,81 @@ onUnmounted(() => {
                     取消
                 </Button>
                 <Button @click="saveEdit">保存</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    <Dialog v-model:open="showSortDialog" modal>
+        <DialogContent class="sm:max-w-lg" @escape-key-down="resetSortDialog">
+            <DialogHeader>
+                <DialogTitle>调整 Mod 排序</DialogTitle>
+                <DialogDescription>
+                    选择一个目标 Mod，并决定把当前 Mod 放到它的上方或下方。
+                </DialogDescription>
+            </DialogHeader>
+            <div class="grid gap-4 py-2">
+                <div class="grid gap-2">
+                    <Label for="sort-current-mod">当前 Mod</Label>
+                    <Input
+                        id="sort-current-mod"
+                        :model-value="sortingMod?.modName ?? ''"
+                        disabled
+                    />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="sort-target-search">目标筛选</Label>
+                    <Input
+                        id="sort-target-search"
+                        v-model="sortTargetKeyword"
+                        placeholder="输入名称、版本或作者筛选目标 Mod"
+                    />
+                </div>
+                <div class="grid gap-2">
+                    <Label for="sort-target-mod">排序目标</Label>
+                    <Select v-model="sortTargetModId">
+                        <SelectTrigger id="sort-target-mod">
+                            <SelectValue
+                                placeholder="请选择目标 Mod"
+                            ></SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="item in sortTargetOptions"
+                                :key="item.id"
+                                :value="item.id"
+                            >
+                                {{ getSortTargetLabel(item) }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p class="text-xs text-muted-foreground">
+                        目标列表按当前排序展示，便于精确定位插入位置。
+                    </p>
+                </div>
+                <div class="grid gap-2">
+                    <Label for="sort-placement">插入位置</Label>
+                    <Select v-model="sortPlacement">
+                        <SelectTrigger id="sort-placement">
+                            <SelectValue></SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="before">放到目标上方</SelectItem>
+                            <SelectItem value="after">放到目标下方</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" @click="resetSortDialog">取消</Button>
+                <Button
+                    :disabled="
+                        !sortingMod ||
+                        sortTargetOptions.length === 0 ||
+                        sortTargetModId === null
+                    "
+                    @click="confirmSortMove"
+                >
+                    确认调整
+                </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>

@@ -5,6 +5,7 @@ import { computed } from "vue";
 import { ref } from "vue";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { FileHandler } from "@/lib/FileHandler";
+import { Log } from "@/lib/log";
 import { Manager } from "@/lib/Manager";
 import { PersistentStore } from "@/lib/persistent-store";
 import { ScanGame } from "@/lib/scan-game";
@@ -479,6 +480,13 @@ export const mcpResourceDefinitions: readonly IMcpResourceDefinition[] = [
         description: "当前管理游戏的安装目录。",
         mimeType: "application/json",
     },
+    {
+        name: "latest-log",
+        uri: "logs://latest-log",
+        title: "最新应用日志",
+        description: "当前会话对应的 latest.log 文本内容。",
+        mimeType: "text/plain",
+    },
 ] as const;
 
 export const mcpPromptDefinitions: readonly IMcpPromptDefinition[] = [
@@ -494,7 +502,8 @@ export const mcpPromptDefinitions: readonly IMcpPromptDefinition[] = [
         arguments: [
             {
                 name: "goal",
-                description: "可选。补充这次整理的目标，例如提升稳定性或精简数量。",
+                description:
+                    "可选。补充这次整理的目标，例如提升稳定性或精简数量。",
             },
         ],
     },
@@ -779,7 +788,9 @@ function createFeatureItemDisabledError(featureName: string, itemName: string) {
     return `${featureName}「${itemName}」已关闭。请先在 MCP 页面中重新启用后再试。`;
 }
 
-async function ensureSupportedGamesLoaded(manager: ReturnType<typeof useManager>) {
+async function ensureSupportedGamesLoaded(
+    manager: ReturnType<typeof useManager>,
+) {
     if (manager.supportedGames.length > 0) {
         return;
     }
@@ -999,15 +1010,21 @@ async function handleToolCall(
                     ...targetGame,
                     gamePath,
                 } satisfies ISupportedGames;
-                const existingIndex = manager.managerGameList.findIndex((game) => {
-                    return game.GlossGameId === GlossGameId;
-                });
+                const existingIndex = manager.managerGameList.findIndex(
+                    (game) => {
+                        return game.GlossGameId === GlossGameId;
+                    },
+                );
 
                 manager.managerGame = nextGame;
                 if (existingIndex >= 0) {
-                    manager.managerGameList = manager.managerGameList.map((game) => {
-                        return game.GlossGameId === GlossGameId ? nextGame : game;
-                    });
+                    manager.managerGameList = manager.managerGameList.map(
+                        (game) => {
+                            return game.GlossGameId === GlossGameId
+                                ? nextGame
+                                : game;
+                        },
+                    );
                 } else {
                     manager.managerGameList = [
                         ...manager.managerGameList,
@@ -1145,9 +1162,11 @@ async function handleToolCall(
                     throw new Error("当前没有管理中的游戏，无法查询前置依赖。");
                 }
 
-                const dependencies = (await fetchGlossGamePlugins()).filter((item) => {
-                    return item.game_id.includes(requestedGlossGameId);
-                });
+                const dependencies = (await fetchGlossGamePlugins()).filter(
+                    (item) => {
+                        return item.game_id.includes(requestedGlossGameId);
+                    },
+                );
                 return createToolResult({
                     dependencies: toSerializable(dependencies),
                     count: dependencies.length,
@@ -1177,7 +1196,11 @@ async function handleToolCall(
                     previousName: tag.name,
                 });
 
-                if (!(targetMod.tags ?? []).some((item) => item.name === tag.name)) {
+                if (
+                    !(targetMod.tags ?? []).some(
+                        (item) => item.name === tag.name,
+                    )
+                ) {
                     await manager.toggleTagOnMod(modId, tag.name);
                 }
 
@@ -1198,7 +1221,9 @@ async function handleToolCall(
                     throw new Error(`未找到 ID 为 ${modId} 的 Mod。`);
                 }
 
-                if ((targetMod.tags ?? []).some((tag) => tag.name === tagName)) {
+                if (
+                    (targetMod.tags ?? []).some((tag) => tag.name === tagName)
+                ) {
                     await manager.toggleTagOnMod(modId, tagName);
                 }
 
@@ -1228,11 +1253,15 @@ async function handleToolCall(
                 });
             }
             case "sort-mods": {
-                const modIds = [...new Set(toNumberArray(args.modIds, "modIds"))];
+                const modIds = [
+                    ...new Set(toNumberArray(args.modIds, "modIds")),
+                ];
                 const { manager } = await ensureManagerRuntimeLoaded();
-                const currentMods = [...manager.managerModList].sort((left, right) => {
-                    return (left.weight ?? 0) - (right.weight ?? 0);
-                });
+                const currentMods = [...manager.managerModList].sort(
+                    (left, right) => {
+                        return (left.weight ?? 0) - (right.weight ?? 0);
+                    },
+                );
                 const modMap = new Map(
                     currentMods.map((item) => {
                         return [item.id, item] as const;
@@ -1314,8 +1343,14 @@ async function handleToolCall(
                 });
             }
             case "copy-file-to-location": {
-                const sourcePath = toRequiredString(args.sourcePath, "sourcePath");
-                const targetPath = toRequiredString(args.targetPath, "targetPath");
+                const sourcePath = toRequiredString(
+                    args.sourcePath,
+                    "sourcePath",
+                );
+                const targetPath = toRequiredString(
+                    args.targetPath,
+                    "targetPath",
+                );
 
                 if (!(await FileHandler.fileExists(sourcePath))) {
                     throw new Error("sourcePath 不存在。");
@@ -1333,8 +1368,14 @@ async function handleToolCall(
                 });
             }
             case "copy-folder-to-location": {
-                const sourcePath = toRequiredString(args.sourcePath, "sourcePath");
-                const targetPath = toRequiredString(args.targetPath, "targetPath");
+                const sourcePath = toRequiredString(
+                    args.sourcePath,
+                    "sourcePath",
+                );
+                const targetPath = toRequiredString(
+                    args.targetPath,
+                    "targetPath",
+                );
 
                 if (!(await FileHandler.isDir(sourcePath))) {
                     throw new Error("sourcePath 不是有效目录。");
@@ -1384,6 +1425,10 @@ async function handleToolCall(
 }
 
 async function handleResourceRead(uri: string) {
+    if (uri === "logs://latest-log") {
+        return await Log.readLatestLog();
+    }
+
     const { manager } = await ensureManagerRuntimeLoaded();
 
     switch (uri) {
@@ -1405,9 +1450,11 @@ async function handleResourceRead(uri: string) {
                 throw new Error("当前没有管理中的游戏，无法读取前置依赖。");
             }
 
-            const dependencies = (await fetchGlossGamePlugins()).filter((item) => {
-                return item.game_id.includes(currentGlossGameId);
-            });
+            const dependencies = (await fetchGlossGamePlugins()).filter(
+                (item) => {
+                    return item.game_id.includes(currentGlossGameId);
+                },
+            );
 
             return {
                 dependencies: toSerializable(dependencies),
@@ -1476,7 +1523,11 @@ async function dispatchRequest(
     request: unknown,
 ): Promise<IMcpJsonRpcResponse | null> {
     if (!isPlainObject(request) || typeof request.method !== "string") {
-        return createJsonRpcError(null, INVALID_REQUEST, "无效的 JSON-RPC 请求。");
+        return createJsonRpcError(
+            null,
+            INVALID_REQUEST,
+            "无效的 JSON-RPC 请求。",
+        );
     }
 
     const normalizedRequest = request as unknown as IMcpJsonRpcRequest;
@@ -1543,7 +1594,10 @@ async function dispatchRequest(
             const toolDefinition = mcpToolDefinitions.find((item) => {
                 return item.name === toolName;
             });
-            if (toolDefinition && !isMcpItemEnabled("tool", toolDefinition.name)) {
+            if (
+                toolDefinition &&
+                !isMcpItemEnabled("tool", toolDefinition.name)
+            ) {
                 return createJsonRpcError(
                     requestId,
                     METHOD_NOT_FOUND,
@@ -1611,12 +1665,17 @@ async function dispatchRequest(
 
             try {
                 const data = await handleResourceRead(uri);
+                const mimeType =
+                    resourceDefinition?.mimeType ?? "application/json";
                 return createJsonRpcResult(requestId, {
                     contents: [
                         {
                             uri,
-                            mimeType: "application/json",
-                            text: JSON.stringify(data, null, 2),
+                            mimeType,
+                            text:
+                                mimeType === "application/json"
+                                    ? JSON.stringify(data, null, 2)
+                                    : formatStructuredText(data),
                         },
                     ],
                 });
@@ -1794,7 +1853,10 @@ async function initialize(pinia?: Pinia) {
             },
         );
         await listen<IMcpServerSnapshot>(MCP_STATUS_EVENT, (event) => {
-            if (typeof event.payload.port === "number" && event.payload.port > 0) {
+            if (
+                typeof event.payload.port === "number" &&
+                event.payload.port > 0
+            ) {
                 mcpPort.value = event.payload.port;
             }
 

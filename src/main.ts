@@ -4,6 +4,7 @@ import App from "@/App.vue";
 import router from "@/routes";
 import "@/style.css";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
+import { initializeAppUpdater } from "@/lib/app-updater";
 import { initializeGlossDownloadMonitor } from "@/lib/gloss-download-monitor";
 import { Log } from "@/lib/log";
 import { McpService } from "@/lib/mcp-service";
@@ -29,6 +30,7 @@ async function bootstrap() {
     app.mount("#app");
 
     initializeGlossDownloadMonitor(useManager(pinia), useSettings(pinia));
+    initializeAppUpdater();
 
     void Aria2Rpc.autoStartFromSettings();
     await Log.info("应用启动完成。");

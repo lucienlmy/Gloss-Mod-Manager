@@ -49,6 +49,7 @@ declare global {
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
   const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
+  const checkForAppUpdates: typeof import('./lib/app-updater').checkForAppUpdates
   const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
   const clearManagerInternalDrag: typeof import('./lib/manager-internal-drag').clearManagerInternalDrag
   const cloneDefinition: typeof import('./lib/custom-definition-utils').cloneDefinition
@@ -113,6 +114,7 @@ declare global {
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
   const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
   const init: typeof import('./lib/global').init
+  const initializeAppUpdater: typeof import('./lib/app-updater').initializeAppUpdater
   const initializeAutoStart: typeof import('./lib/auto-start').initializeAutoStart
   const initializeGlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').initializeGlossDownloadMonitor
   const initializeTheme: typeof import('./lib/theme').initializeTheme

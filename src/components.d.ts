@@ -102,7 +102,6 @@ declare module 'vue' {
     IconEllipsis: typeof import('lucide-vue-next')['Ellipsis']
     IconExternalLink: typeof import('lucide-vue-next')['ExternalLink']
     IconEye: typeof import('lucide-vue-next')['Eye']
-    IconEyeOff: typeof import('lucide-vue-next')['EyeOff']
     IconFileUp: typeof import('lucide-vue-next')['FileUp']
     IconFilterX: typeof import('lucide-vue-next')['FilterX']
     IconFolderOpen: typeof import('lucide-vue-next')['FolderOpen']

@@ -17,8 +17,7 @@ fn format_local_timestamp() -> String {
 }
 
 fn build_session_log_file_name() -> String {
-    let file_name_format =
-        format_description!("[year]-[month]-[day]_[hour]-[minute]-[second]");
+    let file_name_format = format_description!("[year]-[month]-[day]_[hour]-[minute]-[second]");
 
     OffsetDateTime::now_local()
         .unwrap_or_else(|_| OffsetDateTime::now_utc())
@@ -30,15 +29,16 @@ fn resolve_app_log_directory(bundle_identifier: &str) -> io::Result<PathBuf> {
     #[cfg(target_os = "macos")]
     {
         let home_directory = std::env::var_os("HOME").ok_or_else(|| {
-            io::Error::new(io::ErrorKind::NotFound, "HOME environment variable is missing")
+            io::Error::new(
+                io::ErrorKind::NotFound,
+                "HOME environment variable is missing",
+            )
         })?;
 
-        return Ok(
-            PathBuf::from(home_directory)
-                .join("Library")
-                .join("Logs")
-                .join(bundle_identifier),
-        );
+        return Ok(PathBuf::from(home_directory)
+            .join("Library")
+            .join("Logs")
+            .join(bundle_identifier));
     }
 
     #[cfg(target_os = "windows")]
@@ -50,26 +50,31 @@ fn resolve_app_log_directory(bundle_identifier: &str) -> io::Result<PathBuf> {
             )
         })?;
 
-        return Ok(PathBuf::from(local_app_data).join(bundle_identifier).join("logs"));
+        return Ok(PathBuf::from(local_app_data)
+            .join(bundle_identifier)
+            .join("logs"));
     }
 
     #[cfg(all(not(target_os = "macos"), not(target_os = "windows")))]
     {
         if let Some(data_home) = std::env::var_os("XDG_DATA_HOME") {
-            return Ok(PathBuf::from(data_home).join(bundle_identifier).join("logs"));
+            return Ok(PathBuf::from(data_home)
+                .join(bundle_identifier)
+                .join("logs"));
         }
 
         let home_directory = std::env::var_os("HOME").ok_or_else(|| {
-            io::Error::new(io::ErrorKind::NotFound, "HOME environment variable is missing")
+            io::Error::new(
+                io::ErrorKind::NotFound,
+                "HOME environment variable is missing",
+            )
         })?;
 
-        return Ok(
-            PathBuf::from(home_directory)
-                .join(".local")
-                .join("share")
-                .join(bundle_identifier)
-                .join("logs"),
-        );
+        return Ok(PathBuf::from(home_directory)
+            .join(".local")
+            .join("share")
+            .join(bundle_identifier)
+            .join("logs"));
     }
 }
 
@@ -173,6 +178,8 @@ pub fn run() {
                 app.handle().plugin(tauri_plugin_persisted_scope::init())?;
                 app.handle()
                     .plugin(tauri_plugin_window_state::Builder::default().build())?;
+                app.handle()
+                    .plugin(tauri_plugin_updater::Builder::new().build())?;
             }
 
             log::info!(target: "gmm::startup", "日志系统初始化完成。");

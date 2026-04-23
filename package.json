@@ -1,8 +1,10 @@
 {
     "name": "gloss-mod-manager",
-    "private": true,
     "version": "2.0.0",
     "type": "module",
+    "author": "小莫sky <xm@aoe.top>",
+    "license": "LGPL-3.0-or-later",
+    "private": true,
     "scripts": {
         "prepare:sidecars": "tsx --tsconfig tsconfig.scripts.json scripts/prepare-sidecars.ts",
         "postinstall": "npm run prepare:sidecars",

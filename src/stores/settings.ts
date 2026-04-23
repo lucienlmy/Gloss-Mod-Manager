@@ -98,14 +98,17 @@ export const useSettings = defineStore("Settings", () => {
         "closeSoftLinks",
         false,
     );
+    const managerGridEnabled = PersistentStore.useValue<boolean>(
+        "managerGridEnabled",
+        false,
+    );
     const mcpToolsEnabled = PersistentStore.useValue<boolean>(
         "mcpToolsEnabled",
         true,
     );
-    const mcpToolItemEnabledMap = PersistentStore.useValue<Record<string, boolean>>(
-        "mcpToolItemEnabledMap",
-        {},
-    );
+    const mcpToolItemEnabledMap = PersistentStore.useValue<
+        Record<string, boolean>
+    >("mcpToolItemEnabledMap", {});
     const mcpResourcesEnabled = PersistentStore.useValue<boolean>(
         "mcpResourcesEnabled",
         true,
@@ -297,6 +300,7 @@ export const useSettings = defineStore("Settings", () => {
         modifiableDuringGame,
         showPreloadList,
         closeSoftLinks,
+        managerGridEnabled,
         mcpToolsEnabled,
         mcpToolItemEnabledMap,
         mcpResourcesEnabled,

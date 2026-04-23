@@ -106,5 +106,12 @@ yarn tauri build -- --bundles nsis,msi --config src-tauri/tauri.microsoftstore.c
 
 ## 备注
 
+- 当前工作流使用 `actions/checkout@v6` 与 `actions/setup-node@v6`，以避免 GitHub Actions 对 Node.js 20 runtime 的弃用告警
+- 当前工作流继续使用 `tauri-apps/tauri-action@v0`，对应 updater 配置项为 `includeUpdaterJson`
+- macOS 依赖安装步骤仅在 Homebrew 缺少对应 formula 时才执行，避免 `already installed and up-to-date` 警告注解
 - 当前工作流显式使用 `macos-13` 与 `macos-14`，避免 sidecar 在交叉构建时生成错误架构的内嵌二进制
-- `uploadUpdaterJson` 当前设为 `false`，因为仓库尚未配置基于 GitHub Releases 的 updater 元数据发布链路
+- 当前工作流已启用 `includeUpdaterJson: true`，并通过附加配置 `src-tauri/tauri.release.conf.json` 仅在 CI 发布时开启 `createUpdaterArtifacts`
+- 默认的 `yarn tauri build` 不会生成 updater 签名产物，因此不会因为本地缺少 `TAURI_SIGNING_PRIVATE_KEY` 而失败
+- GitHub Releases 静态 JSON 端点使用 `https://github.com/GlossMod/Gloss-Mod-Manager/releases/latest/download/latest.json`
+- updater 公钥当前在 `src-tauri/src/lib.rs` 中通过 Rust builder 注入，仓库内仍使用显式占位符，正式发布前必须替换为真实的 Tauri 公钥 PEM 文本
+- 只有在发布构建环境中提供 `TAURI_SIGNING_PRIVATE_KEY` 与 `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` 时，`latest.json` 和对应签名构件才能被正确生成

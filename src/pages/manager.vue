@@ -18,6 +18,8 @@ import {
     FolderOpen,
     FolderPlus,
     Gamepad2,
+    LayoutGrid,
+    List as ListIcon,
     Package,
     RefreshCw,
     Search,
@@ -49,6 +51,8 @@ interface IManagerGmmDialogExpose {
 const manager = useManager();
 const router = useRouter();
 const { selectionMode, selectionIds } = storeToRefs(manager);
+const settings = useSettings();
+const { managerGridEnabled } = storeToRefs(settings);
 
 const storagePath = PersistentStore.useValue<string>("storagePath", "");
 const disableSymlinkInstall = PersistentStore.useValue<boolean>(
@@ -156,7 +160,9 @@ function resolveDroppedSourceType(filePath: string, isDirectory: boolean) {
 }
 
 async function createDroppedImportSources(paths: string[]) {
-    const uniquePaths = [...new Set(paths.map((item) => item.trim()).filter(Boolean))];
+    const uniquePaths = [
+        ...new Set(paths.map((item) => item.trim()).filter(Boolean)),
+    ];
 
     return Promise.all(
         uniquePaths.map(async (path) => {
@@ -615,10 +621,7 @@ function openGamesPage() {
 }
 </script>
 <template>
-    <div
-        ref="dragImportRootRef"
-        class="relative flex flex-col gap-6"
-    >
+    <div ref="dragImportRootRef" class="relative flex flex-col gap-6">
         <Card v-if="!storagePath">
             <CardHeader>
                 <CardTitle>先配置储存路径</CardTitle>
@@ -724,6 +727,24 @@ function openGamesPage() {
                                 <CheckSquare class="h-4 w-4" />
                                 多选
                             </Button>
+                            <Button
+                                :variant="
+                                    managerGridEnabled ? 'default' : 'outline'
+                                "
+                                @click="
+                                    managerGridEnabled = !managerGridEnabled
+                                "
+                            >
+                                <component
+                                    :is="
+                                        managerGridEnabled
+                                            ? ListIcon
+                                            : LayoutGrid
+                                    "
+                                    class="h-4 w-4"
+                                />
+                                {{ managerGridEnabled ? "列表" : "网格" }}
+                            </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger>
                                     <Button variant="outline">
@@ -744,7 +765,9 @@ function openGamesPage() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        :disabled="!manager.managerModList.length"
+                                        :disabled="
+                                            !manager.managerModList.length
+                                        "
                                         @click="openGmmExportDialog"
                                     >
                                         <Upload class="h-4 w-4" />
