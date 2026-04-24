@@ -24,7 +24,7 @@
     },
     "bundle": {
         "active": true,
-        "targets": "nsis",
+        "targets": "all",
         "homepage": "https://github.com/GlossMod/Gloss-Mod-Manager",
         "publisher": "小莫sky",
         "license": "LGPL-3.0-or-later",
