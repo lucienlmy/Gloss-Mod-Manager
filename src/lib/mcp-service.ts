@@ -16,6 +16,7 @@ import { useManager } from "@/stores/manager";
 import { useSettings } from "@/stores/settings";
 
 const DEFAULT_MCP_PORT = 36412;
+const MCP_SERVER_ENABLED_KEY = "mcpServerEnabled";
 const JSON_RPC_VERSION = "2.0";
 const DEFAULT_PROTOCOL_VERSION = "2025-03-26";
 const SUPPORTED_PROTOCOL_VERSIONS = new Set(["2025-03-26", "2024-11-05"]);
@@ -529,6 +530,7 @@ const isBusy = computed(() => {
 
 let activePinia: Pinia | null = null;
 let initPromise: Promise<void> | null = null;
+let autoStartPromise: Promise<void> | null = null;
 
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : String(error);
@@ -693,6 +695,21 @@ async function syncServerState() {
     }
 
     serverStatus.value = snapshot.status;
+}
+
+async function getStoredServerEnabledState() {
+    return Boolean(
+        await PersistentStore.get<boolean>(MCP_SERVER_ENABLED_KEY, false),
+    );
+}
+
+async function persistServerEnabledState(enabled: boolean) {
+    try {
+        await PersistentStore.set(MCP_SERVER_ENABLED_KEY, enabled);
+    } catch (error: unknown) {
+        console.error("写入 MCP 服务启用状态失败");
+        console.error(error);
+    }
 }
 
 function getStores() {
@@ -1872,8 +1889,44 @@ async function initialize(pinia?: Pinia) {
     await initPromise;
 }
 
+async function autoStartFromSettings() {
+    await initialize();
+
+    if (autoStartPromise) {
+        await autoStartPromise;
+        return;
+    }
+
+    autoStartPromise = (async () => {
+        if (isBusy.value || serverStatus.value !== "stopped") {
+            return;
+        }
+
+        // 单独持久化服务启停意图，应用重启后按上次状态恢复。
+        if (!(await getStoredServerEnabledState())) {
+            return;
+        }
+
+        try {
+            await start(mcpPort.value);
+        } catch (error: unknown) {
+            console.error("自动启动 MCP 服务失败");
+            console.error(error);
+        }
+    })().finally(() => {
+        autoStartPromise = null;
+    });
+
+    await autoStartPromise;
+}
+
 async function start(portValue: number = mcpPort.value) {
     await initialize();
+
+    if (serverStatus.value === "running") {
+        await persistServerEnabledState(true);
+        return;
+    }
 
     if (isBusy.value) {
         throw new Error("MCP 服务正在切换状态，请稍后再试。");
@@ -1895,6 +1948,7 @@ async function start(portValue: number = mcpPort.value) {
         if (typeof snapshot.port === "number" && snapshot.port > 0) {
             mcpPort.value = snapshot.port;
         }
+        await persistServerEnabledState(true);
     } catch (error: unknown) {
         serverStatus.value = "stopped";
         throw new Error(getErrorMessage(error));
@@ -1909,6 +1963,7 @@ async function stop() {
     }
 
     if (serverStatus.value === "stopped") {
+        await persistServerEnabledState(false);
         return;
     }
 
@@ -1917,6 +1972,7 @@ async function stop() {
     try {
         const snapshot = await invoke<IMcpServerSnapshot>("mcp_stop_server");
         serverStatus.value = snapshot.status;
+        await persistServerEnabledState(false);
     } catch (error: unknown) {
         serverStatus.value = "running";
         throw new Error(getErrorMessage(error));
@@ -1934,6 +1990,7 @@ function setPort(value: number) {
 }
 
 export const McpService = {
+    autoStartFromSettings,
     endpoint,
     initialize,
     isBusy,

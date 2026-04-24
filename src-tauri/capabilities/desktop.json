@@ -1,70 +1,66 @@
 {
-  "identifier": "desktop-capability",
-  "platforms": [
-    "macOS",
-    "windows",
-    "linux"
-  ],
-  "windows": [
-    "main"
-  ],
+    "identifier": "desktop-capability",
+    "platforms": ["macOS", "windows", "linux"],
+    "windows": ["main"],
     "permissions": [
+        "core:event:default",
         "autostart:default",
         "positioner:default",
         "cli:default",
-    "updater:default",
-    "window-state:default",
-    "dialog:default",
-    "log:default",
-    "opener:allow-open-path",
-    {
-      "identifier": "opener:allow-open-path",
-      "allow": [
+        "deep-link:default",
+        "updater:default",
+        "window-state:default",
+        "dialog:default",
+        "log:default",
+        "opener:allow-open-path",
         {
-          "path": "**"
-        }
-      ]
-    },
-    "fs:read-all",
-    "fs:write-all",
-    "fs:allow-size",
+            "identifier": "opener:allow-open-path",
+            "allow": [
+                {
+                    "path": "**"
+                }
+            ]
+        },
+        "fs:read-all",
+        "fs:write-all",
+        "fs:allow-size",
         {
-          "identifier": "fs:scope",
-          "allow": [
-            {
-              "path": "**"
-            }
-          ]
+            "identifier": "fs:scope",
+            "allow": [
+                {
+                    "path": "**"
+                }
+            ]
         },
         {
-          "identifier": "http:default",
-          "allow": [
-            {
-              "url": "https://*.3dmgame.com"
-            },
-            {
-              "url": "https://api.nexusmods.com"
-            },
-            {
-              "url": "https://api-router.nexusmods.com"
-            },
-            {
-              "url": "https://thunderstore.io"
-            },
-            {
-              "url": "https://*.modapi.io"
-            },
-            {
-              "url": "https://mod.io"
-            },
-            {
-              "url": "https://api.curseforge.com"
-            },
-            {
-              "url": "https://gamebanana.com"
-            }
-          ]
+            "identifier": "http:default",
+            "allow": [
+                {
+                    "url": "https://*.3dmgame.com"
+                },
+                {
+                    "url": "https://api.nexusmods.com"
+                },
+                {
+                    "url": "https://api-router.nexusmods.com"
+                },
+                {
+                    "url": "https://thunderstore.io"
+                },
+                {
+                    "url": "https://*.modapi.io"
+                },
+                {
+                    "url": "https://mod.io"
+                },
+                {
+                    "url": "https://api.curseforge.com"
+                },
+                {
+                    "url": "https://gamebanana.com"
+                }
+            ]
         },
         "http:default"
     ]
-  }
+}

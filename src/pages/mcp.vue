@@ -57,7 +57,8 @@ const portModel = computed<number>({
 const enabledModel = computed<boolean>({
     get: () => {
         return (
-            serverStatus.value === "running" || serverStatus.value === "starting"
+            serverStatus.value === "running" ||
+            serverStatus.value === "starting"
         );
     },
     set: async (enabled) => {
@@ -227,14 +228,17 @@ async function copyVscodeConfig() {
                         <span>MCP 服务</span>
                     </CardTitle>
                     <CardDescription class="max-w-3xl leading-6">
-                        在本机启动一个 MCP HTTP 端点，让 VS Code、Copilot
-                        MCP 或其他兼容客户端可以直接读取 Gloss Mod Manager
+                        在本机启动一个 MCP HTTP 端点，让 VS Code、Copilot MCP
+                        或其他兼容客户端可以直接读取 Gloss Mod Manager
                         的游戏、Mod 与文件操作能力。
                     </CardDescription>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">
-                    <Badge variant="outline" class="gap-2 rounded-full px-3 py-1">
+                    <Badge
+                        variant="outline"
+                        class="gap-2 rounded-full px-3 py-1"
+                    >
                         <component
                             :is="statusMeta.icon"
                             :class="['h-4 w-4', statusMeta.iconClass]"
@@ -254,13 +258,19 @@ async function copyVscodeConfig() {
 
             <CardContent class="flex flex-col gap-4">
                 <div class="flex flex-wrap gap-3">
-                    <Button variant="secondary" @click="showConfigDialog = true">
+                    <Button
+                        variant="secondary"
+                        @click="showConfigDialog = true"
+                    >
                         配置
                     </Button>
                     <Button variant="outline" @click="showToolsDialog = true">
                         Tools
                     </Button>
-                    <Button variant="outline" @click="showResourcesDialog = true">
+                    <Button
+                        variant="outline"
+                        @click="showResourcesDialog = true"
+                    >
                         Resources
                     </Button>
                     <Button variant="outline" @click="showPromptsDialog = true">
@@ -276,7 +286,9 @@ async function copyVscodeConfig() {
                         </div>
                     </div>
                     <div class="rounded-xl border p-4">
-                        <div class="text-sm text-muted-foreground">Resources</div>
+                        <div class="text-sm text-muted-foreground">
+                            Resources
+                        </div>
                         <div class="mt-2 text-sm font-medium">
                             {{ resourcesSummary }}
                         </div>
@@ -289,7 +301,9 @@ async function copyVscodeConfig() {
                     </div>
                 </div>
 
-                <div class="rounded-xl border bg-muted/35 p-4 text-sm leading-6">
+                <div
+                    class="rounded-xl border bg-muted/35 p-4 text-sm leading-6"
+                >
                     <div class="flex items-start gap-3">
                         <CircleAlert
                             class="mt-0.5 h-4 w-4 shrink-0 text-amber-500"
@@ -297,7 +311,9 @@ async function copyVscodeConfig() {
                         <div class="space-y-1 text-muted-foreground">
                             <p>
                                 服务仅监听本机
-                                <code class="rounded bg-background px-1.5 py-0.5">
+                                <code
+                                    class="rounded bg-background px-1.5 py-0.5"
+                                >
                                     127.0.0.1
                                 </code>
                                 ，运行中无法修改端口。
@@ -308,6 +324,25 @@ async function copyVscodeConfig() {
                             </p>
                         </div>
                     </div>
+                </div>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <h2>相关视频</h2>
+            </CardHeader>
+            <CardContent>
+                <div class="w-87 rounded-xl border-rounded-l overflow-hidden">
+                    <a
+                        href="https://www.bilibili.com/video/BV13K1YBtE6e/"
+                        target="_blank"
+                    >
+                        <img
+                            src="https://assets-mod.3dmgame.com/static/upload/mod/202511/MOD690873f6cb561.png@webp"
+                            class="video-img"
+                        />
+                    </a>
                 </div>
             </CardContent>
         </Card>
@@ -386,7 +421,8 @@ async function copyVscodeConfig() {
                 <DialogHeader>
                     <DialogTitle>可用 Tools</DialogTitle>
                     <DialogDescription>
-                        总开关控制整个 Tool 能力，下面的单项开关用于精确控制每个 Tool。
+                        总开关控制整个 Tool 能力，下面的单项开关用于精确控制每个
+                        Tool。
                     </DialogDescription>
                 </DialogHeader>
 
@@ -446,7 +482,8 @@ async function copyVscodeConfig() {
                 <DialogHeader>
                     <DialogTitle>可用 Resources</DialogTitle>
                     <DialogDescription>
-                        总开关控制整个 Resource 能力，下面的单项开关用于精确控制每个 Resource。
+                        总开关控制整个 Resource
+                        能力，下面的单项开关用于精确控制每个 Resource。
                     </DialogDescription>
                 </DialogHeader>
 
@@ -506,7 +543,8 @@ async function copyVscodeConfig() {
                 <DialogHeader>
                     <DialogTitle>可用 Prompts</DialogTitle>
                     <DialogDescription>
-                        总开关控制整个 Prompt 能力，下面的单项开关用于精确控制每个 Prompt。
+                        总开关控制整个 Prompt
+                        能力，下面的单项开关用于精确控制每个 Prompt。
                     </DialogDescription>
                 </DialogHeader>
 

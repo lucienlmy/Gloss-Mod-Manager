@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization
+    Culture="en-us"
+    Codepage="936"
+    xmlns="http://schemas.microsoft.com/wix/2006/localization"
+>
+    <String Id="TauriLanguage">1033</String>
+    <String Id="TauriCodepage">936</String>
+    <String Id="LaunchApp">Launch Gloss Mod Manager</String>
+    <String Id="DowngradeErrorMessage">A newer version of Gloss Mod Manager is already installed.</String>
+    <String Id="PathEnvVarFeature">Add the install location of the Gloss Mod Manager executable to
+        the PATH system environment variable. This allows the Gloss Mod Manager executable to be
+        called from any location.</String>
+    <String Id="InstallAppFeature">Installs Gloss Mod Manager.</String>
+</WixLocalization>

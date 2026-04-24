@@ -114,10 +114,12 @@ declare global {
   const hasThirdPartyMultipleFiles: typeof import('./lib/download-file-selection').hasThirdPartyMultipleFiles
   const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
+  const importGmmShareCode: typeof import('./lib/gmm-share-code').importGmmShareCode
   const importLocalModSources: typeof import('./lib/local-mod-import').importLocalModSources
   const init: typeof import('./lib/global').init
   const initializeAppUpdater: typeof import('./lib/app-updater').initializeAppUpdater
   const initializeAutoStart: typeof import('./lib/auto-start').initializeAutoStart
+  const initializeExternalLaunchHandling: typeof import('./lib/external-launch').initializeExternalLaunchHandling
   const initializeGlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').initializeGlossDownloadMonitor
   const initializeTheme: typeof import('./lib/theme').initializeTheme
   const inject: typeof import('vue').inject
@@ -173,10 +175,12 @@ declare global {
   const onUnmounted: typeof import('vue').onUnmounted
   const onUpdated: typeof import('vue').onUpdated
   const onWatcherCleanup: typeof import('vue').onWatcherCleanup
+  const parseGmmShareCode: typeof import('./lib/gmm-share-code').parseGmmShareCode
   const parseKeywordText: typeof import('./lib/custom-definition-utils').parseKeywordText
   const pausableWatch: typeof import('@vueuse/core').pausableWatch
   const provide: typeof import('vue').provide
   const provideLocal: typeof import('@vueuse/core').provideLocal
+  const queueCustomDownload: typeof import('./lib/custom-download-queue').queueCustomDownload
   const queueGlossModDownload: typeof import('./lib/gloss-download-queue').queueGlossModDownload
   const queueGlossModDownloadWithSelection: typeof import('./lib/download-file-selection').queueGlossModDownloadWithSelection
   const queueThirdPartyModDownload: typeof import('./lib/third-party-download-queue').queueThirdPartyModDownload
@@ -324,6 +328,7 @@ declare global {
   const useIntervalFn: typeof import('@vueuse/core').useIntervalFn
   const useKeyModifier: typeof import('@vueuse/core').useKeyModifier
   const useLastChanged: typeof import('@vueuse/core').useLastChanged
+  const useLaunchStore: typeof import('./stores/launch').useLaunchStore
   const useLauncherStore: typeof import('./stores/launcher').useLauncherStore
   const useLink: typeof import('vue-router').useLink
   const useLocalStorage: typeof import('@vueuse/core').useLocalStorage
@@ -476,6 +481,9 @@ declare global {
   export type { TCustomGameModTypeTemplate, TCustomGameCheckTypeTemplate } from './lib/custom-definition-utils'
   import('./lib/custom-definition-utils')
   // @ts-ignore
+  export type { CustomQueueDownloadStatus, IQueueCustomDownloadOptions, IQueueCustomDownloadResult } from './lib/custom-download-queue'
+  import('./lib/custom-download-queue')
+  // @ts-ignore
   export type { DotNetTool } from './lib/dotnet-tool'
   import('./lib/dotnet-tool')
   // @ts-ignore
@@ -526,4 +534,7 @@ declare global {
   // @ts-ignore
   export type { IDownloadFilePickerItem, IDownloadFilePickerRequest } from './stores/download-picker'
   import('./stores/download-picker')
+  // @ts-ignore
+  export type { TManagerLaunchAction } from './stores/launch'
+  import('./stores/launch')
 }

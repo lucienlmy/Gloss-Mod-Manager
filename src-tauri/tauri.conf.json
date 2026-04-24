@@ -1,7 +1,7 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "productName": "Gloss Mod Manager",
-    "version": "2.0.4",
+    "version": "2.0.5",
     "identifier": "gmm2.aoe.top",
     "build": {
         "beforeDevCommand": "yarn dev",
@@ -26,6 +26,19 @@
         "active": true,
         "targets": "all",
         "category": "Utility",
+        "fileAssociations": [
+            {
+                "ext": ["gmm"],
+                "name": "Gloss Mod Manager Package",
+                "description": "Gloss Mod Manager package file",
+                "mimeType": "application/x-gloss-mod-manager-package",
+                "role": "Editor",
+                "exportedType": {
+                    "identifier": "top.aoe.gmm2.package",
+                    "conformsTo": ["public.data"]
+                }
+            }
+        ],
         "macOS": {
             "minimumSystemVersion": "12.0",
             "entitlements": "entitlements.plist",
@@ -50,6 +63,13 @@
                 "type": "embedBootstrapper",
                 "silent": true
             },
+            "wix": {
+                "language": {
+                    "en-US": {
+                        "localePath": "windows/wix/en-US.wxl"
+                    }
+                }
+            },
             "nsis": {
                 "displayLanguageSelector": true,
                 "languages": ["SimpChinese", "English"],
@@ -60,6 +80,11 @@
         }
     },
     "plugins": {
+        "deep-link": {
+            "desktop": {
+                "schemes": ["gmm", "nxm"]
+            }
+        },
         "cli": {},
         "updater": {
             "endpoints": [

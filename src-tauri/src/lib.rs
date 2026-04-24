@@ -3,11 +3,97 @@ mod mcp_server;
 use std::io;
 use std::path::PathBuf;
 use std::sync::Arc;
-use tauri::Manager;
+use std::sync::Mutex;
+use tauri::{Emitter, Manager};
 use tauri_plugin_log::{Target, TargetKind, TimezoneStrategy};
 use time::format_description::well_known::Rfc3339;
 use time::macros::format_description;
 use time::OffsetDateTime;
+
+const APP_LAUNCH_FILES_EVENT_NAME: &str = "app-launch-files";
+
+#[derive(Default)]
+struct AppLaunchState {
+    pending_files: Mutex<Vec<String>>,
+}
+
+impl AppLaunchState {
+    fn push_files(&self, files: Vec<String>) {
+        if let Ok(mut pending_files) = self.pending_files.lock() {
+            pending_files.extend(files);
+        }
+    }
+
+    fn take_pending_files(&self) -> Vec<String> {
+        if let Ok(mut pending_files) = self.pending_files.lock() {
+            return std::mem::take(&mut *pending_files);
+        }
+
+        Vec::new()
+    }
+}
+
+#[derive(Clone, serde::Serialize)]
+struct AppLaunchFilesEvent {
+    paths: Vec<String>,
+}
+
+#[tauri::command]
+fn app_take_pending_launch_files(state: tauri::State<AppLaunchState>) -> Vec<String> {
+    state.take_pending_files()
+}
+
+fn normalize_file_launch_arg(value: &str) -> Option<String> {
+    let trimmed = value.trim().trim_matches('"');
+
+    if trimmed.is_empty()
+        || trimmed.starts_with("--")
+        || trimmed.starts_with("gmm://")
+        || trimmed.starts_with("nxm://")
+    {
+        return None;
+    }
+
+    let normalized = if let Some(file_url) = trimmed.strip_prefix("file://") {
+        let mut path = file_url;
+
+        #[cfg(target_os = "windows")]
+        {
+            if path.starts_with('/') && path.chars().nth(2) == Some(':') {
+                path = &path[1..];
+            }
+
+            return if path.to_ascii_lowercase().ends_with(".gmm") {
+                Some(path.replace('/', "\\"))
+            } else {
+                None
+            };
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            path.to_string()
+        }
+    } else {
+        trimmed.to_string()
+    };
+
+    if normalized.to_ascii_lowercase().ends_with(".gmm") {
+        return Some(normalized);
+    }
+
+    None
+}
+
+fn collect_launch_files<I>(args: I) -> Vec<String>
+where
+    I: IntoIterator<Item = String>,
+{
+    args.into_iter()
+        .skip(1)
+        .filter_map(|value| normalize_file_launch_arg(&value))
+        .collect()
+}
 
 fn format_local_timestamp() -> String {
     OffsetDateTime::now_local()
@@ -104,9 +190,41 @@ pub fn run() {
     let session_log_file_name = build_session_log_file_name();
 
     #[allow(unused_mut)]
-    let mut builder = tauri::Builder::default()
+    let mut builder = tauri::Builder::default();
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.unminimize();
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+
+            let launch_files = collect_launch_files(args);
+
+            if launch_files.is_empty() {
+                return;
+            }
+
+            if let Some(state) = app.try_state::<AppLaunchState>() {
+                state.push_files(launch_files.clone());
+            }
+
+            let _ = app.emit(
+                APP_LAUNCH_FILES_EVENT_NAME,
+                AppLaunchFilesEvent {
+                    paths: launch_files,
+                },
+            );
+        }));
+    }
+
+    builder = builder
+        .manage(AppLaunchState::default())
         .manage(Arc::new(mcp_server::McpRuntimeState::default()))
         .invoke_handler(tauri::generate_handler![
+            app_take_pending_launch_files,
             mcp_server::mcp_get_server_state,
             mcp_server::mcp_start_server,
             mcp_server::mcp_stop_server,
@@ -145,18 +263,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_store::Builder::default().build());
-
-    #[cfg(not(any(target_os = "android", target_os = "ios")))]
-    {
-        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.unminimize();
-                let _ = window.show();
-                let _ = window.set_focus();
-            }
-        }));
-    }
+        .plugin(tauri_plugin_store::Builder::default().build())
+        .plugin(tauri_plugin_deep_link::init());
 
     builder
         .setup(|app| {
@@ -180,6 +288,18 @@ pub fn run() {
                     .plugin(tauri_plugin_window_state::Builder::default().build())?;
                 app.handle()
                     .plugin(tauri_plugin_updater::Builder::new().build())?;
+
+                #[cfg(any(target_os = "linux", all(debug_assertions, windows)))]
+                {
+                    use tauri_plugin_deep_link::DeepLinkExt;
+                    app.deep_link().register_all()?;
+                }
+            }
+
+            let launch_files = collect_launch_files(std::env::args());
+
+            if !launch_files.is_empty() {
+                app.state::<AppLaunchState>().push_files(launch_files);
             }
 
             log::info!(target: "gmm::startup", "日志系统初始化完成。");

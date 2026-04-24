@@ -4,6 +4,7 @@ import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
+import { initializeExternalLaunchHandling } from "@/lib/external-launch";
 import { PersistentStore } from "@/lib/persistent-store";
 import router from "@/routes";
 
@@ -142,4 +143,8 @@ async function setupDefaultRoute() {
 }
 
 setupDefaultRoute();
+//#endregion
+
+//#region 外部启动接管
+void initializeExternalLaunchHandling();
 //#endregion

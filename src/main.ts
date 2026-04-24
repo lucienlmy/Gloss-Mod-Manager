@@ -29,6 +29,8 @@ async function bootstrap() {
 
     app.mount("#app");
 
+    // 首屏渲染后恢复 MCP 服务的上次启停状态，避免阻塞应用启动。
+    void McpService.autoStartFromSettings();
     initializeGlossDownloadMonitor(useManager(pinia), useSettings(pinia));
     initializeAppUpdater();
 

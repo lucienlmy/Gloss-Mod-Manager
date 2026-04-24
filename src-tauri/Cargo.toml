@@ -1,6 +1,6 @@
 [package]
 name = "gloss-mod-manager"
-version = "2.0.4"
+version = "2.0.5"
 description = "Gloss Mod Manager is a comprehensive modern game mod manager"
 authors = ["小莫"]
 edition = "2021"
@@ -20,6 +20,7 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 tauri = { version = "2", features = ['tray-icon'] }
 tauri-plugin-clipboard-manager = "2"
+tauri-plugin-deep-link = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-opener = "2"
@@ -40,6 +41,6 @@ tauri-plugin-autostart = "2"
 tauri-plugin-cli = "2"
 tauri-plugin-persisted-scope = "2"
 tauri-plugin-positioner = { version = "2.0.0", features = ["tray-icon"] }
-tauri-plugin-single-instance = "2"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 tauri-plugin-updater = "2"
 tauri-plugin-window-state = "2"

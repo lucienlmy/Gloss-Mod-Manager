@@ -6,6 +6,7 @@ import { ElMessage } from "element-plus-message";
 import { queueGlossModDownloadWithSelection } from "@/lib/download-file-selection";
 import { installGmmPackage } from "@/lib/gmm-package";
 import { checkGlossModUpdates } from "@/lib/gloss-mod-api";
+import { useLaunchStore } from "@/stores/launch";
 import {
     ARCHIVE_EXTENSIONS,
     importLocalModSources,
@@ -49,6 +50,7 @@ interface IManagerGmmDialogExpose {
 }
 
 const manager = useManager();
+const launchStore = useLaunchStore();
 const router = useRouter();
 const { managerGame, selectionMode, selectionIds } = storeToRefs(manager);
 const settings = useSettings();
@@ -77,6 +79,22 @@ const batchEditForm = reactive<IBatchEditForm>({
 });
 
 let unlistenNativeDragDrop: (() => void) | null = null;
+
+async function consumePendingManagerLaunchActions() {
+    while (true) {
+        const action = launchStore.takeNextManagerAction();
+
+        if (!action) {
+            return;
+        }
+
+        if (action.type !== "open-gmm-import") {
+            continue;
+        }
+
+        await managerGmmDialogRef.value?.openImportDialog(action.filePath);
+    }
+}
 
 watch(manager.filteredMods, (mods) => {
     void mods;
@@ -641,12 +659,21 @@ onMounted(async () => {
             void handleNativeFileDrop(payload.paths);
         },
     );
+
+    await consumePendingManagerLaunchActions();
 });
 
 onUnmounted(() => {
     unlistenNativeDragDrop?.();
     unlistenNativeDragDrop = null;
 });
+
+watch(
+    () => launchStore.pendingManagerActions.length,
+    () => {
+        void consumePendingManagerLaunchActions();
+    },
+);
 
 function getTypeCount(typeId: number | string | 0) {
     if (typeId === 0) {
