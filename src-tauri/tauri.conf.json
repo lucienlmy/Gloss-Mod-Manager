@@ -25,6 +25,12 @@
     "bundle": {
         "active": true,
         "targets": "all",
+        "category": "Utility",
+        "macOS": {
+            "minimumSystemVersion": "12.0",
+            "entitlements": "entitlements.plist",
+            "signingIdentity": "DA1EEC08DE48B2B4B2F4C08B0C608E11AB983375"
+        },
         "homepage": "https://github.com/GlossMod/Gloss-Mod-Manager",
         "publisher": "小莫sky",
         "license": "LGPL-3.0-or-later",
