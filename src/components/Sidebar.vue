@@ -61,6 +61,19 @@ const bottomItems = [
         </div>
 
         <div class="p-3 border-t border-border/50">
+            <a
+                href="https://github.com/glosc-ai/Glosc-Copilot/releases"
+                target="_blank"
+                :class="
+                    cn(
+                        'group flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors relative',
+                        'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+                    )
+                "
+            >
+                <icon-message-circle-more class="h-5 w-5" />
+                <span class="hidden md:inline-block">AI对话</span>
+            </a>
             <router-link
                 v-for="item in bottomItems"
                 :key="item.path"
