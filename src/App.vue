@@ -5,6 +5,7 @@ import "@/lib/global";
     <Layout>
         <RouterView />
         <DownloadFilePickerDialog />
+        <AppUpdateInstallDialog />
     </Layout>
 </template>
 <style scoped></style>

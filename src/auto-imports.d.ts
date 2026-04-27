@@ -49,6 +49,7 @@ declare global {
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
   const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
+  const cancelAppUpdateInstallDialog: typeof import('./lib/app-update-install-dialog').cancelAppUpdateInstallDialog
   const checkForAppUpdates: typeof import('./lib/app-updater').checkForAppUpdates
   const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
   const clearManagerInternalDrag: typeof import('./lib/manager-internal-drag').clearManagerInternalDrag
@@ -59,6 +60,7 @@ declare global {
   const computedEager: typeof import('@vueuse/core').computedEager
   const computedInject: typeof import('@vueuse/core').computedInject
   const computedWithControl: typeof import('@vueuse/core').computedWithControl
+  const confirmAppUpdateInstallDialog: typeof import('./lib/app-update-install-dialog').confirmAppUpdateInstallDialog
   const controlledComputed: typeof import('@vueuse/core').controlledComputed
   const controlledRef: typeof import('@vueuse/core').controlledRef
   const createApp: typeof import('vue').createApp
@@ -111,6 +113,7 @@ declare global {
   const h: typeof import('vue').h
   const hasExternalFilePayload: typeof import('./lib/browser-drop-import').hasExternalFilePayload
   const hasGlossMultipleResources: typeof import('./lib/download-file-selection').hasGlossMultipleResources
+  const hasPendingAppUpdateInstall: typeof import('./lib/app-updater').hasPendingAppUpdateInstall
   const hasThirdPartyMultipleFiles: typeof import('./lib/download-file-selection').hasThirdPartyMultipleFiles
   const hydrateManagerRuntimeData: typeof import('./lib/manager-runtime-data').hydrateManagerRuntimeData
   const ignorableWatch: typeof import('@vueuse/core').ignorableWatch
@@ -125,6 +128,7 @@ declare global {
   const inject: typeof import('vue').inject
   const injectLocal: typeof import('@vueuse/core').injectLocal
   const installGmmPackage: typeof import('./lib/gmm-package').installGmmPackage
+  const installPendingAppUpdate: typeof import('./lib/app-updater').installPendingAppUpdate
   const isDefined: typeof import('@vueuse/core').isDefined
   const isGlossCloudDriveResource: typeof import('./lib/gloss-download-queue').isGlossCloudDriveResource
   const isGlossCloudDriveUrl: typeof import('./lib/gloss-download-queue').isGlossCloudDriveUrl
@@ -200,6 +204,7 @@ declare global {
   const refManualReset: typeof import('@vueuse/core').refManualReset
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
+  const requestAppUpdateInstallConfirmation: typeof import('./lib/app-update-install-dialog').requestAppUpdateInstallConfirmation
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveGlossAssetUrl: typeof import('./lib/gloss-mod-api').resolveGlossAssetUrl
   const resolveGlossDownloadImportSourceType: typeof import('./lib/gloss-download-queue').resolveGlossDownloadImportSourceType
@@ -227,6 +232,7 @@ declare global {
   const storeToRefs: typeof import('pinia').storeToRefs
   const supportedGamesGTA5: typeof import('./lib/GTA5Handler').supportedGamesGTA5
   const supportedGamesGTA5Enhanced: typeof import('./lib/GTA5Handler').supportedGamesGTA5Enhanced
+  const syncAppUpdateInstallDialogOpen: typeof import('./lib/app-update-install-dialog').syncAppUpdateInstallDialogOpen
   const syncManagerRuntimeContext: typeof import('./lib/manager-context').syncManagerRuntimeContext
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
@@ -250,6 +256,7 @@ declare global {
   const until: typeof import('@vueuse/core').until
   const useActiveElement: typeof import('@vueuse/core').useActiveElement
   const useAnimate: typeof import('@vueuse/core').useAnimate
+  const useAppUpdateInstallDialogState: typeof import('./lib/app-update-install-dialog').useAppUpdateInstallDialogState
   const useArrayDifference: typeof import('@vueuse/core').useArrayDifference
   const useArrayEvery: typeof import('@vueuse/core').useArrayEvery
   const useArrayFilter: typeof import('@vueuse/core').useArrayFilter

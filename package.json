@@ -42,6 +42,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "element-plus-message": "^0.0.0-dev.1",
+        "firebase": "^12.12.1",
         "ini": "^6.0.0",
         "js-md5": "^0.8.3",
         "lucide-vue-next": "^1.0.0",

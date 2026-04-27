@@ -4,6 +4,10 @@ import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
+import {
+    hasPendingAppUpdateInstall,
+    installPendingAppUpdate,
+} from "@/lib/app-updater";
 import { initializeExternalLaunchHandling } from "@/lib/external-launch";
 import { PersistentStore } from "@/lib/persistent-store";
 import router from "@/routes";
@@ -13,6 +17,7 @@ const TRAY_ID = "main-tray";
 let tray: TrayIcon | null = null;
 let unlistenCloseRequested: (() => void) | null = null;
 let isQuitting = false;
+
 async function showMainWindow() {
     const appWindow = getCurrentWindow();
 
@@ -24,7 +29,7 @@ async function showMainWindow() {
     await appWindow.setFocus();
 }
 
-async function quitApplication() {
+async function prepareQuitApplication() {
     isQuitting = true;
 
     if (unlistenCloseRequested) {
@@ -43,6 +48,18 @@ async function quitApplication() {
     } catch (error) {
         console.error("停止 aria2 服务失败");
         console.error(error);
+    }
+}
+
+async function quitApplication(
+    trigger: "close-window" | "quit-app" = "quit-app",
+) {
+    await prepareQuitApplication();
+
+    const startedUpdateInstall = await installPendingAppUpdate(trigger, false);
+
+    if (startedUpdateInstall) {
+        return;
     }
 
     await getCurrentWindow().destroy();
@@ -105,6 +122,12 @@ async function setupTray() {
             }
 
             event.preventDefault();
+
+            if (hasPendingAppUpdateInstall()) {
+                void quitApplication("close-window");
+                return;
+            }
+
             void appWindow.hide();
         });
     }

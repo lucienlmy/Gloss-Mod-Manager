@@ -13,15 +13,14 @@
 - 问题反馈: [QQ频道](https://pd.qq.com/s/hco46ol54) | [QQ群 2169033132](https://qm.qq.com/q/ft6b4xx2PS) | [GitHub Issues](https://github.com/GlossMod/Gloss-Mod-Manager/issues)
 
 
-    <img src="https://mod.3dmgame.com/static/upload/mod/202410/MOD671f300fbe3b7.webp" width="200px" alt="频道">
-
-
 
 ### 这是什么？
-Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
-它为游戏玩家提供了一个简单易用的方式来管理和安装各种游戏Mod.
+Gloss Mod Manager (GMM) 是一款综合性的智能游戏模组管理器.
+内置集成了AI MCP 和 Skills 工具.
+它为游戏玩家提供了一个简单易用的智能模组管理平台，帮助用户更快地下载、安装和卸载 Mod。
+无论你是第一次接触模组管理，还是已经有自己的使用习惯，
+GMM 的目标都是把常见流程集中到一个统一入口里.
 安全无毒, 简单易用, 可帮助您快捷的 下载、安装、卸载 Mod.
-无论你是新手还是老手,使用GMM都会让你的Mod安装和管理更加轻松和快捷.
 
 ### 兼容平台
 - Windows 
@@ -53,6 +52,13 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 - 游戏库快捷切换
 
 
+### v1 to v2
+V2 版本是对 V1 版本的全面升级，最显著的提升就是 安装包的体积减少了 90%;
+另一个重大升级则是引入了 AI MCP 和 Skills 工具, 使得 GMM 能在借助大模型的能力下, 更智能地管理 Mod 包和游戏文件.
+从V2 理论上兼容了 V1 版本的所有东西，包括 Mod列表、游戏列表、自定义游戏、标签分类、备份等等.
+如果在升级过程中遇到任何问题, 请随时通过 [GitHub](https://github.com/GlossMod/Gloss-Mod-Manager/issues) 告诉我.
+
+
 ### [支持的游戏](https://gmm.aoe.top/SupportedGames.html)
 
 
@@ -75,7 +81,7 @@ Gloss Mod Manager (GMM) 是一款综合性的现代化游戏模组管理器.
 - [x] 自适应系统主题
 - [x] 自动检查Mod更新功能
 - [x] 实现Mod排序功能, 并允许用户自定义排序方式。
-- [ ] 自动处理Mod冲突问题
+- [x] 自动处理Mod冲突问题
 
 
 ### [帮助翻译](https://gmm.aoe.top/Translate.html)
