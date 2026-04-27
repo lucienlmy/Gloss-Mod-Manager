@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 import { appLocalDataDir, documentDir, join } from "@tauri-apps/api/path";
 import { Aria2 } from "@/lib/aria2";
 import { FileHandler } from "@/lib/FileHandler";
@@ -13,6 +14,7 @@ const DEFAULT_MAX_CONNECTION_PER_SERVER = 8;
 const DEFAULT_MIN_SPLIT_SIZE = "1M";
 const RPC_REQUEST_TIMEOUT_MS = 2500;
 const RPC_START_TIMEOUT_MS = 8000;
+const RPC_SHUTDOWN_TIMEOUT_MS = 2500;
 const RPC_TASK_KEYS = [
     "gid",
     "status",
@@ -121,6 +123,7 @@ interface IResolvedRpcOptions {
 export class Aria2Rpc {
     private static rpcProcess: SpawnedSidecarProcess | null = null;
     private static ensureServerPromise: Promise<void> | null = null;
+    private static appProcessIdPromise: Promise<number | null> | null = null;
     private static currentOptions: IResolvedRpcOptions = {
         outputDirectory: "",
         listenPort: DEFAULT_RPC_PORT,
@@ -255,6 +258,51 @@ export class Aria2Rpc {
         );
     }
 
+    private static async resolveAppProcessId() {
+        if (!Aria2Rpc.appProcessIdPromise) {
+            Aria2Rpc.appProcessIdPromise = invoke<number>("app_process_id")
+                .then((processId) => {
+                    if (!Number.isFinite(processId) || processId <= 0) {
+                        return null;
+                    }
+
+                    return Math.round(processId);
+                })
+                .catch((error) => {
+                    console.warn(
+                        "获取应用进程 ID 失败，aria2 将跳过父进程监听。",
+                        error,
+                    );
+                    return null;
+                });
+        }
+
+        return Aria2Rpc.appProcessIdPromise;
+    }
+
+    private static async buildRpcLifecycleArgs() {
+        const args = [
+            "--no-conf=true",
+            "--save-session-interval=0",
+            "--console-log-level=warn",
+            "--summary-interval=0",
+            "--download-result=hide",
+            "--enable-dht=false",
+            "--enable-dht6=false",
+            "--enable-peer-exchange=false",
+            "--bt-enable-lpd=false",
+            "--seed-time=0",
+        ];
+        const appProcessId = await Aria2Rpc.resolveAppProcessId();
+
+        if (appProcessId) {
+            // aria2 自己监听父进程，主程序被强制关闭时也能及时退出。
+            args.push(`--stop-with-process=${appProcessId}`);
+        }
+
+        return args;
+    }
+
     private static buildParams(
         options: IResolvedRpcOptions,
         params: unknown[],
@@ -360,12 +408,64 @@ export class Aria2Rpc {
             : new Error("aria2 RPC 启动超时");
     }
 
-    private static async ping(options: IResolvedRpcOptions) {
+    private static async ping(
+        options: IResolvedRpcOptions,
+        timeoutMs: number = 1000,
+    ) {
         try {
-            await Aria2Rpc.request("getVersion", [], options, 1000);
+            await Aria2Rpc.request("getVersion", [], options, timeoutMs);
             return true;
         } catch {
             return false;
+        }
+    }
+
+    private static async shutdownServerByRpc(options: IResolvedRpcOptions) {
+        try {
+            await Aria2Rpc.request("saveSession", [], options, 1000);
+        } catch {
+            // 服务已退出或不可达时，后续 kill 兜底即可。
+        }
+
+        try {
+            await Aria2Rpc.request("forceShutdown", [], options, 1000);
+        } catch {
+            return false;
+        }
+
+        const deadline = Date.now() + RPC_SHUTDOWN_TIMEOUT_MS;
+
+        while (Date.now() < deadline) {
+            if (!(await Aria2Rpc.ping(options, 400))) {
+                return true;
+            }
+
+            await Aria2Rpc.sleep(100);
+        }
+
+        return !(await Aria2Rpc.ping(options, 400));
+    }
+
+    private static async isServerManagedByCurrentProcess(
+        options: IResolvedRpcOptions,
+    ) {
+        const appProcessId = await Aria2Rpc.resolveAppProcessId();
+
+        if (!appProcessId) {
+            return true;
+        }
+
+        try {
+            const globalOptions = await Aria2Rpc.request<Record<string, string>>(
+                "getGlobalOption",
+                [],
+                options,
+                1000,
+            );
+
+            return globalOptions["stop-with-process"] === String(appProcessId);
+        } catch {
+            return true;
         }
     }
 
@@ -374,7 +474,22 @@ export class Aria2Rpc {
         Aria2Rpc.currentOptions = resolvedOptions;
 
         if (await Aria2Rpc.ping(resolvedOptions)) {
-            return;
+            if (
+                Aria2Rpc.rpcProcess ||
+                (await Aria2Rpc.isServerManagedByCurrentProcess(resolvedOptions))
+            ) {
+                return;
+            }
+
+            const stoppedExistingServer =
+                await Aria2Rpc.shutdownServerByRpc(resolvedOptions);
+
+            if (!stoppedExistingServer) {
+                console.warn(
+                    "检测到未绑定当前进程的 aria2 服务，但无法自动重启。",
+                );
+                return;
+            }
         }
 
         if (Aria2Rpc.ensureServerPromise) {
@@ -383,6 +498,7 @@ export class Aria2Rpc {
 
         Aria2Rpc.ensureServerPromise = (async () => {
             const sessionFilePath = await Aria2Rpc.ensureSessionFile();
+            const lifecycleArgs = await Aria2Rpc.buildRpcLifecycleArgs();
 
             if (Aria2Rpc.rpcProcess) {
                 try {
@@ -402,7 +518,7 @@ export class Aria2Rpc {
                     "--rpc-allow-origin-all=true",
                     "--rpc-save-upload-metadata=false",
                     "--rpc-max-request-size=8M",
-                    "--save-session-interval=5",
+                    ...lifecycleArgs,
                     `--input-file=${sessionFilePath}`,
                     `--save-session=${sessionFilePath}`,
                     `--max-concurrent-downloads=${resolvedOptions.maxConcurrentDownloads}`,
@@ -530,13 +646,26 @@ export class Aria2Rpc {
 
     public static async stopServer() {
         if (!Aria2Rpc.rpcProcess) {
+            if (await Aria2Rpc.ping(Aria2Rpc.currentOptions, 500)) {
+                await Aria2Rpc.shutdownServerByRpc(Aria2Rpc.currentOptions);
+            }
+
             return;
         }
 
+        const rpcProcess = Aria2Rpc.rpcProcess;
+        const stoppedByRpc = await Aria2Rpc.shutdownServerByRpc(
+            Aria2Rpc.currentOptions,
+        );
+
         try {
-            await Aria2Rpc.rpcProcess.stop();
+            if (!stoppedByRpc) {
+                await rpcProcess.stop();
+            }
         } finally {
-            Aria2Rpc.rpcProcess = null;
+            if (Aria2Rpc.rpcProcess?.child.pid === rpcProcess.child.pid) {
+                Aria2Rpc.rpcProcess = null;
+            }
         }
     }
 

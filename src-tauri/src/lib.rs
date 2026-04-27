@@ -43,6 +43,11 @@ fn app_take_pending_launch_files(state: tauri::State<AppLaunchState>) -> Vec<Str
     state.take_pending_files()
 }
 
+#[tauri::command]
+fn app_process_id() -> u32 {
+    std::process::id()
+}
+
 fn normalize_file_launch_arg(value: &str) -> Option<String> {
     let trimmed = value.trim().trim_matches('"');
 
@@ -225,6 +230,7 @@ pub fn run() {
         .manage(Arc::new(mcp_server::McpRuntimeState::default()))
         .invoke_handler(tauri::generate_handler![
             app_take_pending_launch_files,
+            app_process_id,
             mcp_server::mcp_get_server_state,
             mcp_server::mcp_start_server,
             mcp_server::mcp_stop_server,
