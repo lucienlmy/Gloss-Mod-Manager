@@ -82,7 +82,7 @@ const presencePriorityMap: Record<GlossDownloadPresence, number> = {
 const presenceLabelMap: Record<GlossDownloadPresence, string> = {
     none: "加入下载",
     active: "下载中",
-    waiting: "排队中",
+    waiting: "等待中",
     paused: "已暂停",
     error: "下载失败",
     complete: "已下载",

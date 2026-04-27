@@ -7,6 +7,7 @@ import type { SpawnedSidecarProcess } from "@/lib/sidecar";
 const DEFAULT_RPC_PORT = 6800;
 const DEFAULT_RPC_SECRET = "gloss-mod-manager";
 const DEFAULT_MAX_CONCURRENT_DOWNLOADS = 5;
+const FIXED_MAX_CONCURRENT_DOWNLOADS = 5;
 const DEFAULT_SPLIT = 8;
 const DEFAULT_MAX_CONNECTION_PER_SERVER = 8;
 const DEFAULT_MIN_SPLIT_SIZE = "1M";
@@ -156,13 +157,8 @@ export class Aria2Rpc {
             rpcSecret:
                 (settings.rpcSecret ?? defaults.rpcSecret).trim() ||
                 defaults.rpcSecret,
-            maxConcurrentDownloads: Math.max(
-                1,
-                Math.round(
-                    settings.maxConcurrentDownloads ??
-                        defaults.maxConcurrentDownloads,
-                ),
-            ),
+            // 3DM 源站容易在批量同时下载时返回 503，这里将并发任务固定为 5。
+            maxConcurrentDownloads: FIXED_MAX_CONCURRENT_DOWNLOADS,
             split: Math.max(1, Math.round(settings.split ?? defaults.split)),
             maxConnectionPerServer: Math.max(
                 1,

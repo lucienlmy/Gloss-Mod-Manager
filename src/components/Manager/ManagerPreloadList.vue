@@ -311,8 +311,8 @@ function resolvePreloadStatus(item: IGamePlugins): IPreloadStatus {
         case "waiting":
             return {
                 state: "waiting",
-                statusLabel: "排队中",
-                actionLabel: "排队中",
+                statusLabel: "等待中",
+                actionLabel: "等待中",
                 progress: getTaskProgress(task),
             };
         case "paused":

@@ -712,7 +712,7 @@ function resolveDownloadStatus(item: IGlossExploreMod): IExploreDownloadStatus {
         case "waiting":
             return {
                 state: "waiting",
-                label: "排队中",
+                label: "等待中",
                 progress: getTaskProgress(task),
             };
         case "paused":

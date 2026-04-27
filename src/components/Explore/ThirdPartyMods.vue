@@ -587,7 +587,7 @@ function resolveFileDownloadStatus(
         case "waiting":
             return {
                 state: "waiting",
-                label: "排队中",
+                label: "等待中",
                 progress: getTaskProgress(task),
             };
         case "paused":

@@ -6,6 +6,7 @@ import { ref } from "vue";
 import packageInfo from "../../package.json";
 import { fetchGlossGamePlugins } from "@/lib/gloss-mod-api";
 import { FileHandler } from "@/lib/FileHandler";
+import { queueGlossModDownload } from "@/lib/gloss-download-queue";
 import { Log } from "@/lib/log";
 import { Manager } from "@/lib/Manager";
 import { PersistentStore } from "@/lib/persistent-store";
@@ -261,6 +262,30 @@ export const mcpToolDefinitions: readonly IMcpToolDefinition[] = [
             },
         }),
         annotations: { readOnlyHint: true },
+    },
+    {
+        name: "queue-gloss-mod-download",
+        title: "添加内部下载任务",
+        description:
+            "按 Gloss Mod ID 将内部下载资源加入下载队列。未传 resourceId 时默认使用最新资源。",
+        inputSchema: createObjectSchema(
+            {
+                modId: {
+                    type: "number",
+                    description: "Gloss 平台上的 Mod ID。",
+                },
+                resourceId: {
+                    anyOf: [{ type: "number" }, { type: "string" }],
+                    description: "可选。指定资源 ID；未传时自动使用最新资源。",
+                },
+                replaceLocalModId: {
+                    type: "number",
+                    description:
+                        "可选。传入后，下载完成自动导入时会尝试覆盖该本地 Mod。",
+                },
+            },
+            ["modId"],
+        ),
     },
     {
         name: "add-tag-to-mod",
@@ -1189,6 +1214,50 @@ async function handleToolCall(
                 return createToolResult({
                     dependencies: toSerializable(dependencies),
                     count: dependencies.length,
+                });
+            }
+            case "queue-gloss-mod-download": {
+                const modId = toRequiredNumber(args.modId, "modId");
+                const resourceId =
+                    args.resourceId === undefined || args.resourceId === null
+                        ? undefined
+                        : typeof args.resourceId === "string"
+                          ? toRequiredString(args.resourceId, "resourceId")
+                          : toRequiredNumber(args.resourceId, "resourceId");
+                const replaceLocalModId =
+                    args.replaceLocalModId === undefined ||
+                    args.replaceLocalModId === null
+                        ? undefined
+                        : toRequiredNumber(
+                              args.replaceLocalModId,
+                              "replaceLocalModId",
+                          );
+                const { manager } = getStores();
+                await ensureSupportedGamesLoaded(manager);
+
+                const result = await queueGlossModDownload({
+                    modId,
+                    resourceId,
+                    replaceLocalModId,
+                    managerModList: manager.managerModList,
+                });
+
+                if (
+                    result.status === "created" ||
+                    result.status === "resumed" ||
+                    result.status === "retried" ||
+                    result.status === "exists"
+                ) {
+                    await router.push("/download");
+                }
+
+                return createToolResult({
+                    state: true,
+                    status: result.status,
+                    gid: result.gid,
+                    message: result.message,
+                    mod: toSerializable(result.mod),
+                    resource: toSerializable(result.resource),
                 });
             }
             case "add-tag-to-mod": {

@@ -111,13 +111,13 @@ const defaultGlobalStat = (): IAria2GlobalStat => ({
 const queueFilterLabels: Record<QueueFilter, string> = {
     all: "全部",
     active: "下载中",
-    waiting: "排队中",
+    waiting: "等待中",
     paused: "已暂停",
     stopped: "已结束",
 };
 const taskStatusLabels: Record<string, string> = {
     active: "下载中",
-    waiting: "排队中",
+    waiting: "等待中",
     paused: "已暂停",
     complete: "已完成",
     error: "失败",
@@ -133,6 +133,14 @@ const dateFormatter = new Intl.DateTimeFormat("zh-CN", {
 });
 const DEFAULT_TASK_PAGE_SIZE = "20";
 const TASK_PAGE_SIZE_OPTIONS = ["20", "50", "100"];
+const TASK_STATUS_SORT_ORDER: Record<string, number> = {
+    active: 0,
+    waiting: 1,
+    paused: 2,
+    complete: 3,
+    error: 4,
+    removed: 5,
+};
 
 const manager = useManager();
 const settings = useSettings();
@@ -329,31 +337,7 @@ const selectedTaskMeta = computed(
 const canImportToLocalManager = computed(() =>
     Boolean(storagePath.value && manager.managerGame),
 );
-const taskSummaryCards = computed(() => [
-    {
-        label: "aria2 状态",
-        value:
-            rpcState.value === "ready"
-                ? "已连接"
-                : rpcState.value === "starting"
-                  ? "启动中"
-                  : rpcState.value === "error"
-                    ? "异常"
-                    : "待启动",
-    },
-    {
-        label: "总任务",
-        value: String(allTasks.value.length),
-    },
-    {
-        label: "下载中",
-        value: String(activeTasks.value.length),
-    },
-    {
-        label: "总速度",
-        value: formatSpeed(globalStat.value.downloadSpeed),
-    },
-]);
+
 const queueFilterOptions = computed(() => [
     {
         value: "all" as QueueFilter,
@@ -387,7 +371,9 @@ const detailParagraphs = computed(() =>
     ),
 );
 
-function getTaskSourceType(metadata?: IGlossDownloadTaskMeta | null): sourceType {
+function getTaskSourceType(
+    metadata?: IGlossDownloadTaskMeta | null,
+): sourceType {
     return metadata?.sourceType ?? (metadata?.modId ? "GlossMod" : "Customize");
 }
 
@@ -928,8 +914,20 @@ function getTaskCreatedTimestamp(task: IAria2RpcTask) {
     );
 }
 
+function getTaskStatusSortOrder(status: string) {
+    return TASK_STATUS_SORT_ORDER[status] ?? Number.MAX_SAFE_INTEGER;
+}
+
 function sortTasksByCreatedAt(tasks: IAria2RpcTask[]) {
     return [...tasks].sort((left, right) => {
+        const statusDifference =
+            getTaskStatusSortOrder(left.status) -
+            getTaskStatusSortOrder(right.status);
+
+        if (statusDifference !== 0) {
+            return statusDifference;
+        }
+
         const timestampDifference =
             getTaskCreatedTimestamp(right) - getTaskCreatedTimestamp(left);
 
@@ -1905,7 +1903,9 @@ async function purgeStoppedTasks() {
             return;
         }
 
-        ElMessage.success(`已清理 ${removedCount} 条历史任务，并删除对应本地文件。`);
+        ElMessage.success(
+            `已清理 ${removedCount} 条历史任务，并删除对应本地文件。`,
+        );
     } catch (error: unknown) {
         ElMessage.error(getErrorMessage(error));
     }
@@ -1965,13 +1965,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                     <div class="space-y-2">
                         <CardTitle class="flex flex-wrap items-center gap-3">
                             <h1 class="text-2xl">下载中心</h1>
-                            <Badge class="rounded-full" variant="secondary">
-                                Aria2
-                            </Badge>
                         </CardTitle>
-                        <CardDescription>
-                            顶部负责下载相关操作，底部集中展示下载队列。
-                        </CardDescription>
                     </div>
                     <Badge
                         class="rounded-full"
@@ -2050,24 +2044,6 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                     </Button>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <div
-                        v-for="item in taskSummaryCards"
-                        :key="item.label"
-                        class="flex items-center gap-3"
-                    >
-                        <div class="text-xs text-muted-foreground">
-                            {{ item.label }}
-                        </div>
-                        <Badge variant="outline" class="rounded-full px-2 py-1">
-                            {{ item.value }}
-                        </Badge>
-                        <!-- <div class="text-lg font-semibold tracking-tight">
-                            {{ item.value }}
-                        </div> -->
-                    </div>
-                </div>
-
                 <div
                     v-if="rpcErrorMessage"
                     class="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
@@ -2082,7 +2058,12 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                 <CardTitle
                     class="flex flex-wrap items-center justify-between gap-3"
                 >
-                    <span>下载任务列表</span>
+                    <span
+                        >下载任务列表
+                        <Badge variant="outline" class="rounded-full ml-4">
+                            {{ formatSpeed(globalStat.downloadSpeed) }}
+                        </Badge>
+                    </span>
                     <Button
                         size="sm"
                         variant="outline"
@@ -2121,7 +2102,9 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-sm text-muted-foreground">每页数量</span>
+                        <span class="text-sm text-muted-foreground"
+                            >每页数量</span
+                        >
                         <Select v-model="taskPageSize">
                             <SelectTrigger class="w-[140px]">
                                 <SelectValue placeholder="选择每页数量" />
@@ -2207,9 +2190,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                     class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground"
                                 >
                                     <span
-                                        >{{
-                                            formatBytes(task.completedLength)
-                                        }}
+                                        >{{ formatBytes(task.completedLength) }}
                                         /
                                         {{
                                             formatBytes(task.totalLength)
@@ -2302,8 +2283,9 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                         class="flex flex-col gap-4 rounded-xl border px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
                     >
                         <div class="text-sm text-muted-foreground">
-                            当前第 {{ taskPage }} 页，共 {{ taskTotalPages }} 页，
-                            累计 {{ filteredTaskCount }} 条任务。
+                            当前第 {{ taskPage }} 页，共
+                            {{ taskTotalPages }} 页， 累计
+                            {{ filteredTaskCount }} 条任务。
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2">
@@ -2554,9 +2536,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 <div class="text-sm font-medium">资源列表</div>
                                 <div class="text-xs text-muted-foreground">
                                     共
-                                    {{
-                                        selectedMod.mods_resource.length
-                                    }}
+                                    {{ selectedMod.mods_resource.length }}
                                     个资源
                                 </div>
                             </div>
@@ -2747,8 +2727,13 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 aria2SettingsDraft.maxConcurrentDownloads
                             "
                             type="number"
-                            min="1"
+                            min="5"
+                            max="5"
+                            disabled
                         />
+                        <div class="text-xs text-muted-foreground">
+                            为降低源站返回 503 的概率，同时下载任务已固定为 5。
+                        </div>
                     </div>
 
                     <div class="grid gap-2">
@@ -3040,7 +3025,8 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                 <Button
                                     v-if="
                                         selectedTaskMeta?.sourceType ===
-                                            'GlossMod' && selectedTaskMeta?.modId
+                                            'GlossMod' &&
+                                        selectedTaskMeta?.modId
                                     "
                                     size="sm"
                                     variant="outline"
@@ -3120,9 +3106,7 @@ async function loadRelatedModDetail(task?: IAria2RpcTask | null) {
                                     <div
                                         class="mt-1 text-xs text-muted-foreground"
                                     >
-                                        {{
-                                            formatBytes(file.completedLength)
-                                        }}
+                                        {{ formatBytes(file.completedLength) }}
                                         / {{ formatBytes(file.length) }}
                                     </div>
                                     <div

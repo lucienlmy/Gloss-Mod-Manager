@@ -42,12 +42,16 @@ export class AppAnalytics {
             language,
         };
 
-        fetch(`https://mod.3dmgame.com/api/gmm/analytics`, {
+        const res = await fetch(`https://mod.3dmgame.com/api/gmm/analytics`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ data }),
+        });
+
+        console.log({
+            data: await res.json(),
         });
     }
 }

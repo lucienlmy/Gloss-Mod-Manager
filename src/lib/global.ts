@@ -148,3 +148,8 @@ setupDefaultRoute();
 //#region 外部启动接管
 void initializeExternalLaunchHandling();
 //#endregion
+
+//#region 发送应用启动事件
+AppAnalytics.sendEvent("start");
+
+//#endregion
