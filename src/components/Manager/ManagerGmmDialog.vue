@@ -160,14 +160,18 @@ const exportFilteredMods = computed<IModInfo[]>(() => {
                 return true;
             }
 
-            return (mod.tags ?? []).some((tag) => tag.name === exportTagFilter.value);
+            return (mod.tags ?? []).some(
+                (tag) => tag.name === exportTagFilter.value,
+            );
         })
         .filter((mod) => {
             if (!keyword) {
                 return true;
             }
 
-            const joinedTags = (mod.tags ?? []).map((tag) => tag.name).join(" ");
+            const joinedTags = (mod.tags ?? [])
+                .map((tag) => tag.name)
+                .join(" ");
             const joinedText = [
                 mod.modName,
                 mod.modAuthor ?? "",
@@ -236,15 +240,17 @@ function createDefaultExportName(mods: IModInfo[] = exportSelectedMods.value) {
         manager.managerGame?.gameName ||
         "mods";
 
-    return mods.length > 1 ? `${gameName}-${mods.length}mods` : `${gameName}-export`;
+    return mods.length > 1
+        ? `${gameName}-${mods.length}mods`
+        : `${gameName}-export`;
 }
 
-function createDefaultExportAuthor(mods: IModInfo[] = exportSelectedMods.value) {
+function createDefaultExportAuthor(
+    mods: IModInfo[] = exportSelectedMods.value,
+) {
     const authorList = [
         ...new Set(
-            mods
-                .map((mod) => mod.modAuthor?.trim() ?? "")
-                .filter(Boolean),
+            mods.map((mod) => mod.modAuthor?.trim() ?? "").filter(Boolean),
         ),
     ];
 
@@ -255,7 +261,9 @@ function createDefaultExportAuthor(mods: IModInfo[] = exportSelectedMods.value) 
     return "";
 }
 
-function createDefaultExportDescription(mods: IModInfo[] = exportSelectedMods.value) {
+function createDefaultExportDescription(
+    mods: IModInfo[] = exportSelectedMods.value,
+) {
     if (mods.length === 1) {
         return mods[0]?.modDesc ?? "";
     }
@@ -505,7 +513,6 @@ async function installSelectedPacks() {
     try {
         importResult.value = await installGmmPackage({
             filePath: importFilePath.value,
-            manager,
             selectedFolderKeys: selectedImportFolderKeys.value,
         });
 
@@ -1189,7 +1196,9 @@ defineExpose<IManagerGmmDialogExpose>({
                                                         : 'outline'
                                                 "
                                                 size="sm"
-                                                @click="exportTagFilter = '全部'"
+                                                @click="
+                                                    exportTagFilter = '全部'
+                                                "
                                             >
                                                 全部标签 ({{
                                                     getExportTagCount("全部")
@@ -1220,10 +1229,12 @@ defineExpose<IManagerGmmDialogExpose>({
                                     >
                                         <div class="flex flex-wrap gap-2">
                                             <Badge variant="secondary">
-                                                已选 {{ exportSelectedCount }} 项
+                                                已选
+                                                {{ exportSelectedCount }} 项
                                             </Badge>
                                             <Badge variant="outline">
-                                                当前筛选 {{ exportFilteredMods.length }}
+                                                当前筛选
+                                                {{ exportFilteredMods.length }}
                                                 项
                                             </Badge>
                                         </div>
@@ -1231,7 +1242,9 @@ defineExpose<IManagerGmmDialogExpose>({
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                @click="selectAllFilteredExportMods"
+                                                @click="
+                                                    selectAllFilteredExportMods
+                                                "
                                             >
                                                 全选当前筛选结果
                                             </Button>
@@ -1277,7 +1290,9 @@ defineExpose<IManagerGmmDialogExpose>({
                                                     )
                                                 "
                                             />
-                                            <div class="min-w-0 flex-1 space-y-2">
+                                            <div
+                                                class="min-w-0 flex-1 space-y-2"
+                                            >
                                                 <div
                                                     class="flex flex-wrap items-center gap-2 text-sm"
                                                 >
@@ -1327,8 +1342,8 @@ defineExpose<IManagerGmmDialogExpose>({
                                                 </div>
                                                 <div
                                                     v-if="
-                                                        (mod.tags ?? []).length >
-                                                        0
+                                                        (mod.tags ?? [])
+                                                            .length > 0
                                                     "
                                                     class="flex flex-wrap gap-2"
                                                 >
@@ -1538,12 +1553,12 @@ defineExpose<IManagerGmmDialogExpose>({
                     <Button
                         v-if="dialogStep < 3"
                         :disabled="
-                             dialogMode === 'import'
-                                 ? dialogStep === 2 && !canStartImport
-                                 : dialogStep === 2 && !canStartExport
-                         "
+                            dialogMode === 'import'
+                                ? dialogStep === 2 && !canStartImport
+                                : dialogStep === 2 && !canStartExport
+                        "
                         @click="
-                             dialogMode === 'import'
+                            dialogMode === 'import'
                                 ? nextImportStep()
                                 : nextExportStep()
                         "

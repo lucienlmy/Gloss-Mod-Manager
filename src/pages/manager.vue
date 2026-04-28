@@ -547,7 +547,6 @@ async function importSources(
 
     try {
         const result = await importLocalModSources(
-            manager,
             sources.map((source) => ({
                 path: source,
                 sourceType,
@@ -597,7 +596,7 @@ async function importDroppedSources(sources: IDroppedImportSource[]) {
             importLoading.value = true;
 
             for (const filePath of gmmFiles) {
-                await installGmmPackage({ filePath, manager });
+                await installGmmPackage({ filePath });
             }
 
             ElMessage.success(`成功导入 ${gmmFiles.length} 个 GMM 包。`);

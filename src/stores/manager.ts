@@ -68,6 +68,14 @@ function createTagColor(tagName: string) {
     return `hsl(${Math.abs(hash)} 68% 46%)`;
 }
 
+function cloneJsonValue<T>(value: T): T {
+    return JSON.parse(JSON.stringify(value)) as T;
+}
+
+function isSameJsonValue<T>(left: T, right: T) {
+    return JSON.stringify(left) === JSON.stringify(right);
+}
+
 function dedupeTags(
     list: Array<ITag | string | undefined>,
     textCollator: Intl.Collator,
@@ -163,14 +171,18 @@ export const useManager = defineStore("Manager", () => {
         sensitivity: "base",
     });
 
-    const managerGame = PersistentStore.useValue<ISupportedGames | null>(
-        "managerGame",
-        null,
-    );
-    const managerGameList = PersistentStore.useValue<ISupportedGames[]>(
-        "managerGameList",
-        [],
-    );
+    const persistedManagerGame =
+        PersistentStore.useValue<IPersistedManagerGame | null>(
+            "managerGame",
+            null,
+        );
+
+    const persistedManagerGameList = PersistentStore.useValue<
+        IPersistedManagerGame[]
+    >("managerGameList", []);
+
+    const managerGame = ref<ISupportedGames | null>(null);
+    const managerGameList = ref<ISupportedGames[]>([]);
 
     const selectedType = ref<number | string | 0>(0);
     const selectedTag = ref("全部");
@@ -182,6 +194,114 @@ export const useManager = defineStore("Manager", () => {
     const loadError = ref("");
 
     let latestLoadId = 0;
+    let syncingPersistedManagerGames = false;
+
+    function createPersistedManagerGame(
+        game: ISupportedGames,
+    ): IPersistedManagerGame {
+        // 运行时扩展对象包含函数，持久化时只保留游戏基础信息和用户路径配置。
+        return cloneJsonValue({
+            GlossGameId: game.GlossGameId,
+            steamAppID: game.steamAppID,
+            SteamWorkshop: game.SteamWorkshop,
+            installdir: game.installdir,
+            gameName: game.gameName,
+            gameShowName: game.gameShowName,
+            gameExe: game.gameExe,
+            startExe: game.startExe,
+            gamePath: game.gamePath,
+            gameVersion: game.gameVersion,
+            gameCoverImg: game.gameCoverImg,
+            nexusMods: game.nexusMods,
+            Thunderstore: game.Thunderstore,
+            mod_io: game.mod_io,
+            gamebanana: game.gamebanana,
+            curseforge: game.curseforge,
+            archivePath: game.archivePath,
+            from: game.from,
+        });
+    }
+
+    function createFallbackRuntimeGame(
+        game: IPersistedManagerGame,
+    ): ISupportedGames {
+        return {
+            ...game,
+            modType: [],
+            checkModType: [],
+        };
+    }
+
+    function findSupportedGame(game: IPersistedManagerGame) {
+        return (
+            supportedGames.value.find((item) => {
+                return Number(item.GlossGameId) === Number(game.GlossGameId);
+            }) ??
+            supportedGames.value.find((item) => {
+                return item.gameName === game.gameName;
+            })
+        );
+    }
+
+    function resolveRuntimeManagerGame(
+        game: IPersistedManagerGame,
+    ): ISupportedGames {
+        const persistedGame = createPersistedManagerGame(
+            createFallbackRuntimeGame(game),
+        );
+        const supportedGame = findSupportedGame(persistedGame);
+
+        if (!supportedGame) {
+            return createFallbackRuntimeGame(persistedGame);
+        }
+
+        return {
+            ...supportedGame,
+            gamePath: persistedGame.gamePath ?? supportedGame.gamePath,
+            gameVersion: persistedGame.gameVersion ?? supportedGame.gameVersion,
+            archivePath: persistedGame.archivePath ?? supportedGame.archivePath,
+            from: supportedGame.from ?? persistedGame.from,
+        };
+    }
+
+    function syncManagerGamesFromPersisted() {
+        syncingPersistedManagerGames = true;
+
+        try {
+            managerGame.value = persistedManagerGame.value
+                ? resolveRuntimeManagerGame(persistedManagerGame.value)
+                : null;
+            managerGameList.value = persistedManagerGameList.value
+                .filter((game) => Boolean(game?.gameName))
+                .map((game) => {
+                    return resolveRuntimeManagerGame(game);
+                });
+        } finally {
+            syncingPersistedManagerGames = false;
+        }
+    }
+
+    function syncPersistedManagerGame(game: ISupportedGames | null) {
+        const nextGame = game ? createPersistedManagerGame(game) : null;
+
+        if (isSameJsonValue(nextGame, persistedManagerGame.value)) {
+            return;
+        }
+
+        persistedManagerGame.value = nextGame;
+    }
+
+    function syncPersistedManagerGameList(list: ISupportedGames[]) {
+        const nextList = list.map((game) => {
+            return createPersistedManagerGame(game);
+        });
+
+        if (isSameJsonValue(nextList, persistedManagerGameList.value)) {
+            return;
+        }
+
+        persistedManagerGameList.value = nextList;
+    }
 
     function sortModsByWeight(list: IModInfo[]) {
         return list
@@ -916,39 +1036,42 @@ export const useManager = defineStore("Manager", () => {
     async function reloadSupportedGames() {
         const games = await getAllExpands();
         supportedGames.value = games;
-
-        if (managerGame.value) {
-            const matchedGame = games.find((game) => {
-                return (
-                    game.GlossGameId === managerGame.value?.GlossGameId ||
-                    game.gameName === managerGame.value?.gameName
-                );
-            });
-
-            if (matchedGame) {
-                managerGame.value = {
-                    ...matchedGame,
-                    ...managerGame.value,
-                };
-            }
-        }
-
-        managerGameList.value = managerGameList.value.map((managedGame) => {
-            const matchedGame = games.find((game) => {
-                return (
-                    game.GlossGameId === managedGame.GlossGameId ||
-                    game.gameName === managedGame.gameName
-                );
-            });
-
-            return matchedGame
-                ? {
-                      ...matchedGame,
-                      ...managedGame,
-                  }
-                : managedGame;
-        });
+        syncManagerGamesFromPersisted();
     }
+
+    syncManagerGamesFromPersisted();
+
+    watch(
+        [persistedManagerGame, persistedManagerGameList, supportedGames],
+        () => {
+            syncManagerGamesFromPersisted();
+        },
+        { deep: true, flush: "sync" },
+    );
+
+    watch(
+        managerGame,
+        (game) => {
+            if (syncingPersistedManagerGames) {
+                return;
+            }
+
+            syncPersistedManagerGame(game);
+        },
+        { deep: true, flush: "sync" },
+    );
+
+    watch(
+        managerGameList,
+        (list) => {
+            if (syncingPersistedManagerGames) {
+                return;
+            }
+
+            syncPersistedManagerGameList(list);
+        },
+        { deep: true, flush: "sync" },
+    );
 
     void reloadSupportedGames().catch((error: unknown) => {
         console.error("加载游戏扩展失败");

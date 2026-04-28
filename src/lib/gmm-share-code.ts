@@ -1,5 +1,6 @@
+import { useManager } from "@/stores/manager";
+
 interface IImportGmmShareCodeOptions {
-    manager: ReturnType<typeof useManager>;
     code: string;
 }
 
@@ -53,10 +54,9 @@ export function parseGmmShareCode(code: string) {
     return payload;
 }
 
-function resolveShareCodeMatchIndex(
-    manager: ReturnType<typeof useManager>,
-    incomingMod: IModInfo,
-) {
+function resolveShareCodeMatchIndex(incomingMod: IModInfo) {
+    const manager = useManager();
+
     return manager.managerModList.findIndex((item) => {
         if (
             incomingMod.webId !== undefined &&
@@ -79,7 +79,8 @@ function resolveShareCodeMatchIndex(
     });
 }
 
-function buildNextModId(manager: ReturnType<typeof useManager>) {
+function buildNextModId() {
+    const manager = useManager();
     const currentMaxId = manager.managerModList.reduce((maxId, item) => {
         return Math.max(maxId, Number(item.id) || 0);
     }, 0);
@@ -90,32 +91,30 @@ function buildNextModId(manager: ReturnType<typeof useManager>) {
 export async function importGmmShareCode(
     options: IImportGmmShareCodeOptions,
 ): Promise<IShareCodeImportMatchResult> {
+    const manager = useManager();
     const shareMods = parseGmmShareCode(options.code);
     let addedCount = 0;
     let updatedCount = 0;
     let skippedCount = 0;
-    let nextModId = buildNextModId(options.manager);
+    let nextModId = buildNextModId();
 
     for (const shareMod of shareMods) {
-        const normalizedIncoming = options.manager.normalizeMod({
+        const normalizedIncoming = manager.normalizeMod({
             ...shareMod,
             id: shareMod.id || nextModId,
             isInstalled: false,
             modFiles: [],
             weight: 0,
         });
-        const matchedIndex = resolveShareCodeMatchIndex(
-            options.manager,
-            normalizedIncoming,
-        );
+        const matchedIndex = resolveShareCodeMatchIndex(normalizedIncoming);
 
         if (matchedIndex === -1) {
-            options.manager.managerModList = [
-                ...options.manager.managerModList,
-                options.manager.normalizeMod({
+            manager.managerModList = [
+                ...manager.managerModList,
+                manager.normalizeMod({
                     ...normalizedIncoming,
                     id: nextModId,
-                    weight: options.manager.managerModList.length + 1,
+                    weight: manager.managerModList.length + 1,
                 }),
             ];
             addedCount += 1;
@@ -123,47 +122,45 @@ export async function importGmmShareCode(
             continue;
         }
 
-        const currentMod = options.manager.managerModList[matchedIndex];
+        const currentMod = manager.managerModList[matchedIndex];
 
         if (currentMod.modVersion === normalizedIncoming.modVersion) {
             skippedCount += 1;
             continue;
         }
 
-        options.manager.managerModList = options.manager.managerModList.map(
-            (item, index) => {
-                if (index !== matchedIndex) {
-                    return item;
-                }
+        manager.managerModList = manager.managerModList.map((item, index) => {
+            if (index !== matchedIndex) {
+                return item;
+            }
 
-                return options.manager.normalizeMod({
-                    ...item,
-                    modName: normalizedIncoming.modName,
-                    modVersion: normalizedIncoming.modVersion,
-                    modAuthor: normalizedIncoming.modAuthor,
-                    modWebsite: normalizedIncoming.modWebsite,
-                    tags: normalizedIncoming.tags,
-                    modType: normalizedIncoming.modType,
-                    modDesc: normalizedIncoming.modDesc,
-                    cover: normalizedIncoming.cover,
-                    other: {
-                        ...item.other,
-                        ...normalizedIncoming.other,
-                    },
-                    from: normalizedIncoming.from,
-                    webId: normalizedIncoming.webId,
-                    gameID: normalizedIncoming.gameID,
-                    key: normalizedIncoming.key,
-                    advanced: normalizedIncoming.advanced,
-                    isInstalled: false,
-                });
-            },
-        );
+            return manager.normalizeMod({
+                ...item,
+                modName: normalizedIncoming.modName,
+                modVersion: normalizedIncoming.modVersion,
+                modAuthor: normalizedIncoming.modAuthor,
+                modWebsite: normalizedIncoming.modWebsite,
+                tags: normalizedIncoming.tags,
+                modType: normalizedIncoming.modType,
+                modDesc: normalizedIncoming.modDesc,
+                cover: normalizedIncoming.cover,
+                other: {
+                    ...item.other,
+                    ...normalizedIncoming.other,
+                },
+                from: normalizedIncoming.from,
+                webId: normalizedIncoming.webId,
+                gameID: normalizedIncoming.gameID,
+                key: normalizedIncoming.key,
+                advanced: normalizedIncoming.advanced,
+                isInstalled: false,
+            });
+        });
         updatedCount += 1;
     }
 
-    options.manager.syncTagsFromMods();
-    await options.manager.saveManagerData();
+    manager.syncTagsFromMods();
+    await manager.saveManagerData();
 
     return {
         addedCount,

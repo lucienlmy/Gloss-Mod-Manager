@@ -12,22 +12,7 @@ import {
 } from "@/lib/local-mod-import";
 import { mergeAria2TaskSnapshots } from "@/lib/aria2-task-cache";
 import { PersistentStore } from "@/lib/persistent-store";
-
-interface IGlossDownloadMonitorManager {
-    managerGame: ISupportedGames | null;
-    managerRoot: string;
-    managerModList: IModInfo[];
-    availableTypes: IType[];
-    textCollator: Intl.Collator;
-    tags: ITag[];
-    selectedType: number | string | 0;
-    selectedTag: string;
-    saveManagerData: () => Promise<void>;
-    refreshRuntimeData: (options: {
-        storagePath: string;
-        closeSoftLinks: boolean;
-    }) => Promise<void>;
-}
+import { useManager } from "@/stores/manager";
 
 interface IGlossDownloadMonitorSettings {
     autoAddAfterDownload: boolean;
@@ -150,11 +135,12 @@ function syncTaskMetaStatuses(
 }
 
 export async function autoImportCompletedDownloadTasks(
-    manager: IGlossDownloadMonitorManager,
     settings: IGlossDownloadMonitorSettings,
     completedTaskGids: string[],
     tasks: IAria2RpcTask[],
 ) {
+    const manager = useManager();
+
     if (!settings.autoAddAfterDownload || completedTaskGids.length === 0) {
         return;
     }
@@ -266,7 +252,7 @@ export async function autoImportCompletedDownloadTasks(
                 }
             }
 
-            const result = await importLocalModSources(manager, [importSource]);
+            const result = await importLocalModSources([importSource]);
             const importedMod = result.importedMods[0];
 
             if (!importedMod) {
@@ -299,14 +285,9 @@ export class GlossDownloadMonitor {
         typeof globalThis.setInterval
     > | null = null;
     private static refreshing = false;
-    private static manager: IGlossDownloadMonitorManager | null = null;
     private static settings: IGlossDownloadMonitorSettings | null = null;
 
-    public static start(
-        manager: IGlossDownloadMonitorManager,
-        settings: IGlossDownloadMonitorSettings,
-    ) {
-        GlossDownloadMonitor.manager = manager;
+    public static start(settings: IGlossDownloadMonitorSettings) {
         GlossDownloadMonitor.settings = settings;
 
         if (GlossDownloadMonitor.intervalId !== null) {
@@ -320,11 +301,7 @@ export class GlossDownloadMonitor {
     }
 
     private static async refresh() {
-        if (
-            GlossDownloadMonitor.refreshing ||
-            !GlossDownloadMonitor.manager ||
-            !GlossDownloadMonitor.settings
-        ) {
+        if (GlossDownloadMonitor.refreshing || !GlossDownloadMonitor.settings) {
             return;
         }
 
@@ -369,7 +346,6 @@ export class GlossDownloadMonitor {
             }
 
             await autoImportCompletedDownloadTasks(
-                GlossDownloadMonitor.manager,
                 GlossDownloadMonitor.settings,
                 syncResult.newlyCompletedTaskGids,
                 allTasks,
@@ -384,10 +360,9 @@ export class GlossDownloadMonitor {
 }
 
 export function initializeGlossDownloadMonitor(
-    manager: IGlossDownloadMonitorManager,
     settings: IGlossDownloadMonitorSettings,
 ) {
-    GlossDownloadMonitor.start(manager, settings);
+    GlossDownloadMonitor.start(settings);
 }
 
 export const autoImportCompletedGlossTasks = autoImportCompletedDownloadTasks;

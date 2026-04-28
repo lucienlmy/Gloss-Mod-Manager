@@ -1,10 +1,6 @@
 import { join } from "@tauri-apps/api/path";
 import { Manager } from "@/lib/Manager";
-
-interface IManagerRuntimeStore {
-    managerGame: ISupportedGames | null;
-    managerRoot: string;
-}
+import { useManager } from "@/stores/manager";
 
 interface ISyncManagerRuntimeContextOptions {
     storagePath: string;
@@ -15,9 +11,10 @@ interface ISyncManagerRuntimeContextOptions {
  * 在非管理页中也同步本地管理器上下文，避免下载页导入时拿不到 modStorage。
  */
 export async function syncManagerRuntimeContext(
-    manager: IManagerRuntimeStore,
     options: ISyncManagerRuntimeContextOptions,
 ) {
+    const manager = useManager();
+
     if (!manager.managerGame || !options.storagePath) {
         manager.managerRoot = "";
         Manager.configureContext({

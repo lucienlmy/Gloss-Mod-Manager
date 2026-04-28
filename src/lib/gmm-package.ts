@@ -2,16 +2,7 @@ import { basename, join, tempDir } from "@tauri-apps/api/path";
 import { FileHandler } from "@/lib/FileHandler";
 import { importLocalModSources } from "@/lib/local-mod-import";
 import { SevenZip } from "@/lib/sevenZip";
-
-interface IGmmPackageManager {
-    managerRoot: string;
-    managerGame: ISupportedGames | null;
-    managerModList: IModInfo[];
-    availableTypes: IType[];
-    textCollator: Intl.Collator;
-    tags: ITag[];
-    saveManagerData: () => Promise<void>;
-}
+import { useManager } from "@/stores/manager";
 
 export interface IGmmPackageDetails {
     filePath: string;
@@ -20,7 +11,6 @@ export interface IGmmPackageDetails {
 }
 
 export interface IInstallGmmPackageOptions {
-    manager: IGmmPackageManager;
     filePath: string;
     selectedFolderKeys?: string[];
 }
@@ -180,13 +170,14 @@ export async function readGmmPackageDetails(filePath: string) {
 }
 
 export async function installGmmPackage(options: IInstallGmmPackageOptions) {
+    const manager = useManager();
     const packageDetails = await readGmmPackageDetails(options.filePath);
 
     if (
-        options.manager.managerGame &&
+        manager.managerGame &&
         packageDetails.info.gameID &&
         Number(packageDetails.info.gameID) !==
-            Number(options.manager.managerGame.GlossGameId)
+            Number(manager.managerGame.GlossGameId)
     ) {
         throw new Error("该 GMM 包不属于当前游戏，请先切换到正确的游戏。");
     }
@@ -231,7 +222,7 @@ export async function installGmmPackage(options: IInstallGmmPackageOptions) {
 
             if (
                 pack.md5 &&
-                options.manager.managerModList.some((mod) => {
+                manager.managerModList.some((mod) => {
                     return Boolean(mod.md5) && mod.md5 === pack.md5;
                 })
             ) {
@@ -259,10 +250,7 @@ export async function installGmmPackage(options: IInstallGmmPackageOptions) {
             };
         }
 
-        const result = await importLocalModSources(
-            options.manager,
-            importSources,
-        );
+        const result = await importLocalModSources(importSources);
         let shouldSaveCover = false;
 
         for (const [index, importedMod] of result.importedMods.entries()) {
@@ -279,11 +267,11 @@ export async function installGmmPackage(options: IInstallGmmPackageOptions) {
             }
 
             const coverPath = await join(
-                options.manager.managerRoot,
+                manager.managerRoot,
                 String(importedMod.id),
                 localCoverPath,
             );
-            const targetMod = options.manager.managerModList.find((mod) => {
+            const targetMod = manager.managerModList.find((mod) => {
                 return mod.id === importedMod.id;
             });
 
@@ -296,7 +284,7 @@ export async function installGmmPackage(options: IInstallGmmPackageOptions) {
         }
 
         if (shouldSaveCover) {
-            await options.manager.saveManagerData();
+            await manager.saveManagerData();
         }
 
         return {

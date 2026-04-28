@@ -3,6 +3,7 @@ import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
 import { SevenZip } from "@/lib/sevenZip";
 import { SidecarExecutionError } from "@/lib/sidecar";
+import { useManager } from "@/stores/manager";
 
 export const ARCHIVE_EXTENSIONS = [
     "zip",
@@ -23,16 +24,6 @@ export interface ILocalModImportSource {
     metadata?: Partial<IModInfo>;
     duplicateStrategy?: LocalModImportDuplicateStrategy;
     targetMod?: IModInfo;
-}
-
-interface ILocalModImportManager {
-    managerRoot: string;
-    managerGame: ISupportedGames | null;
-    managerModList: IModInfo[];
-    availableTypes: IType[];
-    textCollator: Intl.Collator;
-    tags: ITag[];
-    saveManagerData: () => Promise<void>;
 }
 
 interface ILocalModImportResult {
@@ -127,11 +118,14 @@ function collectModTags(modList: IModInfo[], textCollator: Intl.Collator) {
     );
 }
 
-async function detectModType(manager: ILocalModImportManager, mod: IModInfo) {
+async function detectModType(mod: IModInfo) {
+    const manager = useManager();
     const game = manager.managerGame;
     if (!game) {
         return 99;
     }
+
+    console.log({ game });
 
     try {
         if (typeof game.checkModType === "function") {
@@ -250,13 +244,13 @@ async function collectRelativeModFiles(targetFolder: string) {
 }
 
 function buildImportedMod(
-    manager: ILocalModImportManager,
     source: ILocalModImportSource,
     importedMods: IModInfo[],
     modId: number,
     originalName: string,
     modFiles: string[],
 ) {
+    const manager = useManager();
     const metadata = source.metadata ?? {};
     const targetMod = source.targetMod;
 
@@ -406,7 +400,9 @@ function getMaterializeFailureMessage(sourceType: LocalModImportSourceType) {
     return "复制文件失败，请确认文件权限和文件是否被占用。";
 }
 
-async function saveImportedManagerData(manager: ILocalModImportManager) {
+async function saveImportedManagerData() {
+    const manager = useManager();
+
     manager.tags = dedupeTags(
         [
             ...manager.tags,
@@ -429,9 +425,10 @@ export function resolveLocalModImportSourceType(filePath: string) {
  * 将文件夹、压缩包或单文件导入到本地管理器目录，并同步更新 store。
  */
 export async function importLocalModSources(
-    manager: ILocalModImportManager,
     sources: ILocalModImportSource[],
 ): Promise<ILocalModImportResult> {
+    const manager = useManager();
+
     if (!manager.managerGame || !manager.managerRoot) {
         throw new Error("请先选择游戏并配置储存路径。");
     }
@@ -492,7 +489,6 @@ export async function importLocalModSources(
 
             const originalName = await basename(source.path);
             const mod = buildImportedMod(
-                manager,
                 source,
                 importedMods,
                 modId,
@@ -503,7 +499,7 @@ export async function importLocalModSources(
             mod.modType =
                 source.metadata?.modType ??
                 source.targetMod?.modType ??
-                (await detectModType(manager, mod));
+                (await detectModType(mod));
 
             manager.managerModList = shouldOverwrite
                 ? manager.managerModList.map((item) =>
@@ -523,14 +519,14 @@ export async function importLocalModSources(
             await Manager.deleteMod(stagingFolder);
 
             if (importedMods.length > 0) {
-                await saveImportedManagerData(manager);
+                await saveImportedManagerData();
             }
 
             throw new Error(`导入 ${originalName} 失败：${message}`);
         }
     }
 
-    await saveImportedManagerData(manager);
+    await saveImportedManagerData();
 
     return {
         importedCount: importedMods.length,

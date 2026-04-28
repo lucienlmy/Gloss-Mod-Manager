@@ -384,7 +384,6 @@ async function handleGmmPackageIntent(
     }
 
     const result = await importGmmShareCode({
-        manager,
         code: intent.code,
     });
 

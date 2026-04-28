@@ -1,15 +1,5 @@
 import { Manager } from "@/lib/Manager";
-
-interface IManagerRuntimeDataStore {
-    managerGame: ISupportedGames | null;
-    managerRoot: string;
-    managerModList: IModInfo[];
-    tags: ITag[];
-    selectedType: number | string | 0;
-    selectedTag: string;
-    availableTypes: IType[];
-    textCollator: Intl.Collator;
-}
+import { useManager } from "@/stores/manager";
 
 function createTagColor(tagName: string) {
     let hash = 0;
@@ -99,9 +89,9 @@ function collectModTags(modList: IModInfo[], textCollator: Intl.Collator) {
     );
 }
 
-export async function hydrateManagerRuntimeData(
-    manager: IManagerRuntimeDataStore,
-) {
+export async function hydrateManagerRuntimeData() {
+    const manager = useManager();
+
     if (!manager.managerGame || !manager.managerRoot) {
         manager.managerModList = [];
         manager.tags = [];

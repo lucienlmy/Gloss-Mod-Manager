@@ -743,8 +743,8 @@ function getStores() {
     }
 
     return {
-        manager: useManager(activePinia),
-        settings: useSettings(activePinia),
+        manager: useManager(),
+        settings: useSettings(),
     };
 }
 
@@ -832,9 +832,9 @@ function createFeatureItemDisabledError(featureName: string, itemName: string) {
     return `${featureName}「${itemName}」已关闭。请先在 MCP 页面中重新启用后再试。`;
 }
 
-async function ensureSupportedGamesLoaded(
-    manager: ReturnType<typeof useManager>,
-) {
+async function ensureSupportedGamesLoaded() {
+    const manager = useManager();
+
     if (manager.supportedGames.length > 0) {
         return;
     }
@@ -851,7 +851,7 @@ async function ensureSupportedGamesLoaded(
 async function ensureManagerRuntimeLoaded() {
     const { manager, settings } = getStores();
 
-    await ensureSupportedGamesLoaded(manager);
+    await ensureSupportedGamesLoaded();
     await manager.refreshRuntimeData({
         storagePath: settings.storagePath,
         closeSoftLinks: settings.closeSoftLinks,
@@ -860,10 +860,9 @@ async function ensureManagerRuntimeLoaded() {
     return { manager, settings };
 }
 
-function getTypeDefinition(
-    manager: ReturnType<typeof useManager>,
-    mod: IModInfo,
-) {
+function getTypeDefinition(mod: IModInfo) {
+    const manager = useManager();
+
     return manager.managerGame?.modType.find((item) => {
         return String(item.id) === String(mod.modType ?? "");
     });
@@ -941,12 +940,9 @@ function isOperationSuccessful(result: IState[] | boolean) {
     return result.every((item) => item.state);
 }
 
-async function toggleModInstall(
-    manager: ReturnType<typeof useManager>,
-    mod: IModInfo,
-    install: boolean,
-) {
-    const type = getTypeDefinition(manager, mod);
+async function toggleModInstall(mod: IModInfo, install: boolean) {
+    const manager = useManager();
+    const type = getTypeDefinition(mod);
 
     if (!type) {
         throw new Error("当前 Mod 没有可用的类型定义，请先检查类型设置。");
@@ -979,7 +975,7 @@ async function handleToolCall(
         switch (name) {
             case "get-supported-games-list": {
                 const { manager } = getStores();
-                await ensureSupportedGamesLoaded(manager);
+                await ensureSupportedGamesLoaded();
                 const games = toSerializable(manager.supportedGames);
                 return createToolResult({
                     games,
@@ -1007,7 +1003,7 @@ async function handleToolCall(
             }
             case "fetch-steam-installed-games": {
                 const { manager } = getStores();
-                await ensureSupportedGamesLoaded(manager);
+                await ensureSupportedGamesLoaded();
                 const resolvedGames = await Promise.all(
                     manager.supportedGames.map(async (game) => {
                         const gamePath = await ScanGame.getSteamGamePath(
@@ -1041,7 +1037,7 @@ async function handleToolCall(
                 const gamePath = toRequiredString(args.gamePath, "gamePath");
                 const { manager, settings } = getStores();
 
-                await ensureSupportedGamesLoaded(manager);
+                await ensureSupportedGamesLoaded();
                 const targetGame = manager.supportedGames.find((item) => {
                     return item.GlossGameId === GlossGameId;
                 });
@@ -1094,7 +1090,7 @@ async function handleToolCall(
                 );
                 const { manager, settings } = getStores();
 
-                await ensureSupportedGamesLoaded(manager);
+                await ensureSupportedGamesLoaded();
                 const supportedGame = manager.supportedGames.find((item) => {
                     return item.GlossGameId === GlossGameId;
                 });
@@ -1177,7 +1173,7 @@ async function handleToolCall(
                     throw new Error(`未找到 ID 为 ${modId} 的 Mod。`);
                 }
 
-                await toggleModInstall(manager, targetMod, isInstall);
+                await toggleModInstall(targetMod, isInstall);
                 await router.push("/manager");
 
                 return createToolResult({
@@ -1233,7 +1229,7 @@ async function handleToolCall(
                               "replaceLocalModId",
                           );
                 const { manager } = getStores();
-                await ensureSupportedGamesLoaded(manager);
+                await ensureSupportedGamesLoaded();
 
                 const result = await queueGlossModDownload({
                     modId,
@@ -1521,7 +1517,7 @@ async function handleResourceRead(uri: string) {
 
     switch (uri) {
         case "games://supported-games-list":
-            await ensureSupportedGamesLoaded(manager);
+            await ensureSupportedGamesLoaded();
             return {
                 games: toSerializable(manager.supportedGames),
                 count: manager.supportedGames.length,

@@ -285,6 +285,7 @@ async function updateModInstalled(item: IModInfo, nextInstalled: unknown) {
     const previousInstalled = item.isInstalled;
     item.isInstalled = nextInstalled;
     startOperating(item.id);
+    console.log(manager.managerGame);
 
     try {
         const type = manager.managerGame?.modType.find(

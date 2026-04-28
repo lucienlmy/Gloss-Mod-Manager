@@ -1130,7 +1130,6 @@ async function autoImportCompletedTasks(
     tasks: IAria2RpcTask[],
 ) {
     await autoImportCompletedDownloadTasks(
-        manager,
         {
             autoAddAfterDownload: settings.autoAddAfterDownload,
             storagePath: storagePath.value,
@@ -1808,7 +1807,7 @@ async function importTaskToLocalManager(task?: IAria2RpcTask | null) {
             }
         }
 
-        const result = await importLocalModSources(manager, [importSource]);
+        const result = await importLocalModSources([importSource]);
         const importedMod = result.importedMods[0];
 
         if (!importedMod) {

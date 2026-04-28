@@ -11,7 +11,6 @@ import { Log } from "@/lib/log";
 import { McpService } from "@/lib/mcp-service";
 import { Theme } from "@/lib/theme";
 import lang from "@/lang";
-import { useManager } from "@/stores/manager";
 import { useSettings } from "@/stores/settings";
 
 import "element-plus-message/dist/index.css"; // 主要样式
@@ -33,7 +32,7 @@ async function bootstrap() {
 
     // 首屏渲染后恢复 MCP 服务的上次启停状态，避免阻塞应用启动。
     void McpService.autoStartFromSettings();
-    initializeGlossDownloadMonitor(useManager(pinia), useSettings(pinia));
+    initializeGlossDownloadMonitor(useSettings(pinia));
     initializeAppUpdater();
 
     void Aria2Rpc.autoStartFromSettings();
