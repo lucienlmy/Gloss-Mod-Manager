@@ -146,8 +146,8 @@ const manager = useManager();
 const settings = useSettings();
 const route = useRoute();
 const router = useRouter();
+const { storagePath } = storeToRefs(settings);
 
-const storagePath = PersistentStore.useValue<string>("storagePath", "");
 const disableSymlinkInstall = PersistentStore.useValue<boolean>(
     "disableSymlinkInstall",
     false,

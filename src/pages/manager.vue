@@ -54,9 +54,7 @@ const launchStore = useLaunchStore();
 const router = useRouter();
 const { managerGame, selectionMode, selectionIds } = storeToRefs(manager);
 const settings = useSettings();
-const { managerGridEnabled } = storeToRefs(settings);
-
-const storagePath = PersistentStore.useValue<string>("storagePath", "");
+const { managerGridEnabled, storagePath } = storeToRefs(settings);
 const disableSymlinkInstall = PersistentStore.useValue<boolean>(
     "disableSymlinkInstall",
     false,
