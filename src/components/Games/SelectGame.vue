@@ -29,10 +29,13 @@ const gameCountLabel = computed(() => {
     const total = manager.supportedGames.length;
 
     if (!searchKeyword.value.trim()) {
-        return `共${total}款游戏`;
+        return t("games.totalCount", { total });
     }
 
-    return `匹配${filteredGames.value.length}款 / 共${total}款`;
+    return t("games.matchedCount", {
+        matched: filteredGames.value.length,
+        total,
+    });
 });
 
 async function select(item: ISupportedGames) {
@@ -48,8 +51,8 @@ async function select(item: ISupportedGames) {
     );
     const selected = await open({
         directory: selectGameByFolder,
-        title: `请选择 ${item.gameExe} 所在位置`,
-        filters: [{ name: "游戏主程序", extensions: ["exe"] }],
+        title: t("games.selectExecutableTitle", { exe: item.gameExe }),
+        filters: [{ name: t("games.executableFilter"), extensions: ["exe"] }],
         defaultPath: path,
     });
 
@@ -66,7 +69,9 @@ async function select(item: ISupportedGames) {
                 };
                 // console.log(manager.managerGame);
             } else {
-                ElMessage.error(`请选择 ${item.gameExe} 所在目录.`);
+                ElMessage.error(
+                    t("games.selectFolderError", { exe: item.gameExe }),
+                );
                 return;
             }
         } else {
@@ -85,8 +90,10 @@ async function select(item: ISupportedGames) {
             } else {
                 let exename = item.gameExe
                     .map((item) => item.name)
-                    .join(" 或 ");
-                ElMessage.error(`请选择 ${exename} 所在目录.`);
+                    .join(` ${t("common.or")} `);
+                ElMessage.error(
+                    t("games.selectFolderError", { exe: exename }),
+                );
                 return;
             }
         }
@@ -118,21 +125,21 @@ async function select(item: ISupportedGames) {
         <Dialog with-backdrop v-model:open="showSelectDialog">
             <DialogTrigger as-child>
                 <Button variant="outline" size="sm">
-                    <IconPlus /> 选择游戏
+                    <IconPlus /> {{ t("games.selectGame") }}
                 </Button>
             </DialogTrigger>
             <DialogContent class="w-225 max-w-[70%]!">
                 <DialogHeader>
                     <DialogTitle class="flex gap-3">
                         <div class="flex items-center">
-                            选择游戏
+                            {{ t("games.selectGame") }}
                             <small>({{ gameCountLabel }})</small>
                         </div>
                         <div class="flex-1 max-w-[75%]">
                             <InputGroup>
                                 <InputGroupInput
                                     v-model="searchKeyword"
-                                    placeholder="搜索游戏"
+                                    :placeholder="t('games.searchGame')"
                                 ></InputGroupInput>
                                 <InputGroupAddon align="inline-end">
                                     <Button variant="ghost" size="icon">
@@ -163,7 +170,7 @@ async function select(item: ISupportedGames) {
                         v-if="!filteredGames.length"
                         class="col-span-4 py-10 text-center text-sm text-muted-foreground"
                     >
-                        未找到匹配的游戏，请尝试输入原名或翻译名。
+                        {{ t("games.noMatches") }}
                     </div>
                 </div>
             </DialogContent>

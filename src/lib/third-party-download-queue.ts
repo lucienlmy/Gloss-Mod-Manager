@@ -1,5 +1,9 @@
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { Aria2Rpc, type IAria2RpcTask, type IAria2RuntimeSettings } from "@/lib/aria2-rpc";
+import {
+    Aria2Rpc,
+    type IAria2RpcTask,
+    type IAria2RuntimeSettings,
+} from "@/lib/aria2-rpc";
 import { FileHandler } from "@/lib/FileHandler";
 import {
     findGlossDuplicateLocalMods,
@@ -13,6 +17,10 @@ import {
     type IThirdPartyModFile,
     type ThirdPartyProvider,
 } from "@/lib/third-party-mod-api";
+import {
+    mergeAria2TaskSnapshots,
+    removeAria2TaskSnapshot,
+} from "@/lib/aria2-task-cache";
 
 export type ThirdPartyQueueDownloadStatus =
     | "created"
@@ -119,7 +127,10 @@ function buildOutputFileName(
     return baseName || urlFileName || "download.bin";
 }
 
-function shouldOpenExternally(provider: ThirdPartyProvider, downloadUrl: string) {
+function shouldOpenExternally(
+    provider: ThirdPartyProvider,
+    downloadUrl: string,
+) {
     if (!/^https?:\/\//iu.test(downloadUrl)) {
         return false;
     }
@@ -215,6 +226,7 @@ async function removeCompletedDuplicateTask(
     const nextTaskMetaMap = { ...runtime.taskMetaMap };
     delete nextTaskMetaMap[task.gid];
     await saveTaskMetaMap(nextTaskMetaMap);
+    await removeAria2TaskSnapshot(task.gid);
     runtime.taskMetaMap = nextTaskMetaMap;
     runtime.allTasks = runtime.allTasks.filter((item) => item.gid !== task.gid);
 }
@@ -258,7 +270,14 @@ async function createThirdPartyDownloadTask(
     };
 
     await saveTaskMetaMap(nextTaskMetaMap);
+    const createdTask = await Aria2Rpc.tellStatus(gid);
+    await mergeAria2TaskSnapshots(
+        [...runtime.allTasks, createdTask],
+        nextTaskMetaMap,
+        runtime.outputDirectory,
+    );
     runtime.taskMetaMap = nextTaskMetaMap;
+    runtime.allTasks = [...runtime.allTasks, createdTask];
 
     return gid;
 }

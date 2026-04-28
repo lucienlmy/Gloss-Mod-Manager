@@ -1,5 +1,6 @@
 import { defaultWindowIcon } from "@tauri-apps/api/app";
 import { isTauri } from "@tauri-apps/api/core";
+import { platform } from "@tauri-apps/plugin-os";
 import { TrayIcon } from "@tauri-apps/api/tray";
 import { Menu } from "@tauri-apps/api/menu";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -58,7 +59,7 @@ async function quitApplication(
 
     const startedUpdateInstall = await installPendingAppUpdate(trigger, false);
 
-    if (startedUpdateInstall) {
+    if (startedUpdateInstall && platform() === "windows") {
         return;
     }
 

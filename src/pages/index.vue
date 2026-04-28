@@ -9,32 +9,32 @@ import {
 } from "lucide-vue-next";
 const list = [
     {
-        title: "游戏",
+        titleKey: "nav.games",
         icon: Gamepad2,
         to: "/games",
     },
     {
-        title: "管理",
+        titleKey: "nav.manager",
         icon: Box,
         to: "/manager",
     },
     {
-        title: "游览",
+        titleKey: "nav.explore",
         icon: GamepadDirectional,
         to: "/explore",
     },
     {
-        title: "下载",
+        titleKey: "nav.download",
         icon: ArrowDownToLine,
         to: "/download",
     },
     {
-        title: "设置",
+        titleKey: "nav.settings",
         icon: Settings,
         to: "/settings",
     },
     {
-        title: "关于",
+        titleKey: "nav.about",
         icon: Info,
         to: "/about",
     },
@@ -44,9 +44,7 @@ const list = [
     <div class="flex flex-col gap-4">
         <Card>
             <CardHeader>
-                <CardTitle
-                    >欢迎使用 Gloss Mod Manager, 在这里你可以...</CardTitle
-                >
+                    <CardTitle>{{ $t("home.welcome") }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div class="flex gap-2">
@@ -58,7 +56,7 @@ const list = [
                         variant="secondary">
                         <router-link :to="item.to">
                             <component :is="item.icon" class="h-5 w-5" />
-                            {{ item.title }}
+                            {{ $t(item.titleKey) }}
                         </router-link>
                     </Button>
                 </div>
@@ -66,7 +64,7 @@ const list = [
         </Card>
         <Card>
             <CardHeader>
-                <CardTitle>合作方</CardTitle>
+                    <CardTitle>{{ $t("home.partners") }}</CardTitle>
             </CardHeader>
             <CardContent>
                 <div

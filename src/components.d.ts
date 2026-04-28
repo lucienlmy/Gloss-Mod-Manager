@@ -24,7 +24,6 @@ declare module 'vue' {
     AlertDialogHeader: typeof import('./components/ui/alert-dialog/AlertDialogHeader.vue')['default']
     AlertDialogTitle: typeof import('./components/ui/alert-dialog/AlertDialogTitle.vue')['default']
     AlertDialogTrigger: typeof import('./components/ui/alert-dialog/AlertDialogTrigger.vue')['default']
-    AppUpdateInstallDialog: typeof import('./components/AppUpdateInstallDialog.vue')['default']
     AsyncImage: typeof import('./components/AsyncImage.vue')['default']
     BackupTreeNode: typeof import('./components/BackupTreeNode.vue')['default']
     Badge: typeof import('./components/ui/badge/Badge.vue')['default']

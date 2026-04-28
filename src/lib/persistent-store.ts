@@ -1,11 +1,12 @@
 import { LazyStore } from "@tauri-apps/plugin-store";
-import { isProxy, toRaw } from "vue";
-import { ref } from "vue";
+import { isProxy, ref, toRaw } from "vue";
 import type { Ref } from "vue";
 import { watch } from "vue";
 
 export class PersistentStore {
     public static readonly store = new LazyStore("settings.json");
+    private static readonly valueRefs = new Map<string, Ref<unknown>>();
+    private static readonly suppressNextWatchKeys = new Set<string>();
 
     /**
      * 读取指定键的持久化值；未命中时返回默认值副本。
@@ -27,17 +28,28 @@ export class PersistentStore {
      * 写入指定键的持久化值。
      */
     public static async set<T>(key: string, value: T): Promise<void> {
-        await PersistentStore.store.set(key, PersistentStore.cloneValue(value));
+        const nextValue = PersistentStore.cloneValue(value);
+
+        await PersistentStore.store.set(key, nextValue);
+        PersistentStore.syncValueRef(key, nextValue);
     }
 
     /**
      * 创建一个和 Tauri Store 自动同步的响应式引用。
      */
     public static useValue<T>(key: string, fallback: T): Ref<T> {
+        const existingRef = PersistentStore.valueRefs.get(key);
+
+        if (existingRef) {
+            return existingRef as Ref<T>;
+        }
+
         const state = ref(PersistentStore.cloneValue(fallback)) as Ref<T>;
         let initialized = false;
         let hydrating = false;
         let dirtyBeforeReady = false;
+
+        PersistentStore.valueRefs.set(key, state as Ref<unknown>);
 
         void PersistentStore.get(key, fallback)
             .then((value) => {
@@ -73,6 +85,11 @@ export class PersistentStore {
                     return;
                 }
 
+                if (PersistentStore.suppressNextWatchKeys.has(key)) {
+                    PersistentStore.suppressNextWatchKeys.delete(key);
+                    return;
+                }
+
                 if (!initialized) {
                     dirtyBeforeReady = true;
                     return;
@@ -82,10 +99,30 @@ export class PersistentStore {
                     PersistentStore.logError("写入", key, error);
                 });
             },
-            { deep: true },
+            { deep: true, flush: "sync" },
         );
 
         return state;
+    }
+
+    /**
+     * 同一 key 可能在多个页面被 useValue 读取，写入后要同步到共享 ref，避免必须刷新页面才更新状态。
+     */
+    private static syncValueRef<T>(key: string, value: T) {
+        const state = PersistentStore.valueRefs.get(key);
+
+        if (!state) {
+            return;
+        }
+
+        const nextValue = PersistentStore.cloneValue(value);
+
+        if (Object.is(state.value, nextValue)) {
+            return;
+        }
+
+        PersistentStore.suppressNextWatchKeys.add(key);
+        state.value = nextValue;
     }
 
     /**

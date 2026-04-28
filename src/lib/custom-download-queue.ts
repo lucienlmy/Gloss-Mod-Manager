@@ -8,6 +8,7 @@ import {
     findGlossDuplicateTasks,
     type IGlossDownloadTaskMeta,
 } from "@/lib/gloss-download";
+import { mergeAria2TaskSnapshots } from "@/lib/aria2-task-cache";
 import { PersistentStore } from "@/lib/persistent-store";
 
 export type CustomQueueDownloadStatus =
@@ -219,6 +220,12 @@ export async function queueCustomDownload(
     };
 
     await saveTaskMetaMap(nextTaskMetaMap);
+    const createdTask = await Aria2Rpc.tellStatus(gid);
+    await mergeAria2TaskSnapshots(
+        [...runtime.allTasks, createdTask],
+        nextTaskMetaMap,
+        runtime.outputDirectory,
+    );
 
     return {
         status: "created",

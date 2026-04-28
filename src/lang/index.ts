@@ -1,30 +1,45 @@
 import { createI18n } from "vue-i18n";
-const modules = import.meta.glob("./*", { eager: true });
+import { fallbackLocale, resolveSystemLocale } from "@/lang/locales";
+import type { AppLocale } from "@/lang/locales";
+
+type LocaleMessageValue =
+    | string
+    | ILocaleMessages;
+
+interface ILocaleMessages {
+    [key: string]: LocaleMessageValue;
+}
+
+interface ILangModule {
+    default?: ILocaleMessages;
+}
+
+const modules = import.meta.glob<ILangModule>("./*.ts", { eager: true });
+
 export function getLangAll() {
-    // let message: any = {}
-    let message = getLangFiles(modules);
+    const message = getLangFiles(modules);
 
-    // LocalLang.getLocalLangData(message)
-    //   getLangFiles(viewModules,message)
-    // console.log(message);
-
-    return message;
+    return message as Record<AppLocale, ILocaleMessages>;
 }
 
 /**
  * 获取所有语言文件
- * @param {Object} mList
+ * @param mList 语言模块列表
  */
-function getLangFiles(mList: any) {
-    let msg: any = {};
-    for (let path in mList) {
+function getLangFiles(mList: Record<string, ILangModule>) {
+    const msg: Record<string, ILocaleMessages> = {};
+    for (const path in mList) {
         if (mList[path].default) {
             //  获取文件名
-            let pathName = path.replace(/(\.\/|\.ts)/g, "");
+            const pathName = path.replace(/(\.\/|\.ts)/g, "");
+
+            if (pathName === "index" || pathName === "locales") {
+                continue;
+            }
 
             if (msg[pathName]) {
                 msg[pathName] = {
-                    ...mList[pathName],
+                    ...msg[pathName],
                     ...mList[path].default,
                 };
             } else {
@@ -35,12 +50,13 @@ function getLangFiles(mList: any) {
     return msg;
 }
 
-const i18n = createI18n({
+const i18n = createI18n<false>({
     legacy: false, // 使用Composition API，这里必须设置为false
     globalInjection: true,
-    global: true,
-    locale: "zh_CN",
-    fallbackLocale: "zh_CN", // 默认语言
+    locale: resolveSystemLocale(),
+    fallbackLocale,
+    missingWarn: false,
+    fallbackWarn: false,
     messages: getLangAll(),
 });
 

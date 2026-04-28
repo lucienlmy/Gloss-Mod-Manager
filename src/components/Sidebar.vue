@@ -16,18 +16,18 @@ import { cn } from "@/lib/utils";
 const route = useRoute();
 
 const navItems = [
-    { name: "首页", path: "/", icon: Home },
-    { name: "游戏", path: "/games", icon: Gamepad2 },
-    { name: "管理", path: "/manager", icon: Box },
-    { name: "游览", path: "/explore", icon: GamepadDirectional },
-    { name: "下载", path: "/download", icon: ArrowDownToLine },
-    { name: "MCP", path: "/mcp", icon: Bot },
-    { name: "备份", path: "/backup", icon: Archive },
-    { name: "关于", path: "/about", icon: Info },
+    { labelKey: "nav.home", path: "/", icon: Home },
+    { labelKey: "nav.games", path: "/games", icon: Gamepad2 },
+    { labelKey: "nav.manager", path: "/manager", icon: Box },
+    { labelKey: "nav.explore", path: "/explore", icon: GamepadDirectional },
+    { labelKey: "nav.download", path: "/download", icon: ArrowDownToLine },
+    { labelKey: "nav.mcp", path: "/mcp", icon: Bot },
+    { labelKey: "nav.backup", path: "/backup", icon: Archive },
+    { labelKey: "nav.about", path: "/about", icon: Info },
 ];
 
 const bottomItems = [
-    { name: "设置", path: "/settings", icon: Settings },
+    { labelKey: "nav.settings", path: "/settings", icon: Settings },
     // { name: "用户", path: "/user", icon: CircleUser },
 ];
 </script>
@@ -51,7 +51,9 @@ const bottomItems = [
                 "
             >
                 <component :is="item.icon" class="h-5 w-5 shrink-0" />
-                <span class="hidden md:inline-block">{{ item.name }}</span>
+                <span class="hidden md:inline-block">{{
+                    $t(item.labelKey)
+                }}</span>
 
                 <div
                     v-if="route.path === item.path"
@@ -72,7 +74,7 @@ const bottomItems = [
                 "
             >
                 <icon-message-circle-more class="h-5 w-5" />
-                <span class="hidden md:inline-block">AI对话</span>
+                <span class="hidden md:inline-block">{{ $t("nav.aiChat") }}</span>
             </a>
             <router-link
                 v-for="item in bottomItems"
@@ -88,7 +90,9 @@ const bottomItems = [
                 "
             >
                 <component :is="item.icon" class="h-5 w-5 shrink-0" />
-                <span class="hidden md:inline-block">{{ item.name }}</span>
+                <span class="hidden md:inline-block">{{
+                    $t(item.labelKey)
+                }}</span>
             </router-link>
         </div>
     </aside>

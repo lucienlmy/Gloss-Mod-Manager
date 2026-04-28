@@ -286,7 +286,7 @@ export class Aria2Rpc {
             "--save-session-interval=0",
             "--console-log-level=warn",
             "--summary-interval=0",
-            "--download-result=hide",
+            "--download-result=default",
             "--enable-dht=false",
             "--enable-dht6=false",
             "--enable-peer-exchange=false",
@@ -444,6 +444,15 @@ export class Aria2Rpc {
         }
 
         return !(await Aria2Rpc.ping(options, 400));
+    }
+
+    private static async saveSessionBestEffort() {
+        try {
+            await Aria2Rpc.request("saveSession", [], Aria2Rpc.currentOptions);
+        } catch (error) {
+            console.error("保存 aria2 下载会话失败");
+            console.error(error);
+        }
     }
 
     private static async isServerManagedByCurrentProcess(
@@ -605,34 +614,58 @@ export class Aria2Rpc {
         options: Record<string, string> = {},
     ) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>("addUri", [uris, options]);
+        const gid = await Aria2Rpc.request<string>("addUri", [uris, options]);
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return gid;
     }
 
     public static async pause(gid: string, force: boolean = false) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>(force ? "forcePause" : "pause", [gid]);
+        const result = await Aria2Rpc.request<string>(
+            force ? "forcePause" : "pause",
+            [gid],
+        );
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async unpause(gid: string) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>("unpause", [gid]);
+        const result = await Aria2Rpc.request<string>("unpause", [gid]);
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async remove(gid: string, force: boolean = false) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>(force ? "forceRemove" : "remove", [
-            gid,
-        ]);
+        const result = await Aria2Rpc.request<string>(
+            force ? "forceRemove" : "remove",
+            [gid],
+        );
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async removeDownloadResult(gid: string) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>("removeDownloadResult", [gid]);
+        const result = await Aria2Rpc.request<string>("removeDownloadResult", [
+            gid,
+        ]);
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async purgeDownloadResult() {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>("purgeDownloadResult");
+        const result = await Aria2Rpc.request<string>("purgeDownloadResult");
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async changeOption(
@@ -640,7 +673,13 @@ export class Aria2Rpc {
         options: Record<string, string>,
     ) {
         await Aria2Rpc.ensureServer();
-        return Aria2Rpc.request<string>("changeOption", [gid, options]);
+        const result = await Aria2Rpc.request<string>("changeOption", [
+            gid,
+            options,
+        ]);
+        await Aria2Rpc.saveSessionBestEffort();
+
+        return result;
     }
 
     public static async stopServer() {

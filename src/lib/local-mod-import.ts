@@ -2,6 +2,7 @@ import { basename, join } from "@tauri-apps/api/path";
 import { FileHandler } from "@/lib/FileHandler";
 import { Manager } from "@/lib/Manager";
 import { SevenZip } from "@/lib/sevenZip";
+import { SidecarExecutionError } from "@/lib/sidecar";
 
 export const ARCHIVE_EXTENSIONS = [
     "zip",
@@ -343,6 +344,79 @@ function getDefaultModName(
     return stripLastExtension(originalName) || originalName;
 }
 
+function getErrorMessage(error: unknown) {
+    if (error instanceof Error && error.message.trim()) {
+        return error.message;
+    }
+
+    return "未知错误";
+}
+
+function getSevenZipErrorText(error: SidecarExecutionError) {
+    return [error.result.stderr, error.result.stdout, error.message]
+        .join("\n")
+        .toLowerCase();
+}
+
+function getArchiveImportErrorMessage(error: unknown) {
+    if (!(error instanceof SidecarExecutionError)) {
+        return getErrorMessage(error);
+    }
+
+    const detail = getSevenZipErrorText(error);
+
+    if (
+        detail.includes("cannot open the file as archive") ||
+        detail.includes("can not open the file as archive")
+    ) {
+        return "下载文件不是有效压缩包，可能下载源返回了网页/错误内容，或文件已损坏。请删除该下载任务和文件后重新下载；如果仍失败，请在浏览器手动下载正确压缩包后导入。";
+    }
+
+    if (detail.includes("wrong password") || detail.includes("encrypted")) {
+        return "压缩包已加密或需要密码，无法自动导入。请先手动解压，再以文件夹方式导入。";
+    }
+
+    if (detail.includes("cannot find archive")) {
+        return "未找到压缩包内容，请确认下载文件完整后再导入。";
+    }
+
+    return getMaterializeFailureMessage("archive");
+}
+
+function getImportSourceErrorMessage(
+    error: unknown,
+    sourceType: LocalModImportSourceType,
+) {
+    if (sourceType === "archive") {
+        return getArchiveImportErrorMessage(error);
+    }
+
+    return getErrorMessage(error);
+}
+
+function getMaterializeFailureMessage(sourceType: LocalModImportSourceType) {
+    if (sourceType === "archive") {
+        return "解压压缩包失败，请确认文件不是空包、损坏包或加密压缩包。";
+    }
+
+    if (sourceType === "folder") {
+        return "复制文件夹失败，请确认目录权限和文件是否被占用。";
+    }
+
+    return "复制文件失败，请确认文件权限和文件是否被占用。";
+}
+
+async function saveImportedManagerData(manager: ILocalModImportManager) {
+    manager.tags = dedupeTags(
+        [
+            ...manager.tags,
+            ...collectModTags(manager.managerModList, manager.textCollator),
+        ],
+        manager.textCollator,
+    );
+    await manager.saveManagerData();
+}
+
 export function resolveLocalModImportSourceType(filePath: string) {
     return ARCHIVE_EXTENSIONS.includes(
         getFileExtension(filePath) as (typeof ARCHIVE_EXTENSIONS)[number],
@@ -387,7 +461,12 @@ export async function importLocalModSources(
         }
 
         try {
-            await FileHandler.deleteFolder(stagingFolder);
+            const cleaned = await FileHandler.deleteFolder(stagingFolder);
+
+            if (!cleaned) {
+                throw new Error("清理临时导入目录失败。");
+            }
+
             await FileHandler.createDirectory(stagingFolder);
 
             const imported = await materializeImportSource(
@@ -396,15 +475,15 @@ export async function importLocalModSources(
             );
 
             if (!imported) {
-                await Manager.deleteMod(stagingFolder);
-                continue;
+                throw new Error(
+                    getMaterializeFailureMessage(source.sourceType),
+                );
             }
 
             const modFiles = await collectRelativeModFiles(stagingFolder);
 
             if (modFiles.length === 0) {
-                await Manager.deleteMod(stagingFolder);
-                continue;
+                throw new Error("源文件中没有可导入的文件。");
             }
 
             if (shouldOverwrite) {
@@ -433,20 +512,25 @@ export async function importLocalModSources(
                 : [...manager.managerModList, mod];
             importedMods.push(mod);
         } catch (error: unknown) {
-            console.error("导入本地 Mod 源失败");
+            const originalName = await basename(source.path);
+            const message = getImportSourceErrorMessage(
+                error,
+                source.sourceType,
+            );
+
+            console.error(`导入本地 Mod 源失败：${source.path}`);
             console.error(error);
             await Manager.deleteMod(stagingFolder);
+
+            if (importedMods.length > 0) {
+                await saveImportedManagerData(manager);
+            }
+
+            throw new Error(`导入 ${originalName} 失败：${message}`);
         }
     }
 
-    manager.tags = dedupeTags(
-        [
-            ...manager.tags,
-            ...collectModTags(manager.managerModList, manager.textCollator),
-        ],
-        manager.textCollator,
-    );
-    await manager.saveManagerData();
+    await saveImportedManagerData(manager);
 
     return {
         importedCount: importedMods.length,

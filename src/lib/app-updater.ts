@@ -1,12 +1,11 @@
 import { isTauri } from "@tauri-apps/api/core";
-import { platform } from "@tauri-apps/plugin-os";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { ElMessage } from "element-plus-message";
-import { requestAppUpdateInstallConfirmation } from "@/lib/app-update-install-dialog";
 import { Log } from "@/lib/log";
 
 const AUTO_UPDATE_CHECK_DELAY = 1500;
 const UPDATE_REQUEST_TIMEOUT = 30000;
+type AppUpdateInstallTrigger = "close-window" | "quit-app";
 
 let initializationStarted = false;
 let runningCheckTask: Promise<void> | null = null;
@@ -36,20 +35,15 @@ function restorePreparedUpdate(update: Update, installOnQuit: boolean) {
     shouldInstallPreparedUpdateOnQuit = installOnQuit;
 }
 
-function buildInstallLog(
-    trigger: "user-confirmed" | "close-window" | "quit-app",
-    version: string,
-) {
+function buildInstallLog(trigger: AppUpdateInstallTrigger, version: string) {
     switch (trigger) {
-        case "user-confirmed":
-            return `用户确认立即安装更新 v${version}。`;
         case "close-window":
             return `用户关闭主窗口，开始静默安装已下载更新 v${version}。`;
         case "quit-app":
             return `用户退出应用，开始静默安装已下载更新 v${version}。`;
-        default:
-            return `开始安装已下载更新 v${version}。`;
     }
+
+    return `开始静默安装已下载更新 v${version}。`;
 }
 
 export function hasPendingAppUpdateInstall() {
@@ -61,7 +55,7 @@ export function hasPendingAppUpdateInstall() {
 }
 
 export async function installPendingAppUpdate(
-    trigger: "user-confirmed" | "close-window" | "quit-app",
+    trigger: AppUpdateInstallTrigger,
     notifyFailure = true,
 ) {
     if (!preparedUpdate || isInstallingPreparedUpdate) {
@@ -78,10 +72,6 @@ export async function installPendingAppUpdate(
     try {
         await Log.info(buildInstallLog(trigger, update.version));
         await update.install();
-
-        if ((await platform()) !== "windows") {
-            ElMessage.success("更新已安装，请重启应用以完成更新。");
-        }
 
         return true;
     } catch (error: unknown) {
@@ -131,40 +121,26 @@ export async function checkForAppUpdates() {
             });
 
             if (!update) {
-                await Log.info("自动更新检查完成，当前已是最新版本。");
                 return;
             }
 
             await Log.info(
                 `发现应用更新：${update.currentVersion} -> ${update.version}`,
             );
-            ElMessage.info(`发现新版本 v${update.version}，正在后台下载。`);
-
             await update.download(undefined, {
                 timeout: UPDATE_REQUEST_TIMEOUT,
             });
 
-            // 用户选择稍后安装时，需要保留这个 Update 资源直到退出应用。
+            // 下载完成后保留 Update 资源，关闭或退出应用时交给 Tauri 静默安装。
             await replacePreparedUpdate(update);
             updateLifecycleTransferred = true;
-
-            const confirmed = await requestAppUpdateInstallConfirmation(
-                update.version,
-                update.body,
+            shouldInstallPreparedUpdateOnQuit = true;
+            await Log.info(
+                `应用更新 v${update.version} 已下载完成，将在关闭主窗口或退出应用时自动静默安装。`,
             );
-
-            if (!confirmed) {
-                shouldInstallPreparedUpdateOnQuit = true;
-                await Log.info(
-                    `用户暂缓安装已下载的更新 v${update.version}，将在关闭主窗口或退出应用时自动静默安装。`,
-                );
-                ElMessage.info(
-                    "更新已下载，将在关闭主窗口或退出应用时自动静默安装。",
-                );
-                return;
-            }
-
-            await installPendingAppUpdate("user-confirmed");
+            ElMessage.success(
+                `新版本 ${update.version} 已就绪，将在关闭后自动安装`,
+            );
         } catch (error: unknown) {
             console.error("自动更新检查失败");
             console.error(error);

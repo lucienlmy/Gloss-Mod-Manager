@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { ElMessage } from "element-plus-message";
+import { useI18n } from "vue-i18n";
+import type { AppLocale } from "@/lang/locales";
 import { type ThemeMode } from "@/lib/theme";
 import { useSettings } from "@/stores/settings";
 
 const settings = useSettings();
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 const {
     autoAddAfterDownload,
     autoStart,
@@ -14,6 +17,7 @@ const {
     debugInfo,
     debugMode,
     defaultStartPage,
+    language,
     closeSoftLinks,
     modifiableDuringGame,
     nexusModsAuthorized,
@@ -30,15 +34,20 @@ const themeModel = computed<ThemeMode>({
     set: (value) => settings.setTheme(value),
 });
 
+const languageModel = computed<AppLocale>({
+    get: () => language.value,
+    set: (value) => settings.setLanguage(value),
+});
+
 const autoStartModel = computed({
     get: () => autoStart.value,
     set: async (value: boolean) => {
         try {
             await settings.setAutoStart(value);
         } catch (error: unknown) {
-            console.error("设置开机自启失败");
+            console.error(t("settings.autoStartError"));
             console.error(error);
-            ElMessage.error("设置开机自启失败");
+            ElMessage.error(t("settings.autoStartError"));
         }
     },
 });
@@ -46,19 +55,23 @@ const autoStartModel = computed({
 async function handleNexusModsLogin() {
     try {
         const user = await settings.loginNexusModsUser();
-        ElMessage.success(`${user.name} 授权成功`);
+        ElMessage.success(
+            t("settings.nexus.authorizeSuccess", { name: user.name }),
+        );
     } catch (error: unknown) {
-        console.error("NexusMods 授权失败");
+        console.error(t("settings.nexus.authorizeFailed"));
         console.error(error);
         ElMessage.error(
-            error instanceof Error ? error.message : "NexusMods 授权失败",
+            error instanceof Error
+                ? error.message
+                : t("settings.nexus.authorizeFailed"),
         );
     }
 }
 
 function handleNexusModsLogout() {
     settings.clearNexusModsAuthorization();
-    ElMessage.success("已清除 NexusMods 授权");
+    ElMessage.success(t("settings.nexus.cleared"));
 }
 
 async function openNexusModsProfile() {
@@ -71,9 +84,9 @@ async function openNexusModsProfile() {
     try {
         await openUrl(profileUrl);
     } catch (error: unknown) {
-        console.error("打开 NexusMods 主页失败");
+        console.error(t("settings.nexus.openProfileFailed"));
         console.error(error);
-        ElMessage.error("打开 NexusMods 主页失败");
+        ElMessage.error(t("settings.nexus.openProfileFailed"));
     }
 }
 
@@ -106,14 +119,14 @@ watch(
         <Card>
             <CardHeader>
                 <CardTitle>
-                    <h1>设置</h1>
+                    <h1>{{ t("settings.title") }}</h1>
                 </CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col gap-4">
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            <h3>基础配置</h3>
+                            <h3>{{ t("settings.basic") }}</h3>
                         </CardTitle>
                     </CardHeader>
                     <CardContent class="flex flex-col gap-8">
@@ -130,7 +143,7 @@ watch(
                                         <Label
                                             for="storage-path"
                                             class="text-sm font-medium"
-                                            >储存路径</Label
+                                            >{{ t("settings.storagePath") }}</Label
                                         >
                                     </InputGroupAddon>
                                     <InputGroupAddon align="inline-end">
@@ -138,7 +151,7 @@ watch(
                                             variant="secondary"
                                             @click="settings.selectStoragePath"
                                         >
-                                            选择
+                                            {{ t("settings.choose") }}
                                         </Button>
                                     </InputGroupAddon>
                                 </InputGroup>
@@ -147,22 +160,54 @@ watch(
                                 <Label
                                     for="theme-model"
                                     class="text-sm font-medium"
-                                    >主题</Label
+                                    >{{ t("settings.theme") }}</Label
                                 >
                                 <Select id="theme-model" v-model="themeModel">
                                     <SelectTrigger>
-                                        <SelectValue placeholder="选择主题" />
+                                        <SelectValue
+                                            :placeholder="t('settings.chooseTheme')"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="system"
-                                            >跟随系统</SelectItem
+                                            >{{
+                                                t("settings.themeSystem")
+                                            }}</SelectItem
                                         >
                                         <SelectItem value="light">
-                                            浅色
+                                            {{ t("settings.themeLight") }}
                                         </SelectItem>
                                         <SelectItem value="dark"
-                                            >深色</SelectItem
+                                            >{{ t("settings.themeDark") }}</SelectItem
                                         >
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div class="flex gap-2 items-center">
+                                <Label
+                                    for="language-model"
+                                    class="text-sm font-medium"
+                                    >{{ t("settings.language") }}</Label
+                                >
+                                <Select
+                                    id="language-model"
+                                    v-model="languageModel"
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue
+                                            :placeholder="
+                                                t('settings.chooseLanguage')
+                                            "
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="item in settings.languageOptions"
+                                            :key="item.value"
+                                            :value="item.value"
+                                        >
+                                            {{ item.label }}
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -170,7 +215,7 @@ watch(
                                 <Label
                                     for="default-start-page"
                                     class="text-sm font-medium"
-                                    >默认启动页</Label
+                                    >{{ t("settings.defaultStartPage") }}</Label
                                 >
                                 <Select
                                     id="default-start-page"
@@ -178,7 +223,11 @@ watch(
                                 >
                                     <SelectTrigger>
                                         <SelectValue
-                                            placeholder="选择默认启动页"
+                                            :placeholder="
+                                                t(
+                                                    'settings.chooseDefaultStartPage',
+                                                )
+                                            "
                                         />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -187,7 +236,7 @@ watch(
                                             :key="item.value"
                                             :value="item.value"
                                         >
-                                            {{ item.name }}
+                                            {{ t(item.labelKey) }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -196,7 +245,7 @@ watch(
                         <div class="grid grid-cols-4 items-center gap-8">
                             <div class="flex gap-2 items-center">
                                 <Label for="auto-add-after-download"
-                                    >下载后自动导入</Label
+                                    >{{ t("settings.autoAddAfterDownload") }}</Label
                                 >
                                 <Switch
                                     id="auto-add-after-download"
@@ -205,7 +254,7 @@ watch(
                             </div>
                             <div class="flex gap-2 items-center">
                                 <Label for="select-game-by-folder"
-                                    >通过目录选择游戏</Label
+                                    >{{ t("settings.selectGameByFolder") }}</Label
                                 >
                                 <Switch
                                     id="select-game-by-folder"
@@ -213,7 +262,9 @@ watch(
                                 />
                             </div>
                             <div class="flex gap-2 items-center">
-                                <Label for="auto-start">开机自启</Label>
+                                <Label for="auto-start">{{
+                                    t("settings.autoStart")
+                                }}</Label>
                                 <Switch
                                     id="auto-start"
                                     v-model="autoStartModel"
@@ -222,7 +273,7 @@ watch(
                             </div>
                             <div class="flex gap-2 items-center">
                                 <Label for="modifiable-during-game"
-                                    >游戏运行时可修改</Label
+                                    >{{ t("settings.modifiableDuringGame") }}</Label
                                 >
                                 <Switch
                                     id="modifiable-during-game"
@@ -231,7 +282,7 @@ watch(
                             </div>
                             <div class="flex gap-2 items-center">
                                 <Label for="show-preload-list"
-                                    >显示前置列表</Label
+                                    >{{ t("settings.showPreloadList") }}</Label
                                 >
                                 <Switch
                                     id="show-preload-list"
@@ -240,7 +291,7 @@ watch(
                             </div>
                             <div class="flex gap-2 items-center">
                                 <Label for="disable-symlink-install"
-                                    >关闭软链安装</Label
+                                    >{{ t("settings.closeSoftLinks") }}</Label
                                 >
                                 <Switch
                                     id="disable-symlink-install"
@@ -253,7 +304,7 @@ watch(
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            <h3>授权</h3>
+                            <h3>{{ t("settings.authorization") }}</h3>
                         </CardTitle>
                     </CardHeader>
                     <CardContent class="flex flex-col gap-4">
@@ -278,8 +329,12 @@ watch(
                                         >
                                             {{
                                                 nexusModsAuthorized
-                                                    ? "已授权"
-                                                    : "未授权"
+                                                    ? t(
+                                                          "settings.nexus.statusAuthorized",
+                                                      )
+                                                    : t(
+                                                          "settings.nexus.statusUnauthorized",
+                                                      )
                                             }}
                                         </Badge>
                                     </div>
@@ -289,15 +344,21 @@ watch(
                                         "
                                         class="text-sm text-muted-foreground"
                                     >
-                                        当前账号：{{ nexusModsUser.name }}（ID:
-                                        {{ nexusModsUser.user_id }}）
+                                        {{
+                                            t(
+                                                "settings.nexus.currentAccount",
+                                                {
+                                                    name: nexusModsUser.name,
+                                                    id: nexusModsUser.user_id,
+                                                },
+                                            )
+                                        }}
                                     </p>
                                     <p
                                         v-else
                                         class="text-sm text-muted-foreground"
                                     >
-                                        使用 NexusMods 浏览与下载前，需要先完成
-                                        SSO 授权。
+                                        {{ t("settings.nexus.ssoRequired") }}
                                     </p>
                                 </div>
 
@@ -309,8 +370,10 @@ watch(
                                     >
                                         {{
                                             nexusModsAuthorized
-                                                ? "重新授权"
-                                                : "登录 NexusMods"
+                                                ? t(
+                                                      "settings.nexus.reauthorize",
+                                                  )
+                                                : t("settings.nexus.login")
                                         }}
                                     </Button>
                                     <Button
@@ -321,14 +384,14 @@ watch(
                                         variant="outline"
                                         @click="openNexusModsProfile"
                                     >
-                                        打开主页
+                                        {{ t("settings.nexus.openProfile") }}
                                     </Button>
                                     <Button
                                         v-if="nexusModsAuthorized"
                                         variant="outline"
                                         @click="handleNexusModsLogout"
                                     >
-                                        清除授权
+                                        {{ t("settings.nexus.clearAuthorization") }}
                                     </Button>
                                 </div>
                             </div>
@@ -338,13 +401,15 @@ watch(
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            <h3>高级设置</h3>
+                            <h3>{{ t("settings.advanced") }}</h3>
                         </CardTitle>
                     </CardHeader>
                     <CardContent class="flex flex-col gap-4">
                         <div class="grid grid-cols-4 items-center gap-4">
                             <div class="flex gap-2 items-center">
-                                <Label for="debug-mode">调试模式</Label>
+                                <Label for="debug-mode">{{
+                                    t("settings.debugMode")
+                                }}</Label>
                                 <Switch id="debug-mode" v-model="debugMode" />
                             </div>
                         </div>
@@ -355,7 +420,7 @@ watch(
         <Card v-if="debugMode">
             <CardHeader>
                 <CardTitle>
-                    <h3>调试信息</h3>
+                    <h3>{{ t("settings.debugInfo") }}</h3>
                 </CardTitle>
             </CardHeader>
             <CardContent class="flex flex-col gap-4">

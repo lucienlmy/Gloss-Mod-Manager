@@ -10,6 +10,7 @@ import {
     importLocalModSources,
     type ILocalModImportSource,
 } from "@/lib/local-mod-import";
+import { mergeAria2TaskSnapshots } from "@/lib/aria2-task-cache";
 import { PersistentStore } from "@/lib/persistent-store";
 
 interface IGlossDownloadMonitorManager {
@@ -344,7 +345,16 @@ export class GlossDownloadMonitor {
                     Aria2Rpc.tellStopped(0, 100),
                 ],
             );
-            const allTasks = [...activeTasks, ...waitingTasks, ...stoppedTasks];
+            const liveTasks = [
+                ...activeTasks,
+                ...waitingTasks,
+                ...stoppedTasks,
+            ];
+            const allTasks = await mergeAria2TaskSnapshots(
+                liveTasks,
+                taskMetaMap,
+                await Aria2Rpc.resolveDownloadDirectory(),
+            );
             const syncResult = syncTaskMetaStatuses(taskMetaMap, allTasks);
 
             if (syncResult.changed) {

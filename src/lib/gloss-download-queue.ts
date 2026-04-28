@@ -16,6 +16,10 @@ import {
     resolveLocalModImportSourceType,
     type LocalModImportSourceType,
 } from "@/lib/local-mod-import";
+import {
+    mergeAria2TaskSnapshots,
+    removeAria2TaskSnapshot,
+} from "@/lib/aria2-task-cache";
 import { PersistentStore } from "@/lib/persistent-store";
 
 export type GlossQueueDownloadStatus =
@@ -392,7 +396,14 @@ async function createGlossDownloadTask(
     };
 
     await saveTaskMetaMap(nextTaskMetaMap);
+    const createdTask = await Aria2Rpc.tellStatus(gid);
+    await mergeAria2TaskSnapshots(
+        [...runtime.allTasks, createdTask],
+        nextTaskMetaMap,
+        runtime.outputDirectory,
+    );
     runtime.taskMetaMap = nextTaskMetaMap;
+    runtime.allTasks = [...runtime.allTasks, createdTask];
 
     return gid;
 }
@@ -428,6 +439,7 @@ async function removeCompletedDuplicateTask(
     const nextTaskMetaMap = { ...runtime.taskMetaMap };
     delete nextTaskMetaMap[task.gid];
     await saveTaskMetaMap(nextTaskMetaMap);
+    await removeAria2TaskSnapshot(task.gid);
     runtime.taskMetaMap = nextTaskMetaMap;
     runtime.allTasks = runtime.allTasks.filter((item) => item.gid !== task.gid);
 }

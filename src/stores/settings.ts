@@ -1,6 +1,7 @@
 import { documentDir, join } from "@tauri-apps/api/path";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { Language } from "@/lib/language";
 import { AutoStart } from "@/lib/auto-start";
 import { PersistentStore } from "@/lib/persistent-store";
 import { validateNexusModsUser } from "@/lib/third-party-mod-api";
@@ -57,19 +58,20 @@ function getOrCreateNexusSsoId() {
 }
 
 export const settingsStartPageOptions = [
-    { name: "首页", value: "/" },
-    { name: "游戏页", value: "/games" },
-    { name: "管理页", value: "/manager" },
-    { name: "游览页", value: "/explore" },
-    { name: "下载页", value: "/download" },
-    { name: "MCP页", value: "/mcp" },
-    { name: "备份页", value: "/backup" },
-    { name: "关于页", value: "/about" },
-    { name: "设置页", value: "/settings" },
+    { labelKey: "settings.pages.home", value: "/" },
+    { labelKey: "settings.pages.games", value: "/games" },
+    { labelKey: "settings.pages.manager", value: "/manager" },
+    { labelKey: "settings.pages.explore", value: "/explore" },
+    { labelKey: "settings.pages.download", value: "/download" },
+    { labelKey: "settings.pages.mcp", value: "/mcp" },
+    { labelKey: "settings.pages.backup", value: "/backup" },
+    { labelKey: "settings.pages.about", value: "/about" },
+    { labelKey: "settings.pages.settings", value: "/settings" },
 ] as const;
 
 export const useSettings = defineStore("Settings", () => {
     const { theme, setTheme } = Theme.use();
+    const { language, languageOptions, setLanguage } = Language.use();
     const { autoStart, autoStartLoading, setAutoStart } = AutoStart.use();
 
     const defaultStartPage = PersistentStore.useValue<string>(
@@ -298,6 +300,9 @@ export const useSettings = defineStore("Settings", () => {
     return {
         theme,
         setTheme,
+        language,
+        languageOptions,
+        setLanguage,
         autoStart,
         autoStartLoading,
         setAutoStart,

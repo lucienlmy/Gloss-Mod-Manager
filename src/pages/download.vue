@@ -26,6 +26,12 @@ import {
     buildGlossOutputFileName,
     resolveGlossDownloadImportSourceType,
 } from "@/lib/gloss-download-queue";
+import {
+    isRestoredAria2Task,
+    mergeAria2TaskSnapshots,
+    removeAria2TaskSnapshot,
+    removeAria2TaskSnapshots,
+} from "@/lib/aria2-task-cache";
 
 type QueueFilter = "all" | "active" | "waiting" | "paused" | "stopped";
 type DuplicateDecisionAction =
@@ -566,6 +572,7 @@ async function initializeDownloadPage() {
     try {
         rpcState.value = "starting";
         rpcErrorMessage.value = "";
+        await hydrateCachedTaskLists();
         await ensureRpcReady();
         rpcState.value = "ready";
         await refreshTaskLists();
@@ -574,6 +581,22 @@ async function initializeDownloadPage() {
         rpcState.value = "error";
         rpcErrorMessage.value = getErrorMessage(error);
     }
+}
+
+async function hydrateCachedTaskLists() {
+    const cachedTasks = await mergeAria2TaskSnapshots(
+        [],
+        taskMetaMap.value,
+        resolvedDownloadDirectory.value,
+    );
+
+    activeTasks.value = cachedTasks.filter((task) => task.status === "active");
+    waitingTasks.value = cachedTasks.filter((task) =>
+        ["waiting", "paused"].includes(task.status),
+    );
+    stoppedTasks.value = cachedTasks.filter(
+        (task) => !["active", "waiting", "paused"].includes(task.status),
+    );
 }
 
 function shouldAutoDownloadFromRoute() {
@@ -665,7 +688,7 @@ async function refreshTaskLists(silent: boolean = false) {
     }
 
     try {
-        await ensureRpcReady();
+        const outputDirectory = await ensureRpcReady();
 
         const [stat, active, waiting, stopped] = await Promise.all([
             Aria2Rpc.getGlobalStat(),
@@ -678,13 +701,34 @@ async function refreshTaskLists(silent: boolean = false) {
             return;
         }
 
-        const allLatestTasks = [...active, ...waiting, ...stopped];
-        const newlyCompletedTaskGids = syncTaskMetaStatuses(allLatestTasks);
+        const liveTasks = [...active, ...waiting, ...stopped];
+        const mergedTasks = await mergeAria2TaskSnapshots(
+            liveTasks,
+            taskMetaMap.value,
+            outputDirectory,
+        );
+        const liveGids = new Set(liveTasks.map((task) => task.gid));
+        const restoredTasks = mergedTasks.filter(
+            (task) => !liveGids.has(task.gid),
+        );
+        const displayedStoppedTasks = [
+            ...stopped,
+            ...restoredTasks.filter(
+                (task) =>
+                    !["active", "waiting", "paused"].includes(task.status),
+            ),
+        ];
+        const allDisplayedTasks = [
+            ...active,
+            ...waiting,
+            ...displayedStoppedTasks,
+        ];
+        const newlyCompletedTaskGids = syncTaskMetaStatuses(allDisplayedTasks);
 
         globalStat.value = stat;
         activeTasks.value = active;
         waitingTasks.value = waiting;
-        stoppedTasks.value = stopped;
+        stoppedTasks.value = displayedStoppedTasks;
         rpcState.value = "ready";
         rpcErrorMessage.value = "";
 
@@ -696,7 +740,7 @@ async function refreshTaskLists(silent: boolean = false) {
         if (newlyCompletedTaskGids.length > 0) {
             void autoImportCompletedTasks(
                 newlyCompletedTaskGids,
-                allLatestTasks,
+                allDisplayedTasks,
             );
         }
     } catch (error: unknown) {
@@ -940,6 +984,10 @@ function sortTasksByCreatedAt(tasks: IAria2RpcTask[]) {
 }
 
 function getTaskProgress(task: IAria2RpcTask) {
+    if (task.status === "complete") {
+        return 100;
+    }
+
     const totalLength = toNumber(task.totalLength);
 
     if (totalLength <= 0) {
@@ -1568,6 +1616,11 @@ async function retryTask(task: IAria2RpcTask) {
             updatedAt: now,
         });
 
+        if (isRestoredAria2Task(task) && gid !== task.gid) {
+            removeTaskMeta(task.gid);
+            await removeAria2TaskSnapshot(task.gid);
+        }
+
         await refreshTaskLists();
         selectedTaskGid.value = gid;
         ElMessage.success(`已重新加入下载队列：${getTaskDisplayName(task)}`);
@@ -1835,13 +1888,19 @@ async function removeTask(task: IAria2RpcTask) {
     startTaskOperation(task.gid);
 
     try {
-        if (["active", "waiting", "paused"].includes(task.status)) {
+        if (
+            !isRestoredAria2Task(task) &&
+            ["active", "waiting", "paused"].includes(task.status)
+        ) {
             await Aria2Rpc.remove(task.gid, true);
             await waitForRemovedTask(task.gid);
         }
 
         await removeTaskLocalFile(task);
-        await removeTaskDownloadRecord(task.gid);
+        if (!isRestoredAria2Task(task)) {
+            await removeTaskDownloadRecord(task.gid);
+        }
+        await removeAria2TaskSnapshot(task.gid);
         removeTaskMeta(task.gid);
         await refreshTaskLists();
     } catch (error: unknown) {
@@ -1876,13 +1935,17 @@ async function purgeStoppedTasks() {
     try {
         const nextMap = { ...taskMetaMap.value };
         const failedMessages: string[] = [];
+        const removedGids: string[] = [];
         let removedCount = 0;
 
         for (const task of stoppedTasks.value) {
             try {
                 await removeTaskLocalFile(task);
-                await removeTaskDownloadRecord(task.gid);
+                if (!isRestoredAria2Task(task)) {
+                    await removeTaskDownloadRecord(task.gid);
+                }
                 delete nextMap[task.gid];
+                removedGids.push(task.gid);
                 removedCount += 1;
             } catch (error: unknown) {
                 failedMessages.push(
@@ -1891,6 +1954,7 @@ async function purgeStoppedTasks() {
             }
         }
 
+        await removeAria2TaskSnapshots(removedGids);
         taskMetaMap.value = nextMap;
         await refreshTaskLists();
 

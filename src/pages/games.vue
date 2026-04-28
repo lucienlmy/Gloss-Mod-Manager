@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { join } from "@tauri-apps/api/path";
 import { ElMessage } from "element-plus-message";
+import { useI18n } from "vue-i18n";
 
 const manager = useManager();
 const router = useRouter();
+const { t } = useI18n();
 
 function select(item: ISupportedGames) {
     const resolvedGame =
@@ -29,7 +31,7 @@ function openGameFolder(item: ISupportedGames) {
     if (item.gamePath) {
         FileHandler.openFolder(item.gamePath);
     } else {
-        ElMessage.error("游戏路径未找到");
+        ElMessage.error(t("games.notFound"));
     }
 }
 
@@ -49,7 +51,7 @@ function deleteGame(item: ISupportedGames) {
     <Card>
         <CardHeader>
             <CardTitle class="flex items-center gap-4">
-                游戏库
+                {{ t("games.library") }}
                 <div class="flex flex-wrap items-center gap-2">
                     <SelectGame />
                     <CustomGameDialog />
@@ -80,13 +82,13 @@ function deleteGame(item: ISupportedGames) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                             <DropdownMenuItem @click="openGameFolder(item)"
-                                >打开游戏目录</DropdownMenuItem
+                                >{{ t("games.openGameFolder") }}</DropdownMenuItem
                             >
                             <DropdownMenuItem @click="openModFolder(item)"
-                                >打开Mod目录</DropdownMenuItem
+                                >{{ t("games.openModFolder") }}</DropdownMenuItem
                             >
                             <DropdownMenuItem @click="deleteGame(item)"
-                                >删除</DropdownMenuItem
+                                >{{ t("common.delete") }}</DropdownMenuItem
                             >
                         </DropdownMenuContent>
                     </DropdownMenu>

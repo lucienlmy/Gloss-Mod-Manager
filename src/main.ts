@@ -6,6 +6,7 @@ import "@/style.css";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
 import { initializeAppUpdater } from "@/lib/app-updater";
 import { initializeGlossDownloadMonitor } from "@/lib/gloss-download-monitor";
+import { Language } from "@/lib/language";
 import { Log } from "@/lib/log";
 import { McpService } from "@/lib/mcp-service";
 import { Theme } from "@/lib/theme";
@@ -19,6 +20,7 @@ import "element-plus-message/theme-chalk/dark/css-vars.css"; // 暗色模式
 async function bootstrap() {
     await Log.initialize();
     await Theme.initialize();
+    await Language.initialize();
 
     const app = createApp(App);
     const pinia = createPinia();

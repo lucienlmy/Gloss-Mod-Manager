@@ -78,6 +78,14 @@ const batchEditForm = reactive<IBatchEditForm>({
 
 let unlistenNativeDragDrop: (() => void) | null = null;
 
+function getErrorMessage(error: unknown) {
+    if (error instanceof Error && error.message.trim()) {
+        return error.message;
+    }
+
+    return "导入 Mod 失败，请查看控制台日志。";
+}
+
 async function consumePendingManagerLaunchActions() {
     while (true) {
         const action = launchStore.takeNextManagerAction();
@@ -554,7 +562,7 @@ async function importSources(
     } catch (error: unknown) {
         console.error("导入 Mod 失败");
         console.error(error);
-        ElMessage.error("导入 Mod 失败，请查看控制台日志。");
+        ElMessage.error(getErrorMessage(error));
     } finally {
         importLoading.value = false;
     }

@@ -21,6 +21,7 @@ declare global {
   const GTA5Handler: typeof import('./lib/GTA5Handler').GTA5Handler
   const GlossDownloadMonitor: typeof import('./lib/gloss-download-monitor').GlossDownloadMonitor
   const INTERNAL_DRAG_THRESHOLD: typeof import('./lib/manager-internal-drag').INTERNAL_DRAG_THRESHOLD
+  const Language: typeof import('./lib/language').Language
   const Log: typeof import('./lib/log').Log
   const Manager: typeof import('./lib/Manager').Manager
   const McpService: typeof import('./lib/mcp-service').McpService
@@ -49,7 +50,6 @@ declare global {
   const buildAria2RpcServerArgs: typeof import('./lib/aria2').buildAria2RpcServerArgs
   const buildGlossOutputFileName: typeof import('./lib/gloss-download-queue').buildGlossOutputFileName
   const buildUniqueGlossFileName: typeof import('./lib/gloss-download').buildUniqueGlossFileName
-  const cancelAppUpdateInstallDialog: typeof import('./lib/app-update-install-dialog').cancelAppUpdateInstallDialog
   const checkForAppUpdates: typeof import('./lib/app-updater').checkForAppUpdates
   const checkGlossModUpdates: typeof import('./lib/gloss-mod-api').checkGlossModUpdates
   const clearManagerInternalDrag: typeof import('./lib/manager-internal-drag').clearManagerInternalDrag
@@ -60,7 +60,6 @@ declare global {
   const computedEager: typeof import('@vueuse/core').computedEager
   const computedInject: typeof import('@vueuse/core').computedInject
   const computedWithControl: typeof import('@vueuse/core').computedWithControl
-  const confirmAppUpdateInstallDialog: typeof import('./lib/app-update-install-dialog').confirmAppUpdateInstallDialog
   const controlledComputed: typeof import('@vueuse/core').controlledComputed
   const controlledRef: typeof import('@vueuse/core').controlledRef
   const createApp: typeof import('vue').createApp
@@ -136,6 +135,7 @@ declare global {
   const isReactive: typeof import('vue').isReactive
   const isReadonly: typeof import('vue').isReadonly
   const isRef: typeof import('vue').isRef
+  const isRestoredAria2Task: typeof import('./lib/aria2-task-cache').isRestoredAria2Task
   const isShallow: typeof import('vue').isShallow
   const isThirdPartyProviderSupported: typeof import('./lib/third-party-mod-api').isThirdPartyProviderSupported
   const joinRelativePath: typeof import('./lib/custom-definition-utils').joinRelativePath
@@ -155,6 +155,7 @@ declare global {
   const mcpPromptDefinitions: typeof import('./lib/mcp-service').mcpPromptDefinitions
   const mcpResourceDefinitions: typeof import('./lib/mcp-service').mcpResourceDefinitions
   const mcpToolDefinitions: typeof import('./lib/mcp-service').mcpToolDefinitions
+  const mergeAria2TaskSnapshots: typeof import('./lib/aria2-task-cache').mergeAria2TaskSnapshots
   const mergeLegacyCustomTypesIntoGame: typeof import('./lib/legacy-custom-data').mergeLegacyCustomTypesIntoGame
   const nextTick: typeof import('vue').nextTick
   const normalizeCompareText: typeof import('./lib/gloss-download').normalizeCompareText
@@ -195,6 +196,7 @@ declare global {
   const reactiveComputed: typeof import('@vueuse/core').reactiveComputed
   const reactiveOmit: typeof import('@vueuse/core').reactiveOmit
   const reactivePick: typeof import('@vueuse/core').reactivePick
+  const readAria2TaskSnapshots: typeof import('./lib/aria2-task-cache').readAria2TaskSnapshots
   const readGmmPackageDetails: typeof import('./lib/gmm-package').readGmmPackageDetails
   const readonly: typeof import('vue').readonly
   const ref: typeof import('vue').ref
@@ -204,7 +206,8 @@ declare global {
   const refManualReset: typeof import('@vueuse/core').refManualReset
   const refThrottled: typeof import('@vueuse/core').refThrottled
   const refWithControl: typeof import('@vueuse/core').refWithControl
-  const requestAppUpdateInstallConfirmation: typeof import('./lib/app-update-install-dialog').requestAppUpdateInstallConfirmation
+  const removeAria2TaskSnapshot: typeof import('./lib/aria2-task-cache').removeAria2TaskSnapshot
+  const removeAria2TaskSnapshots: typeof import('./lib/aria2-task-cache').removeAria2TaskSnapshots
   const resolveComponent: typeof import('vue').resolveComponent
   const resolveGlossAssetUrl: typeof import('./lib/gloss-mod-api').resolveGlossAssetUrl
   const resolveGlossDownloadImportSourceType: typeof import('./lib/gloss-download-queue').resolveGlossDownloadImportSourceType
@@ -232,7 +235,6 @@ declare global {
   const storeToRefs: typeof import('pinia').storeToRefs
   const supportedGamesGTA5: typeof import('./lib/GTA5Handler').supportedGamesGTA5
   const supportedGamesGTA5Enhanced: typeof import('./lib/GTA5Handler').supportedGamesGTA5Enhanced
-  const syncAppUpdateInstallDialogOpen: typeof import('./lib/app-update-install-dialog').syncAppUpdateInstallDialogOpen
   const syncManagerRuntimeContext: typeof import('./lib/manager-context').syncManagerRuntimeContext
   const syncRef: typeof import('@vueuse/core').syncRef
   const syncRefs: typeof import('@vueuse/core').syncRefs
@@ -256,7 +258,6 @@ declare global {
   const until: typeof import('@vueuse/core').until
   const useActiveElement: typeof import('@vueuse/core').useActiveElement
   const useAnimate: typeof import('@vueuse/core').useAnimate
-  const useAppUpdateInstallDialogState: typeof import('./lib/app-update-install-dialog').useAppUpdateInstallDialogState
   const useArrayDifference: typeof import('@vueuse/core').useArrayDifference
   const useArrayEvery: typeof import('@vueuse/core').useArrayEvery
   const useArrayFilter: typeof import('@vueuse/core').useArrayFilter
@@ -508,6 +509,9 @@ declare global {
   // @ts-ignore
   export type { IGmmPackageDetails, IInstallGmmPackageOptions } from './lib/gmm-package'
   import('./lib/gmm-package')
+  // @ts-ignore
+  export type { Language } from './lib/language'
+  import('./lib/language')
   // @ts-ignore
   export type { LocalModImportSourceType, LocalModImportDuplicateStrategy, ILocalModImportSource } from './lib/local-mod-import'
   import('./lib/local-mod-import')
