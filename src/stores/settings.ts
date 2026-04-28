@@ -161,16 +161,25 @@ export const useSettings = defineStore("Settings", () => {
         }
     }
 
-    async function setDefaultStoragePath() {
+    async function ensureDefaultStoragePath() {
+        const savedStoragePath =
+            (await PersistentStore.get<string>("storagePath", "")) ?? "";
+
+        if (savedStoragePath.trim() || storagePath.value.trim()) {
+            return;
+        }
+
+        // 等待持久化读取完成后再补默认路径，避免覆盖用户已保存的路径。
         storagePath.value = await join(
             await documentDir(),
             "Gloss Mod Manager",
         );
     }
 
-    if (storagePath.value == "") {
-        setDefaultStoragePath();
-    }
+    void ensureDefaultStoragePath().catch((error: unknown) => {
+        console.error("初始化默认储存路径失败");
+        console.error(error);
+    });
 
     async function loginNexusModsUser() {
         if (nexusModsLoginLoading.value) {
