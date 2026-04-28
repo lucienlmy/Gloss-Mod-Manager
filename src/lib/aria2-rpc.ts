@@ -456,12 +456,9 @@ export class Aria2Rpc {
         }
 
         try {
-            const globalOptions = await Aria2Rpc.request<Record<string, string>>(
-                "getGlobalOption",
-                [],
-                options,
-                1000,
-            );
+            const globalOptions = await Aria2Rpc.request<
+                Record<string, string>
+            >("getGlobalOption", [], options, 1000);
 
             return globalOptions["stop-with-process"] === String(appProcessId);
         } catch {
@@ -476,7 +473,9 @@ export class Aria2Rpc {
         if (await Aria2Rpc.ping(resolvedOptions)) {
             if (
                 Aria2Rpc.rpcProcess ||
-                (await Aria2Rpc.isServerManagedByCurrentProcess(resolvedOptions))
+                (await Aria2Rpc.isServerManagedByCurrentProcess(
+                    resolvedOptions,
+                ))
             ) {
                 return;
             }
