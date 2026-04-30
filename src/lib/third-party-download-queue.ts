@@ -15,6 +15,7 @@ import {
     resolveThirdPartyDownloadUrl,
     type IThirdPartyModDetail,
     type IThirdPartyModFile,
+    type INexusModsDownloadAuthorization,
     type ThirdPartyProvider,
 } from "@/lib/third-party-mod-api";
 import {
@@ -37,6 +38,7 @@ export interface IQueueThirdPartyDownloadOptions {
     gameName?: string;
     managerModList?: IModInfo[];
     nexusUser?: INexusModsUser | null;
+    nexusDownloadAuthorization?: INexusModsDownloadAuthorization | null;
     replaceLocalModId?: number;
 }
 
@@ -306,6 +308,7 @@ export async function queueThirdPartyModDownload(
             options.mod,
             file.id,
             options.nexusUser,
+            options.nexusDownloadAuthorization,
         )
     ).trim();
 

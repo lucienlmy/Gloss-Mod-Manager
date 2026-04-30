@@ -426,6 +426,10 @@ async function handleNxmIntent(
             gameName: targetGame.gameName,
             managerModList: manager.managerModList,
             nexusUser: settings.nexusModsUser,
+            nexusDownloadAuthorization: {
+                key: intent.key,
+                expires: intent.expires,
+            },
         });
 
         if (result) {

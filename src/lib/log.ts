@@ -28,6 +28,10 @@ export interface ILogFileItem {
 
 export class Log {
     private static readonly latestLogFileName = "latest.log";
+    private static readonly ignoredTauriCallbackWarningParts = [
+        "Couldn't find callback id",
+        "app is reloaded while Rust is running an asynchronous operation",
+    ];
     private static readonly originalConsole: Record<
         ConsoleMethodName,
         (...args: unknown[]) => void
@@ -228,6 +232,10 @@ export class Log {
 
         const message = Log.stringifyArgs(args);
 
+        if (Log.isIgnoredPluginLogMessage(message)) {
+            return;
+        }
+
         try {
             switch (level) {
                 case "trace":
@@ -258,6 +266,13 @@ export class Log {
      */
     private static stringifyArgs(args: unknown[]) {
         return args.map((item) => Log.stringifyValue(item)).join(" ");
+    }
+
+    private static isIgnoredPluginLogMessage(message: string) {
+        // Tauri 热重载或窗口刷新时可能产生大量无效回调警告，这类噪声不写入文件日志。
+        return Log.ignoredTauriCallbackWarningParts.every((part) =>
+            message.includes(part),
+        );
     }
 
     private static stringifyValue(value: unknown): string {

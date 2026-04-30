@@ -157,6 +157,11 @@ interface INexusDownloadLinkResponseItem {
     URI: string;
 }
 
+export interface INexusModsDownloadAuthorization {
+    key?: string;
+    expires?: string;
+}
+
 export const THIRD_PARTY_PROVIDER_OPTIONS: IThirdPartyProviderOption[] = [
     { label: "NexusMods", value: "NexusMods" },
     { label: "Thunderstore", value: "Thunderstore" },
@@ -171,7 +176,7 @@ const MOD_IO_KEY = (import.meta.env.MODID_KEY ?? "").trim();
 const MOD_IO_UID_KEY = (import.meta.env.MODID_UID_KEY ?? "").trim();
 const CURSE_FORGE_KEY = (import.meta.env.CURSE_FORGE_KEY ?? "").trim();
 export class NexusModsAuthorizationError extends Error {
-    public constructor(message = "请先授权NEuxMOds") {
+    public constructor(message = "请先授权 NexusMods") {
         super(message);
         this.name = "NexusModsAuthorizationError";
     }
@@ -263,7 +268,10 @@ export async function fetchThirdPartyModDetail(
         case "NexusMods":
             return fetchNexusModsDetail(game, routeId, nexusUser);
         case "Thunderstore":
-            return fetchThunderstoreDetail(routeQuery.namespace, routeQuery.name);
+            return fetchThunderstoreDetail(
+                routeQuery.namespace,
+                routeQuery.name,
+            );
         case "ModIo":
             return fetchModIoDetail(
                 Number(routeQuery.gameId || game.mod_io || 0),
@@ -280,6 +288,7 @@ export async function resolveThirdPartyDownloadUrl(
     detail: IThirdPartyModDetail,
     fileId?: string,
     nexusUser?: INexusModsUser | null,
+    nexusDownloadAuthorization?: INexusModsDownloadAuthorization | null,
 ) {
     if (detail.source !== "NexusMods") {
         const targetFile =
@@ -307,6 +316,7 @@ export async function resolveThirdPartyDownloadUrl(
         detail.id,
         targetFile.id,
         nexusUser,
+        nexusDownloadAuthorization,
     );
 }
 
@@ -406,7 +416,9 @@ function buildGameBananaMediaUrl(media?: IGameBananaMedia) {
     return fileName ? `${media._sBaseUrl}/${fileName}` : "";
 }
 
-function emptyListResult(query: IThirdPartyListQuery): IThirdPartyModListResult {
+function emptyListResult(
+    query: IThirdPartyListQuery,
+): IThirdPartyModListResult {
     return {
         items: [],
         page: normalizePage(query.page),
@@ -416,8 +428,14 @@ function emptyListResult(query: IThirdPartyListQuery): IThirdPartyModListResult 
     };
 }
 
-function buildNexusModsWebsite(gameDomain: string, modId: string, fileId?: string) {
-    const url = new URL(`https://www.nexusmods.com/${gameDomain}/mods/${modId}`);
+function buildNexusModsWebsite(
+    gameDomain: string,
+    modId: string,
+    fileId?: string,
+) {
+    const url = new URL(
+        `https://www.nexusmods.com/${gameDomain}/mods/${modId}`,
+    );
 
     if (fileId) {
         url.searchParams.set("tab", "files");
@@ -444,10 +462,7 @@ function getNexusModsHeaders(
     return headers;
 }
 
-function buildNexusModsErrorMessage(
-    payload: unknown,
-    fallbackMessage: string,
-) {
+function buildNexusModsErrorMessage(payload: unknown, fallbackMessage: string) {
     const message =
         typeof payload === "object" &&
         payload !== null &&
@@ -470,14 +485,18 @@ async function fetchNexusModsApiJson<T>(
     const payload = (await response.json()) as T | IApiMessageResponse;
 
     if (!response.ok) {
-        throw new Error(buildNexusModsErrorMessage(payload, "请求 NexusMods 接口失败。"));
+        throw new Error(
+            buildNexusModsErrorMessage(payload, "请求 NexusMods 接口失败。"),
+        );
     }
 
     return payload as T;
 }
 
 function normalizeNexusModsAuthor(item: INexusModsV1Mod) {
-    return normalizeText(item.author || item.uploaded_by || item.user?.name || "");
+    return normalizeText(
+        item.author || item.uploaded_by || item.user?.name || "",
+    );
 }
 
 function normalizeNexusModsBaseItem(
@@ -529,7 +548,11 @@ function normalizeNexusModsDetailPayload(
 ): IThirdPartyModDetail {
     const modId = normalizeText(String(item.mod_id ?? ""));
     const normalizedFiles = normalizeNexusModsFiles(files, gameDomain, modId);
-    const baseItem = normalizeNexusModsBaseItem(item, gameDomain, normalizedFiles);
+    const baseItem = normalizeNexusModsBaseItem(
+        item,
+        gameDomain,
+        normalizedFiles,
+    );
 
     return {
         ...baseItem,
@@ -663,17 +686,20 @@ async function fetchNexusModsList(
         };
     }
 
-    const response = await httpFetch("https://api-router.nexusmods.com/graphql", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...getNexusModsHeaders(nexusUser),
+    const response = await httpFetch(
+        "https://api-router.nexusmods.com/graphql",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getNexusModsHeaders(nexusUser),
+            },
+            body: JSON.stringify({
+                query: gql,
+                variables,
+            }),
         },
-        body: JSON.stringify({
-            query: gql,
-            variables,
-        }),
-    });
+    );
     const payload = (await response.json()) as INexusGraphqlResponse;
 
     if (!response.ok) {
@@ -685,7 +711,8 @@ async function fetchNexusModsList(
 
     return {
         items: items.map((item) => {
-            const modId = String(item.modId).split("_")[0] ?? String(item.modId);
+            const modId =
+                String(item.modId).split("_")[0] ?? String(item.modId);
 
             return {
                 source: "NexusMods",
@@ -701,9 +728,10 @@ async function fetchNexusModsList(
                 version: "",
                 website: buildNexusModsWebsite(item.game.domainName, modId),
                 cover: item.thumbnailUrl ?? item.picture_url ?? "",
-                gallery: [item.thumbnailUrl ?? "", item.picture_url ?? ""].filter(
-                    Boolean,
-                ),
+                gallery: [
+                    item.thumbnailUrl ?? "",
+                    item.picture_url ?? "",
+                ].filter(Boolean),
                 downloads: item.downloads ?? 0,
                 likes: item.endorsements ?? 0,
                 categories: [item.modCategory?.name ?? ""].filter(Boolean),
@@ -728,7 +756,8 @@ async function fetchNexusModsDetail(
     nexusUser?: INexusModsUser | null,
 ) {
     const gameDomain = game.nexusMods?.game_domain_name?.trim() ?? "";
-    const modId = normalizeText(routeId).split("_")[0] ?? normalizeText(routeId);
+    const modId =
+        normalizeText(routeId).split("_")[0] ?? normalizeText(routeId);
 
     if (!gameDomain || !modId) {
         throw new Error("缺少 NexusMods 所需的游戏或 Mod 标识。");
@@ -749,7 +778,9 @@ function normalizeNexusModsFiles(
 
     return list
         .sort((left, right) => {
-            return (right.uploaded_timestamp ?? 0) - (left.uploaded_timestamp ?? 0);
+            return (
+                (right.uploaded_timestamp ?? 0) - (left.uploaded_timestamp ?? 0)
+            );
         })
         .map((item) => {
             return {
@@ -780,14 +811,30 @@ async function resolveNexusModsDownloadUrl(
     modId: string,
     fileId: string,
     nexusUser?: INexusModsUser | null,
+    nexusDownloadAuthorization?: INexusModsDownloadAuthorization | null,
 ) {
-    const response = await httpFetch(
+    const downloadLinkUrl = new URL(
         `https://api.nexusmods.com/v1/games/${gameDomain}/mods/${modId}/files/${fileId}/download_link.json`,
-        {
-            method: "GET",
-            headers: getNexusModsHeaders(nexusUser, true),
-        },
     );
+
+    // NXM 协议回调会携带临时 key，非会员下载需要把它传给 NexusMods。
+    const nexusDownloadKey = normalizeText(nexusDownloadAuthorization?.key);
+    const nexusDownloadExpires = normalizeText(
+        nexusDownloadAuthorization?.expires,
+    );
+
+    if (nexusDownloadKey) {
+        downloadLinkUrl.searchParams.set("key", nexusDownloadKey);
+
+        if (nexusDownloadExpires) {
+            downloadLinkUrl.searchParams.set("expires", nexusDownloadExpires);
+        }
+    }
+
+    const response = await httpFetch(downloadLinkUrl.toString(), {
+        method: "GET",
+        headers: getNexusModsHeaders(nexusUser, true),
+    });
     const payload = (await response.json()) as
         | INexusDownloadLinkResponseItem[]
         | IApiMessageResponse;
@@ -798,8 +845,12 @@ async function resolveNexusModsDownloadUrl(
             "获取 NexusMods 下载地址失败。",
         );
 
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 401) {
             throw new NexusModsAuthorizationError();
+        }
+
+        if (response.status === 403) {
+            return buildNexusModsWebsite(gameDomain, modId, fileId);
         }
 
         throw new Error(message);
@@ -857,7 +908,9 @@ async function fetchThunderstoreList(
             return searchSource.includes(normalizedSearch);
         })
         .sort((left, right) => {
-            return (right.latest?.downloads ?? 0) - (left.latest?.downloads ?? 0);
+            return (
+                (right.latest?.downloads ?? 0) - (left.latest?.downloads ?? 0)
+            );
         });
 
     const page = normalizePage(query.page);
@@ -872,7 +925,8 @@ async function fetchThunderstoreList(
         page,
         pageSize,
         totalCount: filtered.length,
-        totalPages: filtered.length > 0 ? Math.ceil(filtered.length / pageSize) : 0,
+        totalPages:
+            filtered.length > 0 ? Math.ceil(filtered.length / pageSize) : 0,
     } satisfies IThirdPartyModListResult;
 }
 
@@ -981,7 +1035,10 @@ async function fetchThunderstoreDetail(namespace?: string, name?: string) {
     } satisfies IThirdPartyModDetail;
 }
 
-async function fetchModIoList(game: ISupportedGames, query: IThirdPartyListQuery) {
+async function fetchModIoList(
+    game: ISupportedGames,
+    query: IThirdPartyListQuery,
+) {
     const gameId = Number(game.mod_io ?? 0);
     if (!gameId) {
         return emptyListResult(query);
@@ -1096,12 +1153,15 @@ async function fetchModIoDetail(gameId: number, modId: number) {
     const baseUrl = getModIoBaseUrl();
     const encodedKey = encodeURIComponent(MOD_IO_KEY);
     const [detailResponse, filesResponse] = await Promise.all([
-        httpFetch(`${baseUrl}/games/${gameId}/mods/${modId}?api_key=${encodedKey}`, {
-            method: "GET",
-            headers: {
-                Accept: "application/json",
+        httpFetch(
+            `${baseUrl}/games/${gameId}/mods/${modId}?api_key=${encodedKey}`,
+            {
+                method: "GET",
+                headers: {
+                    Accept: "application/json",
+                },
             },
-        }),
+        ),
         httpFetch(
             `${baseUrl}/games/${gameId}/mods/${modId}/files?api_key=${encodedKey}`,
             {
@@ -1140,9 +1200,13 @@ async function fetchModIoDetail(gameId: number, modId: number) {
         })
         .filter((item) => item.downloadUrl);
 
-    const description = detail.description || detail.description_plaintext || "";
-    const descriptionFormat: ThirdPartyDescriptionFormat =
-        description.includes("<") ? "html" : "text";
+    const description =
+        detail.description || detail.description_plaintext || "";
+    const descriptionFormat: ThirdPartyDescriptionFormat = description.includes(
+        "<",
+    )
+        ? "html"
+        : "text";
 
     return {
         ...normalized,
@@ -1220,7 +1284,9 @@ function normalizeCurseForgeMod(item: ICurseForgeMod) {
               version: latestFile.displayName || latestFile.fileName,
               size: latestFile.fileLength ?? 0,
               createdAt: latestFile.fileDate ?? "",
-              downloadUrl: normalizeCurseForgeDownloadUrl(latestFile.downloadUrl),
+              downloadUrl: normalizeCurseForgeDownloadUrl(
+                  latestFile.downloadUrl,
+              ),
               detailsUrl: item.links?.websiteUrl ?? "",
           } satisfies IThirdPartyModFile)
         : null;
@@ -1278,7 +1344,8 @@ async function fetchCurseForgeDetail(modId: number) {
             },
         }),
     ]);
-    const detailPayload = (await detailResponse.json()) as ICurseForgeDetailResponse;
+    const detailPayload =
+        (await detailResponse.json()) as ICurseForgeDetailResponse;
     const descriptionPayload =
         (await descriptionResponse.json()) as ICurseForgeDescriptionResponse;
 
@@ -1348,7 +1415,8 @@ async function fetchGameBananaList(
         throw new Error("获取 GameBanana 列表失败。");
     }
 
-    const totalCount = payload._aMetadata?._nRecordCount ?? payload._aRecords.length;
+    const totalCount =
+        payload._aMetadata?._nRecordCount ?? payload._aRecords.length;
     return {
         items: payload._aRecords.map((item) => normalizeGameBananaMod(item)),
         page: normalizePage(query.page),
@@ -1414,12 +1482,15 @@ async function fetchGameBananaDetail(routeId: string) {
         throw new Error("缺少有效的 GameBanana Mod ID。");
     }
 
-    const response = await httpFetch(`${GAMEBANANA_BASE_URL}/Mod/${modId}/ProfilePage`, {
-        method: "GET",
-        headers: {
-            Accept: "application/json",
+    const response = await httpFetch(
+        `${GAMEBANANA_BASE_URL}/Mod/${modId}/ProfilePage`,
+        {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+            },
         },
-    });
+    );
     const payload = (await response.json()) as IGameBananaMod;
 
     if (!response.ok || !payload?._idRow) {

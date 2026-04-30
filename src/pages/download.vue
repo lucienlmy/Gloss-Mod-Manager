@@ -147,6 +147,7 @@ const TASK_STATUS_SORT_ORDER: Record<string, number> = {
     error: 4,
     removed: 5,
 };
+const ARIA2_TASK_META_KEY = "aria2TaskMetaMap";
 
 const manager = useManager();
 const settings = useSettings();
@@ -169,7 +170,7 @@ const aria2Settings = PersistentStore.useValue<IAria2RuntimeSettings>(
 );
 const taskMetaMap = PersistentStore.useValue<
     Record<string, IGlossDownloadTaskMeta>
->("aria2TaskMetaMap", {});
+>(ARIA2_TASK_META_KEY, {});
 
 const rpcState = ref<"idle" | "starting" | "ready" | "error">("idle");
 const rpcErrorMessage = ref("");
@@ -1338,6 +1339,25 @@ function removeTaskMeta(gid: string) {
     taskMetaMap.value = nextMap;
 }
 
+async function readLatestTaskMetaMap() {
+    const storedTaskMetaMap =
+        (await PersistentStore.get<Record<string, IGlossDownloadTaskMeta>>(
+            ARIA2_TASK_META_KEY,
+            {},
+        )) ?? {};
+
+    return {
+        ...storedTaskMetaMap,
+        ...taskMetaMap.value,
+    };
+}
+
+async function saveTaskMetaMap(
+    nextMap: Record<string, IGlossDownloadTaskMeta>,
+) {
+    await PersistentStore.set(ARIA2_TASK_META_KEY, nextMap, true);
+}
+
 function startTaskOperation(gid: string) {
     if (taskOperatingIds.value.includes(gid)) {
         return;
@@ -1932,7 +1952,7 @@ async function purgeStoppedTasks() {
     }
 
     try {
-        const nextMap = { ...taskMetaMap.value };
+        const nextMap = await readLatestTaskMetaMap();
         const failedMessages: string[] = [];
         const removedGids: string[] = [];
         let removedCount = 0;
@@ -1954,7 +1974,7 @@ async function purgeStoppedTasks() {
         }
 
         await removeAria2TaskSnapshots(removedGids);
-        taskMetaMap.value = nextMap;
+        await saveTaskMetaMap(nextMap);
         await refreshTaskLists();
 
         if (failedMessages.length > 0) {

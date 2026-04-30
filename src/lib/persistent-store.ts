@@ -7,6 +7,7 @@ export class PersistentStore {
     public static readonly store = new LazyStore("settings.json");
     private static readonly valueRefs = new Map<string, Ref<unknown>>();
     private static readonly suppressNextWatchKeys = new Set<string>();
+    private static readonly valueVersions = new Map<string, number>();
 
     /**
      * 读取指定键的持久化值；未命中时返回默认值副本。
@@ -27,10 +28,24 @@ export class PersistentStore {
     /**
      * 写入指定键的持久化值。
      */
-    public static async set<T>(key: string, value: T): Promise<void> {
+    public static async set<T>(
+        key: string,
+        value: T,
+        flushToDisk: boolean = false,
+    ): Promise<void> {
         const nextValue = PersistentStore.cloneValue(value);
+        const writeVersion = PersistentStore.bumpValueVersion(key);
 
         await PersistentStore.store.set(key, nextValue);
+
+        if (flushToDisk) {
+            await PersistentStore.store.save();
+        }
+
+        if (PersistentStore.getValueVersion(key) !== writeVersion) {
+            return;
+        }
+
         PersistentStore.syncValueRef(key, nextValue);
     }
 
@@ -48,12 +63,16 @@ export class PersistentStore {
         let initialized = false;
         let hydrating = false;
         let dirtyBeforeReady = false;
+        const initialVersion = PersistentStore.getValueVersion(key);
 
         PersistentStore.valueRefs.set(key, state as Ref<unknown>);
 
         void PersistentStore.get(key, fallback)
             .then((value) => {
-                if (dirtyBeforeReady) {
+                if (
+                    dirtyBeforeReady ||
+                    PersistentStore.getValueVersion(key) !== initialVersion
+                ) {
                     return;
                 }
 
@@ -123,6 +142,21 @@ export class PersistentStore {
 
         PersistentStore.suppressNextWatchKeys.add(key);
         state.value = nextValue;
+    }
+
+    /**
+     * 标记指定 key 已经发生过主动写入，避免 useValue 的异步初始读取把新值覆盖回旧值。
+     */
+    private static bumpValueVersion(key: string) {
+        const nextVersion = PersistentStore.getValueVersion(key) + 1;
+
+        PersistentStore.valueVersions.set(key, nextVersion);
+
+        return nextVersion;
+    }
+
+    private static getValueVersion(key: string) {
+        return PersistentStore.valueVersions.get(key) ?? 0;
     }
 
     /**

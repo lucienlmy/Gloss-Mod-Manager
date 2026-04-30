@@ -181,7 +181,7 @@ export async function removeAria2TaskSnapshot(gid: string) {
 
     const nextSnapshots = { ...storedSnapshots };
     delete nextSnapshots[gid];
-    await PersistentStore.set(ARIA2_TASK_SNAPSHOT_KEY, nextSnapshots);
+    await PersistentStore.set(ARIA2_TASK_SNAPSHOT_KEY, nextSnapshots, true);
 }
 
 export async function removeAria2TaskSnapshots(gids: string[]) {
@@ -195,5 +195,5 @@ export async function removeAria2TaskSnapshots(gids: string[]) {
         Object.entries(storedSnapshots).filter(([gid]) => !gidSet.has(gid)),
     );
 
-    await PersistentStore.set(ARIA2_TASK_SNAPSHOT_KEY, nextSnapshots);
+    await PersistentStore.set(ARIA2_TASK_SNAPSHOT_KEY, nextSnapshots, true);
 }

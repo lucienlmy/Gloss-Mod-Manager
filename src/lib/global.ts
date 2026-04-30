@@ -9,7 +9,6 @@ import {
     hasPendingAppUpdateInstall,
     installPendingAppUpdate,
 } from "@/lib/app-updater";
-import { initializeExternalLaunchHandling } from "@/lib/external-launch";
 import { PersistentStore } from "@/lib/persistent-store";
 import router from "@/routes";
 
@@ -167,10 +166,6 @@ async function setupDefaultRoute() {
 }
 
 setupDefaultRoute();
-//#endregion
-
-//#region 外部启动接管
-void initializeExternalLaunchHandling();
 //#endregion
 
 //#region 发送应用启动事件

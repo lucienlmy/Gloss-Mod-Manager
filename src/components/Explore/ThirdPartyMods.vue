@@ -782,7 +782,7 @@ async function maybeRedirectForNexusAuth(error: unknown) {
         return false;
     }
 
-    ElMessage.warning("请先授权NEuxMOds");
+    ElMessage.warning("请先授权NexusMods");
     await router.push({
         path: "/settings",
         query: {

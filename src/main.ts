@@ -5,6 +5,7 @@ import router from "@/routes";
 import "@/style.css";
 import { Aria2Rpc } from "@/lib/aria2-rpc";
 import { initializeAppUpdater } from "@/lib/app-updater";
+import { initializeExternalLaunchHandling } from "@/lib/external-launch";
 import { initializeGlossDownloadMonitor } from "@/lib/gloss-download-monitor";
 import { Language } from "@/lib/language";
 import { Log } from "@/lib/log";
@@ -29,6 +30,8 @@ async function bootstrap() {
     await McpService.initialize(pinia);
 
     app.mount("#app");
+
+    await initializeExternalLaunchHandling();
 
     // 首屏渲染后恢复 MCP 服务的上次启停状态，避免阻塞应用启动。
     void McpService.autoStartFromSettings();
